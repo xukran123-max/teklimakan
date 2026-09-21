@@ -1,0 +1,3862 @@
+/* ================================================================
+   بۇلاق تور سودا سۇپىسى (Bulaq E-Commerce) - ئاساسىي كۆرۈنمە ئۇسلۇبى
+   RTL ماسلاشقان، زامانىۋى، يۇقىرى ئوقۇلۇشچانلىققا ئىگە
+   ================================================================ */
+
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --accent-color: #f59e0b;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --danger-light: #fef2f2;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* تۈن ھالىتى (Dark Theme) */
+body.dark-mode {
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --bg-main: #0b1120;
+  --bg-card: #1e293b;
+  --border-color: #334155;
+  --border-light: #1e293b;
+  --primary-light: #1e3a8a;
+  --danger-light: #450a0a;
+}
+
+/* نۆللەش ۋە ئاساسىي بەلگىلەر */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* LTR تەڭشەكلىرى (Türkçe ۋە English تىللىرى ئۈچۈن) */
+html[dir="ltr"], html[dir="ltr"] body {
+  direction: ltr;
+  text-align: left;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+html[dir="ltr"] .cart-drawer {
+  left: auto;
+  right: 0;
+  transform: translateX(100%);
+}
+
+html[dir="ltr"] .cart-overlay.active .cart-drawer {
+  transform: translateX(0);
+}
+
+html[dir="ltr"] .search-category-select {
+  border-left: none;
+  border-right: 1px solid var(--border-color);
+}
+
+html[dir="ltr"] .hero-slide-overlay {
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 60%, rgba(15, 23, 42, 0.2) 100%);
+}
+
+html[dir="ltr"] .hero-btn i {
+  transform: rotate(180deg);
+}
+
+html[dir="ltr"] .toast-container {
+  left: auto;
+  right: 1.5rem;
+}
+
+html[dir="ltr"] .toast {
+  border-right: none;
+  border-left: 4px solid var(--primary-color);
+}
+
+html[dir="ltr"] .toast.toast-success {
+  border-left-color: var(--success-color);
+}
+
+html[dir="ltr"] .toast.toast-error {
+  border-left-color: var(--danger-color);
+}
+
+/* تىل تاللاش كونۇپكىسى (Language Selector) */
+.lang-selector-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-select-dropdown {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition);
+}
+
+.lang-select-dropdown:hover, .lang-select-dropdown:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* مەخسۇس تىل تاللاش كۆزنىكى (Custom Language Modal Styles) */
+.lang-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: transparent;
+}
+
+.lang-option-row:hover {
+  background: #f1f5f9;
+}
+
+.lang-radio-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.lang-option-row.active .lang-radio-indicator,
+.lang-radio-indicator.checked {
+  border-color: #2563eb !important;
+}
+
+.lang-option-row.active .lang-radio-indicator::after,
+.lang-radio-indicator.checked::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ==================== ئۈستۈنكى ئېلان تاختىسى ۋە ئايلانما خەت (Marquee Ticker) ==================== */
+.top-announcement {
+  background: linear-gradient(90deg, #1e3a8a, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-size: 0.92rem;
+  padding: 0.35rem 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.top-marquee-container {
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.top-marquee-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5rem;
+  animation: scrollMarquee 50s linear infinite;
+  will-change: transform;
+}
+
+.top-marquee-container:hover .top-marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.marquee-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #fef08a;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.4;
+}
+
+.marquee-badge {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.marquee-badge.badge-sale {
+  background: #ef4444;
+}
+
+.marquee-badge.badge-featured {
+  background: #10b981;
+}
+
+.marquee-badge.badge-gift {
+  background: #f59e0b;
+}
+
+.marquee-badge.badge-service {
+  background: #8b5cf6;
+}
+
+@keyframes scrollMarquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+}
+
+html[dir="ltr"] .top-marquee-track {
+  animation: scrollMarqueeLtr 50s linear infinite;
+}
+
+@keyframes scrollMarqueeLtr {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* پۇل بىرلىكى تاللىغۇچ (Currency Selector) */
+.currency-select-dropdown {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition);
+}
+
+/* ماركا سۈزگۈچى (Sidebar Brand Filter) */
+.brands-sidebar-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.brand-btn-pill {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.brand-btn-pill:hover, .brand-btn-pill.active {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+@media (max-width: 768px) {
+  .brands-sidebar-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .brand-btn-pill {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* مەھسۇلات كارتىسىدىكى ماركا بەلگىسى (Brand Tag on Product Card) */
+.product-brand-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+  width: fit-content;
+  transition: var(--transition);
+  border: 1px solid var(--border-light);
+}
+
+.product-brand-tag:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* ==================== نەپىس مىللىي ئۇسلۇبتىكى چەكلىك ۋاقىتلىق ئېتىبار ۋە ھاۋارايى (Flash Sale & Weather) ==================== */
+.flash-sale-bar {
+  background-color: #09171e;
+  background-image: radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.15) 0%, transparent 45%),
+                    radial-gradient(circle at 88% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+                    linear-gradient(135deg, #09171e 0%, #0d2830 50%, #082026 100%);
+  color: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  padding: 1.6rem 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.15rem;
+  box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.5), 
+              0 0 0 1px rgba(255, 255, 255, 0.05),
+              inset 0 1px 0 rgba(254, 240, 138, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 1-قۇر: ماۋزۇ ۋە بەلگە قىسمى */
+.flash-sale-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.flash-sale-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 620px;
+}
+
+.flash-sale-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fef08a;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 7px 22px;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  width: fit-content;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  user-select: none;
+  margin: 0.15rem 0 0.2rem 0;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* 🌟 1-ئۇسلۇب: ئالتۇن نۇر سىيرىلىپ ئۆتۈش ئۈنۈمى (Shimmer Sweep) */
+.flash-sale-badge::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -85%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 35%,
+    rgba(254, 240, 138, 0.6) 50%,
+    rgba(255, 255, 255, 0.2) 65%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  animation: shimmerSweep 3.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    left: -85%;
+  }
+  30%, 100% {
+    left: 155%;
+  }
+}
+
+/* ✨ 3-ئۇسلۇب: سىلىق لەرزان كۆتۈرۈلۈش ۋە چېكىلگەندىكى ئېلاستىكىلىق بېسىلىش (Hover Float & Active Press) */
+.flash-sale-badge:hover,
+.flash-sale-badge-btn:hover {
+  background: rgba(245, 158, 11, 0.34);
+  border-color: #fbbf24;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45), 0 0 16px rgba(245, 158, 11, 0.35);
+}
+
+.flash-sale-badge:active,
+.flash-sale-badge-btn:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+/* چېكىلگەندىكى نۇر دولقۇنى (Click Ripple Wave) */
+.badge-click-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.85) 0%, rgba(245, 158, 11, 0) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: badgeRippleAnim 0.6s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes badgeRippleAnim {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(15);
+    opacity: 0;
+  }
+}
+
+.flash-sale-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: pulseGlow 2s infinite ease-in-out;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.flash-sale-badge span {
+  position: relative;
+  z-index: 2;
+}
+
+.flash-sale-title {
+  display: none;
+}
+
+.flash-sale-sub {
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  font-weight: 500;
+  line-height: 1.65;
+  text-align: center;
+  margin: 0;
+  padding: 0 1.25rem;
+  opacity: 0.95;
+  letter-spacing: 0.2px;
+  max-width: 100%;
+}
+
+.flash-sale-icon-wrap {
+  display: none;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(245, 158, 11, 0.55);
+    border-color: rgba(251, 191, 36, 0.7);
+  }
+}
+
+/* 2-قۇر: ۋاقىت ھېسابلىغۇچ */
+.flash-sale-clock-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.75rem 1.6rem;
+  background: rgba(15, 23, 42, 0.55);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: fit-content;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
+  margin: 0.2rem auto 0 auto;
+}
+
+.countdown-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.countdown-clock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clock-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.clock-box {
+  background: rgba(15, 23, 42, 0.9);
+  color: #fef08a;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.4rem 0.7rem;
+  border-radius: 10px;
+  min-width: 44px;
+  text-align: center;
+  font-size: 1.22rem;
+  font-weight: 800;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.5px;
+}
+
+.clock-unit-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.clock-separator {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #f59e0b;
+  align-self: flex-start;
+  margin-top: 0.35rem;
+}
+
+/* 3-قۇر: ئاستىنقى قۇر (ئېتىبارلار كۇنۇپكىسى + ھاۋارايى) */
+.flash-sale-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.15rem;
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.flash-sale-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a !important;
+  font-weight: 800;
+  font-size: 0.92rem;
+  padding: 0.65rem 1.45rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
+}
+
+.flash-sale-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 22px rgba(245, 158, 11, 0.55);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #000000 !important;
+}
+
+html[dir="ltr"] .flash-sale-btn i {
+  transform: rotate(180deg);
+}
+
+/* 🌤️ سول ئاستى بوشلۇقتىكى نەپىس ھاۋارايى مەلۇماتى (Weather Widget) */
+.flash-weather-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 14px;
+  padding: 0.45rem 0.95rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.flash-weather-widget:hover {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.weather-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.weather-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.weather-city-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fef08a;
+}
+
+.weather-cond-badge {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.weather-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-temp-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.weather-switch-link {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.flash-weather-widget:hover .weather-switch-link {
+  color: #fbbf24;
+}
+
+/* 🌹 ئالاھىدە نۇر چېچىش ھالىتى (Deal Spotlight Card Animation) */
+.deal-spotlight-active {
+  animation: dealSpotlightPulse 2.5s ease-in-out 2 !important;
+  border-color: #f59e0b !important;
+  outline: 2px solid #f59e0b !important;
+}
+
+@keyframes dealSpotlightPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 25px 6px rgba(245, 158, 11, 0.65);
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+/* ==================== لەيلىمە تېز ئالاقە كۇنۇپكىلىرى (Floating Quick Contact Buttons) ==================== */
+.floating-contact-wrap {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+html[dir="rtl"] .floating-contact-wrap {
+  right: auto;
+  left: 1.5rem;
+}
+
+.floating-contact-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff !important;
+  font-size: 1.45rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.floating-contact-btn:hover {
+  transform: scale(1.12) translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.floating-btn-instagram {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
+
+.floating-btn-whatsapp {
+  background: #25d366;
+}
+
+.floating-btn-phone {
+  background: #2563eb;
+}
+
+.floating-contact-tooltip {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+html[dir="ltr"] .floating-contact-tooltip {
+  right: 60px;
+}
+
+html[dir="rtl"] .floating-contact-tooltip {
+  left: 60px;
+}
+
+.floating-contact-btn:hover .floating-contact-tooltip {
+  opacity: 1;
+}
+
+/* ئىجتىمائىي تاراتقۇ كۇنۇپكىلىرى (Social Pill Badges) */
+.social-link-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 700;
+  height: 40px;
+  box-sizing: border-box;
+  transition: all 0.25s ease;
+  text-decoration: none !important;
+  user-select: none;
+}
+
+.social-pill-instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(225, 48, 108, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.social-pill-instagram:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(225, 48, 108, 0.5);
+  filter: brightness(1.08);
+}
+
+.social-pill-phone {
+  background: #2563eb;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+}
+
+.social-pill-phone:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.social-pill-whatsapp {
+  background: #25d366;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(37, 211, 102, 0.35);
+}
+
+.social-pill-whatsapp:hover {
+  background: #20ba5a;
+  transform: translateY(-2px);
+}
+
+.social-pill-agent {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25));
+  border: 1.5px solid #f59e0b;
+  color: #fef08a !important;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.25);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.social-pill-agent:hover {
+  background: #f59e0b;
+  color: #0f172a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+}
+
+/* جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Live Sales Popup) */
+.live-sales-popup {
+  position: fixed;
+  bottom: 8.5rem;
+  right: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1000;
+  max-width: 320px;
+  animation: slideInBottom 0.4s ease;
+  transition: opacity 0.4s ease;
+}
+
+html[dir="rtl"] .live-sales-popup {
+  right: auto;
+  left: 1.5rem;
+}
+
+@keyframes slideInBottom {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== باش تىزىملىك (Navbar) ==================== */
+.main-navbar {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  padding: 0.35rem 0;
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 0.35rem 0;
+}
+
+/* دۇكان لوگوسى */
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  flex-shrink: 0;
+  order: 1;
+}
+
+.brand-logo .logo-icon {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.brand-logo .logo-img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 2.5px solid #eab308;
+  margin: 4px 0;
+  transition: var(--transition);
+}
+
+.brand-logo:hover .logo-img {
+  transform: scale(1.05) rotate(-3deg);
+}
+
+
+
+/* ئىزدەش بۆلىكى */
+.search-bar-container {
+  flex: 1;
+  max-width: 580px;
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-main);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  transition: var(--transition);
+  position: relative;
+}
+
+.search-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  z-index: 1050;
+  max-height: 380px;
+  overflow-y: auto;
+  display: none;
+  animation: fadeInDown 0.2s ease;
+}
+
+.search-autocomplete-dropdown.active {
+  display: block;
+}
+
+.search-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.search-suggest-item:last-child {
+  border-bottom: none;
+}
+
+.search-suggest-item:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.search-suggest-img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.search-suggest-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-suggest-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-suggest-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.search-suggest-price {
+  font-weight: 800;
+  color: var(--danger-color);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coupon-copy-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.coupon-copy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.search-bar-container:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background-color: var(--bg-card);
+}
+
+.search-category-select {
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  font-weight: 600;
+  border-left: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0.55rem 1rem;
+  font-size: 1.02rem;
+  color: var(--text-main);
+  outline: none;
+}
+
+.search-btn {
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1.1rem;
+}
+
+.search-btn:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
+}
+
+/* باش تىزىملىكتىكى مەشغۇلات كونۇپكىلىرى (سېۋەت، تىل، پۇل، تۈن ھالىتى) */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0.5rem;
+  padding: 0.35rem 0;
+  flex-wrap: nowrap;
+}
+
+.currency-selector-wrap,
+.lang-selector-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.currency-select-dropdown,
+.lang-select-dropdown,
+.theme-toggle-btn,
+.nav-action-cart-btn {
+  height: 40px;
+  background: var(--bg-main);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.currency-select-dropdown:hover,
+.lang-select-dropdown:hover,
+.theme-toggle-btn:hover {
+  border-color: var(--primary-color);
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+.currency-select-dropdown {
+  padding: 0 0.95rem;
+  outline: none;
+  text-align: center;
+}
+
+.lang-select-dropdown {
+  padding: 0 1rem;
+  gap: 0.5rem;
+  outline: none;
+}
+
+.lang-flag-img {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.nav-lang-arrow {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-right: 2px;
+}
+
+.theme-toggle-btn {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+/* سېۋەت كۇنۇپكىسى - ئوڭدىن بىرىنچى */
+.nav-action-cart-btn {
+  padding: 0 1.15rem;
+  gap: 0.55rem;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: var(--primary-light);
+  position: relative;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+}
+
+.nav-action-cart-btn:hover {
+  background: var(--primary-color);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.nav-action-cart-btn i {
+  font-size: 1.05rem;
+  color: var(--primary-color);
+  transition: color 0.2s;
+}
+
+.nav-action-cart-btn .badge-counter {
+  position: static;
+  background: var(--danger-color);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+}
+
+.currency-select-dropdown:hover,
+.lang-select-dropdown:hover,
+.theme-toggle-btn:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.15);
+}
+
+.nav-action-cart-btn:hover {
+  background: var(--primary-color);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.nav-action-cart-btn:hover i {
+  color: #ffffff !important;
+}
+
+/* ==================== تەشۋىقات سىيرىلمىسى (Hero Banner) ==================== */
+.hero-section {
+  padding: 1.5rem 0;
+}
+
+.hero-slider-container {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  height: 380px;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(270deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 60%, rgba(15, 23, 42, 0.2) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  max-width: 600px;
+  padding: 2.5rem;
+}
+
+.hero-tag {
+  display: inline-block;
+  background: var(--accent-color);
+  color: #ffffff;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+}
+
+.hero-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.35;
+  margin-bottom: 0.85rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--primary-color);
+  color: #ffffff;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.hero-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.hero-nav-dots {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.dot-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dot-indicator.active {
+  background: #ffffff;
+  width: 30px;
+}
+
+/* ==================== مۇلازىمەت ئالاھىدىلىكلىرى (Features Row) ==================== */
+.features-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.feature-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.feature-box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.feature-info h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.feature-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ==================== تۈرلەر تىزىملىكى (Categories Grid) ==================== */
+.categories-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.section-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 22px;
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.category-pills-wrap {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+}
+
+.category-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.category-pill:hover, .category-pill.active {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+/* ==================== تاۋارلار كۆرگەزمىسى قىسمى (Product Catalog) ==================== */
+.catalog-layout {
+  display: block;
+  margin-bottom: 3.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* يان سۈزگۈچ تاختىسى */
+.catalog-sidebar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  height: fit-content;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 85px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.mobile-sidebar-toggle-bar {
+  display: none;
+}
+
+.catalog-sidebar-inner {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.catalog-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.filter-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  color: var(--text-main);
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.filter-checkbox-label input {
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  width: 16px;
+  height: 16px;
+}
+
+.filter-range-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.price-display-text {
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* تاۋارلار سۈزۈش تاياقچىسى */
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.results-count-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.sort-select-wrap select {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.85rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+/* تاۋارلار تور كۆرسىتىلىشى (Product Grid) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* تاۋار كارتىسى (Product Card) */
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: #cbd5e1;
+}
+
+.product-card-thumb {
+  position: relative;
+  width: 100%;
+  padding-top: 85%;
+  background-color: #f1f5f9;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.product-card-thumb img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-card-thumb img {
+  transform: scale(1.06);
+}
+
+.product-badges {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 2;
+}
+
+.product-badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.badge-sale {
+  background: var(--danger-color);
+}
+
+.badge-hot {
+  background: var(--accent-color);
+}
+
+.badge-new {
+  background: var(--primary-color);
+}
+
+.product-wish-btn {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  cursor: pointer;
+  z-index: 2;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.product-wish-btn:hover, .product-wish-btn.active {
+  color: var(--danger-color);
+  background: #ffffff;
+  transform: scale(1.1);
+}
+
+.product-card-body {
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.5;
+  margin-bottom: 0.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 3.4rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.product-title:hover {
+  color: var(--primary-color);
+}
+
+.product-category-row {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.product-category-tag {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  background: var(--bg-main);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.product-category-tag:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.product-merchant-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.merchant-tag-trusted {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.merchant-tag-new {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.merchant-tag-gold {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.merchant-tag-diamond {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+
+.merchant-tag-official {
+  background: #fdf2f8;
+  color: #9d174d;
+  border: 1px solid #fbcfe8;
+}
+
+.merchant-tag-custom {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--accent-color);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.rating-count {
+  color: var(--text-light);
+  font-size: 0.88rem;
+}
+
+/* ئامبار زاپاس ھالىتى (Stock info) */
+.product-stock-bar {
+  font-size: 0.92rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stock-status-in {
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+.stock-status-low {
+  color: var(--danger-color);
+  font-weight: 800;
+}
+
+.stock-status-out {
+  color: var(--text-light);
+  font-weight: 700;
+}
+
+.sales-count {
+  color: var(--text-muted);
+}
+
+/* باھا بۆلىكى */
+.product-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-top: auto;
+  margin-bottom: 1rem;
+}
+
+.current-price {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--danger-color);
+}
+
+.original-price {
+  font-size: 1.02rem;
+  color: var(--text-light);
+  text-decoration: line-through;
+}
+
+/* تاۋار كارتىسى كونۇپكىلىرى */
+.product-card-actions {
+  display: block;
+  width: 100%;
+}
+
+.btn-add-cart {
+  width: 100%;
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1rem;
+  min-height: 42px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn-add-cart span {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.btn-add-cart:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.btn-add-cart:disabled {
+  background: var(--border-color);
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
+.btn-quick-view {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-quick-view:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* ==================== سېۋەت پۈركۈش تارتما كۆزنىكى (Cart Drawer) ==================== */
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.cart-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  left: 0; /* RTL نۇقتىسىدا سولدىن ياكى ئوڭدىن تارتىلىدۇ */
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xl);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cart-overlay.active .cart-drawer {
+  transform: translateX(0);
+}
+
+.cart-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-header-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-close-drawer {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: var(--transition);
+}
+
+.btn-close-drawer:hover {
+  color: var(--danger-color);
+}
+
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+/* سېۋەت ئىچىدىكى مال قۇتىسى */
+.cart-item {
+  display: flex;
+  gap: 0.85rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cart-item-img {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.cart-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-item-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-bottom: 0.35rem;
+}
+
+.cart-item-price {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--danger-color);
+  margin-bottom: 0.5rem;
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.qty-control-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.qty-btn {
+  background: var(--bg-main);
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: var(--transition);
+  font-size: 0.95rem;
+}
+
+.qty-btn:hover {
+  background: var(--border-color);
+}
+
+.qty-input {
+  width: 42px;
+  height: 32px;
+  border: none;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  background: transparent;
+}
+
+.btn-remove-item {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  cursor: pointer;
+  padding: 0.35rem;
+  font-size: 1.1rem;
+  transition: var(--transition);
+}
+
+.btn-remove-item:hover {
+  opacity: 0.7;
+}
+
+/* يەتكۈزۈش ھەققى پىرسەنت كۆرسەتكۈچى */
+.free-shipping-bar {
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  margin-bottom: 1.15rem;
+  font-size: 0.95rem;
+}
+
+.free-shipping-text {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.45rem;
+}
+
+.shipping-progress {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.shipping-progress-fill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.cart-footer {
+  padding: 1.35rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.cart-summary-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.02rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.cart-summary-line.total {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main);
+  border-top: 1px dashed var(--border-color);
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.cart-total-price {
+  color: var(--danger-color);
+}
+
+.btn-checkout {
+  width: 100%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.btn-checkout:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-2px);
+}
+
+/* ==================== كۆزنەكلەر (Modals) ==================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  transform: scale(0.95);
+  transition: var(--transition);
+  position: relative;
+}
+
+#quickViewModal .modal-content {
+  max-width: 780px;
+}
+
+.quick-view-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.quick-view-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-main);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-height: 350px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.quick-view-media img {
+  width: 100%;
+  height: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+.quick-view-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-view-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.modal-backdrop.active .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+  font-size: 1.02rem;
+  color: var(--text-main);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.8rem 1.1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-size: 1.02rem;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ==================== ئۇقتۇرۇش تاياقچىسى (Toast Notification) ==================== */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem; /* RTL دا كۆز ئالدىدا روشەن كۆرۈنىدۇ */
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toast {
+  background: #1e293b;
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  animation: slideInToast 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: 4px solid var(--primary-color);
+}
+
+.toast.toast-success {
+  border-right-color: var(--success-color);
+}
+
+.toast.toast-error {
+  border-right-color: var(--danger-color);
+}
+
+@keyframes slideInToast {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== ئاستى پۇت قىسمى (Footer) ==================== */
+.main-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 3.5rem 0 1.5rem;
+  border-top: 1px solid #1e293b;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 1.3fr;
+  gap: 2.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.footer-brand-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #eab308;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.footer-brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.footer-store-name {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.footer-domain-badge {
+  color: #f59e0b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.footer-brand-desc {
+  color: #94a3b8;
+  line-height: 1.75;
+  font-size: 0.92rem;
+  margin: 0 0 1.25rem 0;
+}
+
+.footer-brand-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.social-link-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.social-pill-instagram {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1.5px solid rgba(244, 63, 94, 0.35);
+  color: #f43f5e;
+}
+
+.social-pill-instagram:hover {
+  background: rgba(244, 63, 94, 0.25);
+  border-color: #f43f5e;
+  color: #fb7185;
+  box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+}
+
+.social-pill-merchant {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  cursor: pointer;
+}
+
+.social-pill-merchant:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  color: #fbbf24;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.footer-column h4 {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.footer-column a,
+.footer-links a {
+  text-decoration: none !important;
+}
+
+.footer-column a:hover,
+.footer-links a:hover {
+  color: #ffffff;
+  text-decoration: none !important;
+  padding-right: 4px;
+}
+
+/* ==================== ئالاقىلىشىش تىزىملىكى (Footer Contact List) ==================== */
+.footer-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  font-size: 0.94rem;
+  margin-top: 0.35rem;
+}
+
+.footer-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+}
+
+.footer-contact-item i {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.footer-contact-label {
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.footer-contact-link {
+  color: #ffffff !important;
+  font-weight: 700;
+  direction: ltr;
+  text-decoration: none !important;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.footer-contact-link:hover {
+  color: #38bdf8 !important;
+}
+
+.footer-bottom {
+  border-top: 1px solid #1e293b;
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* ==================== پۇت قىسمىدىكى چىقىم كارتىلىرى ۋە بىخەتەرلىك كاپالىتى (Footer Trust & Payment Bar) ==================== */
+.footer-trust-payment-bar {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.footer-trust-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.25rem;
+}
+
+.trust-badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: all 0.25s ease;
+}
+
+.trust-badge-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.footer-payment-cards {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.85rem;
+}
+
+.payment-card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.payment-card-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.card-brand-name {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.troy-pill {
+  background: #1e3a8a;
+  color: #ffffff;
+}
+
+.troy-logo-text {
+  font-family: "Arial Black", Impact, sans-serif;
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: #00d2ff;
+  letter-spacing: 1px;
+}
+
+/* ==================== ماسلىشىشچانلىق (Comprehensive Responsive Design for Mobile & Tablet) ==================== */
+
+@media (max-width: 992px) {
+  .catalog-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .catalog-sidebar {
+    position: static;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.5rem;
+  }
+  .mobile-sidebar-toggle-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.15rem;
+    background: var(--bg-card);
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--radius-md);
+    transition: background 0.2s ease;
+  }
+  .mobile-sidebar-toggle-bar:hover {
+    background: #f1f5f9;
+  }
+  .mobile-filter-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .mobile-filter-title-wrap i {
+    color: var(--primary-color);
+  }
+  .mobile-filter-action-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .mobile-filter-badge {
+    font-size: 0.78rem;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .mobile-toggle-chevron {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+  }
+  .catalog-sidebar.is-expanded .mobile-toggle-chevron {
+    transform: rotate(180deg);
+  }
+  .catalog-sidebar-inner {
+    display: none;
+    padding: 1rem 1.15rem;
+    border-top: 1px solid var(--border-light);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .catalog-sidebar.is-expanded .catalog-sidebar-inner {
+    display: block;
+    animation: fadeIn 0.25s ease;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ئۈستۈنكى تاياقچە ۋە خەتلەرنىڭ سۈرئىتى/چوڭلۇقى */
+  .top-announcement {
+    height: 36px;
+    font-size: 0.85rem;
+  }
+  .marquee-item {
+    font-size: 0.85rem;
+    gap: 0.5rem;
+  }
+  .marquee-badge {
+    font-size: 0.72rem;
+    padding: 1px 7px;
+  }
+  .marquee-text {
+    font-size: 0.85rem;
+  }
+
+  /* باش تىزىملىك (Navbar) */
+  .main-navbar {
+    padding: 0.35rem 0 0.5rem;
+  }
+  .nav-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.85rem;
+    gap: 0.65rem;
+  }
+
+  /* 1-قۇر: دۇكان لوگوسى مەركەزگە كۆركەم ماسلاشتۇرۇلدى */
+  .brand-logo {
+    order: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 4px 0;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #eab308;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    margin: 2px 0;
+  }
+  .brand-store-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    white-space: nowrap;
+  }
+
+  /* 2-قۇر: تولۇق كەڭلىكتىكى ئىزدەش رامكىسى */
+  .search-bar-container {
+    order: 2;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 0.15rem;
+    padding: 0.2rem 0.35rem;
+    box-sizing: border-box;
+  }
+  .search-category-select {
+    max-width: 95px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.82rem;
+  }
+  .search-input {
+    min-width: 0;
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+  }
+  .search-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  /* 3-قۇر: ياردەمچى مەشغۇلات كونۇپكىلىرى (سېۋەت، تىل، پۇل، تۈن ھالىتى) */
+  .nav-actions {
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.35rem 0 0.2rem;
+    padding: 0.45rem 0.25rem;
+    border-top: 1px dashed var(--border-light);
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+  }
+
+  .currency-select-dropdown,
+  .lang-select-dropdown,
+  .nav-action-cart-btn,
+  .nav-action-wish-btn {
+    height: 38px;
+    font-size: 0.86rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .currency-select-dropdown {
+    padding: 0 0.65rem;
+  }
+
+  .lang-select-dropdown {
+    padding: 0 0.65rem;
+    gap: 0.35rem;
+  }
+
+  .theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    font-size: 0.95rem;
+  }
+
+  .nav-action-cart-btn {
+    padding: 0 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .nav-action-wish-btn {
+    padding: 0 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .nav-action-cart-btn .nav-cart-text,
+  .nav-action-wish-btn .nav-cart-text {
+    display: none;
+  }
+
+  .nav-action-cart-btn i,
+  .nav-action-wish-btn i {
+    font-size: 1.05rem;
+  }
+
+  /* چوڭ تەشۋىقات بەلبېغى (Hero Slider) */
+  .hero-slider-container {
+    height: 310px;
+    border-radius: var(--radius-lg);
+  }
+  .hero-content {
+    padding: 1.25rem 1.25rem 2rem;
+    max-width: 95%;
+  }
+  .hero-tag {
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    margin-bottom: 0.45rem;
+  }
+  .hero-title {
+    font-size: 1.28rem;
+    line-height: 1.35;
+    margin-bottom: 0.4rem;
+  }
+  .hero-subtitle {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    margin-bottom: 0.85rem;
+    color: #e2e8f0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .hero-btn {
+    padding: 0.45rem 1.15rem;
+    font-size: 0.85rem;
+    gap: 0.4rem;
+  }
+  .hero-nav-dots {
+    bottom: 0.75rem;
+    left: 1.25rem;
+    transform: none;
+    gap: 0.4rem;
+    z-index: 10;
+  }
+  .dot-indicator {
+    width: 8px;
+    height: 8px;
+  }
+  .dot-indicator.active {
+    width: 22px;
+  }
+
+  /* چەكلىك ۋاقىت ئېتىبارى (Flash Sale Responsive) */
+  .flash-sale-bar {
+    padding: 1.4rem 1.25rem;
+    gap: 1rem;
+    border-radius: 16px;
+    align-items: center;
+    text-align: center;
+  }
+  .flash-sale-top-row {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .flash-sale-text-wrap {
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .flash-sale-badge {
+    padding: 7px 20px;
+    font-size: 0.92rem;
+    margin: 0.1rem 0;
+  }
+  .flash-sale-sub {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    text-align: center;
+    padding: 0 0.85rem;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .flash-sale-clock-row {
+    width: 100%;
+    max-width: 330px;
+    justify-content: center;
+    gap: 1.15rem;
+    padding: 0.65rem 1rem;
+    margin: 0.2rem auto 0 auto;
+  }
+  .clock-box {
+    min-width: 36px;
+    padding: 0.35rem 0.5rem;
+    font-size: 1.05rem;
+  }
+  .flash-sale-bottom-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.85rem;
+  }
+  .flash-sale-btn {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.84rem;
+  }
+  .flash-weather-widget {
+    padding: 0.35rem 0.75rem;
+    gap: 0.5rem;
+  }
+  .weather-icon-badge {
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+  }
+  .weather-city-name {
+    font-size: 0.78rem;
+  }
+  .weather-temp-value {
+    font-size: 0.84rem;
+  }
+
+  /* تاۋارلار كاتالوگى (Product Grid - ئىككى بۆلەكلىك تېلېفون كۆرۈنۈشى) */
+  .product-grid, #productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  .product-card-thumb {
+    height: 175px;
+  }
+  .product-card-body {
+    padding: 0.75rem;
+  }
+  .product-title {
+    font-size: 0.92rem;
+    height: 2.5rem;
+    -webkit-line-clamp: 2;
+  }
+  .current-price {
+    font-size: 1.15rem;
+  }
+  .original-price {
+    font-size: 0.82rem;
+  }
+  .product-card-actions {
+    display: block;
+    width: 100%;
+  }
+  .btn-add-cart {
+    width: 100%;
+    min-height: 38px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    gap: 0.45rem;
+    border-radius: var(--radius-sm);
+  }
+  .btn-add-cart span {
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  /* مەھسۇلاتنى تېز كۆرۈش كۆزنىكى (Quick View Modal on Mobile) */
+  #quickViewModal .modal-content {
+    width: 95%;
+    max-width: 95vw;
+    margin: 0 auto;
+    max-height: 88vh;
+    border-radius: var(--radius-lg);
+  }
+  .quick-view-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .quick-view-media {
+    max-height: 220px;
+    min-height: 180px;
+  }
+  .quick-view-media img {
+    max-height: 220px;
+  }
+  .quick-view-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .quick-view-actions .qty-control-wrap {
+    height: 42px;
+  }
+  .quick-view-actions .btn-add-cart {
+    height: 42px;
+    min-height: 42px;
+  }
+
+  /* ئالاھىدىلىكلەر / كاپالەتلەر (Features Grid) */
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .feature-item {
+    padding: 0.85rem;
+  }
+
+  /* سەھىپە تۈرلىرى (Categories) */
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.65rem;
+  }
+  .category-card {
+    padding: 0.85rem 0.5rem;
+  }
+  .category-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+  .category-name {
+    font-size: 0.85rem;
+  }
+
+  /* سېۋەت رامكىسى (Cart Drawer) */
+  .cart-drawer {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* تېز ئالاقە لەيلىمە كۇنۇپكىلىرى */
+  .floating-contact-wrap {
+    bottom: 1.25rem;
+    gap: 0.6rem;
+    z-index: 1040;
+  }
+  html[dir="rtl"] .floating-contact-wrap {
+    left: 1rem;
+    right: auto;
+  }
+  html[dir="ltr"] .floating-contact-wrap {
+    right: 1rem;
+    left: auto;
+  }
+  .floating-contact-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.35rem;
+  }
+
+  /* سېتىلىش ئۇقتۇرۇشى (Live Sales Popup) */
+  .live-sales-popup {
+    bottom: 5.2rem;
+    max-width: 270px;
+    font-size: 0.78rem;
+    padding: 0.55rem 0.75rem;
+  }
+  html[dir="rtl"] .live-sales-popup {
+    left: 1rem;
+    right: auto;
+  }
+  html[dir="ltr"] .live-sales-popup {
+    right: 1rem;
+    left: auto;
+  }
+
+  /* ئاستى قىسمى (Footer) */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .footer-brand {
+    align-items: center;
+    text-align: center;
+  }
+  .footer-brand-header {
+    justify-content: center;
+    margin-bottom: 0.85rem;
+  }
+  .footer-brand-title-wrap {
+    align-items: center;
+    text-align: center;
+  }
+  .footer-brand-desc {
+    max-width: 92%;
+    margin: 0 auto 1.25rem auto;
+    text-align: center;
+    line-height: 1.7;
+    font-size: 0.9rem;
+  }
+  .footer-brand-actions {
+    justify-content: center;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.75rem;
+  }
+  .footer-brand-actions .social-link-pill {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.84rem;
+    height: 40px;
+  }
+  .footer-contact-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 320px;
+    margin: 0.5rem auto 0 auto;
+  }
+  .footer-contact-item {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.65rem 1rem;
+    box-sizing: border-box;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+  }
+  .footer-contact-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(56, 189, 248, 0.35);
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  .container {
+    padding: 0 0.85rem;
+  }
+
+  .main-navbar {
+    padding: 0.2rem 0 0.4rem;
+  }
+  .nav-wrapper {
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem;
+  }
+  .brand-logo {
+    gap: 0.45rem;
+    padding: 2px 4px;
+    margin: 0;
+  }
+  .logo-img {
+    width: 36px;
+    height: 36px;
+    margin: 2px 0;
+  }
+  .brand-store-name {
+    font-size: 1.05rem;
+  }
+  .nav-actions {
+    gap: 0.35rem;
+    padding: 0.35rem 0.15rem;
+    margin: 0.25rem 0 0.15rem;
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .currency-select-dropdown,
+  .lang-select-dropdown,
+  .nav-action-cart-btn,
+  .nav-action-wish-btn {
+    height: 36px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .currency-select-dropdown {
+    padding: 0 0.5rem;
+  }
+  .lang-select-dropdown {
+    padding: 0 0.55rem;
+    gap: 0.3rem;
+  }
+  .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 0.9rem;
+    padding: 0;
+  }
+  .nav-action-cart-btn,
+  .nav-action-wish-btn {
+    padding: 0 0.65rem;
+    gap: 0.3rem;
+  }
+  .nav-action-cart-btn .nav-cart-text,
+  .nav-action-wish-btn .nav-cart-text {
+    display: none;
+  }
+  .nav-action-cart-btn i,
+  .nav-action-wish-btn i {
+    font-size: 1.05rem;
+  }
+
+  .hero-slider-container {
+    height: 290px;
+  }
+  .hero-content {
+    padding: 1rem 1rem 1.85rem;
+    max-width: 100%;
+  }
+  .hero-title {
+    font-size: 1.18rem;
+    line-height: 1.35;
+    margin-bottom: 0.35rem;
+  }
+  .hero-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+  .hero-btn {
+    padding: 0.4rem 0.95rem;
+    font-size: 0.82rem;
+  }
+  .hero-nav-dots {
+    bottom: 0.65rem;
+    left: 1rem;
+    transform: none;
+  }
+
+  /* 2 بالداقلىق تېخىمۇ ئىخچام كارتىلار */
+  .product-grid, #productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .product-card-thumb {
+    height: 145px;
+  }
+  .product-card-body {
+    padding: 0.6rem 0.5rem;
+  }
+  .product-category-tag, .product-brand-tag {
+    font-size: 0.7rem;
+    padding: 1px 5px;
+  }
+  .product-title {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  .current-price {
+    font-size: 1rem;
+  }
+  .product-card-actions {
+    display: block;
+    width: 100%;
+  }
+  .btn-add-cart {
+    width: 100%;
+    min-height: 35px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    gap: 0.35rem;
+  }
+  .btn-add-cart span {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  /* مودال كۆزنەكلەر (Modals on Mobile) */
+  .modal-content {
+    max-width: 95%;
+    width: 95%;
+    max-height: 92vh;
+    border-radius: var(--radius-md);
+    margin: 0 auto;
+  }
+  .modal-header {
+    padding: 0.75rem 1rem;
+  }
+  .modal-body {
+    padding: 0.85rem;
+  }
+  .modal-title {
+    font-size: 1.12rem;
+  }
+  .quick-view-media {
+    max-height: 190px;
+    min-height: 150px;
+  }
+  .quick-view-media img {
+    max-height: 190px;
+  }
+
+  .clock-box {
+    min-width: 32px;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ==================== 🔐 پەقەت باشقۇرغۇچىنىڭ تېلېفون ۋە كومپيۇتېرىدىلا كۆرۈنىدىغان كۇنۇپكا ==================== */
+.admin-secret-nav-btn {
+  display: none !important;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #facc15 !important;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.38rem 0.85rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  border: 1.5px solid #eab308;
+  white-space: nowrap;
+}
+.admin-secret-nav-btn i {
+  color: #eab308;
+  font-size: 0.92rem;
+}
+.admin-secret-nav-btn:hover {
+  background: #1e3a8a;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.admin-floating-badge {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 99999;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #0f172a;
+  color: #fbbf24 !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.6rem 1.15rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(234, 179, 8, 0.5);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.admin-floating-badge i {
+  font-size: 1.05rem;
+  color: #eab308;
+}
+.admin-floating-badge:hover {
+  background: #1e293b;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.6), 0 0 0 2.5px rgba(234, 179, 8, 0.9);
+}
+
+@media (max-width: 640px) {
+  .admin-floating-badge {
+    bottom: 80px;
+    left: 14px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* Category Icon Palette */
+.category-icon-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.icon-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-pick-btn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
+}
+
+.icon-pick-btn.active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+/* ==================== نەق مەيدان پېرېۋوت باھاسى كۆزنىكى (Live Exchange Rates Footer) ==================== */
+.footer-rates-column {
+  padding-top: 0;
+  margin-top: 0;
+}
+@media (max-width: 768px) {
+  .footer-rates-column {
+    padding-top: 0;
+  }
+}
+
+.footer-rates-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  backdrop-filter: blur(8px);
+}
+
+.rate-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.65);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  transition: all 0.25s ease;
+}
+
+.rate-card-usd {
+  border: 1px solid rgba(56, 189, 248, 0.22);
+}
+.rate-card-usd:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.12);
+}
+
+.rate-card-eur {
+  border: 1px solid rgba(192, 132, 252, 0.22);
+}
+.rate-card-eur:hover {
+  border-color: rgba(192, 132, 252, 0.5);
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 4px 12px rgba(192, 132, 252, 0.12);
+}
+
+.rate-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.rate-currency-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.icon-usd {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.icon-eur {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.rate-currency-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+
+.rate-currency-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.rate-card-val-wrap {
+  text-align: left;
+  direction: ltr;
+}
+
+.rate-card-usd .rate-val {
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: #38bdf8;
+  line-height: 1.2;
+}
+
+.rate-card-eur .rate-val {
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: #c084fc;
+  line-height: 1.2;
+}
+
+.rate-trend-label {
+  font-size: 0.68rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 1px;
+}
+
+.rate-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  padding-top: 0.35rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  gap: 0.3rem;
+  flex-wrap: nowrap;
+}
+
+.rate-update-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn-refresh-rates {
+  background: none;
+  border: none;
+  color: #38bdf8;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-refresh-rates:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #7dd3fc;
+}
+
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: ratePulse 2s infinite;
+}
+@keyframes ratePulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ==================== ❤️ ياقتۇرغانلار تارتما كۆزنىكى ئۇسلۇبى ==================== */
+.nav-action-wish-btn,
+.nav-action-track-btn {
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  padding: 0 0.85rem;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.nav-action-wish-btn:hover {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #f43f5e;
+  transform: translateY(-1px);
+}
+
+.nav-action-track-btn:hover {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.4);
+  color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.nav-action-wish-btn .badge-counter {
+  position: static;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  margin-right: 2px;
+}
+
+.btn-whatsapp-instant:hover {
+  background: #1ebc59 !important;
+  transform: translateY(-1px);
+}
+
+.btn-move-wish-cart:hover {
+  background: #1d4ed8 !important;
+  transform: scale(1.05);
+}
+
+.btn-remove-wish:hover {
+  background: #fecdd3 !important;
+  color: #e11d48 !important;
+  transform: scale(1.05);
+}
+
+/* ==================== 🚚 زاكاز ئىز قوغلاش تىزىق ئۈنۈمى ==================== */
+.track-timeline::before {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.track-step.active .track-step-circle {
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.18);
+}
+
+.track-step.current .track-step-circle {
+  animation: trackPulse 1.8s infinite;
+}
+
+@keyframes trackPulse {
+  0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+}
+
+@media (max-width: 768px) {
+  #orderTrackModal .modal-content {
+    margin: 0.75rem !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.25rem 1rem !important;
+  }
+  
+  .track-step-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .track-timeline::before {
+    top: 16px;
+    left: 20px;
+    right: 20px;
+  }
+
+  .track-step div {
+    font-size: 0.72rem !important;
+  }
+}
+
+

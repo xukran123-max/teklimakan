@@ -1,0 +1,12 @@
+﻿# Executable binaries
+*.exe
+cloudflared.exe
+
+# Logs
+*.log
+edge_err.log
+
+# Local files & temporary
+sms_logs.json
+.vscode/
+.idea/

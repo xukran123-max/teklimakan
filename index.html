@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ug" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تەكلىماكان سودا تورى | Teklimakan E-Commerce</title>
+  
+  <!-- سۇپا سىنبەلگىسى (Favicon) -->
+  <link rel="icon" type="image/png" href="images/logo_circle.png">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
+  <link rel="stylesheet" href="css/fonts.css?v=20260916_v7">
+  <link rel="stylesheet" href="css/style.css?v=20260916_v7">
+</head>
+<body class="font-modern">
+
+  <!-- 🚚 ئۈستۈنكى ئاپتوماتىك ئايلانما ئېلان تاختىسى (Infinite Marquee Ticker) -->
+  <div class="top-announcement">
+    <div class="top-marquee-container">
+      <div class="top-marquee-track">
+        <!-- 1-ئېلان: تېز ھەم ئىشەنچلىك يەتكۈزۈش -->
+        <div class="marquee-item">
+          <span class="marquee-badge badge-sale" data-marquee-badge="1">يەتكۈزۈش</span>
+          <span class="marquee-text" data-marquee-text="1">🚚 تېز ھەم ئىشەنچلىك يەتكۈزۈش — 1000 لىرادىن ئاشسا يەتكۈزۈش ھەقسىز</span>
+        </div>
+        <!-- 2-ئېلان: 100% ساپ سۈپەت كاپالىتى -->
+        <div class="marquee-item">
+          <span class="marquee-badge badge-featured" data-marquee-badge="2">كاپالەت</span>
+          <span class="marquee-text" data-marquee-text="2">🛡️ 100% ساپ سۈپەت كاپالىتى — قاتتىق تەكشۈرۈلگەن ھەقىقىي ماللار</span>
+        </div>
+        <!-- 3-ئېلان: 7 كۈن سەۋەبسىز قايتۇرۇش -->
+        <div class="marquee-item">
+          <span class="marquee-badge badge-gift" data-marquee-badge="3">قايتۇرۇش</span>
+          <span class="marquee-text" data-marquee-text="3">🔄 7 كۈن سەۋەبسىز قايتۇرۇش — ئەنسىرىمەي خاتىرجەم مال سېتىۋېلىش</span>
+        </div>
+        <!-- 4-ئېلان: 24/7 توردا خېرىدارلار مۇلازىمىتى -->
+        <div class="marquee-item">
+          <span class="marquee-badge badge-service" data-marquee-badge="4">مۇلازىمەت</span>
+          <span class="marquee-text" data-marquee-text="4">🎧 24/7 توردا خېرىدارلار مۇلازىمىتى — ھەر قانداق سوئالىڭىزغا دەل ۋاقتىدا جاۋاب</span>
+        </div>
+        <!-- ئۈزۈلمەس راۋان ئايلىنىش ئۈچۈن تەكرار قىسمى -->
+        <div class="marquee-item" aria-hidden="true">
+          <span class="marquee-badge badge-sale" data-marquee-badge="1">يەتكۈزۈش</span>
+          <span class="marquee-text" data-marquee-text="1">🚚 تېز ھەم ئىشەنچلىك يەتكۈزۈش — 1000 لىرادىن ئاشسا يەتكۈزۈش ھەقسىز</span>
+        </div>
+        <div class="marquee-item" aria-hidden="true">
+          <span class="marquee-badge badge-featured" data-marquee-badge="2">كاپالەت</span>
+          <span class="marquee-text" data-marquee-text="2">🛡️ 100% ساپ سۈپەت كاپالىتى — قاتتىق تەكشۈرۈلگەن ھەقىقىي ماللار</span>
+        </div>
+        <div class="marquee-item" aria-hidden="true">
+          <span class="marquee-badge badge-gift" data-marquee-badge="3">قايتۇرۇش</span>
+          <span class="marquee-text" data-marquee-text="3">🔄 7 كۈن سەۋەبسىز قايتۇرۇش — ئەنسىرىمەي خاتىرجەم مال سېتىۋېلىش</span>
+        </div>
+        <div class="marquee-item" aria-hidden="true">
+          <span class="marquee-badge badge-service" data-marquee-badge="4">مۇلازىمەت</span>
+          <span class="marquee-text" data-marquee-text="4">🎧 24/7 توردا خېرىدارلار مۇلازىمىتى — ھەر قانداق سوئالىڭىزغا دەل ۋاقتىدا جاۋاب</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ئاساسىي باش تىزىملىك (Navbar) -->
+  <header class="main-navbar">
+    <div class="container nav-wrapper">
+      <!-- 1. دۇكان لوگوسى ۋە نامى (Logo & Brand Name) -->
+      <a href="index.html" class="brand-logo">
+        <img src="images/logo_circle.png" class="logo-img" alt="تەكلىماكان سودا تورى لوگوسى">
+        <span class="brand-store-name">تەكلىماكان سودا تورى</span>
+      </a>
+
+      <!-- 2. ئىزدەش بۆلىكى -->
+      <div class="search-bar-container">
+        <select id="searchCategorySelect" class="search-category-select">
+          <option value="all">بارلىق تۈرلەر</option>
+          <option value="ئۇيغۇر تىبابىتى">ئۇيغۇر تىبابىتى</option>
+          <option value="پىششىق دورىلار">پىششىق دورىلار</option>
+          <option value="ئۆسۈملۈك دورىلار">ئۆسۈملۈك دورىلار</option>
+          <option value="تەبىئىي ياغلار">تەبىئىي ياغلار</option>
+          <option value="گۈزەللىك ۋە ساغلاملىق">گۈزەللىك ۋە ساغلاملىق</option>
+          <option value="گۈلقەنتلەر">گۈلقەنتلەر</option>
+          <option value="كىتاپ ۋە مەدەنىيەت">كىتاپ ۋە مەدەنىيەت</option>
+        </select>
+        <input type="text" id="mainSearchInput" class="search-input" placeholder="تاۋار نامى، ماركا ياكى تۈرى بويىچە ئىزدەڭ..." autocomplete="off">
+        <button id="mainSearchBtn" class="search-btn" title="ئىزدەش">
+          <i class="fas fa-search"></i>
+        </button>
+        <div id="searchAutocompleteDropdown" class="search-autocomplete-dropdown"></div>
+      </div>
+
+      <!-- 3. قوشۇمچە كونۇپكىلار (سېۋەت، تىل، پۇل، تۈن ھالىتى) -->
+      <div class="nav-actions">
+        <!-- 1. سودا سېۋىتى (ئوڭدىن بىرىنچى) -->
+        <button id="cartToggleBtn" class="action-btn nav-action-cart-btn" title="سودا سېۋىتى">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="nav-cart-text" id="navCartText">سېۋەت</span>
+          <span id="cartCounterBadge" class="badge-counter" style="display: none;">0</span>
+        </button>
+
+        <!-- 2. ياقتۇرغانلىرىم (Wishlist) -->
+        <button type="button" id="wishlistToggleBtn" class="nav-action-wish-btn" title="ياقتۇرغان تاۋارلىرىم (Wishlist)" style="position: relative;">
+          <i class="fas fa-heart" style="color: #f43f5e;"></i>
+          <span class="nav-cart-text" id="navWishlistText">ياقتۇرغانلار</span>
+          <span id="wishlistCounterBadge" class="badge-counter" style="display: none; background: #f43f5e; color: white;">0</span>
+        </button>
+
+
+        <!-- 2. تىل تاللاش (ئوڭدىن ئىككىنچى) -->
+        <div class="lang-selector-wrap">
+          <button type="button" id="languagePickerBtn" class="lang-select-dropdown" title="تىل تاللاش / Dil / Language">
+            <img id="navLangFlag" src="images/flag_uyghur.png" alt="ئۇيغۇرچە" class="lang-flag-img">
+            <span id="navLangLabel">ئۇيغۇرچە</span>
+            <i class="fas fa-chevron-down nav-lang-arrow"></i>
+          </button>
+          <select id="languageSelect" style="display: none;" title="تىل تاللاش / Dil / Language">
+            <option value="ug">ئۇيغۇرچە</option>
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <!-- 3. پۇل بىرلىكى تاللاش (ئوڭدىن ئۈچۈنچى) -->
+        <div class="currency-selector-wrap">
+          <select id="currencySelect" class="currency-select-dropdown" title="پۇل بىرلىكى">
+            <option value="TRY">₺ Lira</option>
+            <option value="USD">$ USD</option>
+          </select>
+        </div>
+
+        <!-- 4. تۈن ھالىتى (كېچە-كۈندۈز، ئەڭ ئاخىرىدا) -->
+        <button id="themeToggleBtn" class="action-btn theme-toggle-btn" title="تۈن ۋە كۈندۈز تەڭشىكى">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- تەشۋىقات بۆلىكى (Hero Section) -->
+    <section class="hero-section">
+      <div class="hero-slider-container">
+        <!-- Slide 1: تەبىئىي تاۋارلار ۋە قاشتېشى -->
+        <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=80');">
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-tag" id="heroTag1">ئەتىيازلىق ئېتىبار</span>
+            <h1 class="hero-title" id="heroTitle1">ساپ تەبىئىي، ئىشەنچلىك ئېسىل مەھسۇلاتلار</h1>
+            <p class="hero-subtitle" id="heroDesc1">يەرلىك ئەلا سۈپەتلىك تۇرپان ئۈزۈم مېغىزى، خوتەن قاشتېشى ۋە مىللىي قول سەنئىتى بۇيۇملىرى 20% ئېتىباردا سېتىلماقتا!</p>
+            <a href="#catalogSection" class="hero-btn" id="heroBtn1">
+              <span>ھازىرلا كۆرۈپ سېتىۋېلىش</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Slide 2: ساپ يىپەك ئەتلەس ۋە زىبۇ-زىننەت -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80');">
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-tag" id="heroTag2" style="background: #10b981;">يېڭى نۇسخىلار</span>
+            <h1 class="hero-title" id="heroTitle2">ئەنئەنىۋى ئەتلەس ۋە نەپىس قول ھۈنەر بۇيۇملىرى</h1>
+            <p class="hero-subtitle" id="heroDesc2">ساپ تەبىئىي يىپەك، يىپەك توقۇلمىلىرى ۋە ھۆسن تۈزەش گۈزەللىك يۈرۈشلۈكلىرى زاكاز قىلىشىڭىزنى كۈتمەكتە.</p>
+            <a href="#catalogSection" class="hero-btn" id="heroBtn2" style="background: #10b981;">
+              <span>مەھسۇلاتلار تىزىملىكى</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Slide 3: ئۇيغۇر تىبابىتى ۋە شىپالىق ئۆسۈملۈكلەر -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1400&q=80');">
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-tag" id="heroTag3" style="background: #d97706;">ئۇيغۇر تىبابىتى</span>
+            <h1 class="hero-title" id="heroTitle3">خوتەن قاشتېشى ۋە شىپالىق ئۆسۈملۈكلەر خەزىنىسى</h1>
+            <p class="hero-subtitle" id="heroDesc3">ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تىبابەت مەلھەملىرى تولۇق كاپالەتلىك.</p>
+            <a href="#catalogSection" class="hero-btn" id="heroBtn3" style="background: #d97706;">
+              <span>شىپالىق ماللارنى كۆرۈش</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Slide 4: تۈركىيە رىزە قارا چېيى ۋە قەدىمىي مىس چەينەك -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=1400&q=80');">
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-tag" id="heroTag4" style="background: #e11d48;">ئالىي تەم ۋە ئىچىملىكلەر</span>
+            <h1 class="hero-title" id="heroTitle4">تۈركىيە رىزە قارا چېيى ۋە قەدىمىي مىس چەينەك توپلىمى</h1>
+            <p class="hero-subtitle" id="heroDesc4">خۇش پۇراق تەبىئىي قارا چاي، نۇسخىلىق قولدا ئىشلەنگەن مىس چەينەك ۋە پىيالە يۈرۈشلۈكلىرى ئېتىبار باھادا.</p>
+            <a href="#catalogSection" class="hero-btn" id="heroBtn4" style="background: #e11d48;">
+              <span>چايلارنى تاللاش</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Slide 5: يىپەك يولى مەدەنىيىتى ۋە كىلاسسىك كىتابلار -->
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=1400&q=80');">
+          <div class="hero-slide-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-tag" id="heroTag5" style="background: #6366f1;">كىتاپ ۋە مەدەنىيەت</span>
+            <h1 class="hero-title" id="heroTitle5">يىپەك يولى مەدەنىيىتى ۋە كىلاسسىك ئەدەبىيات ئەسەرلىرى</h1>
+            <p class="hero-subtitle" id="heroDesc5">تارىخىي رەسىملىك قامۇسلار، مىللىي ئەتلەس يۆگەلمە كىتابلار ۋە زامانىۋى سىمسىز قۇلاقلىقلار كۆرگەزمىسى.</p>
+            <a href="#catalogSection" class="hero-btn" id="heroBtn5" style="background: #6366f1;">
+              <span>كىتابلارنى كۆرۈش</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-nav-dots">
+          <div class="dot-indicator active" title="1-ئېلان"></div>
+          <div class="dot-indicator" title="2-ئېلان"></div>
+          <div class="dot-indicator" title="3-ئېلان"></div>
+          <div class="dot-indicator" title="4-ئېلان"></div>
+          <div class="dot-indicator" title="5-ئېلان"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⚡ چەكلىك ۋاقىتلىق ئېتىبار كۆزنىكى (Flash Sale Showcase) -->
+    <div class="flash-sale-bar">
+      <!-- 1-قۇر: خەۋەر ۋە بەلگە كۇنۇپكا (Top Row) -->
+      <div class="flash-sale-top-row">
+        <div class="flash-sale-text-wrap">
+          <button type="button" class="flash-sale-badge flash-sale-badge-btn" id="flashSaleBtn" title="گۈلقەنتلەر تۈرىدىكى مەھسۇلاتلارنى كۆرۈش">
+            <span class="flash-sale-pulse"></span>
+            <span id="flashSaleBadge">بۈگۈنكى ئېتىبارلارنى كۆرۈش</span>
+          </button>
+          <p class="flash-sale-sub" id="flashSaleSub">ئېتىبار باھالىق مەھسۇلاتلارنى ھازىرلا ئەرزان باھادا سېتىۋىلىڭ</p>
+        </div>
+      </div>
+
+      <!-- 2-قۇر: ۋاقىت ھېسابلىغۇچ (Countdown Row) -->
+      <div class="flash-sale-clock-row">
+        <span id="flashCountdownLabel" class="countdown-label">قالغان ۋاقىت:</span>
+        <div class="countdown-clock">
+          <div class="clock-unit">
+            <div class="clock-box" id="flashHours">08</div>
+            <span class="clock-unit-label" id="clockHoursLabel">سائەت</span>
+          </div>
+          <span class="clock-separator">:</span>
+          <div class="clock-unit">
+            <div class="clock-box" id="flashMinutes">45</div>
+            <span class="clock-unit-label" id="clockMinutesLabel">مىنۇت</span>
+          </div>
+          <span class="clock-separator">:</span>
+          <div class="clock-unit">
+            <div class="clock-box" id="flashSeconds">20</div>
+            <span class="clock-unit-label" id="clockSecondsLabel">سېكۇنت</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- تۈرلەر بۆلىكى (Category Pills) -->
+    <section class="categories-section">
+      <div class="section-header">
+        <h2 class="section-title" id="categoriesSectionTitle">مەھسۇلات تۈرلىرى</h2>
+      </div>
+      <div class="category-pills-wrap" id="categoryPillsContainer">
+        <button class="category-pill active"><i class="fas fa-th-large"></i> <span>بارلىق مەھسۇلاتلار</span></button>
+        <button class="category-pill"><i class="fas fa-mortar-pestle"></i> <span>ئۇيغۇر تىبابىتى</span></button>
+        <button class="category-pill"><i class="fas fa-pills"></i> <span>پىششىق دورىلار</span></button>
+        <button class="category-pill"><i class="fas fa-leaf"></i> <span>ئۆسۈملۈك دورىلار</span></button>
+        <button class="category-pill"><i class="fas fa-tint"></i> <span>تەبىئىي ياغلار</span></button>
+        <button class="category-pill"><i class="fas fa-heartbeat"></i> <span>گۈزەللىك ۋە ساغلاملىق</span></button>
+        <button class="category-pill"><i class="fas fa-seedling"></i> <span>گۈلقەنتلەر</span></button>
+        <button class="category-pill"><i class="fas fa-book-open"></i> <span>كىتاپ ۋە مەدەنىيەت</span></button>
+      </div>
+    </section>
+
+    <!-- ماللار كۆرگەزمىسى (Catalog) -->
+    <section id="catalogSection" class="catalog-layout">
+      <div class="catalog-content">
+        <!-- مەھسۇلاتلار رېشاتكىسى (Grid) -->
+        <div class="product-grid" id="productsGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- سېۋەت پۈركۈش تارتما كۆزنىكى (Cart Drawer) -->
+  <div class="cart-overlay" id="cartDrawerOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3 class="cart-header-title">
+          <i class="fas fa-shopping-bag" style="color: var(--primary-color);"></i>
+          <span id="cartDrawerTitle">سودا سېۋىتىڭىز</span>
+        </h3>
+        <button id="closeCartDrawerBtn" class="btn-close-drawer" title="تاقاش">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="cart-body" id="cartDrawerItems"></div>
+
+      <div class="cart-footer">
+        <!-- 🚚 1000 لىرا ھەقسىز يەتكۈزۈش تەرەققىيات بالدىقى -->
+        <div class="free-shipping-bar">
+          <div class="free-shipping-text" id="cartFreeShippingText">
+            يەنە ... لىك مال ئالسىڭىز، يەتكۈزۈش ھەقسىز!
+          </div>
+          <div class="shipping-progress">
+            <div class="shipping-progress-fill" id="cartShippingProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem;">
+          <input type="text" id="couponCodeInput" placeholder="ئېتىبار كودى: TEKLIMAKAN20" style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem;">
+          <button id="applyCouponBtn" style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 0.5rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer;">ئىشلىتىش</button>
+        </div>
+
+        <div class="cart-summary-line">
+          <span id="cartSubtotalLabel">مال باھاسى:</span>
+          <span id="cartSubtotalPrice">0</span>
+        </div>
+        <div class="cart-summary-line">
+          <span id="cartDeliveryLabel">يەتكۈزۈش ھەققى:</span>
+          <span id="cartDeliveryPrice">0</span>
+        </div>
+        <div class="cart-summary-line">
+          <span id="cartDiscountLabel">ئېتىبار سوممىسى:</span>
+          <span id="cartDiscountPrice" style="color: var(--danger-color);">-0</span>
+        </div>
+        <div class="cart-summary-line total">
+          <span id="cartTotalLabel">جەمئىي تۆلەيدىغىنى:</span>
+          <span class="cart-total-price" id="cartTotalPrice">0</span>
+        </div>
+
+        <button id="proceedCheckoutBtn" class="btn-checkout">
+          <i class="fas fa-lock"></i>
+          <span>زاكاز قىلىش ۋە ھېسابات</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ❤️ ياقتۇرغانلار تارتما كۆزنىكى (Wishlist Drawer) -->
+  <div class="cart-overlay" id="wishlistDrawerOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3 class="cart-header-title">
+          <i class="fas fa-heart" style="color: #f43f5e;"></i>
+          <span id="wishlistDrawerTitle">ياقتۇرغان تاۋارلىرىڭىز</span>
+        </h3>
+        <button id="closeWishlistDrawerBtn" class="btn-close-drawer" title="تاقاش">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="cart-body" id="wishlistDrawerItems">
+        <!-- ياقتۇرغان تاۋارلار كود ئارقىلىق بۇ يەرگە قىستۇرۇلىدۇ -->
+      </div>
+
+      <div class="cart-footer">
+        <button id="btnMoveAllWishlistToCart" class="btn-checkout" style="background: #2563eb; margin-bottom: 0.65rem;">
+          <i class="fas fa-cart-plus"></i>
+          <span>ھەممىنى سېۋەتكە يۆتكەش</span>
+        </button>
+        <button id="btnClearWishlistBtn" class="btn-secondary" style="width: 100%; border-radius: var(--radius-md); padding: 0.65rem; font-weight: 700;">
+          <i class="fas fa-trash-alt"></i>
+          <span>تىزىملىكنى تازىلاش</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚚 زاكاز ئىز قوغلاش ۋە سۈرۈشتۈرۈش كۆزنىكى (Order Tracking Modal) -->
+  <div class="modal-backdrop" id="orderTrackModal">
+    <div class="modal-content" style="max-width: 600px; border-radius: 20px;">
+      <div class="modal-header">
+        <h4 class="modal-title" id="orderTrackModalTitle">
+          <i class="fas fa-truck-fast" style="color: #0284c7;"></i> كارگو ئەھۋالىنى تەكشۈرۈش
+        </h4>
+        <button class="btn-close-drawer btn-modal-close" id="btnCloseOrderTrackModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-size: 0.9rem; font-weight: 700; display: block; margin-bottom: 0.4rem;">زاكاز كودى ياكى تېلېفون نومۇرىڭىزنى كىرگۈزۈڭ:</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="orderTrackQueryInput" class="form-control number-latin" placeholder="مەسىلەن: ORD-2026-... ياكى 05551609999" style="direction: ltr; font-weight: 700; font-size: 1rem; flex: 1;">
+            <button type="button" id="btnDoTrackOrder" class="btn-checkout" style="width: auto; padding: 0.6rem 1.25rem; white-space: nowrap; border-radius: 10px;">
+              <i class="fas fa-search"></i> سۈرۈشتۈرۈش
+            </button>
+          </div>
+        </div>
+
+        <div id="orderTrackResultsWrap">
+          <div style="text-align: center; color: #94a3b8; padding: 2.5rem 1rem;">
+            <i class="fas fa-box-open" style="font-size: 3.2rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
+            <p style="margin: 0; font-size: 0.92rem; line-height: 1.6;">زاكاز نومۇرىڭىز (مەسىلەن: ORD-2026-...) ياكى زاكازدا كىرگۈزگەن تېلېفون نومۇرىڭىز ئارقىلىق زاكاز ھالىتى، تەستىق، كارگو كودى ۋە ئەۋەتىلىش ۋاقتىنى نەق مەيداندا سۈرۈشتۈرەلەيسىز.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تېز كۆرۈش كۆزنىكى (Quick View Modal) -->
+  <div class="modal-backdrop" id="quickViewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="quickViewModalTitle">مەھسۇلات تەپسىلاتى</h4>
+        <button class="btn-close-drawer btn-modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="quickViewModalBody"></div>
+    </div>
+  </div>
+
+  <!-- چىقىم ۋە زاكاز كۆزنىكى (Checkout Modal) -->
+  <div class="modal-backdrop" id="checkoutModal">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <h4 class="modal-title" id="checkoutModalTitle"><i class="fas fa-truck"></i> مال تاپشۇرۇۋېلىش ۋە چىقىم ئۇچۇرى</h4>
+        <button class="btn-close-drawer btn-modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm">
+          <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+            <h5 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text-main);" id="checkoutSummaryTitle">سېتىۋالىدىغان ماللىرىڭىز:</h5>
+            <div id="checkoutOrderItemsSummary"></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.75rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem; font-weight: 800;">
+              <span id="checkoutTotalLabel">ئومۇمىي سومما:</span>
+              <span id="checkoutTotalDisplay" style="color: var(--danger-color); font-size: 1.2rem;">0</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutCustNameLabel">تاپشۇرۇۋالغۇچىنىڭ ئىسمى <span style="color: var(--danger-color);">*</span></label>
+            <input type="text" id="checkoutCustName" class="form-control" placeholder="Ali / Murat / John" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutCustPhoneLabel">تېلېفون نۇمۇرى <span style="color: var(--danger-color);">*</span></label>
+            <input type="tel" id="checkoutCustPhone" class="form-control number-latin" placeholder="+90 / +86 139..." required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutCustCityLabel">ۋىلايەت / شەھەر <span style="color: var(--danger-color);">*</span></label>
+            <select id="checkoutCustCity" class="form-control">
+              <option value="ئىستانبۇل">ئىستانبۇل</option>
+              <option value="ئەنقەرە">ئەنقەرە</option>
+              <option value="بۇرسا">بۇرسا</option>
+              <option value="ئۈرۈمچى شەھىرى">ئۈرۈمچى شەھىرى</option>
+              <option value="قەشقەر ۋىلايىتى">قەشقەر ۋىلايىتى</option>
+              <option value="خوتەن ۋىلايىتى">خوتەن ۋىلايىتى</option>
+              <option value="تۇرپان شەھىرى">تۇرپان شەھىرى</option>
+              <option value="غۇلجا شەھىرى">غۇلجا شەھىرى</option>
+              <option value="باشقا شەھەرلەر">باشقا شەھەرلەر</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutCustAddressLabel">تەپسىلىي ئادرېسى <span style="color: var(--danger-color);">*</span></label>
+            <textarea id="checkoutCustAddress" class="form-control" rows="2" placeholder="Street, District, Building..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutPaymentLabel">چىقىم قىلىش ئۇسۇلىنى تاللاڭ</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.35rem;">
+              <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; background: var(--bg-main); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <input type="radio" name="checkoutPayment" value="بانكا ياكى خەلقئارالىق كارتا" checked style="accent-color: #6366f1;">
+                <i class="fas fa-credit-card" style="color: #6366f1; font-size: 1.25rem;"></i>
+                <span id="payMethodCardSpan">بانكا ياكى خەلقئارالىق كارتا</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; background: var(--bg-main); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <input type="radio" name="checkoutPayment" value="بانكا ھېساباتىغا يۆتكەش" style="accent-color: #059669;">
+                <i class="fas fa-university" style="color: #059669; font-size: 1.25rem;"></i>
+                <span id="payMethodHavaleSpan">بانكا ھېساباتىغا يۆتكەش</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; background: var(--bg-main); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); border-inline-start: 3px solid #25D366;">
+                <input type="radio" name="checkoutPayment" id="checkoutPaymentWhatsapp" value="ۋاتساپ ئارقىلىق پۇل تۆلەش" style="accent-color: #25D366;">
+                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.25rem;"></i>
+                <span id="payMethodWhatsappSpan" style="font-weight: 700;">ۋاتساپ ئارقىلىق پۇل تۆلەش</span>
+              </label>
+              <div id="whatsappPayNotice" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; font-size: 0.85rem; color: #065f46; line-height: 1.5;">
+                <i class="fab fa-whatsapp" style="color: #25D366; margin-inline-end: 0.35rem;"></i>
+                <span id="whatsappPayNoticeText">زاكازنى جەزملىگەندىن كېيىن، ئومۇمىي سومما ۋە سېتىۋالغان ماللار تىزىملىكى ئاپتوماتىك ۋاتساپ ئالاقىمىزگە ئۇلىنىدۇ.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="checkoutCustNotesLabel">ئالاھىدە تەلەپ (ئىختىيارىي)</label>
+            <input type="text" id="checkoutCustNotes" class="form-control" placeholder="ئالاھىدە يەتكۈزۈش تەلەپلىرى...">
+          </div>
+
+          <button type="submit" id="submitOrderBtn" class="btn-checkout">
+            <i class="fas fa-check-circle"></i>
+            <span>زاكازنى جەزملەپ تاپشۇرۇش</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- زاكاز غەلىبىلىك كۆزنىكى -->
+  <div class="modal-backdrop" id="orderSuccessModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-body" id="orderSuccessModalContent"></div>
+    </div>
+  </div>
+
+  <!-- 🤝 ۋاكالەتچى ۋە سودىگەرلەر مەركىزى كۆزنىكى (Agent & Vendor Portal Modal) -->
+  <div class="modal-backdrop" id="agentPortalModal">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #1e40af); color: #ffffff; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 1.25rem 1.5rem;">
+        <div>
+          <h4 class="modal-title" style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; font-weight: 800;">
+            <i class="fas fa-handshake" style="color: #f59e0b;"></i>
+            <span id="agentPortalTitle">تەكلىماكان ۋاكالەتچى ۋە سودىگەرلەر مەركىزى</span>
+          </h4>
+          <p style="font-size: 0.82rem; color: #bfdbfe; margin: 0.25rem 0 0 0;" id="agentPortalSubtitle">
+            سۇپىمىزغا ۋاكالەتچى بولۇپ قوشۇلۇڭ ياكى مەھسۇلاتلىرىڭىزنى تەكشۈرۈشكە يوللاڭ
+          </p>
+        </div>
+        <button class="btn-close-drawer btn-modal-close" id="btnCloseAgentPortalModal" style="color: #ffffff; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- تاللاش قۇلاقلىرى (Tabs) -->
+      <div style="display: flex; border-bottom: 2px solid var(--border-color); background: var(--bg-surface);">
+        <button type="button" class="agent-tab-btn active" id="tabBtnAgentApply" style="flex: 1; padding: 0.85rem 1rem; border: none; background: transparent; font-weight: 800; font-size: 0.92rem; cursor: pointer; color: var(--primary-color); border-bottom: 3px solid var(--primary-color); transition: all 0.2s;">
+          <i class="fas fa-user-plus"></i> <span id="agentTab1Text">1. ۋاكالەتچى بولۇپ تىزىملىتىش</span>
+        </button>
+        <button type="button" class="agent-tab-btn" id="tabBtnAgentSubmit" style="flex: 1; padding: 0.85rem 1rem; border: none; background: transparent; font-weight: 700; font-size: 0.92rem; cursor: pointer; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s;">
+          <i class="fas fa-box-open"></i> <span id="agentTab2Text">2. تاۋار سۇنۇش (تەستىقلانغانلار)</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.5rem;">
+        <!-- ==================== 1-قۇلاق: يېڭى ۋاكالەتچى تىزىملىتىش ==================== -->
+        <div id="agentApplyPane">
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.85rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.85rem; color: #1e40af; line-height: 1.6;">
+            <i class="fas fa-info-circle"></i> <strong>سۇپىمىزغا مەرھابا!</strong> ئەگەر ئۇيغۇر تىبابىتى، تەبىئىي دورا، گۈلقەنت، قۇرۇق يەل-يېمىش ياكى باشقا ئەلا سۈپەتلىك مىللىي مەھسۇلاتلارنى تور دۇكىنىمىزدا ساتماقچى بولسىڭىز، تۆۋەندىكى ئىلتىماسنى تولدۇرۇڭ. سۇپا باشقۇرغۇچىسى تەكشۈرۈپ تەستىقلىغاندىن كېيىن ماركا سېتىش ھوقۇقى بېرىلىدۇ.
+            <div style="margin-top: 0.6rem; padding: 0.5rem 0.75rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; color: #9f1239; font-weight: 700; font-size: 0.82rem; line-height: 1.5;">
+              ⚖️ <strong>مەسئۇلىيەت بەلگىلىمىسى:</strong> تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
+            </div>
+          </div>
+
+          <form id="agentApplyForm">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">ئىسىم-فامىلىڭىز ياكى شىركەت نامى <span style="color: red;">*</span></label>
+              <input type="text" id="applyAgentName" class="form-control" placeholder="مەسىلەن: ئەلىجان روزى ياكى تۇرپان سۈپەت دۇكىنى" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">ئېلخەت ئادرېسى <span style="color: red;">*</span></label>
+                <input type="email" id="applyAgentEmail" class="form-control number-latin" placeholder="alijan@example.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">تېلېفون / WhatsApp <span style="color: red;">*</span></label>
+                <input type="text" id="applyAgentPhone" class="form-control number-latin" placeholder="05551609999" required>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">سېتىشنى ئويلىغان تاۋار ياكى ماركا تۈرى</label>
+              <input type="text" id="applyAgentCategory" class="form-control" placeholder="مەسىلەن: ئۇيغۇر تىبابىتى، پىششىق دورىلار، قۇرۇق يەل-يېمىش...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">قىسقىچە چۈشەندۈرۈش ياكى بايان</label>
+              <textarea id="applyAgentNotes" class="form-control" rows="2" placeholder="مەھسۇلات مەنبەسى، تەجرىبىڭىز ياكى دۇكىنىڭىز ھەققىدە قىسقىچە مەلۇمات..."></textarea>
+            </div>
+
+            <!-- 📜 ۋاكالەتچىلىك كېلىشىمنامىسىنى ئوقۇش ۋە چۈشۈرۈش تاختىسى (Mandatory Contract Reading & Download) -->
+            <div id="agentContractTermsBox" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                <div style="font-weight: 800; font-size: 0.92rem; color: #92400e; display: flex; align-items: center; gap: 0.45rem;">
+                  <i class="fas fa-file-contract" style="color: #d97706; font-size: 1.1rem;"></i>
+                  <span>تەكلىماكان سۇپىسى ۋاكالەتچىلىك كېلىشىمنامىسى ۋە مەسئۇلىيەت بەلگىلىمىسى</span>
+                </div>
+                <span style="font-size: 0.74rem; font-weight: 800; background: #b45309; color: #ffffff; padding: 2px 8px; border-radius: 6px;">مەجبۇرىي ئوقۇش</span>
+              </div>
+
+              <div style="max-height: 140px; overflow-y: auto; background: rgba(255, 255, 255, 0.85); border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem; font-size: 0.8rem; color: #78350f; line-height: 1.6; margin-bottom: 0.6rem;">
+                <div><strong>1. ئاساسىي بەلگىلىمە:</strong> ۋاكالەتچىلەر تاۋارلىرىنى پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلالايدۇ، كۆپ تىل ھوقۇقى پەقەت ئالىي باشقۇرغۇچىنىڭ ئالاھىدە تەستىقى بىلەنلا بېرىلىدۇ. بارلىق تاۋارلار ئارقا سۇپىدا تەستىقتىن ئۆتكەندىن كېيىن ئېلان قىلىنىدۇ.</div>
+                <div style="margin-top: 0.4rem;"><strong>2. تاشقى ئالاقە چەكلىمىسى:</strong> تاۋار نامى ياكى چۈشەندۈرۈشىدە تېلېفون نومۇرى، WhatsApp، Telegram، ئۈندىدار ياكى تاشقى ئۇلىنىش يېزىش پۈتۈنلەي چەكلىنىدۇ. خىلاپلىق قىلغان ھەر بىر قېتىمدا قېتىم سانىچە كۈن (N قېتىم = N كۈن) بارلىق مەشغۇلات ئاپتوماتىك توختىتىلىدۇ.</div>
+                <div style="margin-top: 0.4rem;"><strong>3. سۈرەت 5 دەخلىسىز قائىدىسى:</strong> سۈرەتتە تاشقى ئېلان بولماسلىق، ئادەم ياكى مودېل رەسىمى بولماسلىق (پەقەت تاۋار ئۆزى بولۇش)، كەم دېگەندە 800×800 پىكسېل بولۇش، 2MB تىن ئاشماسلىق ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسى بېسىلىدۇ.</div>
+                <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border: 1.5px solid #f43f5e; border-radius: 6px; color: #9f1239; font-weight: 800;">
+                  ⚖️ <strong>مەھسۇلات مەسئۇلىيىتى ماددىسى:</strong> تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <!-- كېلىشىمنى تېلېفونغا چۈشۈرۈۋېلىش كۇنۇپكىسى -->
+                <button type="button" id="btnDownloadContractBeforeApply" style="background: #ffffff; border: 1.5px solid #d97706; color: #b45309; padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-file-download" style="color: #d97706;"></i> <span>📥 كېلىشىمنامىنى تېلېفونغا چۈشۈرۈۋېلىش</span>
+                </button>
+                <span style="font-size: 0.72rem; color: #92400e;">(تېلېفون ياكى كومپيۇتېرىڭىزدا ساقلىۋېلىڭ)</span>
+              </div>
+
+              <!-- قوشۇلۇش كۆزنەكچىسى -->
+              <div style="background: #ffffff; border: 1.5px solid #d97706; border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 0.75rem; display: flex; align-items: flex-start; gap: 0.6rem;">
+                <input type="checkbox" id="applyAgreeTerms" style="margin-top: 3px; width: 18px; height: 18px; accent-color: #d97706; cursor: pointer;" required>
+                <label for="applyAgreeTerms" style="font-size: 0.82rem; font-weight: 800; color: #92400e; cursor: pointer; line-height: 1.45; user-select: none;">
+                  مەن يۇقىرىقى بارلىق قائىدە-تۈزۈملەرنى، سۈرەت نىزامنامىسىنى ھەمدە <u>«تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ»</u> دېگەن مەسئۇلىيەت پۈتۈمىنى تولۇق ئوقۇدۇم، چۈشەندىم ۋە بارلىق قانۇنىي مەسئۇلىيەتنى ئۈستۈمگە ئېلىپ قوشۇلىمەن. <span style="color: red;">*</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-checkout" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800;">
+              <i class="fas fa-paper-plane"></i> ۋاكالەتچىلىك ئىلتىماسى ۋە ئىمزالانغان كېلىشىمنى تاپشۇرۇش
+            </button>
+          </form>
+
+          <div id="applyAgentSuccessBox" style="display: none; margin-top: 1rem; padding: 1.25rem; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; color: #065f46; text-align: center;">
+            <i class="fas fa-check-circle" style="font-size: 2.2rem; color: #10b981; margin-bottom: 0.5rem;"></i>
+            <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem;">ئىلتىماسىڭىز ۋە كېلىشىمىڭىز تاپشۇرۇلدى!</h4>
+            <p style="font-size: 0.88rem; margin: 0 0 0.75rem 0; line-height: 1.6;" id="applyAgentSuccessMsg">ئىلتىماسىڭىز ۋە رەقەملىك ئىمزالانغان كېلىشىمنامە سۇپا باشقۇرغۇچىسىغا يەتكۈزۈلدى.</p>
+            <button type="button" id="btnDownloadContractAfterApply" class="btn-checkout" style="background: #059669 !important; border-color: #059669 !important; font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-file-download"></i> <span>📥 ئىمزالانغان كېلىشىمنامىنى تېلېفونغا چۈشۈرۈش</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== 2-قۇلاق: تەستىقلانغان ۋاكالەتچى تاۋار سۇنۇش ==================== -->
+        <div id="agentSubmitPane" style="display: none;">
+          <!-- 1-قەدەم: ۋاكالەتچى كىملىكىنى دەلىللەش -->
+          <div id="agentVerifyWrap" style="background: var(--bg-surface); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;">
+            <h5 style="font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.95rem;">
+              <i class="fas fa-id-card" style="color: var(--primary-color);"></i> ۋاكالەتچى كىملىكىنى دەلىللەش:
+            </h5>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              سۇپىدا تەستىقلانغان ئېلخەت، تېلېفون نومۇرى ياكى ۋاكالەتچى كودىڭىز (AGT-xxx) نى كىرگۈزۈڭ.
+            </p>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="agentLoginInput" class="form-control number-latin" placeholder="ئېلخەت ياكى تېلېفون (مەسىلەن: 05551609999 ياكى alijan@teklimakan.com)...">
+              <button type="button" id="btnVerifyAgentLogin" class="btn-checkout" style="padding: 0.5rem 1.25rem; white-space: nowrap; font-weight: 700;">
+                <i class="fas fa-search"></i> دەلىللەش
+              </button>
+            </div>
+            <div id="agentVerifyMsg" style="margin-top: 0.75rem; font-size: 0.85rem; display: none;"></div>
+          </div>
+
+          <!-- 🚨 كۆزگە چېلىقىپ تۇرىدىغان خىلاپلىق ۋە توختىتىش ئاگاھلاندۇرۇش تاختىسى (Agent Violation & Suspension Alert Card) -->
+          <div id="agentViolationAlertCard" style="display: none; border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.12);">
+          </div>
+
+          <!-- مېنىڭ تاۋارلىرىم سەھىپىسى (تەھرىرلەش، باھا ۋە نام ئۆزگەرتىش) -->
+          <div id="agentMyProductsWrap" style="display: none; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+              <h5 style="font-weight: 800; margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; color: #1e3a8a;">
+                <i class="fas fa-boxes" style="color: #3b82f6;"></i> مېنىڭ تاۋارلىرىم (تەھرىرلەش / باھا ئۆزگەرتىش):
+              </h5>
+              <button type="button" id="btnAgentAddNewProductMode" class="btn-checkout" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 700; background: #10b981; border: none; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-plus-circle"></i> + يېڭى تاۋار قوشۇش
+              </button>
+            </div>
+            <div id="agentMyProductsList" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-surface); display: flex; flex-direction: column; gap: 0.5rem;">
+              <!-- مەھسۇلاتلار ھەرىكەتچان قوشۇلىدۇ -->
+            </div>
+          </div>
+
+          <!-- 2-قەدەم: تاۋار يوللاش ۋە تەھرىرلەش جەدۋىلى (دەلىللەنگەندىن كېيىن كۆرۈنىدۇ) -->
+          <form id="formAgentProductSubmit" style="display: none;">
+            <input type="hidden" id="agentSubmitVerifiedId">
+            <input type="hidden" id="agentEditProductId" value="">
+
+            <div id="agentEditStatusBanner" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1rem; color: #92400e; font-size: 0.84rem; justify-content: space-between; align-items: center;">
+              <div><i class="fas fa-edit"></i> <strong id="agentEditBannerTitle">مەھسۇلاتنى تەھرىرلەۋاتىسىز:</strong> باھا، نام ياكى زاپاسنى ئۆزگەرتىپ قايتا تەستىققا يوللاڭ.</div>
+              <button type="button" id="btnCancelEditProduct" style="background: #ffffff; border: 1px solid #d97706; color: #b45309; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">بىكار قىلىش</button>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">مەھسۇلات نامى <span style="color: red;">*</span></label>
+              <input type="text" id="agentProdName" class="form-control" placeholder="مەسىلەن: ئەلا سۈپەتلىك تۇرپان قارا كىشمىش قۇرۇق ئۈزۈمى" required>
+            </div>
+
+            <!-- 🌐 مەھسۇلات ئېلان قىلىش تىلى (Language Scope) -->
+            <div class="form-group" style="margin-bottom: 1rem; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0.75rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                <span><i class="fas fa-globe" style="color: var(--primary-color);"></i> تاۋارنى ئېلان قىلىش تىلى: <span style="color: red;">*</span></span>
+                <span id="agentScopeNoticeBadge" style="font-size: 0.75rem; font-weight: 800; background: #f1f5f9; color: #475569; padding: 2px 7px; border-radius: 6px;">🌙 پەقەت ئۇيغۇرچە</span>
+              </label>
+              <select id="agentProdLanguageScope" class="form-control" style="font-weight: 700; background: #ffffff;">
+                <option value="ug" selected>🌙 پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلىش</option>
+                <option value="all">🌍 بارلىق تىللاردا ئېلان قىلىش (ھەممە بەتتە كۆرۈنىدۇ)</option>
+                <option value="tr">🇹🇷 پەقەت تۈركچە بەتتە ئېلان قىلىش</option>
+                <option value="en">🇬🇧 پەقەت ئىنگلىزچە بەتتە ئېلان قىلىش</option>
+              </select>
+              <div id="agentScopeHelpText" style="font-size: 0.78rem; color: #64748b; margin-top: 0.35rem; line-height: 1.4;">
+                سۇپا بەلگىلىمىسى بويىچە، ئالىي باشقۇرغۇچى رۇخسەت بەرمىگەن ۋاكالەتچىلەر پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلالايدۇ.
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">سېتىش ماركىسى <span style="color: red;">*</span></label>
+                <select id="agentProdBrand" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">تۈرى <span style="color: red;">*</span></label>
+                <select id="agentProdCategory" class="form-control" required></select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">باھاسى (₺ / $) <span style="color: red;">*</span></label>
+                <input type="number" id="agentProdPrice" class="form-control number-latin" step="0.01" min="0" placeholder="150" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">ئەسلى باھاسى</label>
+                <input type="number" id="agentProdOldPrice" class="form-control number-latin" step="0.01" min="0" placeholder="180">
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">ئامبار زاپىسى <span style="color: red;">*</span></label>
+                <input type="number" id="agentProdStock" class="form-control number-latin" min="1" placeholder="50" required>
+              </div>
+            </div>
+
+            <!-- 📜 مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك دەخلىسىز قائىدە ۋە چەكلىمىلەر) -->
+            <div id="agentImgRegulationsCard" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 1rem; margin-bottom: 1.1rem; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                <div style="font-weight: 800; font-size: 0.92rem; color: #92400e; display: flex; align-items: center; gap: 0.45rem;">
+                  <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1.1rem;"></i>
+                  <span>مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك دەخلىسىز قائىدە)</span>
+                </div>
+                <span style="font-size: 0.74rem; font-weight: 800; background: #b45309; color: #ffffff; padding: 2px 8px; border-radius: 6px;">مەجبۇرىي ئۆلچەم</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 0.45rem; font-size: 0.8rem; color: #78350f; line-height: 1.45;">
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                  <strong>1️⃣ تاشقى ئالاقە ۋە ئېلانلارنى مۇتلەق چەكلەش:</strong> سۈرەتتە تېلېفون، WhatsApp، Telegram، ئۈندىدار، تاشقى URL، QR كود ۋە باشقا سۇپا تامغىلىرى (Trendyol, Taobao قاتارلىقلار) پۈتۈنلەي مەنئى قىلىنىدۇ.
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                  <strong>2️⃣ ئەخلاقىي ۋە مەدەنىيەت ئۆلچىمى:</strong> ئادەم يۈزى، مودېل، تەن، قول ۋە بارماق رەسىملىرىنى سېلىش قەتئىي مەنئى قىلىنىدۇ. پەقەت مەھسۇلاتنىڭ ساپ ئۆزىلا (تەكشى، مانېكېندا ياكى ئاسقۇچتا) بولۇشى شەرت.
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                  <strong>3️⃣ سۈرەت ئېنىقلىقى ۋە نىسبىتى:</strong> كەم دېگەندە 800×800 پىكسېل (كۆڭۈلدىكىدەك: 1080×1080)، 1:1 كۋادرات نىسبەت، سۈزۈك، خىرەلەشمىگەن بولۇشى كېرەك.
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                  <strong>4️⃣ تېخنىكىلىق فورمات ۋە سىغىم:</strong> پەقەت JPG, JPEG, PNG, WEBP فورماتى بولۇشى، سىغىمى 2MB تىن ئاشماسلىقى شەرت.
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                  <strong>5️⃣ ئاپتوماتىك سۇپا تامغىسى ۋە ئارقا سۇپا تەستىقى:</strong> بارلىق سۈرەتلەرگە «تەكلىماكان كاپالىتى ★ Teklimakan Quality» ئالتۇن تامغىسى ئاپتوماتىك بېسىلىدۇ ۋە ئالىي باشقۇرغۇچىنىڭ تەستىقىغا كىرىدۇ.
+                </div>
+              </div>
+
+              <!-- ⚖️ قانۇنىي مەسئۇلىيەت ۋە مەھسۇلات جاۋابكارلىقى ئەسكەرتمىسى -->
+              <div style="background: #fff1f2; border: 1.5px dashed #f43f5e; border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 0.65rem; color: #881337; font-size: 0.82rem; line-height: 1.55;">
+                <div style="font-weight: 800; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.2rem; color: #be123c;">
+                  <i class="fas fa-balance-scale"></i> <span>مەھسۇلات مەسئۇلىيىتى ۋە ئاقىۋەت بەلگىلىمىسى:</span>
+                </div>
+                <div>
+                  تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
+                </div>
+              </div>
+
+              <!-- قوشۇلۇش كۆزنەكچىسى -->
+              <div style="background: #ffffff; border: 1.5px solid #d97706; border-radius: 8px; padding: 0.6rem 0.75rem; margin-top: 0.6rem; display: flex; align-items: center; gap: 0.6rem;">
+                <input type="checkbox" id="agentAgreeImgRules" style="width: 18px; height: 18px; accent-color: #d97706; cursor: pointer;" required>
+                <label for="agentAgreeImgRules" style="font-size: 0.82rem; font-weight: 800; color: #92400e; cursor: pointer; user-select: none;">
+                  مەن يۇقىرىقى 5 دەخلىسىز قائىدە، سۈرەت نىزامنامىسى ۋە ۋاكالەتچى مەھسۇلات مەسئۇلىيىتى بەلگىلىمىسىنى تولۇق ئوقۇدۇم، چۈشەندىم ۋە ئەمەل قىلىشقا قوشۇلىمەن. <span style="color: red;">*</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- رەسىم ئەكىرىش ۋە تەكشۈرۈش -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
+                تاۋار رەسىمى <span style="color: red;">*</span> (ئاپتوماتىك سۇپا تامغىسى چۈشىدۇ)
+              </label>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <label for="agentFileInput" class="action-btn" style="background: #eff6ff !important; border-color: #3b82f6 !important; color: #1d4ed8 !important; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-weight: 700;">
+                  <i class="fas fa-camera"></i> <span>سۈرەت تاللاش (800×800+)</span>
+                </label>
+                <input type="file" id="agentFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+              </div>
+              <input type="text" id="agentProdImage" class="form-control number-latin" placeholder="ياكى سۈرەت تور ئۇلانمىسىنى كىرگۈزۈڭ: https://..." required>
+              
+              <!-- ئالدىن كۆرۈش قۇتىسى ۋە تېخنىكىلىق ئۇچۇرلار -->
+              <div id="agentImagePreviewWrap" style="display: none; margin-top: 0.6rem; padding: 0.75rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
+                  <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; background: #f8fafc; max-width: 160px; max-height: 160px;">
+                    <img id="agentImagePreviewImg" src="" alt="ئالدىن كۆرۈش" style="width: 100%; height: auto; display: block; object-fit: contain;">
+                  </div>
+                  <div style="flex: 1; min-width: 200px;">
+                    <div id="agentImageSecStatus" style="font-size: 0.85rem; font-weight: 800; margin-bottom: 0.45rem;"></div>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.78rem; color: #475569;">
+                      <div>📐 ئۆلچىمى: <strong id="agentImgDimBadge" style="color: #0f172a;">800×800 px</strong></div>
+                      <div>📁 تۈرى: <strong id="agentImgFormatBadge" style="color: #0f172a;">JPG / PNG</strong></div>
+                      <div>⚖️ سىغىمى: <strong id="agentImgSizeBadge" style="color: #0f172a;">--</strong></div>
+                      <div>🛡️ سۇپا تامغىسى: <span id="agentImgWatermarkBadge" style="color: #d97706; font-weight: 800;">★ «تەكلىماكان كاپالىتى» بېسىلدى</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">مەھسۇلات تەپسىلاتى</label>
+              <textarea id="agentProdDesc" class="form-control" rows="2" placeholder="مەھسۇلاتنىڭ ئالاھىدىلىكى، ئىشلىتىلىشى..."></textarea>
+            </div>
+
+            <button type="submit" id="btnAgentSubmitProductAction" class="btn-checkout" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800;">
+              <i class="fas fa-upload" id="agentSubmitBtnIcon"></i> <span id="agentSubmitBtnText">مەھسۇلاتنى تەستىققا يوللاش</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚫 تېلېفون نومۇرى ۋە تاشقى ئۇلىنىش رەت قىلىش / بىخەتەرلىك ئاگاھلاندۇرۇش ئېكرانى (Strict Phone & Link Violation Modal) -->
+  <div class="modal-backdrop" id="linkViolationModal" style="z-index: 10050;">
+    <div class="modal-content" style="max-width: 520px; border-radius: 20px; padding: 1.8rem; background: #ffffff; text-align: center; box-shadow: 0 25px 60px rgba(220, 38, 38, 0.25); border: 2px solid #ef4444;">
+      <div style="width: 76px; height: 76px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; border: 3px solid #fca5a5;">
+        <i class="fas fa-phone-slash" style="font-size: 2.3rem; color: #dc2626;"></i>
+      </div>
+      
+      <h3 style="color: #b91c1c; font-size: 1.35rem; font-weight: 900; margin-bottom: 0.75rem;" id="linkViolationModalTitle">
+        تېلېفون نومۇرى ياكى تاشقى ئۇلىنىش چەكلەندى!
+      </h3>
+      
+      <div style="background: #fef2f2; border: 1.5px dashed #f87171; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: right;">
+        <div style="font-size: 0.92rem; color: #991b1b; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
+          <span>بايقالغان ئورۇن: <strong id="linkViolationFieldText" style="color: #7f1d1d;">مەھسۇلات نامى ياكى مەزمۇنىدا</strong></span>
+        </div>
+        <div style="font-size: 0.86rem; color: #4b5563; margin-bottom: 0.4rem;" id="linkViolationLabel">بايقالغان نومۇر ياكى تاشقى ئۇلىنىش:</div>
+        <div style="background: #ffffff; border: 1px solid #fca5a5; border-radius: 8px; padding: 0.5rem 0.75rem; font-family: monospace; direction: ltr; font-size: 0.95rem; color: #b91c1c; font-weight: 800; word-break: break-all;" id="linkViolationCodeText">
+          -
+        </div>
+      </div>
+
+      <div style="color: #475569; font-size: 0.88rem; line-height: 1.65; margin-bottom: 1.5rem; text-align: justify;" id="linkViolationDescText">
+        ⚠️ <strong>ھۆرمەتلىك سېتىش ۋاكالەتچىسى:</strong> سۇپا بىخەتەرلىك بەلگىلىمىسى بويىچە، مەھسۇلات نامى، تەپسىلاتى، تۈرى ياكى سۈرىتى ئىچىگە <strong>ھەرقانداق تېلېفون نومۇرى، يانفون، شەخسىي ئالاقە ياكى تاشقى تور ئۇلانمىسى (WhatsApp, Telegram, WeChat قاتارلىقلار) يېزىش قەتئىي مەنئى قىلىنىدۇ!</strong> بۇ مەھسۇلات سىستېما تەرىپىدىن توسۇپ قېلىندى ھەمدە <strong>ئالىي باشقۇرغۇچىنىڭ تەكشۈرۈپ تەستىقلىشىغا يوللاندى</strong>.
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button type="button" id="btnCloseLinkViolationModal" class="btn-checkout" style="padding: 0.7rem 2rem; font-weight: 800; font-size: 0.95rem; background: #dc2626; border-radius: 10px;">
+          <i class="fas fa-check"></i> چۈشەندىم، ئۆزگەرتىمەن
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌐 تىل تاللاش كۆزنىكى (Language Switcher Modal with Kökbayraq) -->
+  <div class="modal-backdrop" id="languageModal">
+    <div class="modal-content" style="max-width: 380px; border-radius: 24px; padding: 0.5rem 0; overflow: hidden; background: #ffffff; color: #1e293b; box-shadow: 0 20px 45px rgba(0,0,0,0.3);">
+      
+      <!-- ئۇيغۇرچە تاللانمىسى (Kökbayraq) -->
+      <div class="lang-option-row active" data-lang="ug" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 0.9rem;">
+          <img src="images/flag_uyghur.png" alt="ئۇيغۇرچە" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
+          <span style="font-size: 1.18rem; font-weight: 800; color: #0f172a;">ئۇيغۇرچە</span>
+        </div>
+        <div class="lang-radio-indicator checked" id="radioLangUg"></div>
+      </div>
+
+      <div style="height: 1px; background: #e2e8f0; margin: 0 1.25rem;"></div>
+
+      <!-- تۈركچە تاللانمىسى -->
+      <div class="lang-option-row" data-lang="tr" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 0.9rem;">
+          <img src="images/flag_tr.png" alt="Türkçe" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
+          <span style="font-size: 1.18rem; font-weight: 700; color: #0f172a; font-family: sans-serif;">Türkçe</span>
+        </div>
+        <div class="lang-radio-indicator" id="radioLangTr"></div>
+      </div>
+
+      <div style="height: 1px; background: #e2e8f0; margin: 0 1.25rem;"></div>
+
+      <!-- ئىنگلىزچە تاللانمىسى -->
+      <div class="lang-option-row" data-lang="en" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 0.9rem;">
+          <img src="images/flag_en.png" alt="English" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
+          <span style="font-size: 1.18rem; font-weight: 700; color: #0f172a; font-family: sans-serif;">English</span>
+        </div>
+        <div class="lang-radio-indicator" id="radioLangEn"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ℹ️ تەكلىماكان سۇپىسى ۋە بىز ھەققىدە كۆزنىكى (About Us Modal) -->
+  <div class="modal-backdrop" id="aboutUsModal">
+    <div class="modal-content" style="max-width: 620px; border-radius: 20px; overflow: hidden; background: var(--bg-card); box-shadow: 0 25px 50px rgba(0,0,0,0.35);">
+      <!-- Header -->
+      <div class="modal-header" style="background: linear-gradient(135deg, #0f172a, #1e3a8a); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #eab308;">
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+          <img src="images/logo_circle.png" alt="تەكلىماكان لوگوسى" style="width: 46px; height: 46px; border-radius: 50%; border: 2px solid #eab308; object-fit: cover;">
+          <div>
+            <h4 class="modal-title" style="color: #ffffff; font-size: 1.2rem; font-weight: 800; margin: 0;">بىز ھەققىدە | تەكلىماكان سودا تورى</h4>
+            <span style="font-size: 0.8rem; color: #f59e0b; font-weight: 700;">سۈپەتلىك، گۈزەل، ئىشەنچلىك ئۇيغۇرچە تور سودا سۇپىڭىز</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-drawer btn-modal-close" id="btnCloseAboutUsModal" style="color: #ffffff; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="تاقاش">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body" style="padding: 1.5rem; line-height: 1.8; color: var(--text-main); font-size: 0.95rem; max-height: 75vh; overflow-y: auto;">
+        
+        <!-- 1. بىز ھەققىدە ۋە سۇپا ئومۇمىي تونۇشتۇرۇشى -->
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 14px; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem;">
+          <h5 style="font-size: 1.05rem; font-weight: 800; color: #1e3a8a; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> بىز ھەققىدە
+          </h5>
+          <p style="margin: 0; color: #1e293b; line-height: 1.8; font-size: 0.95rem;">
+            تەكلىماكان سودا تورى — ئەلا سۈپەتلىك ئۇيغۇر تىبابىتى شىپالىق دورىلىرى، گۈلقەنتلەر، تەبىئىي ساغلاملىق مەھسۇلاتلىرى، شىپالىق مايلار ۋە مىللىي مەدەنىيەت بايلىقلىرىنى دۇنيانىڭ ھەر قايسى جايلىرىدىكى خېرىدارلارغا ئەڭ قولايلىق، ئەرزان باھادا يەتكۈزۈپ بېرىدىغان زامانىۋىي تور سودا سۇپىسىدۇر.
+          </p>
+        </div>
+
+        <!-- 2. تىجارەت پرىنسىپىمىز ۋە ساپلىق كاپالىتى (Option 3) -->
+        <div style="background: #fdf2f8; border: 1.5px solid #fbcfe8; border-radius: 14px; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem;">
+          <h5 style="font-size: 1.05rem; font-weight: 800; color: #9d174d; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-shield-alt" style="color: #ec4899;"></i> تىجارەت پرىنسىپىمىز ۋە ساپلىق كاپالىتى
+          </h5>
+          <p style="margin: 0; color: #831843; line-height: 1.75; font-size: 0.9rem;">
+            سۇپىمىز سەمىمىيلىك، ساپلىق ۋە ئىشەنچنى ھەممىدىن ئەلا بىلىدۇ. سۇپىدا ساختا ياكى سۈپەتسىز مەھسۇلاتلارغا قەتئىي ئورۇن بېرىلمەيدۇ. ھەر بىر زاكاز خېرىدارغا ئەۋەتىلىشتىن بۇرۇن مەخسۇس سۈپەت تەكشۈرۈشىدىن ئۆتكۈزۈلۈپ، بىخەتەر قاچىلىنىدۇ. خېرىدارلارنىڭ شەخسىي مەخپىيەتلىكى ۋە ھەر بىر تىجارەت جەريانى سۇپىنىڭ تولۇق نازارىتى ۋە كاپالىتى ئاستىدا تاماملىنىدۇ.
+          </p>
+        </div>
+
+        <!-- 3. سۇپا ئەۋزەللىكلىرى (Option 1) -->
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem;">
+          <h5 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-gem" style="color: #f59e0b;"></i> سۇپىمىز تەمىنلەيدىغان ئاساسىي ئەۋزەللىكلەر
+          </h5>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-check-double" style="color: #10b981; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">100% ساپ سۈپەت</strong>
+                <small style="color: #64748b;">تەكشۈرۈلگەن ئەلا ئەسلى مەھسۇلات</small>
+              </div>
+            </div>
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-globe-americas" style="color: #0284c7; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">كۆپ تىللىق سۇپا</strong>
+                <small style="color: #64748b;">ئۇيغۇرچە، تۈركچە، ئىنگلىزچە</small>
+              </div>
+            </div>
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-shipping-fast" style="color: #2563eb; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">1000 TL ھەقسىز يەتكۈزۈش</strong>
+                <small style="color: #64748b;">تېز ھەم پۈتۈنلەي كاپالەتلىك</small>
+              </div>
+            </div>
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-credit-card" style="color: #6366f1; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">كۆپ خىل چىقىم</strong>
+                <small style="color: #64748b;">بانكا كارتىسى، يۆتكەش، WhatsApp</small>
+              </div>
+            </div>
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-undo-alt" style="color: #8b5cf6; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">7 كۈن قايتۇرۇش</strong>
+                <small style="color: #64748b;">خاتىرجەم سېتىۋېلىش كاپالىتى</small>
+              </div>
+            </div>
+            <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fas fa-handshake" style="color: #f59e0b; font-size: 1.25rem;"></i>
+              <div>
+                <strong style="font-size: 0.88rem; display: block; color: #0f172a;">ھەمكارلىق سۇپىسى</strong>
+                <small style="color: #64748b;">ۋاكالەتچى ۋە تەمىنلىگۈچىلەرگە پۇرسەت</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. سودىنى باشلاش كۇنۇپكىسى -->
+        <div style="text-align: center; padding-top: 0.5rem;">
+          <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1rem;">ھەر قانداق سۇئال، تەكلىپ ياكى تەلەپلىرىڭىز بولسا دەرھال بىز بىلەن ئالاقىلاشسىڭىز بولىدۇ.</p>
+          <button type="button" id="btnStartShoppingFromAbout" class="btn-checkout" style="padding: 0.75rem 2rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem;">
+            <i class="fas fa-shopping-bag"></i> <span>مال سېتىۋېلىشنى داۋاملاشتۇرۇش</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 لەيلىمە تېز ئالاقە كۇنۇپكىلىرى (Floating Quick Contact Buttons) -->
+  <div class="floating-contact-wrap">
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/905551609999" target="_blank" class="floating-contact-btn floating-btn-whatsapp" title="WhatsApp: 05551609999">
+      <i class="fab fa-whatsapp"></i>
+      <span class="floating-contact-tooltip">WhatsApp: 05551609999</span>
+    </a>
+  </div>
+
+  <!-- تۆۋەنكى پۇت قىسمى (Footer) -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-brand-header">
+            <img src="images/logo_circle.png" class="footer-brand-logo" alt="تەكلىماكان لوگوسى">
+            <div class="footer-brand-title-wrap">
+              <h3 class="footer-store-name">تەكلىماكان سودا تورى</h3>
+              <span class="footer-domain-badge number-latin">www.teklimakan.com</span>
+            </div>
+          </div>
+          <p id="footerBrandDesc" class="footer-brand-desc">تەكلىماكان تور سودا سۇپىسى سىزگە ئۆلچەملىك ئۇيغۇرچە يېزىق، ئەڭ يۇقىرى سۈپەتلىك تاللانغان تاۋارلار، ئەرزان باھا ۋە كۆپ تىللىق زامانىۋىي تور سودا سۇپىسى بىلەن تەمىنلەيدۇ.</p>
+          
+          <!-- ئىجتىمائىي تاراتقۇ ۋە سودىگەر بولۇش كۇنۇپكىلىرى -->
+          <div class="footer-brand-actions">
+            <a href="https://www.instagram.com/teklimakancom" id="footerBrandInstaLink" target="_blank" class="social-link-pill social-pill-instagram" title="Instagram بېتىمىز">
+              <i class="fab fa-instagram"></i>
+              <span id="footerBrandInstaText">@teklimakancom</span>
+            </a>
+            <button type="button" id="btnOpenMerchantApplyFooter" class="social-link-pill social-pill-merchant" title="تەكلىماكاندا سودىگەر بولۇش ئىلتىماسى">
+              <i class="fas fa-store"></i>
+              <span id="footerMerchantSpan">سودىگەر بولىمەن</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 📈 بازار پېرېۋوت باھاسى (نەق مەيدان دوللار ۋە ياۋرو كۇرسى) -->
+        <div class="footer-column footer-rates-column">
+          <div class="footer-rates-box">
+            <!-- دوللار (USD / TRY) -->
+            <div class="rate-card-item rate-card-usd">
+              <div class="rate-card-meta">
+                <span class="rate-currency-icon icon-usd">$</span>
+                <div>
+                  <div class="rate-currency-name" id="rateNameUsd">دوللار (USD)</div>
+                  <div class="rate-currency-sub number-latin">1 USD / TRY</div>
+                </div>
+              </div>
+              <div class="rate-card-val-wrap">
+                <div class="rate-val number-latin" id="liveRateUsd">₺--.--</div>
+                <div class="rate-trend-label" id="rateTrendUsd"><i class="fas fa-arrow-trend-up"></i> <span>بازار باھاسى</span></div>
+              </div>
+            </div>
+
+            <!-- ياۋرو (EUR / TRY) -->
+            <div class="rate-card-item rate-card-eur">
+              <div class="rate-card-meta">
+                <span class="rate-currency-icon icon-eur">€</span>
+                <div>
+                  <div class="rate-currency-name" id="rateNameEur">ياۋرو (EUR)</div>
+                  <div class="rate-currency-sub number-latin">1 EUR / TRY</div>
+                </div>
+              </div>
+              <div class="rate-card-val-wrap">
+                <div class="rate-val number-latin" id="liveRateEur">₺--.--</div>
+                <div class="rate-trend-label" id="rateTrendEur"><i class="fas fa-arrow-trend-up"></i> <span>بازار باھاسى</span></div>
+              </div>
+            </div>
+
+            <!-- يېڭىلىنىش ئەسكەرتىشى ۋە كۇنۇپكا -->
+            <div class="rate-footer-bar">
+              <span id="rateLastUpdatedText" class="rate-update-text" title="چېسلا ۋە ۋاقىت ئۇچۇرى" style="display:inline-flex; align-items:center; gap:0.45rem;">
+                <span style="display:inline-flex; align-items:center; gap:0.25rem;">
+                  <i class="fas fa-calendar-days" style="color: #38bdf8;"></i>
+                  <span class="number-latin" id="rateLiveDate" style="direction:ltr; font-weight:700; color:#e2e8f0;">2026-09-19</span>
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:0.25rem;">
+                  <i class="fas fa-clock" style="color: #38bdf8;"></i>
+                  <span class="number-latin" id="rateLiveTime" style="direction:ltr; font-weight:700; color:#cbd5e1;">--:--:--</span>
+                </span>
+              </span>
+              <button type="button" id="btnRefreshRates" class="btn-refresh-rates" title="دەرھال يېڭىلاش">
+                <i class="fas fa-rotate" id="rateRefreshIcon"></i> <span id="btnRefreshRatesText">يېڭىلاش</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-column">
+          <h4 id="footerCol2Title" onclick="window.openAboutUsModal && window.openAboutUsModal(event)" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; color: #ffffff;" title="سۇپا ھەققىدە تولۇق مەلۇماتنى ئېچىش">
+            <i class="fas fa-info-circle" style="color: #60a5fa;"></i>
+            <span>سۇپا ھەققىدە</span>
+            <i class="fas fa-chevron-left" style="font-size: 0.75rem; color: #60a5fa; margin-right: 0.2rem;"></i>
+          </h4>
+          <ul class="footer-links">
+            <li><a href="javascript:void(0)" id="fLinkAbout" onclick="window.openAboutUsModal && window.openAboutUsModal(event)" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-info-circle" style="color: #60a5fa;"></i> <span id="fLinkAboutSpan">بىز ھەققىدە</span></a></li>
+            <li><a href="javascript:void(0)" id="fLinkAgentPortal" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-handshake" style="color: #f59e0b;"></i> <span id="fLinkAgentPortalSpan">ۋاكالەتچى مەركىزى</span></a></li>
+            <li><a href="javascript:void(0)" id="fLinkTrackOrder" onclick="window.openTrackOrderModal && window.openTrackOrderModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-truck-fast" style="color: #38bdf8;"></i> <span id="fLinkTrackOrderSpan">كارگو ئەھۋالىنى تەكشۈرۈش</span></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 id="footerCol3Title">بىز بىلەن ئالاقىلىشىڭ</h4>
+          <div class="footer-contact-list">
+            <!-- تېلېفون -->
+            <div class="footer-contact-item">
+              <i class="fas fa-phone-alt" style="color: #60a5fa;"></i>
+              <span id="fLabelPhone" class="footer-contact-label">تېلېفون:</span>
+              <a href="tel:05551609999" class="footer-contact-link number-latin">0555 160 99 99</a>
+            </div>
+            <!-- WhatsApp -->
+            <div class="footer-contact-item">
+              <i class="fab fa-whatsapp" style="color: #34d399;"></i>
+              <span class="footer-contact-label number-latin">WhatsApp:</span>
+              <a href="https://wa.me/905551609999" target="_blank" class="footer-contact-link number-latin">0555 160 99 99</a>
+            </div>
+            <!-- Instagram -->
+            <div class="footer-contact-item">
+              <i class="fab fa-instagram" style="color: #f43f5e;"></i>
+              <span class="footer-contact-label number-latin">Instagram:</span>
+              <a href="https://www.instagram.com/teklimakancom" id="fContactInstaLink" target="_blank" class="footer-contact-link number-latin" style="color: #f43f5e;">@teklimakancom</a>
+            </div>
+            <!-- تور بېكەت -->
+            <div class="footer-contact-item">
+              <i class="fas fa-globe" style="color: var(--accent-color);"></i>
+              <span id="fLabelWebsite" class="footer-contact-label">تور بېكەت:</span>
+              <a href="https://www.teklimakan.com" class="footer-contact-link number-latin">www.teklimakan.com</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💳 چىقىم كارتىلىرى ۋە بىخەتەرلىك كاپالىتى (Trust & Payment Badges) -->
+      <div class="footer-trust-payment-bar">
+        <!-- 1. ئىشەنچ ۋە بىخەتەرلىك كاپالەتلىرى -->
+        <div class="footer-trust-badges">
+          <span class="trust-badge-item" title="256-Bit SSL كودلاشتۇرۇلغان يۇقىرى بىخەتەر چىقىم سىستېمىسى">
+            <i class="fas fa-lock" style="color: #10b981;"></i>
+            <span id="footerBadgeSsl">256-Bit SSL بىخەتەر چىقىم</span>
+          </span>
+          <span class="trust-badge-item" title="3D Secure قوش يۆنىلىشلىك كارتىنى دەلىللەش قوغدىنىشى">
+            <i class="fas fa-shield-alt" style="color: #60a5fa;"></i>
+            <span id="footerBadge3d">3D Secure كاپالىتى</span>
+          </span>
+          <span class="trust-badge-item" title="100% تەكشۈرۈلگەن ساپ ئەسلى مەھسۇلات">
+            <i class="fas fa-check-circle" style="color: #f59e0b;"></i>
+            <span id="footerBadgeOriginal">100% ئەسلى مال كاپالىتى</span>
+          </span>
+          <span class="trust-badge-item" title="7 كۈن ئىچىدە خاتىرجەم قايتۇرۇش ياكى ئالماشتۇرۇش">
+            <i class="fas fa-undo-alt" style="color: #a855f7;"></i>
+            <span id="footerBadgeReturn">7 كۈن قايتۇرۇش كاپالىتى</span>
+          </span>
+        </div>
+
+        <!-- 2. قوبۇل قىلىنىدىغان كارتا ۋە چىقىم سىنبەلگىلىرى -->
+        <div class="footer-payment-cards">
+          <span class="payment-card-pill" title="Visa Card">
+            <i class="fab fa-cc-visa" style="color: #1a1f71; font-size: 1.35rem;"></i>
+            <span class="card-brand-name">VISA</span>
+          </span>
+          <span class="payment-card-pill" title="MasterCard">
+            <i class="fab fa-cc-mastercard" style="color: #eb001b; font-size: 1.35rem;"></i>
+            <span class="card-brand-name">MasterCard</span>
+          </span>
+          <span class="payment-card-pill troy-pill" title="TROY - Türkiye'nin Yerli Kartı">
+            <span class="troy-logo-text">TROY</span>
+          </span>
+          <span class="payment-card-pill" title="بانكا يۆتكەش (Havale / EFT / FAST)">
+            <i class="fas fa-university" style="color: #0284c7; font-size: 1.05rem;"></i>
+            <span class="card-brand-name">Havale / EFT</span>
+          </span>
+          <span class="payment-card-pill" title="WhatsApp ئارقىلىق زاكاز چىقىمى ۋە كېلىشىش">
+            <i class="fab fa-whatsapp" style="color: #25d366; font-size: 1.25rem;"></i>
+            <span class="card-brand-name">WhatsApp</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div id="footerCopyright">بارلىق نەشر ھوقۇقى قوغدىلىدۇ <a href="admin.html" title="باشقۇرۇش" style="color: inherit; text-decoration: none; cursor: default;">©</a> 2026 تەكلىماكان سودا تورى.</div>
+      </div>
+    </div>
+  <!-- 🔐 لەيلىمە ئارقا سۇپا كۇنۇپكىسى (پەقەت سىزنىڭ ئۈسكۈنىڭىزدىلا كۆرۈنىدۇ) -->
+  <a href="admin.html" id="adminFloatingBadge" class="admin-floating-badge" style="display: none;" title="ئارقا سۇپىغا كىرىش (پەقەت سىزگىلا كۆرۈنىدۇ)">
+    <i class="fas fa-shield-alt"></i>
+    <span>ئارقا سۇپا</span>
+  </a>
+
+  <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
+  <script src="js/i18n.js?v=20260917_v3"></script>
+  <script src="js/store.js?v=20260917_v3"></script>
+  <script src="js/app.js?v=20260917_v3"></script>
+</body>
+</html>

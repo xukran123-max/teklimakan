@@ -1,0 +1,89 @@
+/* ================================================================
+   ئۇيغۇرچە ئۆلچەملىك فونىت ۋە خەت شەكىللەندۈرۈش قائىدىلىرى (Typography)
+   رەسىمدىكى سۈزۈك، نەپىس نەسخ خەت نۇسخىسى: Noto Naskh Arabic
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;600;700&display=swap');
+
+:root {
+  /* رەسىمدىكى خەت نۇسخىسى - Noto Naskh Arabic */
+  --font-uyghur-naskh: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+  --font-uyghur-modern: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+  --font-uyghur-traditional: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+  --font-primary: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+}
+
+/* فونىت تاللاش سىنىپلىرى (Font Classes) */
+body,
+body.font-modern,
+body.font-traditional {
+  --font-primary: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif !important;
+  font-size: 1.05rem;
+}
+
+/* ئاساسىي بەلگىلەرگە ئۆلچەملىك ئۇيغۇرچە RTL بېكىتىش ۋە خەتلەرنىڭ چوڭ-كىچىكلىكىنى بىرلىككە كەلتۈرۈش */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif !important;
+  line-height: 1.8;
+  letter-spacing: normal;
+  word-spacing: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* بارلىق كۇنۇپكا، كىرگۈزۈش بۆلەكلىرى، تاللىغۇچلاردا فونىتنىڭ پۈتۈنلەي بىرلىككە كېلىشى */
+button, input, select, textarea, optgroup {
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+}
+
+/* 🛡️ FontAwesome بەلگىلىرىنىڭ (Icons) سۇئال بەلگىسى [?] بولۇپ قالماسلىقىنى قەتئىي قوغداش */
+.fa, .fas, .far, .fal, .fad, .fab, 
+i[class*="fa-"], span[class*="fa-"],
+[class^="fa-"], [class*=" fa-"],
+.fa::before, .fas::before, .far::before, .fab::before,
+[class^="fa-"]::before, [class*=" fa-"]::before,
+[class^="fa-"]::after, [class*=" fa-"]::after {
+  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  text-rendering: auto !important;
+  line-height: 1 !important;
+}
+
+.fab, [class^="fab"], [class*=" fab"], .fab::before, [class^="fab"]::before, [class*=" fab"]::before {
+  font-family: "Font Awesome 6 Brands", "Font Awesome 5 Brands", "FontAwesome" !important;
+}
+
+button i, .btn-action-edit i, .btn-action-delete i, .action-btn i {
+  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
+}
+
+/* ئۇيغۇر تىلىدىكى ھەرپلەرنىڭ توغرا تۇتىشىشى ۋە زامانىۋى كۆرۈنۈشى */
+* {
+  font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
+}
+
+/* سانلار ۋە ئىنگلىزچە بەلگىلەر رەسىمدىكىدەك چىرايلىق چىقىشى */
+.number-latin {
+  direction: ltr;
+  display: inline-block;
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* تېما ۋە سەھىپە خەتلىرىنىڭ بىرلىككە كەلگەن فونىتى */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif !important;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}

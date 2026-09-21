@@ -1496,6 +1496,117 @@ class StoreManager {
       this.currentCurrency = 'TRY';
       localStorage.setItem(STORAGE_KEYS.CURRENCY, 'TRY');
     }
+
+    // ☁️ Supabase بۇلۇت ئامبىرى بىلەن ئارقا تەرەپتە ئاپتوماتىك قوش يۆنىلىشلىك ماسلىشىش
+    this.syncWithSupabase();
+  }
+
+  async syncWithSupabase() {
+    if (!window.TeklimakanSupabase) return;
+    try {
+      // 1. مەھسۇلاتلارنى بۇلۇتتىن يېڭىلاش
+      const remoteProducts = await window.TeklimakanSupabase.fetchProducts();
+      if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
+        const localProds = this.getProducts();
+        // بۇلۇتتىكى سۈپەتلىك پىششىقلانغان تاۋارلار بىلەن يەرلىكنى بىرىكتۈرۈش
+        const map = new Map();
+        localProds.forEach(p => map.set(p.id, p));
+        remoteProducts.forEach(rp => {
+          map.set(rp.id, {
+            id: rp.id,
+            name: rp.name,
+            brand: rp.brand,
+            category: rp.category,
+            price: Number(rp.price),
+            oldPrice: rp.old_price ? Number(rp.old_price) : null,
+            stock: rp.stock,
+            sales: rp.sales,
+            rating: Number(rp.rating),
+            ratingCount: rp.rating_count,
+            image: rp.image,
+            description: rp.description,
+            badge: rp.badge,
+            featured: rp.featured,
+            approvalStatus: rp.approval_status || 'تەستىقلاندى',
+            languageScope: rp.language_scope || 'all',
+            merchantBadge: rp.merchant_badge,
+            agentId: rp.agent_id,
+            agentName: rp.agent_name,
+            translations: rp.translations || {}
+          });
+        });
+        const merged = Array.from(map.values());
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
+        this.notifyDataChange('products');
+      }
+
+      // 2. زاكازلارنى بۇلۇتتىن يېڭىلاش
+      const remoteOrders = await window.TeklimakanSupabase.fetchOrders();
+      if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
+        const localOrders = this.getOrders();
+        const oMap = new Map();
+        localOrders.forEach(o => oMap.set(o.id, o));
+        remoteOrders.forEach(ro => {
+          oMap.set(ro.id, {
+            id: ro.id,
+            customer: ro.customer,
+            items: ro.items,
+            subtotalCny: Number(ro.subtotal_cny || 0),
+            discountCny: Number(ro.discount_cny || 0),
+            deliveryFeeCny: Number(ro.delivery_fee_cny || 0),
+            totalCny: Number(ro.total_cny || 0),
+            totalFormatted: ro.total_formatted,
+            paymentMethod: ro.payment_method,
+            status: ro.status,
+            date: ro.date,
+            notes: ro.notes,
+            language: ro.language,
+            currency: ro.currency,
+            trackingCarrier: ro.tracking_carrier,
+            trackingNumber: ro.tracking_number,
+            shippedAt: ro.shipped_at
+          });
+        });
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(Array.from(oMap.values())));
+        this.notifyDataChange('orders');
+      }
+
+      // 3. ۋاكالەتچىلەرنى بۇلۇتتىن يېڭىلاش
+      const remoteAgents = await window.TeklimakanSupabase.fetchAgents();
+      if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
+        const localAgents = this.getAgents('none');
+        const aMap = new Map();
+        localAgents.forEach(a => aMap.set(a.id, a));
+        remoteAgents.forEach(ra => {
+          aMap.set(ra.id, {
+            id: ra.id,
+            name: ra.name,
+            email: ra.email,
+            phone: ra.phone,
+            city: ra.city,
+            status: ra.status,
+            reputation: ra.reputation,
+            canPublishMultilingual: ra.can_publish_multilingual,
+            authorizedBrands: ra.authorized_brands || [],
+            registeredAt: ra.registered_at,
+            authExpireDate: ra.auth_expire_date,
+            certCode: ra.cert_code,
+            productsCount: ra.products_count,
+            salesTotal: Number(ra.sales_total || 0),
+            monthlySales: Number(ra.monthly_sales || 0),
+            monthlyOrders: Number(ra.monthly_orders || 0),
+            commissionRate: Number(ra.commission_rate || 15),
+            violationsCount: Number(ra.violations_count || 0),
+            suspendedUntil: ra.suspended_until,
+            suspensionReason: ra.suspension_reason || ''
+          });
+        });
+        localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(Array.from(aMap.values())));
+        this.notifyDataChange('agents');
+      }
+    } catch (e) {
+      console.warn('Supabase ماسلىشىش خاتالىقى:', e);
+    }
   }
 
   // ==================== پۇل بىرلىكى (Currency) ====================
@@ -1759,6 +1870,13 @@ class StoreManager {
     }
     localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
     this.notifyDataChange('agents');
+
+    // ☁️ Supabase بۇلۇتقا ۋاكالەتچىنى يۈكلەش
+    if (window.TeklimakanSupabase) {
+      const currentAgent = this.getAgentById(agentData.id) || agents[0];
+      if (currentAgent) window.TeklimakanSupabase.upsertAgent(currentAgent);
+    }
+
     return true;
   }
 
@@ -3060,6 +3178,12 @@ class StoreManager {
     }
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
     this.notifyDataChange('products');
+
+    // ☁️ Supabase بۇلۇتقا ماس قەدەمدە يوللاش
+    if (window.TeklimakanSupabase && savedProduct) {
+      window.TeklimakanSupabase.upsertProduct(savedProduct);
+    }
+
     return { 
       success: true, 
       product: savedProduct,
@@ -3751,6 +3875,11 @@ class StoreManager {
     this.clearCart();
     this.notifyDataChange('orders');
     this.notifyDataChange('products');
+
+    // ☁️ Supabase بۇلۇت ئامبىرىغا زاكازنى يۈكلەش
+    if (window.TeklimakanSupabase && newOrder) {
+      window.TeklimakanSupabase.insertOrder(newOrder);
+    }
 
     return { success: true, order: newOrder };
   }

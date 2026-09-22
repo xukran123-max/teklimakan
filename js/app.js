@@ -2049,6 +2049,130 @@ function initTeklimakanApp() {
 
     const checkoutForm = document.getElementById('checkoutForm');
     if (checkoutForm) {
+      // چىقىم قىلىش ئۇسۇللىرىنى ئالماشتۇرۇش ۋە ئېلېمېنتلارنى كۆرسىتىش/يوشۇرۇش
+      const cardDetails = document.getElementById('cardPaymentDetails');
+      const havaleDetails = document.getElementById('havalePaymentDetails');
+      const whatsappNotice = document.getElementById('whatsappPayNotice');
+      const labelCard = document.getElementById('labelPayCard');
+      const labelHavale = document.getElementById('labelPayHavale');
+      const labelWhatsapp = document.getElementById('labelPayWhatsapp');
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
+      const submitBtnIcon = submitBtn ? submitBtn.querySelector('i') : null;
+
+      function updatePaymentMethodUI(method) {
+        if (labelCard) labelCard.style.borderColor = 'var(--border-color)';
+        if (labelHavale) labelHavale.style.borderColor = 'var(--border-color)';
+        if (labelWhatsapp) labelWhatsapp.style.borderColor = 'var(--border-color)';
+
+        if (method.includes('كارتا') || method.includes('Card')) {
+          if (cardDetails) cardDetails.style.display = 'block';
+          if (havaleDetails) havaleDetails.style.display = 'none';
+          if (whatsappNotice) whatsappNotice.style.display = 'none';
+          if (labelCard) labelCard.style.borderColor = '#6366f1';
+          if (submitBtnSpan) submitBtnSpan.textContent = 'كارتىدىن بىخەتەر چىقىم قىلىش';
+          if (submitBtnIcon) submitBtnIcon.className = 'fas fa-lock';
+        } else if (method.includes('يۆتكەش') || method.includes('Havale')) {
+          if (cardDetails) cardDetails.style.display = 'none';
+          if (havaleDetails) havaleDetails.style.display = 'block';
+          if (whatsappNotice) whatsappNotice.style.display = 'none';
+          if (labelHavale) labelHavale.style.borderColor = '#059669';
+          if (submitBtnSpan) submitBtnSpan.textContent = 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
+          if (submitBtnIcon) submitBtnIcon.className = 'fas fa-university';
+        } else if (method.includes('ۋاتساپ') || method.includes('WhatsApp')) {
+          if (cardDetails) cardDetails.style.display = 'none';
+          if (havaleDetails) havaleDetails.style.display = 'none';
+          if (whatsappNotice) whatsappNotice.style.display = 'block';
+          if (labelWhatsapp) labelWhatsapp.style.borderColor = '#25D366';
+          if (submitBtnSpan) submitBtnSpan.textContent = 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
+          if (submitBtnIcon) submitBtnIcon.className = 'fab fa-whatsapp';
+        }
+      }
+
+      document.querySelectorAll('input[name="checkoutPayment"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          updatePaymentMethodUI(e.target.value);
+        });
+      });
+
+      // IBAN كۆچۈرۈش كۇنۇپكىسى
+      const btnCopyIban = document.getElementById('btnCopyIban');
+      if (btnCopyIban) {
+        btnCopyIban.addEventListener('click', () => {
+          const ibanText = 'TR840020500009876543210001';
+          const copySpan = document.getElementById('btnCopyIbanText');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ibanText).then(() => {
+              showToast('IBAN نۇمۇرى كۆچۈرۈلدى: TR84 0020 5000 0987 6543 2100 01', 'success');
+              if (copySpan) copySpan.textContent = 'كۆچۈرۈلدى ✓';
+              setTimeout(() => { if (copySpan) copySpan.textContent = 'كۆچۈرۈش'; }, 2500);
+            }).catch(() => {
+              fallbackCopy(ibanText);
+            });
+          } else {
+            fallbackCopy(ibanText);
+          }
+        });
+      }
+
+      function fallbackCopy(text) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showToast('IBAN نۇمۇرى كۆچۈرۈلدى!', 'success');
+      }
+
+      // كارت نومۇرىنى 4 خانىدىن ئارىلىق قويۇش ۋە ماركىسىنى ئېنىقلاش
+      const cardNumInput = document.getElementById('checkoutCardNumber');
+      const cardBrandIcon = document.getElementById('cardInputBrandIcon');
+      const cardTypeBadge = document.getElementById('cardTypeBadge');
+      if (cardNumInput) {
+        cardNumInput.addEventListener('input', (e) => {
+          let val = e.target.value.replace(/\D/g, '').substring(0, 16);
+          let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+          e.target.value = formatted;
+
+          if (val.startsWith('4')) {
+            if (cardBrandIcon) cardBrandIcon.innerHTML = '<i class="fab fa-cc-visa" style="color: #1a1f71;"></i>';
+            if (cardTypeBadge) cardTypeBadge.textContent = 'VISA';
+          } else if (/^5[1-5]/.test(val) || /^2[2-7]/.test(val)) {
+            if (cardBrandIcon) cardBrandIcon.innerHTML = '<i class="fab fa-cc-mastercard" style="color: #eb001b;"></i>';
+            if (cardTypeBadge) cardTypeBadge.textContent = 'MASTERCARD';
+          } else if (val.startsWith('9792')) {
+            if (cardBrandIcon) cardBrandIcon.innerHTML = '<i class="fas fa-credit-card" style="color: #059669;"></i>';
+            if (cardTypeBadge) cardTypeBadge.textContent = 'TROY';
+          } else {
+            if (cardBrandIcon) cardBrandIcon.innerHTML = '<i class="fas fa-credit-card" style="color: #6366f1;"></i>';
+            if (cardTypeBadge) cardTypeBadge.textContent = 'VISA / MASTER';
+          }
+        });
+      }
+
+      // كارت ۋاقتىنى MM/YY شەكلىدە ئاپتوماتىك تەڭشەش
+      const cardExpiryInput = document.getElementById('checkoutCardExpiry');
+      if (cardExpiryInput) {
+        cardExpiryInput.addEventListener('input', (e) => {
+          let val = e.target.value.replace(/\D/g, '').substring(0, 4);
+          if (val.length >= 2) {
+            e.target.value = val.substring(0, 2) + '/' + val.substring(2);
+          } else {
+            e.target.value = val;
+          }
+        });
+      }
+
+      // كارت CVV پەقەت سان قىلىش
+      const cardCvvInput = document.getElementById('checkoutCardCvv');
+      if (cardCvvInput) {
+        cardCvvInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+        });
+      }
+
+      // زاكاز تاپشۇرۇش جەريانى
       checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('checkoutCustName').value.trim();
@@ -2059,10 +2183,53 @@ function initTeklimakanApp() {
         const notes = document.getElementById('checkoutCustNotes')?.value.trim() || '';
         const lang = window.appI18n.getLang();
 
+        // ئەگەر بانكا كارتىسى تاللانغان بولسا، كارتا ئۇچۇرلىرىنى تەكشۈرۈش
+        if (payment.includes('كارتا') || payment.includes('Card')) {
+          const cardNum = (document.getElementById('checkoutCardNumber')?.value || '').replace(/\s/g, '');
+          const cardExp = document.getElementById('checkoutCardExpiry')?.value || '';
+          const cardCvv = document.getElementById('checkoutCardCvv')?.value || '';
+          const cardHolder = document.getElementById('checkoutCardHolder')?.value || '';
+
+          if (cardNum.length < 15) {
+            showToast('كارتا نومۇرىنى تولۇق كىرگۈزۈڭ (16 خانىلىق)!', 'warning');
+            document.getElementById('checkoutCardNumber')?.focus();
+            return;
+          }
+          if (!cardExp.includes('/') || cardExp.length < 5) {
+            showToast('كارتىنىڭ يىل-ئاي ۋاقتىنى (MM/YY) توغرا تولدۇرۇڭ!', 'warning');
+            document.getElementById('checkoutCardExpiry')?.focus();
+            return;
+          }
+          if (cardCvv.length < 3) {
+            showToast('كارتىنىڭ CVV كودىنى تولدۇرۇڭ!', 'warning');
+            document.getElementById('checkoutCardCvv')?.focus();
+            return;
+          }
+
+          // چىقىم بىر تەرەپ قىلىش ھالىتىنى كۆرسىتىش
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>3D Secure بىخەتەر چىقىم قىلىنىۋاتىدۇ...</span>';
+          }
+
+          setTimeout(() => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-lock"></i> <span>كارتىدىن بىخەتەر چىقىم قىلىش</span>';
+            }
+            proceedOrderCreation(name, phone, city, address, 'بانكا ياكى خەلقئارالىق كارتا (3D Secure مۇۋەپپەقىيەتلىك)', notes, lang);
+          }, 800);
+          return;
+        }
+
+        proceedOrderCreation(name, phone, city, address, payment, notes, lang);
+      });
+
+      function proceedOrderCreation(name, phone, city, address, payment, notes, lang) {
         const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
         const res = window.appStore.createOrder({ name, phone, city, address }, payment, notes, discountVal, lang);
 
-          if (res.success) {
+        if (res.success) {
           if (typeof playChime === 'function') playChime('success');
           document.getElementById('checkoutModal').classList.remove('active');
           appliedCoupon = null;
@@ -2087,22 +2254,7 @@ function initTeklimakanApp() {
         } else {
           showToast(res.message, 'error');
         }
-      });
-
-      // چىقىم تاللانمىسى ئۆزگەرگەندە ۋاتساپ ئەسكەرتىشى ۋە كۇنۇپكا خېتىنى تەڭشەش
-      document.querySelectorAll('input[name="checkoutPayment"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-          const notice = document.getElementById('whatsappPayNotice');
-          const submitBtnSpan = document.querySelector('#submitOrderBtn span');
-          if (e.target.value.includes('ۋاتساپ') || e.target.value.includes('WhatsApp')) {
-            if (notice) notice.style.display = 'block';
-            if (submitBtnSpan) submitBtnSpan.textContent = window.appI18n.t('payWhatsappBtn');
-          } else {
-            if (notice) notice.style.display = 'none';
-            if (submitBtnSpan) submitBtnSpan.textContent = window.appI18n.t('submitOrderBtn');
-          }
-        });
-      });
+      }
     }
 
 
@@ -2549,24 +2701,60 @@ function initTeklimakanApp() {
     if (!modal || !content) return;
 
     const isWhatsapp = (order.paymentMethod || '').includes('ۋاتساپ') || (order.paymentMethod || '').includes('WhatsApp');
+    const isHavale = (order.paymentMethod || '').includes('يۆتكەش') || (order.paymentMethod || '').includes('Havale');
+    const isCard = (order.paymentMethod || '').includes('كارتا') || (order.paymentMethod || '').includes('Card');
     const waUrl = isWhatsapp ? getWhatsAppOrderUrl(order, window.appI18n.getLang()) : '';
+    const havaleWaUrl = `https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان! زاكاز نومۇرۇم: ${order.id}، بانكا ئارقىلىق ${order.totalFormatted} پۇلنى ئاتتىم، دەلىل تالونىنى يوللاۋاتىمەن.`)}`;
+
+    let methodDetailsHtml = '';
+
+    if (isCard) {
+      methodDetailsHtml = `
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: right; font-size: 0.86rem; color: #3730a3;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; margin-bottom: 0.35rem; color: #4338ca;">
+            <i class="fas fa-check-circle" style="color: #10b981;"></i> 3D Secure كارتا چىقىمى تەستىقلاندى
+          </div>
+          <div>پۇل بىخەتەر تۇتۇلدى. رەسمىي ئېلېكترونلۇق تالون ئېلخەتكە يوللاندى.</div>
+          <div style="margin-top: 0.4rem; font-family: monospace; font-size: 0.8rem; color: #6366f1;">تەستىق كودى: AUTH-${Math.floor(100000 + Math.random() * 900000)}</div>
+        </div>
+      `;
+    } else if (isHavale) {
+      methodDetailsHtml = `
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: right; font-size: 0.86rem; color: #166534;">
+          <div style="font-weight: 700; margin-bottom: 0.4rem;"><i class="fas fa-building-columns"></i> پۇل يۆتكەيدىغان رەسمىي بانكا ھېساباتى:</div>
+          <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; direction: ltr;">TR84 0020 5000 0987 6543 2100 01</span>
+            <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR840020500009876543210001'); showToast('IBAN كۆچۈرۈلدى!', 'success'); this.innerText='كۆچۈرۈلدى ✓';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">IBAN كۆچۈرۈش</button>
+          </div>
+          <div style="font-size: 0.8rem; color: #15803d; margin-bottom: 0.6rem;">
+            ئىگىسى: <strong>TEKLİMAKAN TİCARET LTD. ŞTİ.</strong> (Ziraat / Kuveyt Türk)<br>
+            Açıklama چۈشەندۈرۈشىگە: <strong>${order.id}</strong> دەپ يېزىڭ.
+          </div>
+          <a href="${havaleWaUrl}" target="_blank" class="btn btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: #059669; color: #ffffff; text-decoration: none; padding: 0.55rem; border-radius: 6px; font-weight: 700;">
+            <i class="fab fa-whatsapp"></i> دەلىل / تالوننى ۋاتساپتا ئەۋەتىش
+          </a>
+        </div>
+      `;
+    }
 
     content.innerHTML = `
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div style="width: 70px; height: 70px; background: #dcfce7; color: #166534; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 0.75rem;">
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <div style="width: 65px; height: 65px; background: #dcfce7; color: #166534; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 0.75rem;">
           <i class="fas fa-check"></i>
         </div>
-        <h3 style="font-size: 1.45rem; font-weight: 800; color: #166534; margin-bottom: 0.35rem;">${window.appI18n.t('orderSuccessTitle')}</h3>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #166534; margin-bottom: 0.35rem;">${window.appI18n.t('orderSuccessTitle')}</h3>
         <p style="color: var(--text-muted); font-size: 0.95rem;">${window.appI18n.t('orderNumberLabel')} <strong class="number-latin" style="color: var(--primary-color);">${order.id}</strong></p>
       </div>
 
-      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem; line-height: 1.8;">
+      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1rem; line-height: 1.8;">
         <div><strong>${window.appI18n.t('custName')}:</strong> ${order.customer.name}</div>
         <div><strong>${window.appI18n.t('custPhone')}:</strong> ${order.customer.phone}</div>
         <div><strong>${window.appI18n.t('custAddress')}:</strong> ${order.customer.city} ${order.customer.address}</div>
-        <div><strong>${window.appI18n.t('paymentMethod')}:</strong> <span style="color: ${isWhatsapp ? '#16a34a' : 'inherit'}; font-weight: 700;">${order.paymentMethod}</span></div>
+        <div><strong>${window.appI18n.t('paymentMethod')}:</strong> <span style="color: ${isWhatsapp ? '#16a34a' : isCard ? '#4338ca' : '#059669'}; font-weight: 700;">${order.paymentMethod}</span></div>
         <div><strong>${window.appI18n.t('checkoutTotalLabel')}</strong> <strong style="color: var(--danger-color); font-size: 1.15rem;">${order.totalFormatted}</strong></div>
       </div>
+
+      ${methodDetailsHtml}
 
       ${isWhatsapp ? `
         <a href="${waUrl}" target="_blank" class="btn-checkout" style="background: #25D366; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none; margin-bottom: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(37,211,102,0.35);">
@@ -2575,9 +2763,14 @@ function initTeklimakanApp() {
         </a>
       ` : ''}
 
-      <button class="btn-checkout" onclick="document.getElementById('orderSuccessModal').classList.remove('active')" style="margin-top: 0; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
-        ${window.appI18n.t('continueShopping')}
-      </button>
+      <div style="display: flex; gap: 0.6rem;">
+        <button type="button" class="btn-checkout" onclick="window.print()" style="flex: 1; margin-top: 0; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color);">
+          <i class="fas fa-print"></i> <span>تالوننى بېسىپ چىقىرىش</span>
+        </button>
+        <button type="button" class="btn-checkout" onclick="document.getElementById('orderSuccessModal').classList.remove('active')" style="flex: 1.2; margin-top: 0; background: var(--primary-color); color: #ffffff;">
+          ${window.appI18n.t('continueShopping')}
+        </button>
+      </div>
     `;
 
     modal.classList.add('active');

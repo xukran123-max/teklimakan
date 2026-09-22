@@ -1,0 +1,150 @@
+﻿{
+  "name": "Teklimakan Uyghur Medicine Automation (Gemini 3.1 Flash-Lite + Telegram)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-12h",
+      "name": "ھەر 12 سائەتتە قوزغىتىش (Schedule 12H)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const sources = [\n  { name: 'خەلقئارا ئۇيغۇر تىبابەت تەتقىقات تورى', url: 'https://uyghurtibabet.com', type: 'rss' },\n  { name: 'ئۇيغۇر شىپالىق خام دورىلار قامۇسى', url: 'https://tebiiydorilar.com', type: 'web' },\n  { name: 'تەكلىماكان ئۇيغۇر تىبابەت گۈلقەنتلەر سەھىپىسى', url: 'https://teklimakan.vercel.app', type: 'web' },\n  { name: 'قەشقەر تىبابىتى ۋە قەدىمكى رېتسىپلار', url: 'https://herbalkashgar.org', type: 'web' },\n  { name: 'ئۇيغۇر مىجەز تەڭشەش ۋە ساغلاملىق مەركىزى', url: 'https://saglamliq.org', type: 'rss' },\n  { name: 'خوتەن تەبىئىي دورا ئۆسۈملۈكلەر بازىسى', url: 'https://hotantibbiyiti.com', type: 'web' },\n  { name: 'ئىلى قاشتېشى كېسەللىكنىڭ ئالدىنى ئېلىش مەنبەسى', url: 'https://dohtur.biz/tibabet', type: 'web' },\n  { name: 'ئۇيغۇر تېببىي ساقلىقنى ساقلاش قانىلى', url: 'https://t.me/uyghurtibabet', type: 'telegram' },\n  { name: 'تەبىئىي ئوزۇقلۇق ۋە تېبابەت بىلىملىرى', url: 'https://saglam-yashash.net', type: 'web' },\n  { name: 'ئۇيغۇرچە شىپالىق ئۆسۈملۈكلەر توپلىمى', url: 'https://uyghurherbals.com', type: 'rss' }\n];\n\nconst safeHerbalImages = [\n  'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1514733670139-4d87a1941d55?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1471193945509-9ad0617afabf?auto=format&fit=crop&w=1000&q=80'\n];\n\nconst uyghurMedicineArticles = [\n  {\n    title: 'پىننە گۈلقەنتىنىڭ مېڭە ۋە ئاشقازاننى كۈچەيتىش رولى',\n    category: 'خام دورىلار',\n    sourceName: 'خەلقئارا ئۇيغۇر تىبابەت تەتقىقات تورى',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'پىننە گۈلقەنتى ئۇيغۇر تىبابىتىدە مىڭ يىلدىن بېرى ئىشلىتىلىپ كېلىۋاتقان ئەڭ ئەتىۋارلىق دورىلارنىڭ بىرى. تەبىئىتى ئىككىنچى دەرىجىدە قۇرۇق ئىسسىق بولۇپ، ئاشقازاننىڭ ھەزىم قىلىش ئىقتىدارىنى ئاشۇرىدۇ، كۆڭۈل ئېلىشىش ۋە ئاشقازان سوغۇقىنى يوقىتىدۇ. نېرۋىنى تىنچلاندۇرۇپ، ئۇيقۇسىزلىق ۋە مېڭە چارچاشقا پايدىلىق.',\n    imageUrl: safeHerbalImages[0]\n  },\n  {\n    title: 'كۈزلۈك ساقلىقنى ساقلاشتا مىزاج تەڭشەشنىڭ ئەھمىيىتى',\n    category: 'ساقلىقنى ساقلاش',\n    sourceName: 'ئۇيغۇر مىجەز تەڭشەش ۋە ساغلاملىق مەركىزى',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'ئۇيغۇر تىبابىتىدە پەسىل ئالمىشىش مەزگىلىدە بەدەن خىلىتلىرىنىڭ تەڭپۇڭلۇقىنى ساقلاش ئىنتايىن مۇھىم. كۈز كىرگەندە قۇرۇقلۇق ۋە سوغۇقلۇق ئاشىدىغان بولغاچقا، گۈلقەنت، تىرىياق، چىلان ۋە قۇرۇق ئۈزۈم مۇرابباسى ئىستېمال قىلىش بەدەن ھۆللۈكىنى ساقلاپ، يۆتەلنىڭ ئالدىنى ئالىدۇ.',\n    imageUrl: safeHerbalImages[1]\n  },\n  {\n    title: 'يۈرەك ۋە قان تومۇر كېسەللىكلىرىنىڭ ئالدىنى ئېلىش ئۇسۇللىرى',\n    category: 'كېسەللىكنىڭ ئالدىنى ئېلىش',\n    sourceName: 'ئىلى قاشتېشى كېسەللىكنىڭ ئالدىنى ئېلىش مەنبەسى',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'ئۇيغۇر تىبابەت نەزەرىيەسىگە كۆرە، قارا سەۋدە ۋە زەپەر يۈرەك مۇسكۇلىنىڭ خىزمىتىنى ياخشىلايدۇ. سەھەردە ئاچ قورساققا بىر چاي قوشۇق قارا سەۋدە مېيىنى سۈت ياكى سۇ بىلەن ئىچىپ بېرىش قان بېسىمىنى تەڭشەپ، قان ئۇيۇپ قېلىشنىڭ ئالدىنى ئالىدۇ.',\n    imageUrl: safeHerbalImages[4]\n  },\n  {\n    title: 'چۈچۈكبۇيا يىلتىزىنىڭ بەلغەم بوشىتىش ۋە باكتېرىيەگە قارشى شىپاسى',\n    category: 'خام دورىلار',\n    sourceName: 'ئۇيغۇر شىپالىق خام دورىلار قامۇسى',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'چۈچۈكبۇيا تەبىئىتى مۆتىدىل، تەمى تاتلىق شىپالىق ئۆسۈملۈك. كۆكرەك پەردە ياللۇغى، زىققا ۋە قۇرۇق يۆتەلگە ئىنتايىن پايدىلىق. چۈچۈكبۇيانى قايناقسۇدا دەملەپ ئىچكەندە گالدىكى قۇرۇقلۇقنى تۈگىتىدۇ.',\n    imageUrl: safeHerbalImages[7]\n  },\n  {\n    title: 'ئەتىگەنلىك ئوزۇقلىنىش ۋە بەدەن ئىممۇنىتېت كۈچىنى ئاشۇرۇش',\n    category: 'ساقلىقنى ساقلاش',\n    sourceName: 'تەبىئىي ئوزۇقلۇق ۋە تېبابەت بىلىملىرى',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'ئەتىگەنكى قورساقنى تاتلىق تەبىئىي چايلار ۋە قۇرۇق يەل-يېمىشلەر (ياڭاق، بادام، ئۆرۈك قېقى) بىلەن غىزالاندۇرۇش مېڭە ئېنېرگىيەسىنى ئاشۇرىدۇ. سوغۇق سۇ ۋە ياغلىق تاماقلاردىن پەرھىز تۇتۇش ھەزىمنى قوغدايدۇ.',\n    imageUrl: safeHerbalImages[6]\n  },\n  {\n    title: 'ئاشقازان ياللۇغىنىڭ تەبىئىي ئالدىنى ئېلىش چارىلىرى',\n    category: 'كېسەللىكنىڭ ئالدىنى ئېلىش',\n    sourceName: 'قەشقەر تىبابىتى ۋە قەدىمكى رېتسىپلار',\n    sourceUrl: 'https://teklimakan.vercel.app',\n    content: 'ئاشقازان كېسەللىكلىرىنىڭ ئالدىنى ئېلىشتا تاماقنى قەرەللىك يېيىش، غىزانى ياخشى چايناش ۋە زەرچىۋە (كۇركۇما) قوشۇلغان يېمەكلىكلەرنى ئىستېمال قىلىش كېرەك. زەرچىۋە ئاشقازان شىللىق پەردىسىنى قوغدايدۇ.',\n    imageUrl: safeHerbalImages[2]\n  }\n];\n\nconst index = Math.floor(Date.now() / (12 * 60 * 60 * 1000)) % uyghurMedicineArticles.length;\nconst chosen = uyghurMedicineArticles[index] || uyghurMedicineArticles[0];\n\nreturn [{\n  json: {\n    rawTitle: chosen.title,\n    rawContent: chosen.content,\n    rawCategory: chosen.category,\n    sourceName: chosen.sourceName,\n    sourceUrl: chosen.sourceUrl,\n    imageUrl: chosen.imageUrl,\n    sourcesList: sources\n  }\n}];"
+      },
+      "id": "collect-sources-node",
+      "name": "10 مەنبە ۋە دورا مەزمۇنى يىغىش (Source Collector)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst bannedKeywords = [\n  'ناخشا', 'مۇزىكا', 'كىنو', 'تىياتىر', 'چولپان', 'مودېل', 'ئارتىس', 'ئارتىست',\n  'مودىل', 'ئۇسسۇل', 'داڭلىق چولپان', 'فىلىم', 'song', 'music', 'movie', 'actor', 'model'\n];\n\nconst textToCheck = (item.rawTitle + ' ' + item.rawContent).toLowerCase();\nfor (const bad of bannedKeywords) {\n  if (textToCheck.includes(bad)) {\n    return [];\n  }\n}\n\nconst safeHerbalBackup = [\n  'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=1000&q=80',\n  'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80'\n];\n\nlet finalImg = item.imageUrl;\nif (!finalImg || finalImg.includes('person') || finalImg.includes('face') || finalImg.includes('girl') || finalImg.includes('human')) {\n  finalImg = safeHerbalBackup[Math.floor(Math.random() * safeHerbalBackup.length)];\n}\n\nreturn [{\n  json: {\n    ...item,\n    verifiedImageUrl: finalImg,\n    isFilterPassed: true\n  }\n}];"
+      },
+      "id": "filter-content-node",
+      "name": "سۈزگۈچ: سەلبىي مەزمۇن ۋە ئىنسان سۈرەتلىرىنى چىقىرىۋېتىش (Negative Filter)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY || 'AIzaSyDemoKeyReplaceWithYours' }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"سەن ئۇيغۇر تىبابىتى بويىچە يۇقىرى دەرىجىلىك ھەكىم. مەزمۇننى ئۆلچەملىك ئەدەبىي ئۇيغۇرچىدا تەھرىرلە. سەھىپىنى پەقەت «خام دورىلار»، «ساقلىقنى ساقلاش»، ياكى «كېسەللىكنىڭ ئالدىنى ئېلىش» دەپ ئايرى. JSON شەكلىدە چىقار:\\n{\\n  \\\"category\\\": \\\"خام دورىلار\\\",\\n  \\\"title\\\": \\\"پىننە گۈلقەنتىنىڭ مېڭە ۋە ئاشقازانغا پايدىسى\\\",\\n  \\\"summary\\\": \\\"پىننە گۈلقەنتى ھەزىم قىلىشنى كۈچەيتىپ، سوغۇقنى قوغدايدۇ...\\\"\\n}\\n\\nمەزمۇن: \" + JSON.stringify($json.rawContent)\n    }]\n  }]\n}"
+      },
+      "id": "gemini-ai-node",
+      "name": "Gemini 3.1 Flash-Lite تىبابەت AI تىلىغا ئايلاندۇرۇش",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $('سۈزگۈچ: سەلبىي مەزمۇن ۋە ئىنسان سۈرەتلىرىنى چىقىرىۋېتىش (Negative Filter)').first().json;\nlet category = item.rawCategory || 'خام دورىلار';\nlet title = item.rawTitle;\nlet summary = item.rawContent;\n\ntry {\n  const aiRes = $input.first().json;\n  if (aiRes && aiRes.candidates && aiRes.candidates[0]?.content?.parts[0]?.text) {\n    const rawText = aiRes.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();\n    const parsed = JSON.parse(rawText);\n    if (parsed.category) category = parsed.category;\n    if (parsed.title) title = parsed.title;\n    if (parsed.summary) summary = parsed.summary;\n  }\n} catch (e) {}\n\nconst telegramCaption = `🌿 <b>[سەھىپە: ${category}]</b>\\n\\n📌 <b>${title}</b>\\n\\n📝 ${summary}\\n\\n💡 <i>تەكلىماكان ئۇيغۇر تىبابىتى ۋە تەبىئىي شىپا ئۇچۇر سۇپىسى</i>`;\n\nconst inlineKeyboard = [\n  [\n    { text: '🌐 ئەسلى مەنبە: ' + item.sourceName, url: item.sourceUrl }\n  ],\n  [\n    { text: '🛍️ تەكلىماكان دۇكىنى', url: 'https://teklimakan.vercel.app' },\n    { text: '📢 تېلېگرامما قانىلى', url: 'https://t.me/teklimakankanal' },\n    { text: '💬 ۋاتساپ ئالاقە', url: 'https://wa.me/905551609999' }\n  ]\n];\n\nreturn [{\n  json: {\n    chat_id: '@teklimakankanal',\n    photoUrl: item.verifiedImageUrl,\n    caption: telegramCaption,\n    reply_markup: {\n      inline_keyboard: inlineKeyboard\n    }\n  }\n}];"
+      },
+      "id": "format-telegram-post",
+      "name": "تېلېگرامما ئۇچۇرى ۋە كۇنۇپكىلىرىنى ھاسىللاش (Format Post)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM/sendPhoto",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"chat_id\": $json.chat_id,\n  \"photo\": $json.photoUrl,\n  \"caption\": $json.caption,\n  \"parse_mode\": \"HTML\",\n  \"reply_markup\": $json.reply_markup\n}"
+      },
+      "id": "send-telegram-node",
+      "name": "تېلېگرامما قانالغا يوللاش (Send Photo to Telegram)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "ھەر 12 سائەتتە قوزغىتىش (Schedule 12H)": {
+      "main": [
+        [
+          {
+            "node": "10 مەنبە ۋە دورا مەزمۇنى يىغىش (Source Collector)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 مەنبە ۋە دورا مەزمۇنى يىغىش (Source Collector)": {
+      "main": [
+        [
+          {
+            "node": "سۈزگۈچ: سەلبىي مەزمۇن ۋە ئىنسان سۈرەتلىرىنى چىقىرىۋېتىش (Negative Filter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "سۈزگۈچ: سەلبىي مەزمۇن ۋە ئىنسان سۈرەتلىرىنى چىقىرىۋېتىش (Negative Filter)": {
+      "main": [
+        [
+          {
+            "node": "Gemini 3.1 Flash-Lite تىبابەت AI تىلىغا ئايلاندۇرۇش",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 3.1 Flash-Lite تىبابەت AI تىلىغا ئايلاندۇرۇش": {
+      "main": [
+        [
+          {
+            "node": "تېلېگرامما ئۇچۇرى ۋە كۇنۇپكىلىرىنى ھاسىللاش (Format Post)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "تېلېگرامما ئۇچۇرى ۋە كۇنۇپكىلىرىنى ھاسىللاش (Format Post)": {
+      "main": [
+        [
+          {
+            "node": "تېلېگرامما قانالغا يوللاش (Send Photo to Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -3859,4 +3859,44 @@ html[dir="rtl"] .live-sales-popup {
   }
 }
 
+/* ==================== 💳 زامانىۋىي چىقىم كارتىلىرى ۋە ئۇسلۇبلىرى ==================== */
+.payment-method-option {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-main);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-method-option:hover {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#cardPaymentDetails,
+#havalePaymentDetails,
+#whatsappPayNotice {
+  animation: fadeInDownPay 0.25s ease-out;
+}
+
+@keyframes fadeInDownPay {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#btnCopyIban:hover {
+  background: #166534 !important;
+  transform: scale(1.02);
+}
+
+#btnCopyIban:active {
+  transform: scale(0.98);
+}
+
 

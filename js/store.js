@@ -6,7 +6,7 @@
  */
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'teklimakan_ecom_products_v11',
+  PRODUCTS: 'teklimakan_ecom_products_v12',
   ORDERS: 'teklimakan_ecom_orders_v4',
   CATEGORIES: 'teklimakan_ecom_categories_v8',
   BRANDS: 'teklimakan_ecom_brands_v4',

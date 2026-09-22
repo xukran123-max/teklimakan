@@ -212,8 +212,44 @@ const INITIAL_BRANDS = [
   'SilkRoad Press'
 ];
 
-// دەسلەپكى تاۋارلار تىزىملىكى (16 كۆپ خىل تاۋار، ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
+// دەسلەپكى تاۋارلار تىزىملىكى (ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
 const INITIAL_PRODUCTS = [
+  {
+    id: 'PRD-100',
+    brand: 'تەكلىماكان تىبابىتى',
+    languageScope: 'all',
+    name: 'تەبىئىي شىپالىق پىننە گۈلقەنتى 1kg (ئاشقازان ۋە ھەزىمگە مەنپەئەتلىك)',
+    category: 'ئۇيغۇر تىبابىتى',
+    price: 185,
+    oldPrice: 240,
+    stock: 45,
+    sales: 128,
+    rating: 5.0,
+    ratingCount: 76,
+    image: 'images/pinne_gulghent.jpg',
+    description: 'ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى مىراس رېتسېپى بويىچە ساپ يالپۇز (پىننە) يوپۇرمىقى ۋە تەبىئىي گۈللەر شىرنىسىدىن ئېتىلگەن. ئاشقازان ۋە ھەزىمنى كۈچەيتىدۇ، چىشنى ساقلاملاشتۇرۇشقا ياردەم بېرىدۇ، يەلنى ھەيدەپ ئىسسىقنى تارقىتىدۇ. ساپ ئېغىرلىقى 1 كىلوگرام.',
+    translations: {
+      ug: {
+        name: 'تەبىئىي شىپالىق پىننە گۈلقەنتى 1kg (ئاشقازان ۋە ھەزىمگە مەنپەئەتلىك)',
+        category: 'ئۇيغۇر تىبابىتى',
+        description: 'ئۇيغۇر تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەييارلانغان ساپ يالپۇز گۈلقەنتى. ئاشقازان ۋە ھەزىمنى كۈچەيتىدۇ، چىش ساقلاملىقىغا پايدىلىق، يەلنى ھەيدەيدۇ. ساپ 1 كىلوگرام.'
+      },
+      tr: {
+        name: 'Doğal Şifalı Nane Gülkenti 1kg (Uygur Tıbbı)',
+        category: 'Uygur Tıbbı',
+        description: 'Geleneksel Uygur tıbbı formülüyle taze nane ve gül özlerinden hazırlanan şifalı macun. Mideyi rahatlatır, sindirimi güçlendirir ve ferahlık verir. Net ağırlık: 1 kg.'
+      },
+      en: {
+        name: 'Natural Healing Mint Gulkand Paste 1kg (Uyghur Medicine)',
+        category: 'Uyghur Medicine',
+        description: 'Traditional Uyghur holistic medicine formula made of pure mint and organic rose petals. Aids digestion, relieves gas, soothes the stomach, and promotes oral wellness. Net: 1kg.'
+      }
+    },
+    badge: 'تەۋسىيە',
+    featured: true,
+    approvalStatus: 'تەستىقلاندى',
+    merchantBadge: 'ئالتۇن دەرىجىلىك'
+  },
   {
     id: 'PRD-101',
     brand: 'خوتەن مىراس',
@@ -1371,7 +1407,7 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(INITIAL_BRANDS));
     }
     const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    if (!storedProducts || storedProducts.includes('Hotan Heritage') || storedProducts.includes('photo-1611591475836') || storedProducts.includes('photo-1607006314546') || storedProducts.includes('photo-1595231712325')) {
+    if (!storedProducts || !storedProducts.includes('PRD-100') || storedProducts.includes('Hotan Heritage') || storedProducts.includes('photo-1611591475836') || storedProducts.includes('photo-1607006314546') || storedProducts.includes('photo-1595231712325')) {
       // دەسلەپكى تاۋارلارغا تەستىقلانغان دەپ ھالەت بېرىش ھەمدە كونا/بۇزۇق رەسىملەرنى ئەسلىگە كەلتۈرۈش
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
     } else {

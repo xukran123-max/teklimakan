@@ -1574,6 +1574,12 @@ class StoreManager {
         const merged = Array.from(map.values());
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
         this.notifyDataChange('products');
+      } else if (Array.isArray(remoteProducts) && remoteProducts.length === 0) {
+        // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا دەسلەپكى قەدەمدە قاچىلاش
+        const currentProds = this.getProducts();
+        currentProds.forEach(p => {
+          window.TeklimakanSupabase.upsertProduct(p);
+        });
       }
 
       // 2. زاكازلارنى بۇلۇتتىن يېڭىلاش

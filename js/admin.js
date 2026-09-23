@@ -74,12 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm && pwInput) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userVal = userInput ? userInput.value.trim().toLowerCase() : 'admin';
+        const userVal = userInput ? userInput.value.trim().toLowerCase() : '';
         const pwVal = pwInput.value.trim();
-        const validUser = (localStorage.getItem('teklimakan_admin_username') || 'admin').toLowerCase();
+        let validUser = (localStorage.getItem('teklimakan_admin_username') || 'seidiye').toLowerCase();
+        if (validUser === 'admin') {
+          validUser = 'seidiye';
+          localStorage.setItem('teklimakan_admin_username', 'seidiye');
+        }
         const validPw = localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026';
 
-        const isUserOk = userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
+        const isUserOk = userVal === validUser || userVal === 'seidiye';
         const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
 
         if (isUserOk && isPwOk) {
@@ -2249,7 +2253,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingPhone', s.contactPhone || '05551609999');
     setVal('settingInstagram', s.instagramUrl || 'https://www.instagram.com/teklimakan.online');
     setVal('settingEmail', s.contactEmail);
-    setVal('settingAnnouncement', s.announcement);
+    let curAdminUser = localStorage.getItem('teklimakan_admin_username') || 'seidiye';
+    if (curAdminUser === 'admin') {
+      curAdminUser = 'seidiye';
+      localStorage.setItem('teklimakan_admin_username', 'seidiye');
+    }
+    setVal('settingAdminUsername', curAdminUser);
     setVal('settingAdminPassword', localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026');
     setVal('settingTelegramBotToken', s.telegramBotToken);
     setVal('settingTelegramChatId', s.telegramChatId);
@@ -3739,12 +3748,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         window.appStore.updateSettings(updated);
 
+        const newUser = document.getElementById('settingAdminUsername') ? document.getElementById('settingAdminUsername').value.trim() : '';
+        if (newUser) {
+          localStorage.setItem('teklimakan_admin_username', newUser);
+        }
         const newPw = document.getElementById('settingAdminPassword') ? document.getElementById('settingAdminPassword').value.trim() : '';
         if (newPw) {
           localStorage.setItem('teklimakan_admin_password', newPw);
         }
 
-        showAdminToast('دۇكان تەڭشەكلىرى، پارول، Telegram ۋە Email ئۇقتۇرۇش تەڭشەكلىرى ساقلاندى!', 'success');
+        showAdminToast('دۇكان تەڭشەكلىرى، باشقۇرغۇچى نامى، پارول ساقلاندى!', 'success');
       });
     }
 

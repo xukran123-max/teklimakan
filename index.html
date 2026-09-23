@@ -13,7 +13,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260916_v7">
-  <link rel="stylesheet" href="css/style.css?v=20260923_v2">
+  <link rel="stylesheet" href="css/style.css?v=20260923_v4">
 </head>
 <body class="font-modern">
 
@@ -105,6 +105,12 @@
           <i class="fas fa-heart" style="color: #f43f5e;"></i>
           <span class="nav-cart-text" id="navWishlistText">ياقتۇرغانلار</span>
           <span id="wishlistCounterBadge" class="badge-counter" style="display: none; background: #f43f5e; color: white;">0</span>
+        </button>
+
+        <!-- 3. زاكازلىرىم (سۈرۈشتۈرۈش / ئىز قوغلاش) -->
+        <button type="button" id="trackOrderNavBtn" class="action-btn nav-action-orders-btn" title="مېنىڭ زاكازلىرىم (سۈرۈشتۈرۈش)" style="position: relative;">
+          <i class="fas fa-truck-fast" style="color: #0284c7;"></i>
+          <span class="nav-cart-text" id="navOrdersText">زاكازلىرىم</span>
         </button>
 
 
@@ -371,20 +377,28 @@
 
   <!-- 🚚 زاكاز ئىز قوغلاش ۋە سۈرۈشتۈرۈش كۆزنىكى (Order Tracking Modal) -->
   <div class="modal-backdrop" id="orderTrackModal">
-    <div class="modal-content" style="max-width: 600px; border-radius: 20px;">
+    <div class="modal-content" style="max-width: 660px; border-radius: 20px;">
       <div class="modal-header">
         <h4 class="modal-title" id="orderTrackModalTitle">
-          <i class="fas fa-truck-fast" style="color: #0284c7;"></i> كارگو ئەھۋالىنى تەكشۈرۈش
+          <i class="fas fa-truck-fast" style="color: #0284c7;"></i> مېنىڭ زاكازلىرىم ۋە كارگو سۈرۈشتۈرۈش
         </h4>
         <button class="btn-close-drawer btn-modal-close" id="btnCloseOrderTrackModal"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="padding: 1.5rem;">
+        <!-- 💡 مەڭگۈلۈك ئارخىپ ئەسكەرتىشى -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 0.75rem 0.95rem; font-size: 0.82rem; color: #166534; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.6rem; line-height: 1.5;">
+          <i class="fas fa-database" style="color: #16a34a; font-size: 1.25rem; flex-shrink: 0;"></i>
+          <span><b>مەڭگۈلۈك ئارخىپ كاپالىتى:</b> بارلىق زاكازلىرىڭىز سىستېما بۇلۇت ئامبىرىدا ساقلىنىدۇ. بىر نەچچە يىلدىن كېيىن كىرسىڭىزمۇ، تېلېفون نومۇرىڭىزنى كىرگۈزۈپ بارلىق زاكازلىرىڭىزنى ئاسانلا تاپالايسىز.</span>
+        </div>
+
         <div style="margin-bottom: 1.25rem;">
-          <label style="font-size: 0.9rem; font-weight: 700; display: block; margin-bottom: 0.4rem;">زاكاز كودى ياكى تېلېفون نومۇرىڭىزنى كىرگۈزۈڭ:</label>
+          <label style="font-size: 0.9rem; font-weight: 700; display: block; margin-bottom: 0.45rem;">
+            تېلېفون نومۇرىڭىز ياكى زاكاز كودىنى كىرگۈزۈڭ:
+          </label>
           <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="orderTrackQueryInput" class="form-control number-latin" placeholder="مەسىلەن: ORD-2026-... ياكى 05551609999" style="direction: ltr; font-weight: 700; font-size: 1rem; flex: 1;">
-            <button type="button" id="btnDoTrackOrder" class="btn-checkout" style="width: auto; padding: 0.6rem 1.25rem; white-space: nowrap; border-radius: 10px;">
-              <i class="fas fa-search"></i> سۈرۈشتۈرۈش
+            <input type="text" id="orderTrackQueryInput" class="form-control number-latin" placeholder="مەسىلەن: 05551609999 ياكى ORD-2026-..." style="direction: ltr; font-weight: 700; font-size: 0.98rem; flex: 1;">
+            <button type="button" id="btnDoTrackOrder" class="btn-checkout" style="width: auto; padding: 0.6rem 1.35rem; white-space: nowrap; border-radius: 10px; font-weight: 800;">
+              <i class="fas fa-search"></i> كۆرۈش
             </button>
           </div>
         </div>
@@ -392,7 +406,7 @@
         <div id="orderTrackResultsWrap">
           <div style="text-align: center; color: #94a3b8; padding: 2.5rem 1rem;">
             <i class="fas fa-box-open" style="font-size: 3.2rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
-            <p style="margin: 0; font-size: 0.92rem; line-height: 1.6;">زاكاز نومۇرىڭىز (مەسىلەن: ORD-2026-...) ياكى زاكازدا كىرگۈزگەن تېلېفون نومۇرىڭىز ئارقىلىق زاكاز ھالىتى، تەستىق، كارگو كودى ۋە ئەۋەتىلىش ۋاقتىنى نەق مەيداندا سۈرۈشتۈرەلەيسىز.</p>
+            <p style="margin: 0; font-size: 0.92rem; line-height: 1.6;">زاكازدا كىرگۈزگەن تېلېفون نومۇرىڭىز (ياكى زاكاز نومۇرىڭىز) ئارقىلىق ئىلگىرى بەرگەن بارلىق زاكازلىرىڭىزنىڭ تەپسىلاتى، پۇل چىقىمى ۋە پوچتا ئىز قوغلاش نومۇرىنى نەق مەيداندا كۆرەلەيسىز.</p>
           </div>
         </div>
       </div>
@@ -1075,11 +1089,84 @@
 
   <!-- 📱 لەيلىمە تېز ئالاقە كۇنۇپكىلىرى (Floating Quick Contact Buttons) -->
   <div class="floating-contact-wrap">
-    <!-- WhatsApp Floating Button -->
+    <!-- 1. WhatsApp Floating Button -->
     <a href="https://wa.me/905551609999" target="_blank" class="floating-contact-btn floating-btn-whatsapp" title="WhatsApp: 05551609999">
       <i class="fab fa-whatsapp"></i>
       <span class="floating-contact-tooltip">WhatsApp: 05551609999</span>
     </a>
+
+    <!-- 2. ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش كۇنۇپكىسى -->
+    <button type="button" id="adminLiveChatToggleBtn" class="floating-contact-btn floating-btn-chat" title="ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش">
+      <i class="fas fa-comments"></i>
+      <span class="chat-online-dot" title="ھازىر توردا"></span>
+      <span class="floating-contact-tooltip">ئالىي باشقۇرغۇچى بىلەن پاراڭلىشىش</span>
+    </button>
+  </div>
+
+  <!-- 💬 ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش كۆزنىكى (Customer Live Chat Window) -->
+  <div id="adminLiveChatBox" class="admin-live-chat-box" style="display: none;">
+    <!-- Chat Header -->
+    <div class="chat-box-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar-wrap">
+          <div class="chat-avatar-circle">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <span class="chat-status-pulse"></span>
+        </div>
+        <div class="chat-header-titles">
+          <h4 class="chat-header-name">ئالىي باشقۇرغۇچى بىلەن ئالاقە</h4>
+          <span class="chat-header-status">🟢 ھازىر توردا • سىزگە ياردەم بېرىشكە تەييار</span>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button type="button" id="btnClearChatHistory" class="chat-action-btn-clean" title="پاراڭ خاتىرىسىنى ئۆچۈرۈش">
+          <i class="fas fa-trash-alt"></i>
+          <span>تازىلاش</span>
+        </button>
+        <button type="button" id="btnCloseChatBox" class="chat-action-btn-close" title="تاقاش">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notice banner explaining persistence -->
+    <div class="chat-persistent-notice">
+      <i class="fas fa-shield-alt"></i>
+      <span>پاراڭ خاتىرىسى سىز ئۆزىڭىز «تازىلاش»نى باقمىغۇچە، بىر نەچچە يىلدىن كېيىن كىرسىڭىزمۇ مەڭگۈ ساقلىنىدۇ.</span>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="adminChatMessagesContainer" class="chat-messages-container">
+      <!-- Chat bubbles loaded dynamically from localStorage -->
+    </div>
+
+    <!-- Quick prompt chips -->
+    <div class="chat-quick-chips">
+      <button type="button" class="chat-chip-btn" data-msg="زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.">📦 زاكاز سۈرۈشتۈرۈش</button>
+      <button type="button" class="chat-chip-btn" data-msg="پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.">💳 بانكا ئۇچۇرى</button>
+      <button type="button" class="chat-chip-btn" data-msg="مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟">🚚 كارگو ئەھۋالى</button>
+    </div>
+
+    <!-- Input Form -->
+    <div class="chat-input-area">
+      <div class="chat-customer-info-bar">
+        <input type="text" id="chatCustomerName" class="chat-small-input" placeholder="ئىسمىڭىز (ئىختىيارىي)" maxlength="30">
+        <input type="tel" id="chatCustomerPhone" class="chat-small-input number-latin" placeholder="يانفون: 05XX XXX XX XX" maxlength="20">
+      </div>
+      <div class="chat-input-row">
+        <textarea id="chatMessageInput" class="chat-textarea" placeholder="ئالىي باشقۇرغۇچىغا ئۇچۇر يېزىڭ... (Enter بىلەن ئەۋەتىلىدۇ)" rows="2"></textarea>
+        <button type="button" id="btnSendChatMessage" class="chat-send-btn" title="ئەۋەتىش">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="chat-bottom-wa-link">
+        <span>جىددىي ئۇچۇرلاردا:</span>
+        <a href="https://wa.me/905551609999" target="_blank" class="chat-wa-direct">
+          <i class="fab fa-whatsapp"></i> WhatsApp ئارقىلىق بىۋاسىتە يېزىڭ
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- تۆۋەنكى پۇت قىسمى (Footer) -->
@@ -1266,8 +1353,8 @@
   <script src="js/supabase.js?v=20260921_v1"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260923_v2"></script>
-  <script src="js/store.js?v=20260923_v2"></script>
-  <script src="js/app.js?v=20260923_v2"></script>
+  <script src="js/i18n.js?v=20260923_v4"></script>
+  <script src="js/store.js?v=20260923_v4"></script>
+  <script src="js/app.js?v=20260923_v4"></script>
 </body>
 </html>

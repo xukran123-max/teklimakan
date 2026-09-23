@@ -1148,19 +1148,21 @@ function initTeklimakanApp() {
     if (overlay) overlay.classList.remove('active');
   }
 
-  // ==================== 🚚 زاكاز ئىز قوغلاش (Order Tracking UI) ====================
+  // ==================== 🚚 زاكاز ئىز قوغلاش ۋە تارىخىي كۆرۈش (Order Tracking & History UI) ====================
   function openTrackOrderModal(initialQuery = '') {
     const modal = document.getElementById('orderTrackModal');
-    if (modal) {
-      modal.classList.add('active');
-      const input = document.getElementById('orderTrackQueryInput');
-      if (input) {
-        if (initialQuery) {
-          input.value = initialQuery;
-          doTrackOrder(initialQuery);
-        }
-        setTimeout(() => input.focus(), 200);
+    if (!modal) return;
+    modal.classList.add('active');
+    const input = document.getElementById('orderTrackQueryInput');
+    if (input) {
+      const savedQuery = initialQuery || 
+                         localStorage.getItem('teklimakan_customer_phone') || 
+                         localStorage.getItem('teklimakan_last_order_id') || '';
+      if (savedQuery) {
+        input.value = savedQuery;
+        doTrackOrder(savedQuery);
       }
+      setTimeout(() => input.focus(), 200);
     }
   }
 
@@ -1169,7 +1171,7 @@ function initTeklimakanApp() {
     if (modal) modal.classList.remove('active');
   }
 
-  function doTrackOrder(query) {
+  async function doTrackOrder(query) {
     const resultsWrap = document.getElementById('orderTrackResultsWrap');
     if (!resultsWrap) return;
 
@@ -1183,19 +1185,42 @@ function initTeklimakanApp() {
       return;
     }
 
-    const order = window.appStore.findOrderByTrackCodeOrPhone(query.trim());
-    if (!order) {
+    const cleanQ = query.trim();
+    resultsWrap.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem 1rem; color: #0284c7;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; margin-bottom: 0.75rem;"></i>
+        <div style="font-weight: 700; font-size: 0.95rem;">بۇلۇت ۋە ئارخىپتىن زاكازلار تەكشۈرۈلمەكتە...</div>
+        <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">بارلىق تارىخىي ئۇچۇرلار يۈكلىنىۋاتىدۇ</div>
+      </div>
+    `;
+
+    // ☁️ بۇلۇتتىن ۋە ئامباردىن تولۇق زاكازلارنى يۈكلەپ تەڭلەشتۈرۈش
+    let orders = [];
+    if (window.appStore.fetchOrdersFromCloudAndMatch) {
+      orders = await window.appStore.fetchOrdersFromCloudAndMatch(cleanQ);
+    } else {
+      orders = window.appStore.findOrdersByTrackCodeOrPhone(cleanQ);
+    }
+
+    if (!orders || orders.length === 0) {
       resultsWrap.innerHTML = `
-        <div style="text-align: center; color: #991b1b; padding: 2rem 1rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px; margin-top: 1rem;">
-          <i class="fas fa-search" style="font-size: 2.2rem; color: #f43f5e; margin-bottom: 0.75rem;"></i>
+        <div style="text-align: center; color: #991b1b; padding: 2rem 1.25rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px; margin-top: 1rem;">
+          <i class="fas fa-search" style="font-size: 2.5rem; color: #f43f5e; margin-bottom: 0.75rem;"></i>
           <h4 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem;">ھېچقانداق زاكاز تېپىلمىدى</h4>
-          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0;">كىرگۈزگەن نومۇر بويىچە دۇكاندىن زاكاز ئۇچۇرى بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى WhatsApp ئارقىلىق بىز بىلەن ئالاقىلىشىڭ.</p>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0 0 1rem 0;">«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ئۇچۇرى بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.</p>
+          <a href="https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن ${cleanQ} نومۇر بويىچە زاكاز تېپىشتا ياردەم سورىماقچىتىم.`)}" target="_blank" class="btn-checkout" style="width: auto; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; font-size: 0.88rem; text-decoration: none; border-radius: 10px; background: #25D366;">
+            <i class="fab fa-whatsapp"></i> WhatsApp ئارقىلىق سۈرۈشتۈرۈش
+          </a>
         </div>
       `;
       return;
     }
 
-    // Step calculation
+    // ئەگەر تېپىلغان بولسا، نومۇرنى يەرلىك ئەستە تۇتۇش
+    if (/^\+?\d{8,15}$/.test(cleanQ.replace(/[\s\-]/g, ''))) {
+      localStorage.setItem('teklimakan_customer_phone', cleanQ);
+    }
+
     const statusMap = {
       'ساقلاۋاتىدۇ': 1,
       'تەستىقلاندى': 2,
@@ -1203,120 +1228,146 @@ function initTeklimakanApp() {
       'تاماملاندى': 4,
       'بىكار قىلىندى': 0
     };
-    const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : 1;
-    const isCancelled = order.status === 'بىكار قىلىندى';
 
-    const phoneMasked = order.customer && order.customer.phone
-      ? order.customer.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-      : '-';
-
-    const trackingUrl = (order.cargoCarrier && order.cargoTrackingNo)
-      ? window.appStore.getCargoTrackingUrl(order.cargoCarrier, order.cargoTrackingNo)
-      : null;
-
-    resultsWrap.innerHTML = `
-      <div class="order-track-card" style="margin-top: 1rem; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9;">
-          <div>
-            <div style="font-size: 0.8rem; color: #64748b;">زاكاز نومۇرى:</div>
-            <div class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #0284c7; direction: ltr;">#${order.id}</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 0.8rem; color: #64748b;">زاكاز ۋاقتى:</div>
-            <div class="number-latin" style="font-size: 0.88rem; font-weight: 700; color: #334155; direction: ltr;">${order.date}</div>
-          </div>
+    let html = `
+      <div style="margin-top: 1rem; margin-bottom: 0.85rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="font-weight: 800; color: #166534; font-size: 0.95rem;">
+          <i class="fas fa-check-circle" style="color: #22c55e;"></i> جەمئىي <b>${orders.length}</b> تال زاكاز تېپىلدى
         </div>
+        <span style="font-size: 0.78rem; color: #15803d; background: #dcfce7; padding: 3px 10px; border-radius: 9999px; font-weight: 700;">
+          <i class="fas fa-cloud-check"></i> مەڭگۈ بۇلۇتتا ساقلانغان
+        </span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    `;
 
-        <!-- 4-Step Progress Tracker -->
-        <div style="margin: 1.5rem 0;">
-          <div class="track-timeline" style="display: flex; justify-content: space-between; position: relative; gap: 0.5rem;">
-            ${[
-              { step: 1, title: 'تاپشۇرۇۋېلىندى', icon: 'fa-clipboard-check' },
-              { step: 2, title: 'تەستىقلاندى', icon: 'fa-box-open' },
-              { step: 3, title: 'كارگودا يوللاندى', icon: 'fa-truck-fast' },
-              { step: 4, title: 'تاپشۇرۇپ ئېلىندى', icon: 'fa-house-circle-check' }
-            ].map(s => {
-              const isActive = !isCancelled && currentStep >= s.step;
-              const isCurrent = !isCancelled && currentStep === s.step;
-              return `
-                <div class="track-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}" style="flex: 1; text-align: center; position: relative; z-index: 1;">
-                  <div class="track-step-circle" style="width: 38px; height: 38px; border-radius: 50%; margin: 0 auto 0.4rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.3s; background: ${isActive ? '#0284c7' : '#f1f5f9'}; color: ${isActive ? '#ffffff' : '#94a3b8'}; border: 2px solid ${isActive ? '#0284c7' : '#e2e8f0'};">
-                    <i class="fas ${s.icon}"></i>
-                  </div>
-                  <div style="font-size: 0.78rem; font-weight: ${isActive ? '800' : '600'}; color: ${isActive ? '#0f172a' : '#94a3b8'}; line-height: 1.3;">
-                    ${s.title}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-          ${isCancelled ? `
-            <div style="margin-top: 0.85rem; padding: 0.5rem; background: #fee2e2; border-radius: 8px; text-align: center; color: #ef4444; font-weight: 700; font-size: 0.85rem;">
-              <i class="fas fa-ban"></i> بۇ زاكاز بىكار قىلىنغان
-            </div>
-          ` : ''}
-        </div>
+    orders.forEach((order) => {
+      const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : 1;
+      const isCancelled = order.status === 'بىكار قىلىندى';
+      const phoneMasked = order.customer && order.customer.phone
+        ? order.customer.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+        : '-';
+      const carrier = order.cargoCarrier || order.trackingCarrier;
+      const trackingNo = order.cargoTrackingNo || order.trackingNumber;
+      const trackingUrl = (carrier && trackingNo)
+        ? window.appStore.getCargoTrackingUrl(carrier, trackingNo)
+        : null;
 
-        <!-- Cargo Tracking Info Card -->
-        ${order.cargoCarrier && order.cargoTrackingNo ? `
-          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-              <div>
-                <span style="background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-shipping-fast"></i> پوچتا شىركىتى</span>
-                <span style="font-weight: 800; font-size: 0.95rem; margin-right: 0.4rem; color: #0369a1;">${order.cargoCarrier}</span>
-              </div>
-              <div style="font-size: 0.82rem; color: #0284c7; font-weight: 700;">
-                ئىز قوغلاش كودى: <strong class="number-latin" style="direction: ltr; font-size: 0.95rem; letter-spacing: 0.5px;">${order.cargoTrackingNo}</strong>
+      html += `
+        <div class="order-track-card" style="background: var(--bg-card, #ffffff); border: 1.5px solid var(--border-color, #e2e8f0); border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 18px rgba(0,0,0,0.06); position: relative;">
+          <!-- Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9;">
+            <div>
+              <div style="font-size: 0.78rem; color: #64748b;">زاكاز نومۇرى:</div>
+              <div class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #0284c7; direction: ltr;">
+                #${order.id}
+                <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('${order.id}').then(() => showToast('زاكاز كودى كۆچۈرۈلدى!', 'success'))" style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; margin-inline-start: 4px;" title="كۆچۈرۈش">
+                  <i class="far fa-copy"></i>
+                </button>
               </div>
             </div>
-            ${trackingUrl ? `
-              <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                <a href="${trackingUrl}" target="_blank" class="btn-checkout" style="width: auto; padding: 0.45rem 1rem; font-size: 0.82rem; font-weight: 800; text-decoration: none; border-radius: 8px; background: #0284c7; display: inline-flex; align-items: center; gap: 0.4rem;">
-                  <i class="fas fa-external-link-alt"></i> پوچتا تورىدىن كۆرۈش
-                </a>
+            <div style="text-align: right;">
+              <div style="font-size: 0.78rem; color: #64748b;">زاكاز ۋاقتى:</div>
+              <div class="number-latin" style="font-size: 0.86rem; font-weight: 700; color: #334155; direction: ltr;">${order.date}</div>
+            </div>
+          </div>
+
+          <!-- 4-Step Progress Tracker -->
+          <div style="margin: 1.25rem 0;">
+            <div class="track-timeline" style="display: flex; justify-content: space-between; position: relative; gap: 0.5rem;">
+              ${[
+                { step: 1, title: 'تاپشۇرۇۋېلىندى', icon: 'fa-clipboard-check' },
+                { step: 2, title: 'تەستىقلاندى', icon: 'fa-box-open' },
+                { step: 3, title: 'كارگودا يوللاندى', icon: 'fa-truck-fast' },
+                { step: 4, title: 'تاپشۇرۇپ ئېلىندى', icon: 'fa-house-circle-check' }
+              ].map(s => {
+                const isActive = !isCancelled && currentStep >= s.step;
+                const isCurrent = !isCancelled && currentStep === s.step;
+                return `
+                  <div class="track-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}" style="flex: 1; text-align: center; position: relative; z-index: 1;">
+                    <div class="track-step-circle" style="width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 0.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; transition: all 0.3s; background: ${isActive ? '#0284c7' : '#f1f5f9'}; color: ${isActive ? '#ffffff' : '#94a3b8'}; border: 2px solid ${isActive ? '#0284c7' : '#e2e8f0'};">
+                      <i class="fas ${s.icon}"></i>
+                    </div>
+                    <div style="font-size: 0.76rem; font-weight: ${isActive ? '800' : '600'}; color: ${isActive ? '#0f172a' : '#94a3b8'}; line-height: 1.3;">
+                      ${s.title}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            ${isCancelled ? `
+              <div style="margin-top: 0.85rem; padding: 0.5rem; background: #fee2e2; border-radius: 8px; text-align: center; color: #ef4444; font-weight: 700; font-size: 0.85rem;">
+                <i class="fas fa-ban"></i> بۇ زاكاز بىكار قىلىنغان
               </div>
             ` : ''}
           </div>
-        ` : (currentStep >= 3 ? `
-          <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.85rem; color: #64748b; text-align: center;">
-            <i class="fas fa-info-circle"></i> پوچتا شىركىتى ۋە ئىز قوغلاش نومۇرى تېز ئارىدا تولۇقلىنىدۇ.
-          </div>
-        ` : '')}
 
-        <!-- Customer & Order details -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.85rem; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem;">
-          <div><b>خېرىدار:</b> ${order.customer?.name || '-'}</div>
-          <div><b>تېلېفون:</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
-          <div><b>شەھەر / ئادرېس:</b> ${order.customer?.city || ''} ${order.customer?.address || ''}</div>
-          <div><b>چىقىم ئۇسۇلى:</b> ${order.paymentMethod || 'بانكا كارتا'}</div>
-          <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-weight: 800; font-size: 1rem; color: var(--danger-color);">
-            <span>ئومۇمىي سومما:</span>
-            <span>${order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total)}</span>
-          </div>
-        </div>
-
-        <!-- Purchased items -->
-        <div style="margin-bottom: 1rem;">
-          <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem; color: #475569;">سېتىۋالغان ماللار:</div>
-          <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-            ${(order.items || []).map(it => `
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 8px;">
-                <span style="font-weight: 700;">${it.name} <span style="color: #64748b; font-weight: 600;">(x${it.quantity})</span></span>
-                <span style="font-weight: 800; color: #0f172a;">${it.priceFormatted || (it.price + ' TL')}</span>
+          <!-- Cargo Tracking Info Card -->
+          ${carrier && trackingNo ? `
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <span style="background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-shipping-fast"></i> پوچتا شىركىتى</span>
+                  <span style="font-weight: 800; font-size: 0.95rem; margin-right: 0.4rem; color: #0369a1;">${carrier}</span>
+                </div>
+                <div style="font-size: 0.82rem; color: #0284c7; font-weight: 700;">
+                  ئىز قوغلاش كودى: <strong class="number-latin" style="direction: ltr; font-size: 0.95rem; letter-spacing: 0.5px;">${trackingNo}</strong>
+                </div>
               </div>
-            `).join('')}
+              ${trackingUrl ? `
+                <div style="margin-top: 0.65rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                  <a href="${trackingUrl}" target="_blank" class="btn-checkout" style="width: auto; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 800; text-decoration: none; border-radius: 8px; background: #0284c7; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <i class="fas fa-external-link-alt"></i> پوچتا تورىدىن كۆرۈش
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+          ` : (currentStep >= 3 ? `
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.85rem; color: #64748b; text-align: center;">
+              <i class="fas fa-info-circle"></i> پوچتا شىركىتى ۋە ئىز قوغلاش نومۇرى تېز ئارىدا تولۇقلىنىدۇ.
+            </div>
+          ` : '')}
+
+          <!-- Customer & Order details -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem; font-size: 0.84rem; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem;">
+            <div><b>خېرىدار:</b> ${order.customer?.name || '-'}</div>
+            <div><b>تېلېفون:</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
+            <div><b>شەھەر / ئادرېس:</b> ${order.customer?.city || ''} ${order.customer?.address || ''}</div>
+            <div><b>چىقىم ئۇسۇلى:</b> ${order.paymentMethod || 'بانكا يۆتكەش (Havale)'}</div>
+            <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-weight: 800; font-size: 1rem; color: var(--danger-color);">
+              <span>ئومۇمىي سومما:</span>
+              <span>${order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total)}</span>
+            </div>
+          </div>
+
+          <!-- Purchased items -->
+          <div style="margin-bottom: 1rem;">
+            <div style="font-weight: 800; font-size: 0.86rem; margin-bottom: 0.45rem; color: #475569;">سېتىۋالغان ماللار:</div>
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+              ${(order.items || []).map(it => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; padding: 0.4rem 0.6rem; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 8px;">
+                  <span style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    ${it.image ? `<img src="${it.image}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px;">` : ''}
+                    <span>${it.name} <span style="color: #64748b; font-weight: 600;">(x${it.quantity})</span></span>
+                  </span>
+                  <span style="font-weight: 800; color: #0f172a;">${it.priceFormatted || (it.price + ' TL')}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- WhatsApp Support Link -->
+          <div style="text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 0.75rem;">
+            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن #${order.id} نومۇرلۇق زاكاز توغرىسىدا سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
+              <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> بۇ زاكاز ھەققىدە باشقۇرغۇچىغا WhatsApp تا يېزىش
+            </a>
           </div>
         </div>
+      `;
+    });
 
-        <!-- WhatsApp Support Link -->
-        <div style="text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 0.85rem;">
-          <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن #${order.id} نومۇرلۇق زاكاز توغرىسىدا سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.88rem; text-decoration: none;">
-            <i class="fab fa-whatsapp" style="font-size: 1.1rem;"></i> زاكاز توغرىسىدا بىزگە WhatsApp تا ئۇچۇر يېزىڭ
-          </a>
-        </div>
-      </div>
-    `;
+    html += `</div>`;
+    resultsWrap.innerHTML = html;
   }
 
   // ==================== تېز كۆرۈش ====================
@@ -4162,6 +4213,208 @@ function initTeklimakanApp() {
         }
       });
     }
+
+    // 💬 ئالىي باشقۇرغۇچى بىلەن توردا بىۋاسىتە پاراڭلىشىش قوزغىتىش
+    initCustomerLiveChat();
+  }
+
+  // ==================== 💬 ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش مەركىزى (Customer Live Chat) ====================
+  function initCustomerLiveChat() {
+    const toggleBtn = document.getElementById('adminLiveChatToggleBtn');
+    const chatBox = document.getElementById('adminLiveChatBox');
+    const btnClose = document.getElementById('btnCloseChatBox');
+    const btnClear = document.getElementById('btnClearChatHistory');
+    const messagesContainer = document.getElementById('adminChatMessagesContainer');
+    const nameInput = document.getElementById('chatCustomerName');
+    const phoneInput = document.getElementById('chatCustomerPhone');
+    const msgInput = document.getElementById('chatMessageInput');
+    const btnSend = document.getElementById('btnSendChatMessage');
+
+    if (!toggleBtn || !chatBox) return;
+
+    const CHAT_STORAGE_KEY = 'teklimakan_customer_chat_v1';
+
+    function safeEscape(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // 1. ئالدىن ساقلانغان تېلېفون ۋە ئىسىمنى تولدۇرۇش
+    const savedPhone = localStorage.getItem('teklimakan_customer_phone') || '';
+    const savedName = localStorage.getItem('teklimakan_customer_name') || '';
+    if (phoneInput && savedPhone) phoneInput.value = savedPhone;
+    if (nameInput && savedName) nameInput.value = savedName;
+
+    function getChatHistory() {
+      try {
+        const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return [
+        {
+          id: 'msg-welcome',
+          sender: 'admin',
+          name: 'ئالىي باشقۇرغۇچى',
+          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خوش كەپسىز. بىزگە بۇ يەردىن بىۋاسىتە ئۇچۇر يازسىڭىز، ئۇچۇرىڭىز دەرھال تېلېگرامما ئارقىلىق ماڭا يەتكۈزۈلىدۇ. زاكاز، مەھسۇلات ياكى چىقىم ھەققىدە قانداق سوئالىڭىز بولسا خۇشاللىق بىلەن ياردەم بېرىمىز!',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('zh-CN'),
+          timestamp: Date.now()
+        }
+      ];
+    }
+
+    function saveChatHistory(list) {
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function renderChatMessages() {
+      if (!messagesContainer) return;
+      const history = getChatHistory();
+      messagesContainer.innerHTML = '';
+
+      history.forEach(m => {
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${m.sender === 'customer' ? 'customer' : 'admin'}`;
+        bubble.innerHTML = `
+          <div class="chat-bubble-author">
+            <i class="fas ${m.sender === 'customer' ? 'fa-user' : 'fa-crown'}"></i>
+            <span>${m.name || (m.sender === 'customer' ? 'سىز' : 'ئالىي باشقۇرغۇچى')}</span>
+          </div>
+          <div class="chat-bubble-text" style="white-space: pre-wrap;">${safeEscape(m.text)}</div>
+          <div class="chat-bubble-time">${m.time || ''}</div>
+        `;
+        messagesContainer.appendChild(bubble);
+      });
+
+      setTimeout(() => {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 50);
+    }
+
+    // كۆزنەكنى ئېچىش / تاقاش
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = chatBox.style.display !== 'none';
+      if (isVisible) {
+        chatBox.style.display = 'none';
+      } else {
+        chatBox.style.display = 'flex';
+        renderChatMessages();
+        if (msgInput) setTimeout(() => msgInput.focus(), 150);
+      }
+    });
+
+    if (btnClose) {
+      btnClose.addEventListener('click', () => {
+        chatBox.style.display = 'none';
+      });
+    }
+
+    // 🗑️ تارىخنى تازىلاش كۇنۇپكىسى (پەقەت خېرىدار ئۆزى بېسىپ جەزملەشتۈرگەندىلا يۇيۇلىدۇ)
+    if (btnClear) {
+      btnClear.addEventListener('click', () => {
+        const confirmed = confirm('پاراڭ خاتىرىسىنى راستىنلا تازىلىۋېتەمسىز؟\n\nئەسكەرتىش: ئەگەر ئۆچۈرمىسىڭىز، بىر يىلدىن كېيىن كىرسىڭىزمۇ مەزكۇر تور كۆرگۈدە مەڭگۈ ساقلىنىپ تۇرىدۇ.');
+        if (confirmed) {
+          localStorage.removeItem(CHAT_STORAGE_KEY);
+          renderChatMessages();
+          showToast('پاراڭ خاتىرىسى تازىلاندى!', 'info');
+        }
+      });
+    }
+
+    // 🚀 ئۇچۇر ئەۋەتىش
+    async function sendMessage() {
+      if (!msgInput) return;
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      const custName = (nameInput && nameInput.value.trim()) || localStorage.getItem('teklimakan_customer_name') || 'خېرىدار';
+      const custPhone = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
+
+      if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
+      if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
+
+      const newMsg = {
+        id: 'msg-' + Date.now(),
+        sender: 'customer',
+        name: custName,
+        phone: custPhone,
+        text: text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString('zh-CN'),
+        timestamp: Date.now()
+      };
+
+      const history = getChatHistory();
+      history.push(newMsg);
+      saveChatHistory(history);
+      renderChatMessages();
+      msgInput.value = '';
+
+      if (typeof playChime === 'function') playChime('click');
+
+      // 📲 ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىش
+      if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
+        const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
+        window.appStore.sendTelegramAlert({
+          title: '💬 [تور بېكەت خېرىدارى] ئالىي باشقۇرغۇچىغا بىۋاسىتە ئۇچۇر يازدى!',
+          message: `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n👉 <a href="${waLink}">WhatsApp دا دەرھال جاۋاب يېزىش</a>`,
+          isUrgent: true
+        });
+      }
+
+      // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
+      if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
+        window.appStore.recordCustomerChatMessage(newMsg);
+      }
+
+      // 🤖 ئاپتوماتىك دەرھال جاۋاب قايتۇرۇش (1 سېكۇنتتىن كېيىن)
+      setTimeout(() => {
+        const reply = {
+          id: 'admin-reply-' + Date.now(),
+          sender: 'admin',
+          name: 'ئالىي باشقۇرغۇچى',
+          text: 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ ئۇچۇرىڭىز ئالىي باشقۇرغۇچىنىڭ تېلېگرامما ۋە يانفونىغا يەتكۈزۈلدى. بىز ئەڭ قىسقا ۋاقىت ئىچىدە جاۋاب قايتۇرىمىز. زاكاز ۋە جىددىي مەسىلىلەردە 05551609999 WhatsApp ياكى تېلېفون ئارقىلىقمۇ ئالاقىلاشسىڭىز بولىدۇ.',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('zh-CN'),
+          timestamp: Date.now()
+        };
+        const updated = getChatHistory();
+        updated.push(reply);
+        saveChatHistory(updated);
+        renderChatMessages();
+        if (typeof playChime === 'function') playChime('success');
+      }, 900);
+    }
+
+    if (btnSend) {
+      btnSend.addEventListener('click', sendMessage);
+    }
+
+    if (msgInput) {
+      msgInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    }
+
+    // تېز سوئال تاللاش كۇنۇپكىلىرى
+    document.querySelectorAll('.chat-chip-btn').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (msgInput) {
+          msgInput.value = chip.dataset.msg || chip.textContent;
+          msgInput.focus();
+        }
+      });
+    });
   }
 
   // مەخپىي باشقۇرغۇچى تېز كۇنۇپكىسى (Ctrl + Shift + A ياكى Alt + Shift + A)
@@ -4174,6 +4427,8 @@ function initTeklimakanApp() {
   });
 
   window.showToast = showToast;
+  window.openTrackOrderModal = openTrackOrderModal;
+  window.doTrackOrder = doTrackOrder;
 }
 
 if (document.readyState === 'loading') {

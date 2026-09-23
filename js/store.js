@@ -3543,17 +3543,65 @@ class StoreManager {
     return { success: true, order: ord, message: 'كارگو ئۇچۇرى ساقلاندى!' };
   }
 
-  findOrderByTrackCodeOrPhone(query) {
-    if (!query) return null;
+  findOrdersByTrackCodeOrPhone(query) {
+    if (!query) return [];
     const q = query.trim().toLowerCase().replace(/[\s\-\+]/g, '');
     const orders = this.getOrders();
-    const found = orders.find(o => {
+    return orders.filter(o => {
       const orderIdClean = (o.id || '').toLowerCase().replace(/[\s\-]/g, '');
       const phoneClean = (o.customer && o.customer.phone ? o.customer.phone : '').replace(/[\s\-\+]/g, '');
       const trackingClean = (o.cargoTrackingNo || '').toLowerCase().replace(/[\s\-]/g, '');
-      return orderIdClean === q || phoneClean.endsWith(q) || phoneClean === q || (trackingClean && trackingClean === q) || orderIdClean.includes(q);
+      return orderIdClean === q || 
+             phoneClean === q || 
+             phoneClean.endsWith(q) || 
+             (q.length >= 7 && phoneClean.includes(q)) || 
+             (trackingClean && trackingClean === q) || 
+             orderIdClean.includes(q);
     });
-    return found || null;
+  }
+
+  findOrderByTrackCodeOrPhone(query) {
+    const list = this.findOrdersByTrackCodeOrPhone(query);
+    return list.length > 0 ? list[0] : null;
+  }
+
+  async fetchOrdersFromCloudAndMatch(query) {
+    if (window.TeklimakanSupabase) {
+      try {
+        const remoteOrders = await window.TeklimakanSupabase.fetchOrders();
+        if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
+          const localOrders = this.getOrders();
+          const oMap = new Map();
+          localOrders.forEach(o => oMap.set(o.id, o));
+          remoteOrders.forEach(ro => {
+            oMap.set(ro.id, {
+              id: ro.id,
+              customer: ro.customer,
+              items: ro.items,
+              subtotalCny: Number(ro.subtotal_cny || 0),
+              discountCny: Number(ro.discount_cny || 0),
+              deliveryFeeCny: Number(ro.delivery_fee_cny || 0),
+              totalCny: Number(ro.total_cny || 0),
+              totalFormatted: ro.total_formatted,
+              paymentMethod: ro.payment_method,
+              status: ro.status,
+              date: ro.date,
+              notes: ro.notes,
+              language: ro.language,
+              currency: ro.currency,
+              cargoCarrier: ro.tracking_carrier || ro.cargoCarrier,
+              cargoTrackingNo: ro.tracking_number || ro.cargoTrackingNo,
+              shippedAt: ro.shipped_at
+            });
+          });
+          const merged = Array.from(oMap.values());
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(merged));
+        }
+      } catch (e) {
+        console.warn('Supabase fetchOrders error:', e);
+      }
+    }
+    return this.findOrdersByTrackCodeOrPhone(query);
   }
 
   // ==================== خېرىدارلار مەركىزى (CRM Summary) ====================
@@ -3923,7 +3971,26 @@ class StoreManager {
       window.TeklimakanSupabase.insertOrder(newOrder);
     }
 
+    // 📱 خېرىدارنىڭ نومۇرى ۋە زاكاز كودىنى ساقلاپ قويۇش (بىر يىلدىن كېيىن كىرسىمۇ ئاسان تېپىش ئۈچۈن)
+    if (customerData && customerData.phone) {
+      localStorage.setItem('teklimakan_customer_phone', customerData.phone);
+    }
+    if (customerData && customerData.name) {
+      localStorage.setItem('teklimakan_customer_name', customerData.name);
+    }
+    localStorage.setItem('teklimakan_last_order_id', newOrder.id);
+
     return { success: true, order: newOrder };
+  }
+
+  recordCustomerChatMessage(chatMsg) {
+    try {
+      const KEY = 'teklimakan_admin_chat_inbox';
+      let inbox = JSON.parse(localStorage.getItem(KEY)) || [];
+      inbox.unshift(chatMsg);
+      if (inbox.length > 200) inbox = inbox.slice(0, 200);
+      localStorage.setItem(KEY, JSON.stringify(inbox));
+    } catch (e) {}
   }
 
   updateOrderStatus(orderId, newStatus) {

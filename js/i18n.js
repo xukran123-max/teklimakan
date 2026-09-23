@@ -30,6 +30,8 @@ const I18N_TRANSLATIONS = {
     brandLabel: 'ماركا:',
     fontBtn: 'فونىت',
     cartBtn: 'سېۋەت',
+    ordersBtn: 'زاكازلىرىم',
+    navOrdersText: 'زاكازلىرىم',
     adminBtn: 'ئارقا بەت',
 
     flashSaleBadge: 'بۈگۈنكى ئېتىبارلارنى كۆرۈش',
@@ -216,6 +218,8 @@ const I18N_TRANSLATIONS = {
     brandLabel: 'Marka:',
     fontBtn: 'Yazı Tipi',
     cartBtn: 'Sepetim',
+    ordersBtn: 'Siparişlerim',
+    navOrdersText: 'Siparişlerim',
     adminBtn: 'Yönetim',
 
     flashSaleBadge: 'Bugünkü İndirimleri Gör',
@@ -402,6 +406,8 @@ const I18N_TRANSLATIONS = {
     brandLabel: 'Brand:',
     fontBtn: 'Font',
     cartBtn: 'Cart',
+    ordersBtn: 'My Orders',
+    navOrdersText: 'My Orders',
     adminBtn: 'Admin',
 
     flashSaleBadge: "View Today's Deals",

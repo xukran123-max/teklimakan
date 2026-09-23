@@ -361,7 +361,10 @@ body, .admin-app, input, select, textarea, button {
   width: 54px;
   height: 54px;
   border-radius: var(--radius-sm);
-  object-fit: cover;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 2px;
+  box-sizing: border-box;
   border: 1px solid var(--admin-border);
 }
 
@@ -1571,9 +1574,11 @@ body.dark-mode select#agentFilterStatus {
   width: 44px;
   height: 44px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   border: 1px solid var(--admin-border);
   background: #fff;
+  padding: 2px;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 .online-pulse {

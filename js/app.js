@@ -1088,7 +1088,7 @@ function initTeklimakanApp() {
 
       return `
         <div class="cart-item" style="align-items: center; gap: 0.75rem; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color);">
-          <img src="${p.image}" alt="${p.name}" style="width: 65px; height: 65px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'">
+          <img src="${p.image}" alt="${p.name}" style="width: 65px; height: 65px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 3px; box-sizing: border-box; border: 1px solid var(--border-color); flex-shrink: 0;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'">
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
             <div style="display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.35rem;">

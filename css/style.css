@@ -212,7 +212,14 @@ button, input, select, textarea {
   position: relative;
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  direction: ltr !important; /* پۈتۈن تور كۆرگۈلەردە راۋان، سەكرىمەس فىزىكىلىق ھەرىكەت كاپالىتى */
+}
+
+html[dir="rtl"] .top-announcement {
+  direction: rtl !important;
+}
+
+html[dir="ltr"] .top-announcement {
+  direction: ltr !important;
 }
 
 .top-marquee-container {
@@ -229,17 +236,38 @@ button, input, select, textarea {
   width: max-content;
 }
 
-.marquee-group {
+/* ئۇيغۇرچە (RTL) ئۈچۈن تەبىئىي، تەمكىن 65 سېكۇنتلۇق راۋان ئايلىنىش */
+html[dir="rtl"] .marquee-group {
   display: flex;
   align-items: center;
   flex-shrink: 0;
   gap: 3.5rem;
-  padding-right: 3.5rem; /* كېيىنكى گۇرۇپپا بىلەن بولغان ئارىلىقنى دەل ماسلاشتۇرۇش */
-  animation: scrollMarqueeSmooth 38s linear infinite;
+  padding-left: 3.5rem; /* گۇرۇپپىلار ئارىسىدىكى ئارىلىقنى كاپالەتلەندۈرۈش */
+  animation: scrollMarqueeRtl 65s linear infinite;
   will-change: transform;
 }
 
-@keyframes scrollMarqueeSmooth {
+@keyframes scrollMarqueeRtl {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* تۈركچە ۋە ئىنگلىزچە (LTR) ئۈچۈن راۋان ئايلىنىش */
+html[dir="ltr"] .marquee-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 3.5rem;
+  padding-right: 3.5rem;
+  animation: scrollMarqueeLtr 65s linear infinite;
+  will-change: transform;
+}
+
+@keyframes scrollMarqueeLtr {
   0% {
     transform: translateX(0);
   }
@@ -2951,10 +2979,15 @@ html[dir="rtl"] .live-sales-popup {
     height: 36px;
     font-size: 0.85rem;
   }
-  .marquee-group {
+  html[dir="rtl"] .marquee-group {
+    gap: 2rem;
+    padding-left: 2rem;
+    animation-duration: 55s;
+  }
+  html[dir="ltr"] .marquee-group {
     gap: 2rem;
     padding-right: 2rem;
-    animation-duration: 28s;
+    animation-duration: 55s;
   }
   .marquee-item {
     font-size: 0.85rem;

@@ -4,6 +4,10 @@
     {
       "source": "/seidiye",
       "destination": "/seidiye.html"
+    },
+    {
+      "source": "/seidiye/(.*)",
+      "destination": "/seidiye.html"
     }
   ],
   "redirects": [

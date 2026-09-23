@@ -2,7 +2,7 @@
 <html lang="ug" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>تەكلىماكان سودا تورى | ئارقا باشقۇرۇش مەركىزى (Admin)</title>
   <base href="/">
   
@@ -13,15 +13,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- ئۇيغۇرچە فونىت ۋە ئارقا بەت كۆرۈنۈش ئۇسلۇبى -->
-  <link rel="stylesheet" href="css/fonts.css?v=20260921_v22">
-  <link rel="stylesheet" href="css/style.css?v=20260923_v8">
-  <link rel="stylesheet" href="css/admin.css?v=20260923_v8">
+  <link rel="stylesheet" href="css/fonts.css?v=20260924_v28">
+  <link rel="stylesheet" href="css/style.css?v=20260924_v28">
+  <link rel="stylesheet" href="css/admin.css?v=20260924_v28">
 </head>
 <body>
 
   <!-- 🔐 ئارقا باشقۇرۇش مەركىزىگە كىرىش كۆزنىكى (Admin Security Login Gate) -->
-  <div id="adminLoginOverlay" class="admin-login-overlay" style="display: flex; position: fixed; inset: 0; background: #0b1329; z-index: 99999; align-items: center; justify-content: center; padding: 1.5rem;">
-    <div class="admin-login-card" style="width: 100%; max-width: 420px; background: #1e293b; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; color: #ffffff;">
+  <div id="adminLoginOverlay" class="admin-login-overlay">
+    <div class="admin-login-card">
       <div style="width: 76px; height: 76px; border-radius: 50%; border: 2.5px solid #eab308; margin: 0 auto 1.25rem; overflow: hidden; box-shadow: 0 4px 20px rgba(234, 179, 8, 0.3);">
         <img src="images/logo_circle.png" alt="تەكلىماكان لوگوسى" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
@@ -34,7 +34,7 @@
           <label class="form-label" style="font-size: 0.88rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; display: block;">
             <i class="fas fa-user-shield" style="color: #60a5fa;"></i> باشقۇرغۇچى نامى:
           </label>
-          <input type="text" id="adminUsernameInput" class="form-control number-latin" placeholder="نامنى كىرگۈزۈڭ..." required autofocus autocomplete="username" style="background: #0f172a; border-color: #334155; color: #ffffff; height: 44px; font-size: 1rem;">
+          <input type="text" id="adminUsernameInput" class="form-control number-latin" placeholder="نامنى كىرگۈزۈڭ..." required autofocus autocomplete="username" style="background: #0f172a; border-color: #334155; color: #ffffff; height: 46px; font-size: 16px;">
         </div>
 
         <div style="position: relative;">
@@ -42,7 +42,7 @@
             <i class="fas fa-key" style="color: #f59e0b;"></i> مەخپىي نومۇر (پارول):
           </label>
           <div style="position: relative; display: flex; align-items: center;">
-            <input type="password" id="adminPasswordInput" class="form-control number-latin" placeholder="پارولنى كىرگۈزۈڭ..." required autocomplete="current-password" style="background: #0f172a; border-color: #334155; color: #ffffff; padding-left: 2.5rem; height: 44px; font-size: 1rem;">
+            <input type="password" id="adminPasswordInput" class="form-control number-latin" placeholder="پارولنى كىرگۈزۈڭ..." required autocomplete="current-password" style="background: #0f172a; border-color: #334155; color: #ffffff; padding-left: 2.5rem; height: 46px; font-size: 16px;">
             <button type="button" id="btnToggleAdminPw" style="position: absolute; left: 0.75rem; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; padding: 0.25rem;" title="پارولنى كۆرسىتىش/يوشۇرۇش">
               <i class="fas fa-eye" id="iconToggleAdminPw"></i>
             </button>
@@ -53,7 +53,7 @@
           <i class="fas fa-exclamation-circle"></i> باشقۇرغۇچى نامى ياكى پارول خاتا!
         </div>
 
-        <button type="submit" class="btn-checkout" style="width: 100%; height: 46px; font-size: 1.05rem; font-weight: 800; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+        <button type="submit" class="btn-checkout" style="width: 100%; height: 48px; font-size: 1.05rem; font-weight: 800; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
           <i class="fas fa-lock-open"></i>
           <span>سىستېمىغا كىرىش</span>
         </button>

@@ -4457,5 +4457,58 @@ html[dir="rtl"] .chat-bubble-time {
   }
 }
 
+/* ================================================================
+   📱 ئالدى دۇكان تېلېفون سەزگۈرلۈكى ۋە كۇنۇپكا راۋانلىقى (Mobile Storefront Enhancements)
+   ================================================================ */
+@media (max-width: 768px) {
+  /* مەھسۇلات سېتىۋېلىش ۋە سېۋەتكە سېلىش كۇنۇپكىلىرى بارماققا تېگىشلىك ئۆلچەم */
+  .btn-add-cart,
+  .btn-buy-now,
+  .btn-checkout {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* خېرىدار چىقىم قىلىش ۋە ئادرېس تولدۇرۇش جەدۋىلىدىكى كىرگۈزۈش رامكىلىرى */
+  .checkout-form input,
+  .checkout-form select,
+  .checkout-form textarea {
+    font-size: 16px !important; /* iOS Zoom نىڭ ئالدىنى ئېلىش */
+    height: 46px !important;
+  }
+
+  .checkout-form textarea {
+    height: auto !important;
+  }
+
+  /* بارلىق كۆزنەك (Modal) تېلېفون رازمېرىغا ماس كېلىش */
+  .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* تېلېفوندا كىچىك ئېكران مەھسۇلات باھاسى ۋە نامى */
+  .product-card .product-title {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .product-price-current {
+    font-size: 1.15rem !important;
+  }
+
+  /* ئۈستۈنكى ئايلانما خەۋەر قۇرى */
+  .top-marquee-content {
+    font-size: 0.8rem !important;
+  }
+}
+
+
 
 

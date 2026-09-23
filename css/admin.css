@@ -1733,3 +1733,150 @@ body.dark-mode select#agentFilterStatus {
   pointer-events: auto !important;
 }
 
+/* ================================================================
+   📱 تېلېفون ئۈسكۈنىلىرىگە پۈتۈنلەي يېڭى، مۇكەممەل ماسلىشىش (Complete Mobile Responsiveness)
+   ================================================================ */
+
+/* 🔐 1. باشقۇرغۇچى كىرىش كۆزنىكى تېلېفون ماسلىشىشچانلىقى */
+.admin-login-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: #0b1329 !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1.25rem !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.admin-login-card {
+  width: 100% !important;
+  max-width: 430px !important;
+  margin: auto !important;
+  background: #1e293b !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 22px !important;
+  padding: 2.25rem 1.75rem !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+  text-align: center !important;
+}
+
+@media (max-width: 480px) {
+  .admin-login-overlay {
+    padding: 0.85rem !important;
+    align-items: flex-start !important;
+  }
+  .admin-login-card {
+    padding: 1.6rem 1.15rem !important;
+    margin: 1rem auto 2.5rem !important;
+    border-radius: 18px !important;
+  }
+  .admin-login-card input {
+    height: 48px !important;
+    font-size: 16px !important;
+  }
+  .admin-login-card button[type="submit"] {
+    height: 48px !important;
+    font-size: 1.05rem !important;
+  }
+}
+
+/* 📱 2. ئارقا سۇپا كۆچمە ئېكران (<= 768px) ماسلىشىشچانلىقى */
+@media (max-width: 768px) {
+  /* تۈرلەر سەھىپىسىدىكى كۆرسىتىش ۋە قوشۇش ئىككى تۈۋرۈكىنى تىك رەتلەش */
+  #tab-categories > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  /* خەۋەرلىشىش مەركىزىدىكى 420px كاتەكچىنى كۆچمە ئېكرانغا پۈتۈنلەي ماسلاشتۇرۇش */
+  #tab-messages > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  /* مودال ئىچىدىكى 2 ۋە 3 تۈۋرۈكلۈك رەت قۇرۇلمىلىرىنى تېلېفوندا رەتلىك تىك قىلىش */
+  .modal-content div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* ۋاكالەتچى ماركا ھوقۇقى چەكبوكسلىرى ۋە كۆپ تاللاش كاتەكچىلىرى */
+  #agentBrandsCheckboxList,
+  #newAgentBrandsCheckboxList {
+    grid-template-columns: 1fr !important;
+    max-height: 180px !important;
+  }
+
+  /* جەدۋەل مەشغۇلات كۇنۇپكىلىرى بارماق بىلەن ئوڭاي ۋە خاتاسىز بېسىلىدىغان ئۆلچەمگە يەتكۈزۈلدى */
+  .btn-action-edit,
+  .btn-action-delete {
+    min-width: 36px !important;
+    height: 36px !important;
+    padding: 0 0.55rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.92rem !important;
+    border-radius: 9px !important;
+  }
+
+  .btn-action-edit i,
+  .btn-action-delete i {
+    font-size: 0.95rem !important;
+  }
+
+  /* سۈزگۈچ ۋە ئىزدەش رامكىلىرى */
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  /* يانفون ئاستى يول باشلاش بالدىقى ئۈچۈن بىخەتەر رايون (iPhone Safe Area) */
+  .admin-mobile-bottom-nav {
+    height: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  .admin-body {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* بارلىق مودال كۆزنەكلەر تېلېفوندا سىلىق ھەم تولۇق چىقسۇن */
+  .modal-backdrop {
+    padding: 0.5rem !important;
+    align-items: center !important;
+  }
+
+  .modal-backdrop .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh !important;
+    margin: auto !important;
+    border-radius: 18px !important;
+    padding: 1.25rem 1rem !important;
+  }
+
+  .modal-header h4, .modal-title {
+    font-size: 1.05rem !important;
+  }
+
+  /* تېلېفوندا جەدۋەلنىڭ ئوڭ-سولغا سۈرۈلىدىغانلىقىنى ئېنىق بىلدۈرۈش */
+  .admin-table-wrap,
+  .data-table-container {
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.65rem 0.5rem !important;
+  }
+}
+
+

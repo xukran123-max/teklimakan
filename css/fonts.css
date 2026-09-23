@@ -87,3 +87,44 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.5;
   letter-spacing: 0;
 }
+
+/* 📱 تېلېفون ئۈسكۈنىلىرىگە ماسلاشقان سەزگۈر خەت چوڭلۇقى ۋە سىيرىلىش (Responsive Mobile Typography) */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+  body,
+  body.font-modern,
+  body.font-traditional {
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+  h1 { font-size: 1.65rem; }
+  h2 { font-size: 1.45rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.1rem; }
+  h5 { font-size: 0.98rem; }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14.5px;
+  }
+  body,
+  body.font-modern,
+  body.font-traditional {
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.15rem; }
+  h4 { font-size: 1.05rem; }
+  h5 { font-size: 0.95rem; }
+
+  /* iOS Safari دا كىرگۈزۈش رامكىسىنى چەككەندە ئاپتوماتىك چوڭىيىپ (Auto-zoom) قالمىسۇن */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+

@@ -4274,10 +4274,26 @@ function initTeklimakanApp() {
       }
     }
 
+    const CORRECT_BANK_TEXT = `🏦 تەكلىماكان سۇپىسى بانكا ھېسابات ئۇچۇرى (Havale / EFT / FAST):\n\n🏛️ بانكا نامى: QNB Finansbank (Enpara.com)\n👤 ھېسابات ئىگىسى: Abudurusuli tuniyazi\n💳 IBAN:\nTR65 0015 7000 0000 0095 1544 93\n\n⚠️ مۇھىم ئەسكەرتىش: پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا چوقۇم (kuruyemiş) دەپ يېزىپ قويۇڭ!`;
+
     function getChatHistory() {
       try {
         const raw = localStorage.getItem(CHAT_STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          let list = JSON.parse(raw);
+          let modified = false;
+          list = list.map(item => {
+            if (item && item.text && (item.text.includes('TR68 0021') || item.text.includes('GULNISA') || item.text.includes('Ziraat Katılım') || item.text.includes('Ziraat'))) {
+              item.text = CORRECT_BANK_TEXT;
+              modified = true;
+            }
+            return item;
+          });
+          if (modified) {
+            saveChatHistory(list);
+          }
+          return list;
+        }
       } catch (e) {}
       return [
         {
@@ -4513,7 +4529,7 @@ function initTeklimakanApp() {
         answerText = `📦 ھۆرمەتلىك خېرىدار! زاكاز ئەھۋالىڭىزنى سۈرۈشتۈرۈش ئۇسۇللىرى:\n\n1. تور بېكىتىمىزنىڭ ئەڭ ئۈستىدىكى «📦 زاكازلىرىم» كۇنۇپكىسىنى چەكسىڭىز، تېلېفون نومۇرىڭىزنى كىرگۈزۈش ئارقىلىق بىر نەچچە يىل ئىلگىرىكى زاكازلىرىڭىزنىمۇ دەرھال كۆرەلەيسىز.\n\n2. ياكى زاكاز نومۇرىڭىزنى مۇشۇ يەرگە يېزىپ قالدۇرسىڭىز، بىز ئەھۋالىنى دەرھال تەكشۈرۈپ جاۋاب قايتۇرىمىز.`;
       } else if (actionKey === 'bank' || buttonText.includes('بانكا')) {
         questionText = '💳 پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.';
-        answerText = `🏦 تەكلىماكان سۇپىسى بانكا ھېسابات ئۇچۇرى (Havale / EFT / FAST):\n\n🏛️ بانكا: Ziraat Katılım\n👤 ھېسابات ئىگىسى: GULNISA ABDURAHMAN\n💳 IBAN:\nTR68 0021 0000 0005 3290 8000 01\n\n⚠️ مۇھىم ئەسكەرتىش: پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا پەقەت (kuruyemiş) دەپ يېزىپ قويۇڭ!`;
+        answerText = CORRECT_BANK_TEXT;
       } else if (actionKey === 'cargo' || buttonText.includes('كارگو')) {
         questionText = '🚚 مال قاچان يوللىنىدۇ، كارگو ئەھۋالى قانداق؟';
         answerText = `🚚 ھۆرمەتلىك خېرىدار! بارلىق زاكازلار تەستىقلانغاندىن كېيىن 24 سائەت ئىچىدە كېلىشىملىك تېز يەتكۈزۈش (كارگو) شىركىتىگە تاپشۇرۇلىدۇ.\n\nمال يوللانغان ھامان سىزگە ئاپتوماتىك كارگو ئىز قوغلاش كودى ئۇچۇر قىلىپ يوللىنىدۇ. زاكاز نومۇرىڭىزنى يازسىڭىز، كارگونىڭ ھازىر قەيەرگە كەلگەنلىكىنى تەكشۈرۈپ بېرىمىز.`;

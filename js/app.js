@@ -4243,11 +4243,36 @@ function initTeklimakanApp() {
         .replace(/"/g, '&quot;');
     }
 
-    // 1. ئالدىن ساقلانغان تېلېفون ۋە ئىسىمنى تولدۇرۇش
+    // 1. ئالدىن ساقلانغان تېلېفون، ئىسىم ۋە خېرىدار مەخسۇس ئولتۇرۇش كودى (Customer Session ID)
     const savedPhone = localStorage.getItem('teklimakan_customer_phone') || '';
     const savedName = localStorage.getItem('teklimakan_customer_name') || '';
     if (phoneInput && savedPhone) phoneInput.value = savedPhone;
     if (nameInput && savedName) nameInput.value = savedName;
+
+    let custSessionId = localStorage.getItem('teklimakan_cust_session_id');
+    if (!custSessionId) {
+      custSessionId = 'C' + Math.floor(100000 + Math.random() * 900000);
+      localStorage.setItem('teklimakan_cust_session_id', custSessionId);
+    }
+
+    function getMySentTgMsgs() {
+      try {
+        const raw = localStorage.getItem('teklimakan_my_tg_msgs');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return [];
+    }
+
+    function recordMySentTgMsg(msgId) {
+      if (!msgId) return;
+      const list = getMySentTgMsgs();
+      if (!list.includes(msgId)) {
+        list.push(msgId);
+        try {
+          localStorage.setItem('teklimakan_my_tg_msgs', JSON.stringify(list));
+        } catch (e) {}
+      }
+    }
 
     function getChatHistory() {
       try {
@@ -4259,7 +4284,7 @@ function initTeklimakanApp() {
           id: 'msg-welcome',
           sender: 'admin',
           name: 'ئالىي باشقۇرغۇچى',
-          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خوش كەپسىز. بىزگە بۇ يەردىن بىۋاسىتە ئۇچۇر يازسىڭىز، ئۇچۇرىڭىز دەرھال تېلېگرامما ئارقىلىق ماڭا يەتكۈزۈلىدۇ. زاكاز، مەھسۇلات ياكى چىقىم ھەققىدە قانداق سوئالىڭىز بولسا خۇشاللىق بىلەن ياردەم بېرىمىز!',
+          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خوش كەپسىز. بىزگە بۇ يەردىن بىۋاسىتە ئۇچۇر يازسىڭىز، ئۇچۇرىڭىز دەرھال تېلېگرامما ئارقىلىق ماڭا يەتكۈزۈلىدۇ. سىز تېلېگراممىدىن قايتۇرغان جاۋابنىمۇ دەل ۋاقتىدا مۇشۇ يەردە كۆرەلەيسىز!',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
           timestamp: Date.now()
@@ -4297,22 +4322,138 @@ function initTeklimakanApp() {
       }, 50);
     }
 
+    // 🔄 تېلېگرامما ئارقىلىق ئالىي باشقۇرغۇچى قايتۇرغان جاۋابنى تەكشۈرۈش (Telegram Two-Way Sync)
+    let pollInterval = null;
+    let isPolling = false;
+
+    async function checkTelegramReplies() {
+      if (isPolling) return;
+      if (!window.appStore || typeof window.appStore.getTelegramUpdates !== 'function') return;
+
+      isPolling = true;
+      try {
+        const updates = await window.appStore.getTelegramUpdates();
+        if (!Array.isArray(updates) || updates.length === 0) {
+          isPolling = false;
+          return;
+        }
+
+        const mySentMsgIds = getMySentTgMsgs();
+        const currentPhone = localStorage.getItem('teklimakan_customer_phone') || '';
+        const cleanPhone = currentPhone.replace(/[\s\-\+]/g, '');
+        const history = getChatHistory();
+        let hasNewReply = false;
+
+        for (const u of updates) {
+          const msg = u && (u.message || u.channel_post);
+          if (!msg || !msg.text) continue;
+
+          const replyTo = msg.reply_to_message;
+          let isForThisCustomer = false;
+          let replyContent = msg.text.trim();
+
+          // 1-ئۇسۇل: تېلېگراممىدا روبوت ئەۋەتكەن خېرىدار ئۇچۇرىغا «Reply (جاۋاب قايتۇرۇش)» قىلىنغان بولسا
+          if (replyTo) {
+            if (mySentMsgIds.includes(replyTo.message_id)) {
+              isForThisCustomer = true;
+            } else if (replyTo.text && replyTo.text.includes('#' + custSessionId)) {
+              isForThisCustomer = true;
+            } else if (cleanPhone && cleanPhone.length >= 8 && replyTo.text && replyTo.text.includes(cleanPhone)) {
+              isForThisCustomer = true;
+            }
+          }
+
+          // 2-ئۇسۇل: ئالىي باشقۇرغۇچى بۇيرۇق شەكلىدە يازغان بولسا (/reply Cxxxxxx ياكى #Cxxxxxx)
+          if (!isForThisCustomer) {
+            const cmdPattern = new RegExp(`^(\\/reply|\\/r|#)\\s*#?${custSessionId}\\s*(.*)$`, 'i');
+            const match = replyContent.match(cmdPattern);
+            if (match) {
+              isForThisCustomer = true;
+              replyContent = match[2] ? match[2].trim() : replyContent;
+            } else if (cleanPhone && cleanPhone.length >= 8 && replyContent.startsWith(cleanPhone)) {
+              isForThisCustomer = true;
+              replyContent = replyContent.replace(cleanPhone, '').trim();
+            }
+          }
+
+          if (isForThisCustomer && replyContent) {
+            const alreadyExists = history.some(item => item.telegramMsgId === msg.message_id);
+            if (!alreadyExists) {
+              const newReplyObj = {
+                id: 'admin-tg-' + msg.message_id,
+                telegramMsgId: msg.message_id,
+                sender: 'admin',
+                name: '👑 ئالىي باشقۇرغۇچى',
+                text: replyContent,
+                time: new Date(msg.date * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date(msg.date * 1000).toLocaleDateString('zh-CN'),
+                timestamp: msg.date * 1000
+              };
+              history.push(newReplyObj);
+              hasNewReply = true;
+            }
+          }
+        }
+
+        if (hasNewReply) {
+          saveChatHistory(history);
+          renderChatMessages();
+          if (typeof playChime === 'function') playChime('success');
+
+          const isVisible = chatBox && chatBox.style.display !== 'none';
+          if (!isVisible) {
+            const badge = document.getElementById('chatUnreadBadge');
+            if (badge) {
+              let count = parseInt(badge.textContent || '0', 10) || 0;
+              badge.textContent = (count + 1).toString();
+              badge.style.display = 'flex';
+            }
+            if (typeof showToast === 'function') {
+              showToast('👑 ئالىي باشقۇرغۇچىدىن سىزگە يېڭى ئۇچۇر كەلدى!', 'success');
+            }
+          }
+        }
+      } catch (err) {
+        // Polling error silently handled
+      } finally {
+        isPolling = false;
+      }
+    }
+
+    function startPolling(intervalMs = 4000) {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(checkTelegramReplies, intervalMs);
+    }
+
+    // دەسلەپكى ئارقا كۆرۈنۈشتە تەكشۈرۈشنى قوزغىتىش
+    startPolling(7000);
+    setTimeout(checkTelegramReplies, 1200);
+
     // كۆزنەكنى ئېچىش / تاقاش
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isVisible = chatBox.style.display !== 'none';
       if (isVisible) {
         chatBox.style.display = 'none';
+        startPolling(8000);
       } else {
         chatBox.style.display = 'flex';
+        const badge = document.getElementById('chatUnreadBadge');
+        if (badge) {
+          badge.textContent = '0';
+          badge.style.display = 'none';
+        }
         renderChatMessages();
         if (msgInput) setTimeout(() => msgInput.focus(), 150);
+        checkTelegramReplies();
+        startPolling(3500);
       }
     });
 
     if (btnClose) {
       btnClose.addEventListener('click', () => {
         chatBox.style.display = 'none';
+        startPolling(8000);
       });
     }
 
@@ -4359,13 +4500,21 @@ function initTeklimakanApp() {
 
       if (typeof playChime === 'function') playChime('click');
 
-      // 📲 ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىش
+      // 📲 ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىش (Reply ئىقتىدارىنى ئۆز ئىچىگە ئالىدۇ)
       if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
         const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
+        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n💬 <b>جاۋاب قايتۇرۇش ئۇسۇلى:</b>\nمۇشۇ ئۇچۇرغا «Reply (جاۋاب قايتۇرۇش)» قىلىپ يازسىڭىزلا، خېرىدارنىڭ تور بەت كۆزنىكىگە بىۋاسىتە بارىدۇ!\n(ياكى: <code>/reply ${custSessionId} سىزنىڭ جاۋابىڭىز</code>)\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
+
         window.appStore.sendTelegramAlert({
           title: '💬 [تور بېكەت خېرىدارى] ئالىي باشقۇرغۇچىغا بىۋاسىتە ئۇچۇر يازدى!',
-          message: `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n👉 <a href="${waLink}">WhatsApp دا دەرھال جاۋاب يېزىش</a>`,
+          message: tgAlertText,
           isUrgent: true
+        }).then(res => {
+          if (res && res.data && res.data.result && res.data.result.message_id) {
+            recordMySentTgMsg(res.data.result.message_id);
+          }
+        }).catch(err => {
+          console.warn('Live chat Telegram alert failed:', err);
         });
       }
 
@@ -4374,13 +4523,13 @@ function initTeklimakanApp() {
         window.appStore.recordCustomerChatMessage(newMsg);
       }
 
-      // 🤖 ئاپتوماتىك دەرھال جاۋاب قايتۇرۇش (1 سېكۇنتتىن كېيىن)
+      // 🤖 ئاپتوماتىك سىپايە جاۋاب (ئىشلەتكۈچى بەلگىلىگەن ئۆلچەملىك تېكىست بويىچە)
       setTimeout(() => {
         const reply = {
-          id: 'admin-reply-' + Date.now(),
+          id: 'admin-auto-reply-' + Date.now(),
           sender: 'admin',
           name: 'ئالىي باشقۇرغۇچى',
-          text: 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ ئۇچۇرىڭىز ئالىي باشقۇرغۇچىنىڭ تېلېگرامما ۋە يانفونىغا يەتكۈزۈلدى. بىز ئەڭ قىسقا ۋاقىت ئىچىدە جاۋاب قايتۇرىمىز. زاكاز ۋە جىددىي مەسىلىلەردە 05551609999 WhatsApp ياكى تېلېفون ئارقىلىقمۇ ئالاقىلاشسىڭىز بولىدۇ.',
+          text: 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ  ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
           timestamp: Date.now()

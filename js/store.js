@@ -2599,6 +2599,20 @@ class StoreManager {
     }
   }
 
+  async getTelegramUpdates(offset = null) {
+    try {
+      const settings = this.getSettings() || {};
+      const botToken = settings.telegramBotToken || INITIAL_SETTINGS.telegramBotToken;
+      if (!botToken) return [];
+      const url = `https://api.telegram.org/bot${botToken}/getUpdates?limit=50${offset ? `&offset=${offset}` : ''}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return (data && data.ok && Array.isArray(data.result)) ? data.result : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   submitAgentProduct(agentIdentifier, productData) {
     const loginRes = this.verifyAgentLogin(agentIdentifier);
     if (!loginRes.success) {

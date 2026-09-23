@@ -852,6 +852,32 @@ html[dir="rtl"] .floating-contact-wrap {
   animation: pulseChatDot 2s infinite;
 }
 
+.chat-unread-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 11px;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(239, 68, 68, 0.6);
+  animation: bounceBadge 0.8s infinite alternate ease-in-out;
+  z-index: 10;
+}
+
+@keyframes bounceBadge {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
 @keyframes pulseChatDot {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
   70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }

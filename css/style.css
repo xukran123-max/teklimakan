@@ -1269,7 +1269,6 @@ html[dir="rtl"] .live-sales-popup {
 .nav-action-wish-btn,
 .nav-action-orders-btn,
 .lang-select-dropdown,
-.currency-select-dropdown,
 .theme-toggle-btn {
   height: 38px;
   border-radius: var(--radius-full, 9999px) !important;
@@ -1431,29 +1430,7 @@ html[dir="rtl"] .live-sales-popup {
   margin-right: 1px;
 }
 
-/* 5. پۇل بىرلىكى كۇنۇپكىسى */
-.currency-selector-wrap {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.currency-select-dropdown {
-  padding: 0 0.85rem;
-  text-align: center;
-  font-family: inherit;
-  font-weight: 700;
-  direction: ltr;
-}
-
-.currency-select-dropdown:hover {
-  border-color: #059669;
-  background: #ecfdf5;
-  color: #047857;
-  transform: translateY(-1px);
-}
-
-/* 6. تۈن ھالىتى كۇنۇپكىسى */
+/* 5. تۈن ھالىتى كۇنۇپكىسى */
 .theme-toggle-btn {
   width: 38px;
   min-width: 38px;
@@ -3064,7 +3041,6 @@ html[dir="rtl"] .live-sales-popup {
     box-sizing: border-box;
   }
 
-  .currency-select-dropdown,
   .lang-select-dropdown,
   .nav-action-cart-btn,
   .nav-action-wish-btn,
@@ -3076,13 +3052,9 @@ html[dir="rtl"] .live-sales-popup {
     flex-shrink: 0;
   }
 
-  .currency-select-dropdown {
-    padding: 0 0.65rem;
-  }
-
   .lang-select-dropdown {
-    padding: 0 0.65rem;
-    gap: 0.35rem;
+    padding: 0 0.75rem;
+    gap: 0.4rem;
   }
 
   .theme-toggle-btn {
@@ -3093,22 +3065,25 @@ html[dir="rtl"] .live-sales-popup {
   }
 
   .nav-action-cart-btn {
-    padding: 0 0.75rem;
+    padding: 0 0.8rem;
     gap: 0.35rem;
   }
 
   .nav-action-wish-btn,
   .nav-action-orders-btn,
   .nav-action-track-btn {
-    padding: 0 0.75rem;
-    gap: 0.35rem;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+    border-radius: 50% !important;
+    justify-content: center;
   }
 
   .nav-action-cart-btn .nav-cart-text,
   .nav-action-wish-btn .nav-cart-text,
   .nav-action-orders-btn .nav-cart-text,
-  .nav-action-track-btn .nav-cart-text,
-  .lang-select-dropdown .nav-lang-text {
+  .nav-action-track-btn .nav-cart-text {
     display: none;
   }
 
@@ -3116,7 +3091,7 @@ html[dir="rtl"] .live-sales-popup {
   .nav-action-wish-btn i,
   .nav-action-orders-btn i,
   .nav-action-track-btn i {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 
   /* چوڭ تەشۋىقات بەلبېغى (Hero Slider) */
@@ -3523,12 +3498,19 @@ html[dir="rtl"] .live-sales-popup {
     font-size: 0.9rem;
     padding: 0;
   }
-  .nav-action-cart-btn,
+  .nav-action-cart-btn {
+    padding: 0 0.65rem;
+    gap: 0.3rem;
+  }
   .nav-action-wish-btn,
   .nav-action-orders-btn,
   .nav-action-track-btn {
-    padding: 0 0.65rem;
-    gap: 0.3rem;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    border-radius: 50% !important;
+    justify-content: center;
   }
   .nav-action-cart-btn .nav-cart-text,
   .nav-action-wish-btn .nav-cart-text,
@@ -3541,7 +3523,7 @@ html[dir="rtl"] .live-sales-popup {
   .nav-action-wish-btn i,
   .nav-action-orders-btn i,
   .nav-action-track-btn i {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 
   .hero-slider-container {

@@ -1396,7 +1396,12 @@ const INITIAL_SETTINGS = {
 
 class StoreManager {
   constructor() {
-    this.currentCurrency = localStorage.getItem(STORAGE_KEYS.CURRENCY) || 'TRY';
+    // 💵 تىل بىلەن ماس قەدەمدە پۇل بىرلىكىنى بېكىتىش (ug/tr -> TRY, en -> USD)
+    const currentLang = localStorage.getItem('teklimakan_language') || 'ug';
+    this.currentCurrency = currentLang === 'en' ? 'USD' : 'TRY';
+    try {
+      localStorage.setItem(STORAGE_KEYS.CURRENCY, this.currentCurrency);
+    } catch (e) {}
     this.init();
   }
 

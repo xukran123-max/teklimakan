@@ -1783,7 +1783,13 @@ function initTeklimakanApp() {
           renderCategories();
           renderProducts();
           updateCartUI();
-          showToast(`تىل ${selectedLang === 'ug' ? 'ئۇيغۇرچە' : (selectedLang === 'tr' ? 'Türkçe' : 'English')} غا ئالماشتۇرۇلدى!`, 'success');
+          if (selectedLang === 'ug') {
+            showToast('تىل ئۇيغۇرچىغا، پۇل بىرلىكى لىرا (₺ TRY) غا ئالماشتۇرۇلدى!', 'success');
+          } else if (selectedLang === 'tr') {
+            showToast('Dil Türkçe, para birimi Türk Lirası (₺ TRY) olarak ayarlandı!', 'success');
+          } else {
+            showToast('Language switched to English, currency set to US Dollar ($ USD)!', 'success');
+          }
         });
       });
     }

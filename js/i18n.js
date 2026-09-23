@@ -854,6 +854,9 @@ class I18nManager {
       initialLang = localStorage.getItem('teklimakan_language') || 'ug';
     }
     this.currentLang = initialLang;
+    try {
+      localStorage.setItem('teklimakan_currency_preference', initialLang === 'en' ? 'USD' : 'TRY');
+    } catch (e) {}
   }
 
   getLang() {
@@ -868,13 +871,16 @@ class I18nManager {
       // 💵 تىل بىلەن ماس قەدەمدە پۇل بىرلىكىنى ئاپتوماتىك ئالماشتۇرۇش:
       // ئۇيغۇرچە ۋە تۈركچە بولسا: لىرا (TRY)
       // ئىنگلىزچە بولسا: دوللار (USD)
+      const targetCurrency = lang === 'en' ? 'USD' : 'TRY';
+      try {
+        localStorage.setItem('teklimakan_currency_preference', targetCurrency);
+      } catch (e) {}
       if (window.appStore && typeof window.appStore.setCurrency === 'function') {
-        const targetCurrency = lang === 'en' ? 'USD' : 'TRY';
         window.appStore.setCurrency(targetCurrency);
       }
 
       this.applyDirectionAndTypography();
-      window.dispatchEvent(new CustomEvent('teklimakan_lang_changed', { detail: { lang } }));
+      window.dispatchEvent(new CustomEvent('teklimakan_lang_changed', { detail: { lang, currency: targetCurrency } }));
     }
   }
 

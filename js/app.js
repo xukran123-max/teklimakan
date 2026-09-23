@@ -1454,13 +1454,24 @@ function initTeklimakanApp() {
 
     const checkedPay = document.querySelector('input[name="checkoutPayment"]:checked');
     const notice = document.getElementById('whatsappPayNotice');
-    const submitBtnSpan = document.querySelector('#submitOrderBtn span');
+    const havaleDetails = document.getElementById('havalePaymentDetails');
+    const cardDetails = document.getElementById('cardPaymentDetails');
+    const submitBtn = document.getElementById('submitOrderBtn');
+    const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
+    const submitBtnIcon = submitBtn ? submitBtn.querySelector('i') : null;
+
     if (checkedPay && (checkedPay.value.includes('ۋاتساپ') || checkedPay.value.includes('WhatsApp'))) {
       if (notice) notice.style.display = 'block';
-      if (submitBtnSpan) submitBtnSpan.textContent = window.appI18n.t('payWhatsappBtn');
+      if (havaleDetails) havaleDetails.style.display = 'none';
+      if (cardDetails) cardDetails.style.display = 'none';
+      if (submitBtnSpan) submitBtnSpan.textContent = 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
+      if (submitBtnIcon) submitBtnIcon.className = 'fab fa-whatsapp';
     } else {
       if (notice) notice.style.display = 'none';
-      if (submitBtnSpan) submitBtnSpan.textContent = window.appI18n.t('submitOrderBtn');
+      if (havaleDetails) havaleDetails.style.display = 'block';
+      if (cardDetails) cardDetails.style.display = 'none';
+      if (submitBtnSpan) submitBtnSpan.textContent = 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
+      if (submitBtnIcon) submitBtnIcon.className = 'fas fa-university';
     }
 
     closeCartDrawer();
@@ -2089,6 +2100,12 @@ function initTeklimakanApp() {
         }
       }
 
+      if (labelCard) {
+        labelCard.addEventListener('click', (e) => {
+          showToast('بانكا ياكى خەلقئارالىق كارتا ئارقىلىق پۇل تۆلەش ھازىرچە پاسسىپ ھالەتتە. بانكا ھېساباتىغا يۆتكەش (Havale) ياكى ۋاتساپ ئارقىلىق پۇل تۆلەڭ.', 'info');
+        });
+      }
+
       document.querySelectorAll('input[name="checkoutPayment"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
           updatePaymentMethodUI(e.target.value);
@@ -2274,6 +2291,22 @@ function initTeklimakanApp() {
       renderCategories();
       renderProducts();
       updateCartUI();
+    });
+
+    window.addEventListener('teklimakan_lang_changed', (e) => {
+      const lang = (e && e.detail) ? e.detail.lang : window.appI18n.getLang();
+      const phoneInp = document.getElementById('checkoutCustPhone');
+      const addressInp = document.getElementById('checkoutCustAddress');
+      if (phoneInp) phoneInp.placeholder = '05XX XXX XX XX (+90)';
+      if (addressInp) {
+        if (lang === 'tr') {
+          addressInp.placeholder = 'Mahalle, Cadde, Sokak, No, Daire, İlçe...';
+        } else if (lang === 'en') {
+          addressInp.placeholder = 'District, Street, Building, Flat...';
+        } else {
+          addressInp.placeholder = 'مەھەللە، كوچا، بىنا-ئۆي، ناھىيە (Mahalle, Cadde, Sokak, No, İlçe...)';
+        }
+      }
     });
   }
 
@@ -2704,7 +2737,7 @@ function initTeklimakanApp() {
     const isHavale = (order.paymentMethod || '').includes('يۆتكەش') || (order.paymentMethod || '').includes('Havale');
     const isCard = (order.paymentMethod || '').includes('كارتا') || (order.paymentMethod || '').includes('Card');
     const waUrl = isWhatsapp ? getWhatsAppOrderUrl(order, window.appI18n.getLang()) : '';
-    const havaleWaUrl = `https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان! زاكاز نومۇرۇم: ${order.id}، بانكا ئارقىلىق ${order.totalFormatted} پۇلنى ئاتتىم، دەلىل تالونىنى يوللاۋاتىمەن.`)}`;
+    const havaleWaUrl = `https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان! زاكاز نومۇرۇم: ${order.id}، بانكىدىن Açıklama غا kuruyemiş دەپ يېزىپ ${order.totalFormatted} پۇلنى ئەۋەتتىم، دەلىل تالونىنى يوللاۋاتىمەن.`)}`;
 
     let methodDetailsHtml = '';
 
@@ -2726,10 +2759,10 @@ function initTeklimakanApp() {
             <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; direction: ltr;">TR65 0015 7000 0000 0095 1544 93</span>
             <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR650015700000000095154493'); showToast('IBAN كۆچۈرۈلدى!', 'success'); this.innerText='كۆچۈرۈلدى ✓';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">IBAN كۆچۈرۈش</button>
           </div>
-          <div style="font-size: 0.8rem; color: #15803d; margin-bottom: 0.6rem;">
-            بانكا: <strong>QNB Finansbank (Enpara.com)</strong><br>
-            ھېسابات ئىگىسى: <strong>Abudurusuli tuniyazi</strong><br>
-            Açıklama چۈشەندۈرۈشىگە: <strong>${order.id}</strong> دەپ يېزىڭ.
+          <div style="font-size: 0.82rem; color: #15803d; margin-bottom: 0.6rem; line-height: 1.6;">
+            <strong>بانكا:</strong> QNB Finansbank (Enpara.com)<br>
+            <strong>ھېسابات ئىگىسى:</strong> Abudurusuli tuniyazi<br>
+            <strong>Açıklama (چۈشەندۈرۈش) قىسمىغا:</strong> <span style="background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.95rem;">kuruyemiş</span> دەپ يېزىڭ.
           </div>
           <a href="${havaleWaUrl}" target="_blank" class="btn btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: #059669; color: #ffffff; text-decoration: none; padding: 0.55rem; border-radius: 6px; font-weight: 700;">
             <i class="fab fa-whatsapp"></i> دەلىل / تالوننى ۋاتساپتا ئەۋەتىش

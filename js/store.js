@@ -2248,7 +2248,10 @@ class StoreManager {
     else if (!waPhone.startsWith('90') && waPhone.length === 10) waPhone = '90' + waPhone;
     const waLink = waPhone ? `https://wa.me/${waPhone}` : '';
 
-    const adminUrl = 'https://xukran123-max.github.io/teklimakan/admin.html';
+    let adminUrl = 'https://teklimakan.vercel.app/admin.html';
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html');
+    }
 
     // 🤖 ئالىي باشقۇرغۇچىغا Telegram ئارقىلىق يېڭى ۋاكالەتچى ئىلتىماسى ۋە ئىمزالانغان كېلىشىم ئۇقتۇرۇشى ئەۋەتىش
     const alertTitle = isReapply ? 

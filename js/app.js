@@ -2590,7 +2590,7 @@ function initTeklimakanApp() {
         `\n⚠️ <b>ھالىتى:</b> ⏳ <b>تەستىق كۈتۈۋاتىدۇ (دۇكاندا كۆرۈنمەيدۇ)</b>\n` +
         `⏰ <b>تاپشۇرۇلغان ۋاقتى:</b> ${new Date().toLocaleString()}\n\n` +
         `👉 <i>ئارقا سۇپىغا كىرىپ، تاۋارلار سەھىپىسىدىن بىر كۇنۇپكا بىلەن تەستىقلاڭ ياكى رەت قىلىڭ:</i>\n` +
-        `🔗 https://meanwhile-makers-traveling-img.trycloudflare.com/admin.html`;
+        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html')) : 'https://teklimakan.vercel.app/admin.html')}">باشقۇرۇش مەركىزىدىن تەستىقلاش</a>`;
 
       await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
         method: 'POST',
@@ -2668,7 +2668,7 @@ function initTeklimakanApp() {
         `📍 <b>بايقالغان ئورنى:</b> مەھسۇلاتنىڭ <b>${field || 'مەزمۇنىدا'}</b>\n\n` +
         `⚠️ <b>ھالىتى:</b> تاشقى ئۇلىنىش تۈپەيلى دۇكاندىن تۇتۇپ قېلىندى ھەم ۋاكالەتچىگە رەت قىلىش ئېكرانى كۆرسىتىلدى.\n` +
         `👉 <i>ئالىي باشقۇرغۇچى سۈپىتىدە، ئارقا سۇپىدىن بىر كۇنۇپكا بىلەن تەستىقلاڭ ياكى پۈتۈنلەي رەت قىلىڭ:</i>\n` +
-        `🔗 https://meanwhile-makers-traveling-img.trycloudflare.com/admin.html`;
+        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html')) : 'https://teklimakan.vercel.app/admin.html')}">باشقۇرۇش مەركىزىدىن بىر تەرەپ قىلىش</a>`;
 
       await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
         method: 'POST',
@@ -2737,7 +2737,10 @@ function initTeklimakanApp() {
       else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
       const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '';
 
-      const adminUrl = 'https://xukran123-max.github.io/teklimakan/admin.html';
+      let adminUrl = 'https://teklimakan.vercel.app/admin.html';
+      if (typeof window !== 'undefined' && window.location && window.location.origin) {
+        adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html');
+      }
 
       let msg = `👤 <b>يېڭى ۋاكالەتچى / سودىگەر ئىلتىماسى كېلىپ چۈشتى!</b>\n\n` +
         `🆔 <b>ئىلتىماس نومۇرى:</b> <code>${agent.id}</code>\n` +

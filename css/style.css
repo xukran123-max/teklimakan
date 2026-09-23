@@ -201,7 +201,7 @@ button, input, select, textarea {
 
 /* ==================== ئۈستۈنكى ئېلان تاختىسى ۋە ئايلانما خەت (Marquee Ticker) ==================== */
 .top-announcement {
-  background: linear-gradient(90deg, #1e3a8a, #2563eb, #1d4ed8);
+  background: linear-gradient(90deg, #064e3b 0%, #047857 50%, #065f46 100%);
   color: #ffffff;
   font-size: 0.92rem;
   padding: 0.35rem 0;
@@ -210,7 +210,8 @@ button, input, select, textarea {
   align-items: center;
   overflow: hidden;
   position: relative;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .top-marquee-container {
@@ -276,6 +277,14 @@ button, input, select, textarea {
 
 .marquee-badge.badge-gift {
   background: #f59e0b;
+}
+
+.marquee-badge.badge-package {
+  background: #0284c7;
+}
+
+.marquee-badge.badge-local {
+  background: #10b981;
 }
 
 .marquee-badge.badge-service {

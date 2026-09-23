@@ -123,15 +123,10 @@ function initTeklimakanApp() {
     if (annEl) annEl.textContent = i18n.t('announcement');
 
     // ئۈستۈنكى ھەرىكەتچان ئايلانما خەت (Marquee Ticker)
-    document.querySelectorAll('[data-marquee-badge="1"]').forEach(el => el.textContent = i18n.t('marqueeBadge1'));
-    document.querySelectorAll('[data-marquee-badge="2"]').forEach(el => el.textContent = i18n.t('marqueeBadge2'));
-    document.querySelectorAll('[data-marquee-badge="3"]').forEach(el => el.textContent = i18n.t('marqueeBadge3'));
-    document.querySelectorAll('[data-marquee-badge="4"]').forEach(el => el.textContent = i18n.t('marqueeBadge4'));
-
-    document.querySelectorAll('[data-marquee-text="1"]').forEach(el => el.textContent = i18n.t('marqueeText1'));
-    document.querySelectorAll('[data-marquee-text="2"]').forEach(el => el.textContent = i18n.t('marqueeText2'));
-    document.querySelectorAll('[data-marquee-text="3"]').forEach(el => el.textContent = i18n.t('marqueeText3'));
-    document.querySelectorAll('[data-marquee-text="4"]').forEach(el => el.textContent = i18n.t('marqueeText4'));
+    for (let m = 1; m <= 5; m++) {
+      document.querySelectorAll(`[data-marquee-badge="${m}"]`).forEach(el => el.textContent = i18n.t(`marqueeBadge${m}`));
+      document.querySelectorAll(`[data-marquee-text="${m}"]`).forEach(el => el.textContent = i18n.t(`marqueeText${m}`));
+    }
 
     // ئۈستۈنكى تاياقچە ئۇچۇرلىرى
     const topWhatsapp = document.getElementById('topWhatsappSpan');

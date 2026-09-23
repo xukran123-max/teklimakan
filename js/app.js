@@ -2099,11 +2099,11 @@ function initTeklimakanApp() {
       const btnCopyIban = document.getElementById('btnCopyIban');
       if (btnCopyIban) {
         btnCopyIban.addEventListener('click', () => {
-          const ibanText = 'TR840020500009876543210001';
+          const ibanText = 'TR650015700000000095154493';
           const copySpan = document.getElementById('btnCopyIbanText');
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(ibanText).then(() => {
-              showToast('IBAN نۇمۇرى كۆچۈرۈلدى: TR84 0020 5000 0987 6543 2100 01', 'success');
+              showToast('IBAN كۆچۈرۈلدى: TR65 0015 7000 0000 0095 1544 93 (QNB Enpara)', 'success');
               if (copySpan) copySpan.textContent = 'كۆچۈرۈلدى ✓';
               setTimeout(() => { if (copySpan) copySpan.textContent = 'كۆچۈرۈش'; }, 2500);
             }).catch(() => {
@@ -2723,11 +2723,12 @@ function initTeklimakanApp() {
         <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: right; font-size: 0.86rem; color: #166534;">
           <div style="font-weight: 700; margin-bottom: 0.4rem;"><i class="fas fa-building-columns"></i> پۇل يۆتكەيدىغان رەسمىي بانكا ھېساباتى:</div>
           <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; direction: ltr;">TR84 0020 5000 0987 6543 2100 01</span>
-            <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR840020500009876543210001'); showToast('IBAN كۆچۈرۈلدى!', 'success'); this.innerText='كۆچۈرۈلدى ✓';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">IBAN كۆچۈرۈش</button>
+            <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; direction: ltr;">TR65 0015 7000 0000 0095 1544 93</span>
+            <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR650015700000000095154493'); showToast('IBAN كۆچۈرۈلدى!', 'success'); this.innerText='كۆچۈرۈلدى ✓';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">IBAN كۆچۈرۈش</button>
           </div>
           <div style="font-size: 0.8rem; color: #15803d; margin-bottom: 0.6rem;">
-            ئىگىسى: <strong>TEKLİMAKAN TİCARET LTD. ŞTİ.</strong> (Ziraat / Kuveyt Türk)<br>
+            بانكا: <strong>QNB Finansbank (Enpara.com)</strong><br>
+            ھېسابات ئىگىسى: <strong>Abudurusuli tuniyazi</strong><br>
             Açıklama چۈشەندۈرۈشىگە: <strong>${order.id}</strong> دەپ يېزىڭ.
           </div>
           <a href="${havaleWaUrl}" target="_blank" class="btn btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: #059669; color: #ffffff; text-decoration: none; padding: 0.55rem; border-radius: 6px; font-weight: 700;">

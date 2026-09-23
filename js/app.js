@@ -3221,9 +3221,10 @@ function initTeklimakanApp() {
             }
             showToast('✅ ئىلتىماسىڭىز ۋە كېلىشىمنامىڭىز تاپشۇرۇلدى!', 'success');
             try {
+              sendTelegramAgentApplyNotification(res.agent);
               sendEmailAgentApplyNotification(res.agent);
             } catch (notifErr) {
-              console.warn('Agent apply email notification error:', notifErr);
+              console.warn('Agent apply notification error:', notifErr);
             }
           } else {
             alert(res.message);

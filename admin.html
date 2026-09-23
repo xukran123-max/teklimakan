@@ -926,6 +926,10 @@
                 </p>
               </div>
               <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button type="button" class="btn-add-primary" id="btnSyncAgentsCloud" onclick="if(window.syncAgentsFromCloud) window.syncAgentsFromCloud(true);" style="background: #0284c7; border-color: #0284c7; cursor: pointer;" title="Supabase بۇلۇت ئامبىرىدىن يېڭى چۈشكەن ۋاكالەتچى ئىلتىماسلىرىنى دەل ۋاقتىدا يۈكلەش">
+                  <i class="fas fa-sync-alt" id="iconSyncAgents"></i>
+                  <span>🔄 بۇلۇتتىن يېڭىلاش</span>
+                </button>
                 <button type="button" class="btn-add-primary" id="btnOpenMonthlySummaryExportModal" onclick="(window.openAgentMonthlySummaryModal || function(){ var m=document.getElementById('agentMonthlySummaryModal'); if(m){ m.classList.add('active'); m.style.display='flex'; } })();" style="background: #2563eb; border-color: #2563eb; cursor: pointer;">
                   <i class="fas fa-chart-pie"></i>
                   <span>📊 ئايلىق خۇلاسە ۋە كومىسسىيە</span>
@@ -2949,11 +2953,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260921_v1"></script>
+  <script src="js/supabase.js?v=20260923_v25"></script>
 
-  <script src="js/i18n.js?v=20260923_v14"></script>
-  <script src="js/store.js?v=20260923_v14"></script>
-  <script src="js/admin.js?v=20260923_v14"></script>
+  <script src="js/i18n.js?v=20260923_v25"></script>
+  <script src="js/store.js?v=20260923_v25"></script>
+  <script src="js/admin.js?v=20260923_v25"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

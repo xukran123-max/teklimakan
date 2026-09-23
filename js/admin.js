@@ -122,6 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCustomersTable();
     renderCouponsTable();
     renderAgentsView();
+    if (typeof window.syncAgentsFromCloud === 'function') {
+      window.syncAgentsFromCloud(false);
+    }
     loadSettingsForm();
     populateCategoryDropdowns();
   }
@@ -163,6 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCouponsTable();
     } else if (tabId === 'agents') {
       renderAgentsView();
+      if (typeof window.syncAgentsFromCloud === 'function') {
+        window.syncAgentsFromCloud(false);
+      }
     } else if (tabId === 'messages') {
       renderMessagesCenter();
     } else if (tabId === 'settings') {
@@ -766,6 +772,30 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAgentsSlider();
     renderAgentsTable();
   }
+
+  // 🔄 Supabase بۇلۇت ئامبىرىدىن ۋاكالەتچىلەر ۋە كۈتۈۋاتقان ئىلتىماسلارنى يېڭىلاش
+  window.syncAgentsFromCloud = async function(isManual = false) {
+    const icon = document.getElementById('iconSyncAgents');
+    if (icon) icon.classList.add('fa-spin');
+
+    try {
+      if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
+        await window.appStore.syncWithSupabase();
+      }
+      renderAgentsView();
+      renderDashboardMetrics();
+      if (isManual) {
+        showAdminToast('✅ بۇلۇتتىن ۋاكالەتچى ئۇچۇرلىرى ۋە يېڭى ئىلتىماسلار يېڭىلاندى!', 'success');
+      }
+    } catch (err) {
+      console.warn('Sync agents cloud failed:', err);
+      if (isManual) {
+        showAdminToast('بۇلۇتتىن يېڭىلاشتا مەسىلە كۆرۈلدى.', 'warning');
+      }
+    } finally {
+      if (icon) icon.classList.remove('fa-spin');
+    }
+  };
 
   // 1. ۋاكالەتچى ئىسمى ۋە دەرىجە رەڭگى بويىچە سىيىرلما تىزىملىك (Sliding Cards Carousel)
   function renderAgentsSlider() {
@@ -4472,6 +4502,18 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCouponsTable();
       renderAgentsView();
     });
+
+    // 🔄 ئارقا سۇپىدا بۇلۇتتىن دەل ۋاقتىدا تەكشۈرۈش (ھەر 20 سېكۇنتتا يېڭى ئىلتىماس كەلگەن-كەلمىگەنلىكىنى تەكشۈرىدۇ)
+    setInterval(async () => {
+      if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
+        const prevPendingCount = (window.appStore.getAgents ? window.appStore.getAgents() : []).filter(a => a.status === 'تەستىق كۈتۈۋاتىدۇ').length;
+        await window.appStore.syncWithSupabase();
+        const newPendingCount = (window.appStore.getAgents ? window.appStore.getAgents() : []).filter(a => a.status === 'تەستىق كۈتۈۋاتىدۇ').length;
+        if (newPendingCount > prevPendingCount) {
+          showAdminToast(`🔔 يېڭى سودىگەر ئىلتىماسى كېلىپ چۈشتى! (${newPendingCount} ئىلتىماس تەستىق كۈتۈۋاتىدۇ)`, 'info');
+        }
+      }
+    }, 20000);
   }
 
   // ==================== 🚚 زاكاز ئىز قوغلاش كۆزنىكى ۋە فورمىسى ====================

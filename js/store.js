@@ -1625,31 +1625,71 @@ class StoreManager {
         const aMap = new Map();
         localAgents.forEach(a => aMap.set(a.id, a));
         remoteAgents.forEach(ra => {
+          let authorizedBrands = [];
+          let proposedBrands = 'بارلىق تۈرلەر';
+          let notes = '';
+          let legalAgreement = null;
+          let suspendedUntil = null;
+          let suspensionReason = '';
+
+          if (Array.isArray(ra.authorized_brands)) {
+            ra.authorized_brands.forEach(item => {
+              if (typeof item === 'string') {
+                authorizedBrands.push(item);
+              } else if (item && typeof item === 'object') {
+                if (item.proposedBrands) proposedBrands = item.proposedBrands;
+                if (item.notes) notes = item.notes;
+                if (item.legalAgreement) legalAgreement = item.legalAgreement;
+                if (item.suspendedUntil) suspendedUntil = item.suspendedUntil;
+                if (item.suspensionReason) suspensionReason = item.suspensionReason;
+              }
+            });
+          }
+
+          const existingLocal = aMap.get(ra.id) || {};
           aMap.set(ra.id, {
+            ...existingLocal,
             id: ra.id,
             name: ra.name,
             email: ra.email,
             phone: ra.phone,
-            city: ra.city,
-            status: ra.status,
-            reputation: ra.reputation,
-            canPublishMultilingual: ra.can_publish_multilingual,
-            authorizedBrands: ra.authorized_brands || [],
-            registeredAt: ra.registered_at,
-            authExpireDate: ra.auth_expire_date,
-            certCode: ra.cert_code,
-            productsCount: ra.products_count,
-            salesTotal: Number(ra.sales_total || 0),
-            monthlySales: Number(ra.monthly_sales || 0),
-            monthlyOrders: Number(ra.monthly_orders || 0),
-            commissionRate: Number(ra.commission_rate || 15),
-            violationsCount: Number(ra.violations_count || 0),
-            suspendedUntil: ra.suspended_until,
-            suspensionReason: ra.suspension_reason || ''
+            city: ra.city || existingLocal.city || 'ئىستانبۇل',
+            status: ra.status || existingLocal.status || 'تەستىقلاندى',
+            reputation: ra.reputation || existingLocal.reputation || 'ئىشەنچىلىك سودىگەر',
+            canPublishMultilingual: !!ra.can_publish_multilingual,
+            authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal.authorizedBrands || []),
+            registeredAt: ra.registered_at || existingLocal.registeredAt,
+            authExpireDate: ra.auth_expire_date || existingLocal.authExpireDate,
+            certCode: ra.cert_code || existingLocal.certCode,
+            productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal.productsCount || 0),
+            salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal.salesTotal || 0)),
+            monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal.monthlySales || 0)),
+            monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal.monthlyOrders || 0)),
+            commissionRate: Number(ra.commission_rate || existingLocal.commissionRate || 15),
+            violationsCount: Number(ra.violations_count || existingLocal.violationsCount || 0),
+            suspendedUntil: suspendedUntil || existingLocal.suspendedUntil || null,
+            suspensionReason: suspensionReason || existingLocal.suspensionReason || '',
+            proposedBrands: existingLocal.proposedBrands || proposedBrands,
+            notes: existingLocal.notes || notes,
+            legalAgreement: existingLocal.legalAgreement || legalAgreement || (ra.cert_code ? {
+              contractNumber: ra.cert_code,
+              signedAt: ra.registered_at || new Date().toISOString(),
+              agentName: ra.name,
+              agentEmail: ra.email,
+              agentPhone: ra.phone,
+              liabilityClauseAccepted: true,
+              fiveRulesAccepted: true
+            } : null)
           });
         });
         localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(Array.from(aMap.values())));
         this.notifyDataChange('agents');
+      } else if (Array.isArray(remoteAgents) && remoteAgents.length === 0) {
+        // ئەگەر بۇلۇتتا ۋاكالەتچى بولمىسا، يەرلىكتىكى بار ۋاكالەتچىلەرنى بۇلۇتقا زاپاس يوللاش
+        const localAgents = this.getAgents('none');
+        localAgents.forEach(a => {
+          window.TeklimakanSupabase.upsertAgent(a);
+        });
       }
     } catch (e) {
       console.warn('Supabase ماسلىشىش خاتالىقى:', e);

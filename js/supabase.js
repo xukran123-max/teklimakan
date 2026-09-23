@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ================================================================
  * Supabase بۇلۇت ئۇلىنىش تەڭشىكى ۋە ماسلاشتۇرغۇچ (supabase.js)
  * تەكلىماكان ئېلېكترونلۇق سودا سۇپىسى
@@ -153,11 +153,26 @@ window.TeklimakanSupabase = {
     }
   },
 
-  // ۋاكالەتچىنى ساقلاش
+  // ۋاكالەتچىنى ساقلاش (Supabase agents جەدۋىلىگە ماس ھالەتتە)
   async upsertAgent(agent) {
     const sb = getSupabase();
     if (!sb) return false;
     try {
+      // ماركىلار ۋە ئىلتىماس/كېلىشىم قوشۇمچە ئۇچۇرلىرىنى authorized_brands غا بىخەتەر قاچىلاش
+      let brandsPayload = Array.isArray(agent.authorizedBrands) 
+        ? agent.authorizedBrands.filter(b => typeof b === 'string') 
+        : [];
+
+      const metaObj = {
+        _meta: true,
+        proposedBrands: agent.proposedBrands || '',
+        notes: agent.notes || '',
+        legalAgreement: agent.legalAgreement || null,
+        suspendedUntil: agent.suspendedUntil || null,
+        suspensionReason: agent.suspensionReason || ''
+      };
+      brandsPayload.push(metaObj);
+
       const row = {
         id: agent.id,
         name: agent.name,
@@ -167,22 +182,26 @@ window.TeklimakanSupabase = {
         status: agent.status || 'تەستىقلاندى',
         reputation: agent.reputation || 'ئىشەنچىلىك سودىگەر',
         can_publish_multilingual: !!agent.canPublishMultilingual,
-        authorized_brands: agent.authorizedBrands || [],
-        registered_at: agent.registeredAt || '',
-        auth_expire_date: agent.authExpireDate || '',
-        cert_code: agent.certCode || '',
-        products_count: agent.productsCount || 0,
-        sales_total: agent.salesTotal || 0,
-        monthly_sales: agent.monthlySales || 0,
-        monthly_orders: agent.monthlyOrders || 0,
-        commission_rate: agent.commissionRate || 15,
-        violations_count: agent.violationsCount || 0,
-        suspended_until: agent.suspendedUntil || null,
-        suspension_reason: agent.suspensionReason || ''
+        authorized_brands: brandsPayload,
+        registered_at: agent.registeredAt || new Date().toISOString().split('T')[0],
+        auth_expire_date: agent.authExpireDate || '2027-09-18',
+        cert_code: (agent.legalAgreement && agent.legalAgreement.contractNumber) || agent.certCode || ('TK-CERT-2026-' + (agent.id ? agent.id.replace(/\D/g, '') : '100')),
+        products_count: Number(agent.productsCount || 0),
+        sales_total: Number(agent.salesTotal || 0),
+        monthly_sales: Number(agent.monthlySales || 0),
+        monthly_orders: Number(agent.monthlyOrders || 0),
+        commission_rate: Number(agent.commissionRate || 15),
+        violations_count: Number(agent.violationsCount || 0)
       };
+
       const { error } = await sb.from('agents').upsert(row);
-      return !error;
+      if (error) {
+        console.warn('Supabase upsertAgent error:', error.message);
+        return false;
+      }
+      return true;
     } catch (e) {
+      console.warn('Supabase agent exception:', e);
       return false;
     }
   }

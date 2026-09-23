@@ -107,7 +107,7 @@ const INITIAL_AGENTS = [
     id: 'AGT-101',
     name: 'ئەلىجان روزى',
     email: 'alijan@teklimakan.com',
-    phone: '05551609999',
+    phone: '05550000101',
     city: 'ئىستانبۇل (فاتىھ)',
     status: 'تەستىقلاندى', // 'تەستىقلاندى', 'تەستىق كۈتۈۋاتىدۇ', 'توختىتىلدى'
     reputation: 'ئىشەنچىلىك سودىگەر',
@@ -2108,6 +2108,9 @@ class StoreManager {
       agent.status = newStatus;
       localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
       this.notifyDataChange('agents');
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+        window.TeklimakanSupabase.upsertAgent(agent).catch(e => console.warn('Supabase agent status sync error:', e));
+      }
       return true;
     }
     return false;
@@ -2122,7 +2125,7 @@ class StoreManager {
   }
 
   // ==================== 🤝 ۋاكالەتچى ئىلتىماس قىلىش ۋە كىرىش ====================
-  applyAgent(agentData) {
+  async applyAgent(agentData) {
     let agents = this.getAgents('none');
     const email = (agentData.email || '').trim().toLowerCase();
     const phone = (agentData.phone || '').trim();
@@ -2131,17 +2134,14 @@ class StoreManager {
       return { success: false, message: 'ئىسىم ۋە ئېلخەت ئادرېسى كىرگۈزۈش مەجبۇرىي!' };
     }
 
-    const existing = agents.find(a => (a.email && a.email.toLowerCase() === email) || (phone && a.phone && a.phone === phone));
-    if (existing) {
-      return { 
-        success: false, 
-        message: 'بۇ ئېلخەت ياكى تېلېفون نومۇرى بىلەن بۇرۇن ئىلتىماس سۇنۇلغان ياكى تىزىملاتقان!' 
-      };
-    }
+    const cleanPhoneInput = phone.replace(/[^0-9]/g, '');
+    const existingIndex = agents.findIndex(a => 
+      (a.email && a.email.toLowerCase() === email) || 
+      (cleanPhoneInput && a.phone && a.phone.replace(/[^0-9]/g, '') === cleanPhoneInput)
+    );
 
-    const newId = 'AGT-' + Math.floor(100 + Math.random() * 900);
-    const contractNumber = 'TK-AGR-' + Math.floor(100000 + Math.random() * 900000);
     const nowIso = new Date().toISOString();
+    const contractNumber = 'TK-AGR-' + Math.floor(100000 + Math.random() * 900000);
     const signatureHash = 'DIGI-SIGN-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
     const legalAgreement = {
@@ -2157,43 +2157,97 @@ class StoreManager {
       digitalSignatureHash: signatureHash
     };
 
-    const newAgent = {
-      id: newId,
-      name: agentData.name.trim(),
-      email: email,
-      phone: phone,
-      status: 'تەستىق كۈتۈۋاتىدۇ',
-      canPublishMultilingual: false,
-      authorizedBrands: [],
-      proposedBrands: agentData.proposedBrands || agentData.categoryInterest || 'بارلىق تۈرلەر',
-      notes: agentData.notes || '',
-      registeredAt: nowIso.split('T')[0],
-      productsCount: 0,
-      legalAgreement: legalAgreement
-    };
+    let targetAgent;
+    let isReapply = false;
 
-    agents.unshift(newAgent);
+    if (existingIndex !== -1) {
+      isReapply = true;
+      targetAgent = agents[existingIndex];
+      targetAgent.name = agentData.name.trim();
+      targetAgent.email = email;
+      targetAgent.phone = phone || targetAgent.phone;
+      targetAgent.proposedBrands = agentData.proposedBrands || agentData.categoryInterest || targetAgent.proposedBrands || 'بارلىق تۈرلەر';
+      targetAgent.notes = agentData.notes || targetAgent.notes || '';
+      targetAgent.status = 'تەستىق كۈتۈۋاتىدۇ'; // ئارقا سۇپىدا كۆرۈنۈشى ئۈچۈن قايتا تەستىق كۈتۈش ھالىتىگە ئۆزگەرتىش
+      targetAgent.legalAgreement = legalAgreement;
+      agents[existingIndex] = targetAgent;
+    } else {
+      const newId = 'AGT-' + Math.floor(100 + Math.random() * 900);
+      targetAgent = {
+        id: newId,
+        name: agentData.name.trim(),
+        email: email,
+        phone: phone,
+        status: 'تەستىق كۈتۈۋاتىدۇ',
+        canPublishMultilingual: false,
+        authorizedBrands: [],
+        proposedBrands: agentData.proposedBrands || agentData.categoryInterest || 'بارلىق تۈرلەر',
+        notes: agentData.notes || '',
+        registeredAt: nowIso.split('T')[0],
+        productsCount: 0,
+        legalAgreement: legalAgreement
+      };
+      agents.unshift(targetAgent);
+    }
+
     localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
     this.notifyDataChange('agents');
 
+    // 🌐 Supabase بۇلۇت ئامبىرىغا دەرھال ساقلاش (باشقۇرغۇچىنىڭ تېلېفون ياكى كومپيۇتېرىدا كۆرۈنۈشى ئۈچۈن)
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+      try {
+        await window.TeklimakanSupabase.upsertAgent(targetAgent);
+      } catch (sbErr) {
+        console.warn('Supabase agent upsert error:', sbErr);
+      }
+    }
+
+    // 📲 WhatsApp تېز ئۇلانمىسى تەييارلاش
+    let waPhone = (phone || '').replace(/[^0-9]/g, '');
+    if (waPhone.startsWith('0')) waPhone = '9' + waPhone;
+    else if (!waPhone.startsWith('90') && waPhone.length === 10) waPhone = '90' + waPhone;
+    const waLink = waPhone ? `https://wa.me/${waPhone}` : '';
+
+    const adminUrl = 'https://xukran123-max.github.io/teklimakan/admin.html';
+
     // 🤖 ئالىي باشقۇرغۇچىغا Telegram ئارقىلىق يېڭى ۋاكالەتچى ئىلتىماسى ۋە ئىمزالانغان كېلىشىم ئۇقتۇرۇشى ئەۋەتىش
-    this.sendTelegramAlert({
-      title: '👤 [يېڭى ۋاكالەتچى ئىلتىماسى ۋە كېلىشىمى] تور بېكەتتىن يېڭى ئىلتىماس چۈشتى!',
-      message: `🆔 <b>ئىلتىماس كودى:</b> <code>${newAgent.id}</code>\n` +
-               `📜 <b>كېلىشىم نومۇرى:</b> <code>${contractNumber}</code>\n` +
-               `👤 <b>ئىسىم-فامىلىسى:</b> <b>${newAgent.name}</b>\n` +
-               `📞 <b>تېلېفون نومۇرى:</b> <code>${newAgent.phone || '-'}</code>\n` +
-               `📧 <b>ئېلخەت ئادرېسى:</b> <code>${newAgent.email}</code>\n` +
-               `🏷️ <b>تەلەپ قىلغان ماركا/تۈر:</b> ${newAgent.proposedBrands}\n` +
-               `⚖️ <b>مەسئۇلىيەت بەلگىلىمىسى:</b> تولۇق قوشۇلدى ۋە رەقەملىك ئىمزالاندى\n` +
-               `⏳ <b>ھالىتى:</b> تەستىق كۈتۈۋاتىدۇ\n\n` +
-               `👉 <i>ئارقا سۇپىنىڭ «ۋاكالەتچىلەر» بۆلىكىدىن ئىمزالانغان كېلىشىمنامىنى تەكشۈرۈپ تەستىقلاڭ.</i>`,
-      isUrgent: false
-    });
+    const alertTitle = isReapply ? 
+      '👤 [ۋاكالەتچى ئىلتىماسى يېڭىلاندى] تىزىملاتقۇچى يېڭى ئىلتىماس تاپشۇردى!' : 
+      '👤 [يېڭى ۋاكالەتچى ئىلتىماسى ۋە كېلىشىمى] تور بېكەتتىن يېڭى سودىگەر ئىلتىماس قىلدى!';
+
+    let alertMsg = `🆔 <b>ئىلتىماس كودى:</b> <code>${targetAgent.id}</code>\n` +
+      `📜 <b>كېلىشىم نومۇرى:</b> <code>${contractNumber}</code>\n` +
+      `👤 <b>ئىسىم-فامىلىسى / دۇكان نامى:</b> <b>${targetAgent.name}</b>\n` +
+      `📞 <b>تېلېفون نومۇرى:</b> <code>${targetAgent.phone || '-'}</code>\n` +
+      `📧 <b>ئېلخەت ئادرېسى:</b> <code>${targetAgent.email}</code>\n` +
+      `🏷️ <b>تەلەپ قىلغان ماركا/تۈر:</b> ${targetAgent.proposedBrands}\n`;
+
+    if (targetAgent.notes) {
+      alertMsg += `📝 <b>ئىلتىماس بايانى / چۈشەندۈرۈش:</b> ${targetAgent.notes}\n`;
+    }
+
+    alertMsg += `⚖️ <b>مەسئۇلىيەت بەلگىلىمىسى:</b> تولۇق قوشۇلدى ۋە رەقەملىك ئىمزالاندى\n` +
+      `⏳ <b>ھالىتى:</b> <b>تەستىق كۈتۈۋاتىدۇ</b>\n\n`;
+
+    if (waLink) {
+      alertMsg += `💬 <a href="${waLink}">📲 <b>ئىلتىماس قىلغۇچى بىلەن WhatsApp ئارقىلىق بىۋاسىتە ئالاقىلىشىش</b></a>\n\n`;
+    }
+
+    alertMsg += `👉 <a href="${adminUrl}">🔗 <b>ئارقا باشقۇرۇش مەركىزىدىن تەستىقلاش (بېسىڭ)</b></a>`;
+
+    try {
+      await this.sendTelegramAlert({
+        title: alertTitle,
+        message: alertMsg,
+        isUrgent: true
+      });
+    } catch (tgErr) {
+      console.warn('sendTelegramAlert in applyAgent failed:', tgErr);
+    }
 
     return {
       success: true,
-      agent: newAgent,
+      agent: targetAgent,
       contractNumber: contractNumber,
       message: '✅ ۋاكالەتچىلىك ئىلتىماسىڭىز ۋە كېلىشىمنامىڭىز مۇۋەپپەقىيەتلىك تاپشۇرۇلدى! سۇپا باشقۇرغۇچىسى تەكشۈرۈپ تەستىقلىغاندىن كېيىن سىز بىلەن ئالاقىلىشىدۇ.'
     };
@@ -2575,11 +2629,11 @@ class StoreManager {
   async sendTelegramAlert({ title, message, isUrgent = false, extraData = null }) {
     try {
       const settings = this.getSettings() || {};
-      const botToken = settings.telegramBotToken || INITIAL_SETTINGS.telegramBotToken;
-      const chatId = settings.telegramChatId || INITIAL_SETTINGS.telegramChatId;
+      const botToken = (settings.telegramBotToken && settings.telegramBotToken.trim()) || INITIAL_SETTINGS.telegramBotToken || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
+      const chatId = (settings.telegramChatId && String(settings.telegramChatId).trim()) || INITIAL_SETTINGS.telegramChatId || '7077223578';
       const enabled = settings.telegramEnabled !== false;
 
-      if (!enabled || !botToken || !chatId) {
+      if ((!enabled && !isUrgent) || !botToken || !chatId) {
         console.warn('Telegram alerts disabled or missing credentials');
         return { success: false, message: 'Telegram disabled or credentials missing' };
       }

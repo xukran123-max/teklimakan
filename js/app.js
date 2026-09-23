@@ -2728,10 +2728,18 @@ function initTeklimakanApp() {
   // ==================== 🤖 Telegram يېڭى ۋاكالەتچى تىزىملىتىش ئىلتىماسى ئۇقتۇرۇشى ====================
   async function sendTelegramAgentApplyNotification(agent) {
     try {
-      const settings = window.appStore ? window.appStore.getSettings() : null;
-      if (!settings || !settings.telegramBotToken || !settings.telegramChatId || settings.telegramEnabled === false) return;
+      const settings = window.appStore ? window.appStore.getSettings() : {};
+      const botToken = (settings && settings.telegramBotToken && settings.telegramBotToken.trim()) || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
+      const chatId = (settings && settings.telegramChatId && String(settings.telegramChatId).trim()) || '7077223578';
 
-      const msg = `👤 <b>يېڭى ۋاكالەتچى ئىلتىماسى كېلىپ چۈشتى!</b>\n\n` +
+      let cleanPhone = (agent.phone || '').replace(/[^0-9]/g, '');
+      if (cleanPhone.startsWith('0')) cleanPhone = '9' + cleanPhone;
+      else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
+      const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '';
+
+      const adminUrl = 'https://xukran123-max.github.io/teklimakan/admin.html';
+
+      let msg = `👤 <b>يېڭى ۋاكالەتچى / سودىگەر ئىلتىماسى كېلىپ چۈشتى!</b>\n\n` +
         `🆔 <b>ئىلتىماس نومۇرى:</b> <code>${agent.id}</code>\n` +
         `👤 <b>ئىسىم-فامىلىسى / شىركەت:</b> <b>${agent.name}</b>\n` +
         `📧 <b>ئېلخەت:</b> <code>${agent.email}</code>\n` +
@@ -2739,15 +2747,19 @@ function initTeklimakanApp() {
         `🏷️ <b>تەلەپ قىلغان ماركا / تۈر:</b> ${agent.proposedBrands || 'ئومۇمىي'}\n` +
         (agent.notes ? `📝 <b>ئىزاھات:</b> ${agent.notes}\n` : '') +
         `\n⚠️ <b>ھالىتى:</b> ⏳ <b>تەستىق كۈتۈۋاتىدۇ</b>\n` +
-        `⏰ <b>ئىلتىماس ۋاقتى:</b> ${new Date().toLocaleString()}\n\n` +
-        `👉 <i>ئارقا سۇپىغا كىرىپ، ۋاكالەتچى سالاھىيىتى ۋە ماركا ھوقۇقىنى بېكىتىپ بېرىڭ:</i>\n` +
-        `🔗 https://meanwhile-makers-traveling-img.trycloudflare.com/admin.html`;
+        `⏰ <b>ئىلتىماس ۋاقتى:</b> ${new Date().toLocaleString()}\n\n`;
 
-      await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+      if (waLink) {
+        msg += `💬 <a href="${waLink}">📲 <b>ئىلتىماس قىلغۇچى بىلەن WhatsApp ئارقىلىق سۆزلىشىش</b></a>\n\n`;
+      }
+
+      msg += `👉 <a href="${adminUrl}">🔗 <b>ئارقا باشقۇرۇش مەركىزىدىن تەستىقلاش (بېسىڭ)</b></a>`;
+
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: settings.telegramChatId,
+          chat_id: chatId,
           text: msg,
           parse_mode: 'HTML'
         })
@@ -3160,7 +3172,7 @@ function initTeklimakanApp() {
     }
 
     if (applyForm) {
-      applyForm.addEventListener('submit', (e) => {
+      applyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // 📜 مەجبۇرىي كېلىشىمنامە ۋە مەسئۇلىيەت بەلگىلىمىسىگە قوشۇلۇشنى تەكشۈرۈش
@@ -3181,34 +3193,50 @@ function initTeklimakanApp() {
         const categoryInterest = document.getElementById('applyAgentCategory').value.trim();
         const notes = document.getElementById('applyAgentNotes').value.trim();
 
-        const res = window.appStore.applyAgent({
-          name,
-          email,
-          phone,
-          proposedBrands: categoryInterest,
-          notes
-        });
+        const submitBtn = applyForm.querySelector('button[type="submit"]');
+        const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تاپشۇرۇلۇۋاتىدۇ...';
+        }
 
-        if (res.success) {
-          lastAppliedAgentObj = res.agent;
-          applyForm.reset();
-          applyForm.style.display = 'none';
-          if (successBox) {
-            successBox.style.display = 'block';
-            if (successMsg) {
-              successMsg.innerHTML = `${res.message}<br><strong style="color: #1e3a8a;">📜 رەقەملىك كېلىشىم نومۇرىڭىز: ${res.contractNumber || 'TK-AGR-OK'}</strong>`;
+        try {
+          const res = await window.appStore.applyAgent({
+            name,
+            email,
+            phone,
+            proposedBrands: categoryInterest,
+            notes
+          });
+
+          if (res.success) {
+            lastAppliedAgentObj = res.agent;
+            applyForm.reset();
+            applyForm.style.display = 'none';
+            if (successBox) {
+              successBox.style.display = 'block';
+              if (successMsg) {
+                successMsg.innerHTML = `${res.message}<br><strong style="color: #1e3a8a;">📜 رەقەملىك كېلىشىم نومۇرىڭىز: ${res.contractNumber || 'TK-AGR-OK'}</strong>`;
+              }
             }
+            showToast('✅ ئىلتىماسىڭىز ۋە كېلىشىمنامىڭىز تاپشۇرۇلدى!', 'success');
+            try {
+              sendEmailAgentApplyNotification(res.agent);
+            } catch (notifErr) {
+              console.warn('Agent apply email notification error:', notifErr);
+            }
+          } else {
+            alert(res.message);
+            showToast(res.message, 'error');
           }
-          showToast('✅ ئىلتىماسىڭىز ۋە كېلىشىمنامىڭىز تاپشۇرۇلدى!', 'success');
-          try {
-            sendTelegramAgentApplyNotification(res.agent);
-            sendEmailAgentApplyNotification(res.agent);
-          } catch (notifErr) {
-            console.warn('Agent apply notification error:', notifErr);
+        } catch (err) {
+          console.error('applyAgent submit error:', err);
+          showToast('ئىلتىماس يوللاشتا كاشىلا كۆرۈلدى!', 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml || '<i class="fas fa-file-signature"></i> كېلىشىمنى رەسمىي ئىمزالاش ۋە ئىلتىماس سۇنۇش';
           }
-        } else {
-          alert(res.message);
-          showToast(res.message, 'error');
         }
       });
     }

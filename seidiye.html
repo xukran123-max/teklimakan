@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تەكلىماكان سودا تورى | ئارقا باشقۇرۇش مەركىزى (Admin)</title>
+  <base href="/">
   
   <!-- سۇپا سىنبەلگىسى (Favicon) -->
   <link rel="icon" type="image/png" href="images/logo_circle.png">
@@ -2961,11 +2962,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260923_v27"></script>
+  <script src="js/supabase.js?v=20260924_v28"></script>
 
-  <script src="js/i18n.js?v=20260923_v27"></script>
-  <script src="js/store.js?v=20260923_v27"></script>
-  <script src="js/admin.js?v=20260923_v27"></script>
+  <script src="js/i18n.js?v=20260924_v28"></script>
+  <script src="js/store.js?v=20260924_v28"></script>
+  <script src="js/admin.js?v=20260924_v28"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>
@@ -2987,13 +2988,17 @@
       // 2. كىنىشكا كۆزنىكىنى بىۋاسىتە ئېچىش كاپالىتى
       var originalCertFn = window.openAgentCertificateModal;
       window.openAgentCertificateModal = function(agentId) {
-        var m = document.getElementById('agentCertificateModal');
-        if (m) {
-          m.classList.add('active');
-          m.style.display = 'flex';
-          m.style.visibility = 'visible';
-          m.style.opacity = '1';
-          m.style.zIndex = '100000';
+        if (typeof window.showModal === 'function') {
+          window.showModal('agentCertificateModal');
+        } else {
+          var m = document.getElementById('agentCertificateModal');
+          if (m) {
+            m.classList.add('active');
+            m.style.display = 'flex';
+            m.style.visibility = 'visible';
+            m.style.opacity = '1';
+            m.style.zIndex = '100000';
+          }
         }
         if (typeof originalCertFn === 'function' && originalCertFn !== window.openAgentCertificateModal) {
           try { originalCertFn(agentId); } catch(e) { console.warn(e); }
@@ -3016,16 +3021,24 @@
         if (e.target.closest('.btn-modal-close') || e.target.classList.contains('btn-modal-close')) {
           var modal = e.target.closest('.modal-backdrop');
           if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
+            if (typeof window.hideModal === 'function') {
+              window.hideModal(modal);
+            } else {
+              modal.classList.remove('active');
+              modal.style.display = 'none';
+            }
           }
           return;
         }
 
         // سىرتىنى چەككەندە تاقاش
         if (e.target.classList.contains('modal-backdrop')) {
-          e.target.classList.remove('active');
-          e.target.style.display = 'none';
+          if (typeof window.hideModal === 'function') {
+            window.hideModal(e.target);
+          } else {
+            e.target.classList.remove('active');
+            e.target.style.display = 'none';
+          }
         }
       });
     })();

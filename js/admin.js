@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let agentFilterTier = 'all';
   let currentViewingCertAgent = null;
 
+  window.showModal = function(modalId) {
+    const m = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (!m) return;
+    m.classList.add('active');
+    m.style.setProperty('display', 'flex', 'important');
+    m.style.setProperty('opacity', '1', 'important');
+    m.style.setProperty('visibility', 'visible', 'important');
+    m.style.setProperty('pointer-events', 'auto', 'important');
+    m.style.setProperty('z-index', '100000', 'important');
+    const content = m.querySelector('.modal-content');
+    if (content) {
+      content.style.setProperty('display', 'block', 'important');
+      content.style.setProperty('opacity', '1', 'important');
+      content.style.setProperty('visibility', 'visible', 'important');
+      content.style.setProperty('transform', 'scale(1)', 'important');
+    }
+  };
+
+  window.hideModal = function(modalId) {
+    const m = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (!m) return;
+    m.classList.remove('active');
+    m.style.setProperty('display', 'none', 'important');
+    m.style.setProperty('visibility', 'hidden', 'important');
+    m.style.setProperty('pointer-events', 'none', 'important');
+  };
+
   setupAuthEvents();
   setupEventListeners();
   if (checkAdminAuth()) {
@@ -546,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const orders = window.appStore.getOrders();
     if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-muted);">زاكاز يوق</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">زاكاز يوق</td></tr>';
       return;
     }
 
@@ -554,22 +581,49 @@ document.addEventListener('DOMContentLoaded', () => {
     orders.forEach(order => {
       const tr = document.createElement('tr');
       const langTag = order.language ? `<span style="font-size:0.75rem; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${order.language.toUpperCase()}</span>` : '';
-      const orderTotalDisplay = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total);
+      const orderTotalDisplay = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total || 0);
+
+      const cust = (typeof order.customer === 'string') 
+        ? (JSON.parse(order.customer || '{}')) 
+        : (order.customer || {});
+      const custName = cust.name || 'خېرىدار';
+      const custPhone = cust.phone || '-';
+
+      const itemsList = Array.isArray(order.items) 
+        ? order.items 
+        : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
+      const itemsSummary = itemsList.map(i => `${i.name || i.productName || 'تاۋار'} (x${i.quantity || 1})`).join('، ') || '-';
+
+      const carrierName = order.cargoCarrier || (order.tracking && order.tracking.carrier) || '';
+      const trackingCode = order.cargoTrackingNo || (order.tracking && order.tracking.trackingNumber) || '';
 
       tr.innerHTML = `
         <td class="number-latin"><strong>${order.id}</strong> ${langTag}</td>
         <td>
-          <div style="font-weight: 700;">${order.customer.name}</div>
-          <div class="number-latin" style="font-size: 0.8rem; color: var(--text-muted);">${order.customer.phone}</div>
+          <div style="font-weight: 700;">${custName}</div>
+          <div class="number-latin" style="font-size: 0.8rem; color: var(--text-muted);">${custPhone}</div>
         </td>
         <td>
-          <div style="font-size: 0.88rem; max-width: 250px; line-height: 1.4;">
-            ${order.items.map(i => `${i.name} (x${i.quantity})`).join('، ')}
+          <div style="font-size: 0.88rem; max-width: 240px; line-height: 1.4;">
+            ${itemsSummary}
           </div>
         </td>
         <td><strong style="color: var(--danger-color); font-size: 1.05rem;">${orderTotalDisplay}</strong></td>
         <td>
-          <select class="order-status-select" data-id="${order.id}" style="padding: 0.35rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--admin-border); background: var(--admin-bg); font-weight: 700;">
+          ${trackingCode ? `
+            <div style="font-size: 0.85rem; font-weight: 700; color: #0284c7; display: flex; align-items: center; gap: 0.35rem;">
+              <i class="fas fa-shipping-fast"></i>
+              <span>${carrierName || 'PTT Kargo'}</span>
+            </div>
+            <div class="number-latin" style="font-size: 0.78rem; color: #64748b; font-family: monospace;">
+              ${trackingCode}
+            </div>
+          ` : `
+            <span style="font-size: 0.8rem; color: #94a3b8; background: #f8fafc; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px dashed #cbd5e1;">بېكىتىلمىدى</span>
+          `}
+        </td>
+        <td>
+          <select class="order-status-select" data-id="${order.id}" style="padding: 0.35rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--admin-border); background: var(--admin-bg); font-weight: 700; cursor: pointer;">
             <option value="ساقلاۋاتىدۇ" ${order.status === 'ساقلاۋاتىدۇ' ? 'selected' : ''}>ساقلاۋاتىدۇ</option>
             <option value="تەستىقلاندى" ${order.status === 'تەستىقلاندى' ? 'selected' : ''}>تەستىقلاندى</option>
             <option value="يوللاندى" ${order.status === 'يوللاندى' ? 'selected' : ''}>يوللاندى</option>
@@ -578,18 +632,18 @@ document.addEventListener('DOMContentLoaded', () => {
           </select>
         </td>
         <td class="number-latin" style="font-size: 0.85rem;">${order.date}</td>
-        <td>
-          <div style="display: flex; gap: 0.4rem;">
-            <button class="btn-action-edit btn-tracking-order" data-id="${order.id}" title="كارگو ئىز قوغلاش ئۇچۇرى كىرگۈزۈش" style="background: #0ea5e9 !important; border-color: #0ea5e9 !important; color: #ffffff !important;">
+        <td style="text-align: center;">
+          <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center;">
+            <button type="button" class="btn-action-edit btn-tracking-order" onclick="window.openOrderTrackingModal('${order.id}')" data-id="${order.id}" title="كارگو ئىز قوغلاش ئۇچۇرى كىرگۈزۈش" style="background: #0ea5e9 !important; border-color: #0ea5e9 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-truck"></i>
             </button>
-            <button class="btn-action-edit btn-sms-order" data-id="${order.id}" title="خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important;">
+            <button type="button" class="btn-action-edit btn-sms-order" onclick="window.openDirectSmsModalForOrder('${order.id}')" data-id="${order.id}" title="خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-sms"></i>
             </button>
-            <button class="btn-action-edit btn-view-invoice" data-id="${order.id}" title="تەپسىلات">
+            <button type="button" class="btn-action-edit btn-view-invoice" onclick="window.openOrderInvoiceModal('${order.id}')" data-id="${order.id}" title="تەپسىلات تالونى" style="cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-file-invoice"></i>
             </button>
-            <button class="btn-action-delete btn-delete-order" data-id="${order.id}" title="ئۆچۈرۈش">
+            <button type="button" class="btn-action-delete btn-delete-order" onclick="window.deleteOrderById('${order.id}')" data-id="${order.id}" title="ئۆچۈرۈش" style="cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -597,27 +651,6 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       tbody.appendChild(tr);
-    });
-
-    tbody.querySelectorAll('.btn-tracking-order').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const order = window.appStore.getOrders().find(o => o.id === btn.dataset.id);
-        if (order) openOrderTrackingModal(order);
-      });
-    });
-
-    tbody.querySelectorAll('.btn-sms-order').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const order = window.appStore.getOrders().find(o => o.id === btn.dataset.id);
-        if (order) {
-          openDirectSmsModal({
-            name: order.customer.name,
-            phone: order.customer.phone,
-            role: 'خېرىدار',
-            orderId: order.id
-          });
-        }
-      });
     });
 
     tbody.querySelectorAll('.order-status-select').forEach(sel => {
@@ -628,35 +661,21 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboardMetrics();
         showAdminToast('زاكاز ھالىتى يېڭىلاندى!', 'success');
 
-        // زاكاز ھالىتى ئۆزگەرگەندە ئاپتوماتىك قىسقا ئۇچۇر / WhatsApp كۆزنىكى چىقىش
-        const order = window.appStore.getOrders().find(o => o.id === oid);
+        const order = window.appStore.getOrders().find(o => String(o.id) === String(oid));
         if (order && (newStatus === 'تەستىقلاندى' || newStatus === 'يوللاندى' || newStatus === 'تاماملاندى')) {
           let tplKey = 'order_approved';
           if (newStatus === 'يوللاندى') tplKey = 'order_shipped';
           if (newStatus === 'تاماملاندى') tplKey = 'order_completed';
 
+          const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
           openDirectSmsModal({
-            name: order.customer.name,
-            phone: order.customer.phone,
+            name: cust.name || 'خېرىدار',
+            phone: cust.phone || '',
             role: 'خېرىدار',
             orderId: order.id,
             templateKey: tplKey
           });
-        }
-      });
-    });
-
-    tbody.querySelectorAll('.btn-view-invoice').forEach(btn => {
-      btn.addEventListener('click', () => openOrderInvoiceModal(btn.dataset.id));
-    });
-
-    tbody.querySelectorAll('.btn-delete-order').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (confirm('بۇ زاكازنى ئۆچۈرەمسىز؟')) {
-          window.appStore.deleteOrder(btn.dataset.id);
-          renderOrdersTable();
-          renderDashboardMetrics();
-          showAdminToast('زاكاز ئۆچۈرۈلدى!', 'info');
+          window.showModal('directSmsModal');
         }
       });
     });
@@ -2148,34 +2167,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openOrderInvoiceModal(orderId) {
-    const order = window.appStore.getOrders().find(o => o.id === orderId);
+    const orders = window.appStore.getOrders();
+    const order = orders.find(o => String(o.id) === String(orderId));
     if (!order) return;
 
     const modal = document.getElementById('orderInvoiceModal');
     const body = document.getElementById('orderInvoiceModalBody');
     if (!modal || !body) return;
 
-    let itemsRows = order.items.map(item => `
+    const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
+    const itemsList = Array.isArray(order.items) ? order.items : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
+
+    let itemsRows = itemsList.map(item => `
       <tr>
         <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            <img src="${item.image}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;">
-            <span>${item.name}</span>
+            ${item.image ? `<img src="${item.image}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;">` : ''}
+            <span>${item.name || item.productName || 'تاۋار'}</span>
           </div>
         </td>
         <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${window.appStore.formatPrice(item.price)}</td>
-        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${item.quantity}</td>
-        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border); font-weight:700;">${window.appStore.formatPrice(item.price * item.quantity)}</td>
+        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${item.quantity || 1}</td>
+        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border); font-weight:700;">${window.appStore.formatPrice((item.price || 0) * (item.quantity || 1))}</td>
       </tr>
     `).join('');
 
-    const invoiceTotal = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total);
+    const invoiceTotal = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total || 0);
 
     body.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1.5rem; border-bottom:2px solid var(--admin-border); padding-bottom:0.75rem;">
         <div>
-          <h3 style="font-size:1.35rem; font-weight:800; color:var(--primary-color);">زاكاز تالونى</h3>
-          <p class="number-latin" style="color:var(--text-muted);">${order.id}</p>
+          <h3 style="font-size:1.35rem; font-weight:800; color:var(--primary-color); margin: 0 0 0.25rem;">زاكاز تالونى</h3>
+          <p class="number-latin" style="color:var(--text-muted); margin: 0; font-weight: 700;">#${order.id}</p>
         </div>
         <div>
           <span class="status-pill ${getStatusClass(order.status)}">${order.status}</span>
@@ -2185,13 +2208,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="order-detail-grid">
         <div class="order-detail-card">
           <h5><i class="fas fa-user"></i> تاپشۇرۇۋالغۇچى:</h5>
-          <p><strong>ئىسىم:</strong> ${order.customer.name}</p>
-          <p><strong>تېلېفون:</strong> <span class="number-latin">${order.customer.phone}</span></p>
-          <p><strong>ئادرېس:</strong> ${order.customer.city} ${order.customer.address}</p>
+          <p><strong>ئىسىم:</strong> ${cust.name || '-'}</p>
+          <p><strong>تېلېفون:</strong> <span class="number-latin">${cust.phone || '-'}</span></p>
+          <p><strong>ئادرېس:</strong> ${cust.city || ''} ${cust.address || ''}</p>
         </div>
         <div class="order-detail-card">
           <h5><i class="fas fa-info-circle"></i> زاكاز ئۇچۇرى:</h5>
-          <p><strong>چىقىم:</strong> ${order.paymentMethod}</p>
+          <p><strong>چىقىم:</strong> ${order.paymentMethod || 'نەق پۇل'}</p>
           <p><strong>ۋاقتى:</strong> <span class="number-latin">${order.date}</span></p>
           <p><strong>ئالاھىدە تەلەپ:</strong> ${order.notes || 'يوق'}</p>
         </div>
@@ -2206,7 +2229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <th style="padding:0.5rem;">جەمئىي</th>
           </tr>
         </thead>
-        <tbody>${itemsRows}</tbody>
+        <tbody>${itemsRows || '<tr><td colspan="4" style="text-align:center; padding:1rem;">تاۋار ئۇچۇرى يوق</td></tr>'}</tbody>
       </table>
 
       <div style="text-align:left; direction:ltr; font-weight:700;">
@@ -2214,6 +2237,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--admin-border); display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn-secondary btn-modal-close" onclick="window.hideModal('orderInvoiceModal')" style="padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px;">تاقاش</button>
         <button type="button" class="btn-secondary btn-invoice-sms" data-id="${order.id}" style="color: #0284c7; border-color: #0284c7; font-weight: 700; padding: 0.55rem 1.25rem; border-radius: 8px;">
           <i class="fas fa-sms"></i> خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش
         </button>
@@ -2224,16 +2248,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (smsBtn) {
       smsBtn.addEventListener('click', () => {
         openDirectSmsModal({
-          name: order.customer.name,
-          phone: order.customer.phone,
+          name: cust.name || 'خېرىدار',
+          phone: cust.phone || '',
           role: 'خېرىدار',
           orderId: order.id
         });
+        window.showModal('directSmsModal');
       });
     }
 
-    modal.classList.add('active');
+    window.showModal('orderInvoiceModal');
   }
+  window.openOrderInvoiceModal = openOrderInvoiceModal;
 
   function loadSettingsForm() {
     const s = window.appStore ? window.appStore.getSettings() : null;
@@ -4530,7 +4556,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==================== 🚚 زاكاز ئىز قوغلاش كۆزنىكى ۋە فورمىسى ====================
-  function openOrderTrackingModal(order) {
+  function openOrderTrackingModal(orderOrId) {
+    const orders = window.appStore ? window.appStore.getOrders() : [];
+    let order = (typeof orderOrId === 'object' && orderOrId !== null) 
+      ? orderOrId 
+      : orders.find(o => String(o.id) === String(orderOrId));
+    if (!order) {
+      alert('زاكاز ئۇچۇرى تېپىلمىدى: ' + orderOrId);
+      return;
+    }
+
     const modal = document.getElementById('orderTrackingModal');
     if (!modal) return;
 
@@ -4539,14 +4574,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const carrierSelect = document.getElementById('trackingCarrierSelect');
     const noInput = document.getElementById('trackingNumberInput');
 
-    if (oidInput) oidInput.value = order.id;
-    if (dispInput) dispInput.value = `#${order.id} - ${order.customer ? order.customer.name : ''}`;
-    if (carrierSelect) carrierSelect.value = order.cargoCarrier || 'PTT Kargo';
-    if (noInput) noInput.value = order.cargoTrackingNo || '';
+    const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
 
-    modal.classList.add('active');
+    if (oidInput) oidInput.value = order.id;
+    if (dispInput) dispInput.value = `#${order.id} - ${cust.name || ''}`;
+    if (carrierSelect) carrierSelect.value = order.cargoCarrier || (order.tracking && order.tracking.carrier) || 'PTT Kargo';
+    if (noInput) noInput.value = order.cargoTrackingNo || (order.tracking && order.tracking.trackingNumber) || '';
+
+    window.showModal('orderTrackingModal');
     setTimeout(() => { if (noInput) noInput.focus(); }, 150);
   }
+  window.openOrderTrackingModal = openOrderTrackingModal;
+
+  window.openDirectSmsModalForOrder = function(orderOrId) {
+    const orders = window.appStore ? window.appStore.getOrders() : [];
+    let order = (typeof orderOrId === 'object' && orderOrId !== null) 
+      ? orderOrId 
+      : orders.find(o => String(o.id) === String(orderOrId));
+    if (!order) {
+      alert('زاكاز ئۇچۇرى تېپىلمىدى: ' + orderOrId);
+      return;
+    }
+    const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
+    openDirectSmsModal({
+      name: cust.name || 'خېرىدار',
+      phone: cust.phone || '',
+      role: 'خېرىدار',
+      orderId: order.id
+    });
+    window.showModal('directSmsModal');
+  };
+
+  window.deleteOrderById = function(orderId) {
+    if (confirm('بۇ زاكازنى ھەقىقەتەن ئۆچۈرەمسىز؟\n\nنومۇرى: #' + orderId)) {
+      window.appStore.deleteOrder(orderId);
+      renderOrdersTable();
+      renderDashboardMetrics();
+      showAdminToast('زاكاز مۇۋەپپەقىيەتلىك ئۆچۈرۈلدى!', 'info');
+    }
+  };
 
   function setupOrderTrackingForm() {
     const form = document.getElementById('orderTrackingForm');
@@ -4559,8 +4625,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const trackingNo = document.getElementById('trackingNumberInput').value.trim();
 
       const res = window.appStore.updateOrderTracking(oid, carrier, trackingNo);
-      if (res.success) {
-        document.getElementById('orderTrackingModal').classList.remove('active');
+      if (res === true || (res && res.success)) {
+        window.hideModal('orderTrackingModal');
         renderOrdersTable();
         renderDashboardMetrics();
         showAdminToast('كارگو ئىز قوغلاش ئۇچۇرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');

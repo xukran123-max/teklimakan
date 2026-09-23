@@ -4111,11 +4111,14 @@ class StoreManager {
 
   updateOrderStatus(orderId, newStatus) {
     const orders = this.getOrders();
-    const order = orders.find(o => o.id === orderId);
+    const order = orders.find(o => String(o.id) === String(orderId));
     if (order) {
       order.status = newStatus;
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
       this.notifyDataChange('orders');
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
+        window.TeklimakanSupabase.updateOrderStatus(order.id, newStatus);
+      }
       return true;
     }
     return false;
@@ -4123,9 +4126,12 @@ class StoreManager {
 
   deleteOrder(orderId) {
     let orders = this.getOrders();
-    orders = orders.filter(o => o.id !== orderId);
+    orders = orders.filter(o => String(o.id) !== String(orderId));
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     this.notifyDataChange('orders');
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteOrder === 'function') {
+      window.TeklimakanSupabase.deleteOrder(orderId);
+    }
     return true;
   }
 
@@ -4185,8 +4191,10 @@ class StoreManager {
 
   updateOrderTracking(orderId, carrier, trackingNumber) {
     const orders = this.getOrders();
-    const order = orders.find(o => o.id === orderId);
+    const order = orders.find(o => String(o.id) === String(orderId));
     if (order) {
+      order.cargoCarrier = carrier || 'PTT Kargo';
+      order.cargoTrackingNo = trackingNumber || '';
       order.tracking = {
         carrier: carrier || 'PTT Kargo',
         trackingNumber: trackingNumber || '',
@@ -4197,9 +4205,14 @@ class StoreManager {
       }
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
       this.notifyDataChange('orders');
-      return true;
+
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderTracking === 'function') {
+        window.TeklimakanSupabase.updateOrderTracking(order.id, carrier, trackingNumber);
+      }
+
+      return { success: true, order: order };
     }
-    return false;
+    return { success: false, message: 'زاكاز تېپىلمىدى' };
   }
 
   getSettings() {

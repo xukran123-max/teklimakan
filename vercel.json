@@ -1,0 +1,21 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/seidiye",
+      "destination": "/seidiye.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/admin.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "destination": "/",
+      "permanent": false
+    }
+  ]
+}

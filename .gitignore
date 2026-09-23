@@ -10,3 +10,6 @@ edge_err.log
 sms_logs.json
 .vscode/
 .idea/
+
+iban.txt
+suba.txt

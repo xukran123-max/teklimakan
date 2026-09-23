@@ -2248,9 +2248,9 @@ class StoreManager {
     else if (!waPhone.startsWith('90') && waPhone.length === 10) waPhone = '90' + waPhone;
     const waLink = waPhone ? `https://wa.me/${waPhone}` : '';
 
-    let adminUrl = 'https://teklimakan.vercel.app/admin.html';
+    let adminUrl = 'https://www.teklimakan.com/seidiye';
     if (typeof window !== 'undefined' && window.location && window.location.origin) {
-      adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html');
+      adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/seidiye');
     }
 
     // 🤖 ئالىي باشقۇرغۇچىغا Telegram ئارقىلىق يېڭى ۋاكالەتچى ئىلتىماسى ۋە ئىمزالانغان كېلىشىم ئۇقتۇرۇشى ئەۋەتىش

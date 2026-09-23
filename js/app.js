@@ -2590,7 +2590,7 @@ function initTeklimakanApp() {
         `\n⚠️ <b>ھالىتى:</b> ⏳ <b>تەستىق كۈتۈۋاتىدۇ (دۇكاندا كۆرۈنمەيدۇ)</b>\n` +
         `⏰ <b>تاپشۇرۇلغان ۋاقتى:</b> ${new Date().toLocaleString()}\n\n` +
         `👉 <i>ئارقا سۇپىغا كىرىپ، تاۋارلار سەھىپىسىدىن بىر كۇنۇپكا بىلەن تەستىقلاڭ ياكى رەت قىلىڭ:</i>\n` +
-        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html')) : 'https://teklimakan.vercel.app/admin.html')}">باشقۇرۇش مەركىزىدىن تەستىقلاش</a>`;
+        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/seidiye')) : 'https://www.teklimakan.com/seidiye')}">باشقۇرۇش مەركىزىدىن تەستىقلاش</a>`;
 
       await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
         method: 'POST',
@@ -2668,7 +2668,7 @@ function initTeklimakanApp() {
         `📍 <b>بايقالغان ئورنى:</b> مەھسۇلاتنىڭ <b>${field || 'مەزمۇنىدا'}</b>\n\n` +
         `⚠️ <b>ھالىتى:</b> تاشقى ئۇلىنىش تۈپەيلى دۇكاندىن تۇتۇپ قېلىندى ھەم ۋاكالەتچىگە رەت قىلىش ئېكرانى كۆرسىتىلدى.\n` +
         `👉 <i>ئالىي باشقۇرغۇچى سۈپىتىدە، ئارقا سۇپىدىن بىر كۇنۇپكا بىلەن تەستىقلاڭ ياكى پۈتۈنلەي رەت قىلىڭ:</i>\n` +
-        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html')) : 'https://teklimakan.vercel.app/admin.html')}">باشقۇرۇش مەركىزىدىن بىر تەرەپ قىلىش</a>`;
+        `🔗 <a href="${(window.location.origin ? (window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/seidiye')) : 'https://www.teklimakan.com/seidiye')}">باشقۇرۇش مەركىزىدىن بىر تەرەپ قىلىش</a>`;
 
       await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
         method: 'POST',
@@ -2737,9 +2737,9 @@ function initTeklimakanApp() {
       else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
       const waLink = cleanPhone ? `https://wa.me/${cleanPhone}` : '';
 
-      let adminUrl = 'https://teklimakan.vercel.app/admin.html';
+      let adminUrl = 'https://www.teklimakan.com/seidiye';
       if (typeof window !== 'undefined' && window.location && window.location.origin) {
-        adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/admin.html');
+        adminUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/seidiye');
       }
 
       let msg = `👤 <b>يېڭى ۋاكالەتچى / سودىگەر ئىلتىماسى كېلىپ چۈشتى!</b>\n\n` +
@@ -4130,7 +4130,7 @@ function initTeklimakanApp() {
         if (tapCount >= 3) {
           tapCount = 0;
           localStorage.setItem('teklimakan_admin_device', 'true');
-          window.location.href = 'admin.html';
+          window.location.href = 'seidiye';
         }
       });
     }
@@ -4966,7 +4966,7 @@ ${text}
     if ((e.ctrlKey || e.altKey) && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.code === 'KeyA')) {
       e.preventDefault();
       localStorage.setItem('teklimakan_admin_device', 'true');
-      window.location.href = 'admin.html';
+      window.location.href = 'seidiye';
     }
   });
 

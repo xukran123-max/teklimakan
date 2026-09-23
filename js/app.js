@@ -2300,6 +2300,19 @@ function initTeklimakanApp() {
       });
 
       function proceedOrderCreation(name, phone, city, address, payment, notes, lang) {
+        // خېرىدار ئۇچۇرلىرىنى كەلگۈسىدىكى پاراڭ ۋە زاكازلار ئۈچۈن مەڭگۈلۈك ساقلاش
+        try {
+          if (name) {
+            localStorage.setItem('teklimakan_customer_name', name);
+            localStorage.setItem('teklimakan_checkout_name', name);
+          }
+          if (phone) {
+            localStorage.setItem('teklimakan_customer_phone', phone);
+            localStorage.setItem('teklimakan_checkout_phone', phone);
+          }
+          if (address) localStorage.setItem('teklimakan_checkout_address', address);
+        } catch (e) {}
+
         const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
         const res = window.appStore.createOrder({ name, phone, city, address }, payment, notes, discountVal, lang);
 
@@ -4249,11 +4262,152 @@ function initTeklimakanApp() {
         .replace(/"/g, '&quot;');
     }
 
-    // 1. ئالدىن ساقلانغان تېلېفون، ئىسىم ۋە خېرىدار مەخسۇس ئولتۇرۇش كودى (Customer Session ID)
-    const savedPhone = localStorage.getItem('teklimakan_customer_phone') || '';
-    const savedName = localStorage.getItem('teklimakan_customer_name') || '';
-    if (phoneInput && savedPhone) phoneInput.value = savedPhone;
-    if (nameInput && savedName) nameInput.value = savedName;
+    // 1. خېرىدارنىڭ تولۇق ئارخىپىنى تور كۆرگۈچ، زاكازلار ۋە چىقىم خاتىرىسىدىن ئەقلىي يىغىش (Customer Profiler)
+    function getCustomerFullProfile() {
+      let name = (nameInput && nameInput.value.trim()) || '';
+      let phone = (phoneInput && phoneInput.value.trim()) || '';
+      let address = '';
+      let city = '';
+      let ordersCount = 0;
+      let lastOrderId = '';
+      let lastOrderStatus = '';
+      let lastOrderDate = '';
+      let totalSpent = 0;
+
+      // A. بىۋاسىتە ساقلىغۇچتىن ئىزدىنىش
+      if (!name || name === 'خېرىدار') name = localStorage.getItem('teklimakan_customer_name') || '';
+      if (!name) name = localStorage.getItem('teklimakan_checkout_name') || '';
+      if (!phone) phone = localStorage.getItem('teklimakan_customer_phone') || '';
+      if (!phone) phone = localStorage.getItem('teklimakan_checkout_phone') || '';
+      if (!phone) phone = localStorage.getItem('teklimakan_track_phone') || '';
+      address = localStorage.getItem('teklimakan_checkout_address') || '';
+
+      // B. بەتتىكى چىقىم كۆزنىكى ئېچىلغان ياكى تولدۇرۇلغان بولسا شۇ يەردىن ئېلىش
+      if (!name) {
+        const domName = document.getElementById('checkoutCustName');
+        if (domName && domName.value.trim()) name = domName.value.trim();
+      }
+      if (!phone) {
+        const domPhone = document.getElementById('checkoutCustPhone') || document.getElementById('trackOrderPhoneInput');
+        if (domPhone && domPhone.value.trim()) phone = domPhone.value.trim();
+      }
+      if (!address) {
+        const domAddr = document.getElementById('checkoutCustAddress');
+        if (domAddr && domAddr.value.trim()) address = domAddr.value.trim();
+      }
+
+      // C. ئىلگىرىكى زاكازلار ئامبىرىدىن خېرىدار ئۇچۇرىنى ئىزدەش
+      try {
+        const allOrders = (window.appStore && typeof window.appStore.getOrders === 'function')
+          ? window.appStore.getOrders()
+          : JSON.parse(localStorage.getItem('teklimakan_ecom_orders_v4') || '[]');
+        if (Array.isArray(allOrders) && allOrders.length > 0) {
+          let matched = allOrders;
+          if (phone) {
+            const cleanP = phone.replace(/\D/g, '');
+            const filtered = allOrders.filter(o => o.customerPhone && o.customerPhone.replace(/\D/g, '').includes(cleanP));
+            if (filtered.length > 0) matched = filtered;
+          }
+          if (matched.length > 0) {
+            const latest = matched[matched.length - 1];
+            if (!name && latest.customerName) name = latest.customerName;
+            if (!phone && latest.customerPhone) phone = latest.customerPhone;
+            if (!address && latest.address) address = latest.address;
+            if (!city && (latest.city || latest.province)) city = latest.city || latest.province;
+            ordersCount = matched.length;
+            lastOrderId = latest.orderNumber || latest.id;
+            lastOrderStatus = latest.status || 'تەستىقلاندى';
+            lastOrderDate = latest.date || '';
+            totalSpent = matched.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+          }
+        }
+      } catch (e) {}
+
+      // D. ئەڭ ئاخىرقى ساقلانغان زاكاز ئوبيېكتى
+      try {
+        const lastOrderRaw = localStorage.getItem('teklimakan_last_order');
+        if (lastOrderRaw) {
+          const lo = JSON.parse(lastOrderRaw);
+          if (lo) {
+            if (!name && lo.customerName) name = lo.customerName;
+            if (!phone && lo.customerPhone) phone = lo.customerPhone;
+            if (!address && lo.address) address = lo.address;
+            if (!city && (lo.city || lo.province)) city = lo.city || lo.province;
+            if (!lastOrderId && (lo.orderNumber || lo.id)) lastOrderId = lo.orderNumber || lo.id;
+            if (!lastOrderStatus && lo.status) lastOrderStatus = lo.status;
+            if (!lastOrderDate && (lo.date || lo.createdAt)) lastOrderDate = lo.date || lo.createdAt;
+          }
+        }
+      } catch (e) {}
+
+      // E. سېۋەت ھالىتى
+      let cartItemsCount = 0;
+      let cartTotal = 0;
+      try {
+        if (window.appStore && typeof window.appStore.getCart === 'function') {
+          const cart = window.appStore.getCart();
+          if (Array.isArray(cart)) {
+            cartItemsCount = cart.reduce((sum, it) => sum + (Number(it.quantity) || 1), 0);
+            cartTotal = window.appStore.getCartTotal ? window.appStore.getCartTotal() : 0;
+          }
+        }
+      } catch (e) {}
+
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const deviceStr = isMobile ? '📱 يانفون (Mobile)' : '💻 كومپيۇتېر (Desktop)';
+      const langStr = (window.appI18n && window.appI18n.getLang ? window.appI18n.getLang() : 'ug');
+      const curStr = (window.appStore && window.appStore.getCurrency ? window.appStore.getCurrency() : 'TRY');
+
+      return {
+        name: name || '',
+        phone: phone || '',
+        address: address || '',
+        city: city || '',
+        ordersCount,
+        lastOrderId,
+        lastOrderStatus,
+        lastOrderDate,
+        totalSpent,
+        cartItemsCount,
+        cartTotal,
+        deviceStr,
+        langInfo: `${langStr === 'ug' ? 'ئۇيغۇرچە' : (langStr === 'tr' ? 'Türkçe' : 'English')} (${curStr})`
+      };
+    }
+
+    // خېرىدار كۆزنىكىنى ئاچقاندا ئىسمى ۋە تېلېفونىنى ئاپتوماتىك كىرگۈزۈش
+    function autoFillCustomerInputs() {
+      const prof = getCustomerFullProfile();
+      if (nameInput) {
+        if (!nameInput.value.trim() || nameInput.value.trim() === 'خېرىدار') {
+          if (prof.name) {
+            nameInput.value = prof.name;
+          }
+        }
+      }
+      if (phoneInput) {
+        if (!phoneInput.value.trim()) {
+          if (prof.phone) {
+            phoneInput.value = prof.phone;
+          }
+        }
+      }
+    }
+
+    autoFillCustomerInputs();
+
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        const val = nameInput.value.trim();
+        if (val) localStorage.setItem('teklimakan_customer_name', val);
+      });
+    }
+    if (phoneInput) {
+      phoneInput.addEventListener('input', () => {
+        const val = phoneInput.value.trim();
+        if (val) localStorage.setItem('teklimakan_customer_phone', val);
+      });
+    }
 
     let custSessionId = localStorage.getItem('teklimakan_cust_session_id');
     if (!custSessionId) {
@@ -4488,6 +4642,7 @@ function initTeklimakanApp() {
         startPolling(8000);
       } else {
         chatBox.style.display = 'flex';
+        autoFillCustomerInputs();
         const badge = document.getElementById('chatUnreadBadge');
         if (badge) {
           badge.textContent = '0';
@@ -4521,8 +4676,9 @@ function initTeklimakanApp() {
 
     // ⚡ تېز سۈرۈشتۈرۈش كۇنۇپكىلىرىنى بىر تەرەپ قىلىش (ئاپتوماتىك سوئال ۋە جاۋاب)
     async function handleQuickAction(actionKey, buttonText) {
-      const custName = (nameInput && nameInput.value.trim()) || localStorage.getItem('teklimakan_customer_name') || 'خېرىدار';
-      const custPhone = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
+      const prof = getCustomerFullProfile();
+      const custName = (nameInput && nameInput.value.trim()) || prof.name || 'خېرىدار';
+      const custPhone = (phoneInput && phoneInput.value.trim()) || prof.phone || '';
 
       if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
       if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
@@ -4581,13 +4737,47 @@ function initTeklimakanApp() {
         if (typeof playChime === 'function') playChime('success');
       }, 350);
 
-      // 3. ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىلىدۇ (نېمە سورالدى ۋە نېمە ئەۋەتىلدى)
+      // 3. ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا خېرىدارنىڭ بارلىق تەپسىلىي ئۇچۇرلىرى بىلەن سىگنال ئەۋەتىلىدۇ
       if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
-        const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
-        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⚡ <b>تېز سۈرۈشتۈرۈش كۇنۇپكىسى:</b> ${questionText}\n\n🤖 <b>خېرىدارغا چىقىرىلغان ئاپتوماتىك جاۋاب:</b>\n${answerText}\n\n💡 <b>باشقۇرۇش ئۇسۇلى:</b>\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بارىدۇ.\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «ئۆچۈر» ياكى «/del» يازسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «/wipe» يازسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
+        let orderHistoryBlock = 'تېخى زاكاز بەرمىگەن يېڭى خېرىدار';
+        if (prof.ordersCount > 0) {
+          orderHistoryBlock = `${prof.ordersCount} قېتىم زاكاز بەرگەن (جەمئىي: ${prof.totalSpent}₺)\n   • ئاخىرقى زاكاز: #${prof.lastOrderId} (${prof.lastOrderStatus || 'تەستىقلاندى'})`;
+        }
+        let cartBlock = 'سېۋىتى بوش';
+        if (prof.cartItemsCount > 0) {
+          cartBlock = `سېۋەتتە ${prof.cartItemsCount} دانە تاۋار بار (ئومۇمىي: ${prof.cartTotal}₺)`;
+        }
+        let addrBlock = 'تېخى ئادرېس كىرگۈزمىگەن';
+        if (prof.address || prof.city) {
+          addrBlock = `${prof.city ? prof.city + ' - ' : ''}${prof.address}`;
+        }
+
+        const waPhone = custPhone.replace(/[\s\-\+]/g, '');
+        const waLink = waPhone ? `https://wa.me/${waPhone}` : 'https://wa.me/905551609999';
+        const telLink = waPhone ? `tel:${waPhone}` : '#';
+
+        const tgAlertText = 
+`👤 <b>خېرىدار ئىسمى:</b> <b>${custName}</b>
+📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>
+📍 <b>ئادرېس / رايونى:</b> ${addrBlock}
+📦 <b>زاكاز تارىخى:</b> ${orderHistoryBlock}
+🛒 <b>نۆۋەتتىكى سېۋىتى:</b> ${cartBlock}
+🌐 <b>ئۈسكۈنە ۋە تىل:</b> ${prof.deviceStr} | ${prof.langInfo}
+🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>
+
+⚡ <b>تېز سۈرۈشتۈرۈش تۈرى:</b> ${questionText}
+🤖 <b>چىقىرىلغان ئاپتوماتىك جاۋاب:</b>
+${answerText}
+
+💡 <b>باشقۇرۇش ئۇسۇلى:</b>
+• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بارىدۇ.
+• «ئۆچۈر» ياكى «/del» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!
+• «/wipe» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!
+
+👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a> | <a href="${telLink}">تېلېفون ئۇرۇش</a>`;
 
         window.appStore.sendTelegramAlert({
-          title: `⚡ [تېز سوئال] خېرىدار «${questionText.slice(0, 15)}...» نى چەكتى`,
+          title: `⚡ [تېز سۈرۈشتۈرۈش] ${custName}: «${questionText.slice(0, 15)}...»`,
           message: tgAlertText,
           isUrgent: false
         }).then(res => {
@@ -4599,7 +4789,12 @@ function initTeklimakanApp() {
 
       // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
       if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
-        window.appStore.recordCustomerChatMessage(clientMsg);
+        window.appStore.recordCustomerChatMessage({
+          ...clientMsg,
+          address: prof.address ? `${prof.city ? prof.city + ' - ' : ''}${prof.address}` : '',
+          orderHistory: prof.ordersCount > 0 ? `${prof.ordersCount} زاكاز (${prof.totalSpent}₺)` : '',
+          cartInfo: prof.cartItemsCount > 0 ? `${prof.cartItemsCount} تاۋار` : ''
+        });
       }
     }
 
@@ -4609,8 +4804,9 @@ function initTeklimakanApp() {
       const text = msgInput.value.trim();
       if (!text) return;
 
-      const custName = (nameInput && nameInput.value.trim()) || localStorage.getItem('teklimakan_customer_name') || 'خېرىدار';
-      const custPhone = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
+      const prof = getCustomerFullProfile();
+      const custName = (nameInput && nameInput.value.trim()) || prof.name || 'خېرىدار';
+      const custPhone = (phoneInput && phoneInput.value.trim()) || prof.phone || '';
 
       if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
       if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
@@ -4634,13 +4830,47 @@ function initTeklimakanApp() {
 
       if (typeof playChime === 'function') playChime('click');
 
-      // 📲 ئالىي باشقۇرغۇچىغا دەرھال سىگنال ئەۋەتىش
+      // 📲 ئالىي باشقۇرغۇچىغا خېرىدارنىڭ بارلىق تەپسىلىي ئۇچۇرلىرى بىلەن سىگنال ئەۋەتىش
       if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
-        const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
-        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n💬 <b>باشقۇرۇش ئۇسۇلى:</b>\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بارىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «ئۆچۈر» ياكى «/del» يازسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «/wipe» يازسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
+        let orderHistoryBlock = 'تېخى زاكاز بەرمىگەن يېڭى خېرىدار';
+        if (prof.ordersCount > 0) {
+          orderHistoryBlock = `${prof.ordersCount} قېتىم زاكاز بەرگەن (جەمئىي: ${prof.totalSpent}₺)\n   • ئاخىرقى زاكاز: #${prof.lastOrderId} (${prof.lastOrderStatus || 'تەستىقلاندى'})`;
+        }
+        let cartBlock = 'سېۋىتى بوش';
+        if (prof.cartItemsCount > 0) {
+          cartBlock = `سېۋەتتە ${prof.cartItemsCount} دانە تاۋار بار (ئومۇمىي: ${prof.cartTotal}₺)`;
+        }
+        let addrBlock = 'تېخى ئادرېس كىرگۈزمىگەن';
+        if (prof.address || prof.city) {
+          addrBlock = `${prof.city ? prof.city + ' - ' : ''}${prof.address}`;
+        }
+
+        const waPhone = custPhone.replace(/[\s\-\+]/g, '');
+        const waLink = waPhone ? `https://wa.me/${waPhone}` : 'https://wa.me/905551609999';
+        const telLink = waPhone ? `tel:${waPhone}` : '#';
+
+        const tgAlertText = 
+`👤 <b>خېرىدار ئىسمى:</b> <b>${custName}</b>
+📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>
+📍 <b>ئادرېس / رايونى:</b> ${addrBlock}
+📦 <b>زاكاز تارىخى:</b> ${orderHistoryBlock}
+🛒 <b>نۆۋەتتىكى سېۋىتى:</b> ${cartBlock}
+🌐 <b>ئۈسكۈنە ۋە تىل:</b> ${prof.deviceStr} | ${prof.langInfo}
+🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>
+⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}
+
+📝 <b>ئۇچۇر مەزمۇنى:</b>
+${text}
+
+💬 <b>باشقۇرۇش ئۇسۇلى:</b>
+• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بىۋاسىتە بارىدۇ!
+• «ئۆچۈر» ياكى «/del» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!
+• «/wipe» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!
+
+👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a> | <a href="${telLink}">تېلېفون ئۇرۇش</a>`;
 
         window.appStore.sendTelegramAlert({
-          title: '💬 [تور بېكەت خېرىدارى] ئالىي باشقۇرغۇچىغا بىۋاسىتە ئۇچۇر يازدى!',
+          title: `💬 [جانلىق پاراڭ] ${custName} ئالىي باشقۇرغۇچىغا ئۇچۇر يازدى!`,
           message: tgAlertText,
           isUrgent: true
         }).then(res => {
@@ -4654,7 +4884,12 @@ function initTeklimakanApp() {
 
       // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
       if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
-        window.appStore.recordCustomerChatMessage(newMsg);
+        window.appStore.recordCustomerChatMessage({
+          ...newMsg,
+          address: prof.address ? `${prof.city ? prof.city + ' - ' : ''}${prof.address}` : '',
+          orderHistory: prof.ordersCount > 0 ? `${prof.ordersCount} زاكاز (${prof.totalSpent}₺)` : '',
+          cartInfo: prof.cartItemsCount > 0 ? `${prof.cartItemsCount} تاۋار` : ''
+        });
       }
 
       // 🤖 ئاپتوماتىك سىپايە جاۋاب

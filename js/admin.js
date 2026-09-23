@@ -2492,12 +2492,27 @@ document.addEventListener('DOMContentLoaded', () => {
       return `
         <tr>
           <td>
-            <div style="font-weight: 800; color: #0f172a;">${custName}</div>
+            <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">${custName}</div>
             <div style="font-size: 0.75rem; color: #64748b;">${msg.sender === 'customer' ? 'خېرىدار سۈرۈشتۈرۈشى' : 'ئاپتوماتىك'}</div>
+            ${msg.address ? `<div style="font-size: 0.72rem; color: #059669; font-weight: 700; margin-top: 3px;"><i class="fas fa-map-marker-alt"></i> ${msg.address}</div>` : ''}
+            ${msg.orderHistory ? `<div style="font-size: 0.72rem; color: #d97706; font-weight: 700; margin-top: 2px;"><i class="fas fa-box"></i> ${msg.orderHistory}</div>` : ''}
+            ${msg.cartInfo ? `<div style="font-size: 0.72rem; color: #2563eb; margin-top: 1px;"><i class="fas fa-shopping-cart"></i> ${msg.cartInfo}</div>` : ''}
           </td>
-          <td class="number-latin" style="font-weight: 700; color: #0284c7; white-space: nowrap;">${custPhone}</td>
+          <td style="white-space: nowrap;">
+            <div class="number-latin" style="font-weight: 700; color: #0284c7; font-size: 0.9rem;">${custPhone}</div>
+            ${custPhone && custPhone !== 'نومۇرسىز' ? `
+              <div style="margin-top: 4px; display: flex; gap: 6px;">
+                <a href="https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}" target="_blank" style="display: inline-flex; align-items: center; gap: 3px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; padding: 2px 7px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; text-decoration: none;">
+                  <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="tel:${custPhone.replace(/[\s\-\+]/g, '')}" style="display: inline-flex; align-items: center; gap: 3px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; padding: 2px 7px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; text-decoration: none;">
+                  <i class="fas fa-phone"></i> تېلېفون
+                </a>
+              </div>
+            ` : ''}
+          </td>
           <td>
-            <div style="max-width: 320px; font-size: 0.82rem; line-height: 1.5; color: #1e293b; word-break: break-word;">
+            <div style="max-width: 320px; font-size: 0.84rem; line-height: 1.5; color: #1e293b; word-break: break-word;">
               ${text}
             </div>
           </td>

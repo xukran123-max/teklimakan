@@ -4284,7 +4284,7 @@ function initTeklimakanApp() {
           id: 'msg-welcome',
           sender: 'admin',
           name: 'ئالىي باشقۇرغۇچى',
-          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خوش كەپسىز. بىزگە بۇ يەردىن بىۋاسىتە ئۇچۇر يازسىڭىز، ئۇچۇرىڭىز دەرھال تېلېگرامما ئارقىلىق ماڭا يەتكۈزۈلىدۇ. سىز تېلېگراممىدىن قايتۇرغان جاۋابنىمۇ دەل ۋاقتىدا مۇشۇ يەردە كۆرەلەيسىز!',
+          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خۇش كەپسىز. زاكاز، بانكا ھېساباتى، مەھسۇلات ياكى كېلىشىملىك كارگو ھەققىدە قانداق سوئالىڭىز بولسا، تۆۋەندىكى تېز كۇنۇپكىلارنى چەكسىڭىز ياكى بىۋاسىتە ئۇچۇر يازسىڭىز دەرھال ياردەم بېرىمىز!',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
           timestamp: Date.now()
@@ -4322,7 +4322,7 @@ function initTeklimakanApp() {
       }, 50);
     }
 
-    // 🔄 تېلېگرامما ئارقىلىق ئالىي باشقۇرغۇچى قايتۇرغان جاۋابنى تەكشۈرۈش (Telegram Two-Way Sync)
+    // 🔄 ئالىي باشقۇرغۇچى قايتۇرغان جاۋاب ياكى يىراقتىن ئۆچۈرۈش بۇيرۇقىنى دەل ۋاقتىدا ماسلاشتۇرۇش
     let pollInterval = null;
     let isPolling = false;
 
@@ -4352,7 +4352,14 @@ function initTeklimakanApp() {
           let isForThisCustomer = false;
           let replyContent = msg.text.trim();
 
-          // 1-ئۇسۇل: تېلېگراممىدا روبوت ئەۋەتكەن خېرىدار ئۇچۇرىغا «Reply (جاۋاب قايتۇرۇش)» قىلىنغان بولسا
+          // 1. ئومۇمىي تازىلاش بۇيرۇقى (Global wipe command)
+          if (/^\/(wipe_all|delete_all|clear_all)/i.test(replyContent)) {
+            localStorage.removeItem(CHAT_STORAGE_KEY);
+            renderChatMessages();
+            continue;
+          }
+
+          // 2. مەزكۇر خېرىدارغا ئالاقىدارلىقىنى جەزملەشتۈرۈش
           if (replyTo) {
             if (mySentMsgIds.includes(replyTo.message_id)) {
               isForThisCustomer = true;
@@ -4363,9 +4370,8 @@ function initTeklimakanApp() {
             }
           }
 
-          // 2-ئۇسۇل: ئالىي باشقۇرغۇچى بۇيرۇق شەكلىدە يازغان بولسا (/reply Cxxxxxx ياكى #Cxxxxxx)
           if (!isForThisCustomer) {
-            const cmdPattern = new RegExp(`^(\\/reply|\\/r|#)\\s*#?${custSessionId}\\s*(.*)$`, 'i');
+            const cmdPattern = new RegExp(`^(\\/reply|\\/r|\\/wipe|\\/del|\\/delete|#)\\s*#?${custSessionId}\\s*(.*)$`, 'i');
             const match = replyContent.match(cmdPattern);
             if (match) {
               isForThisCustomer = true;
@@ -4376,9 +4382,31 @@ function initTeklimakanApp() {
             }
           }
 
-          if (isForThisCustomer && replyContent) {
+          if (isForThisCustomer) {
+            // 🗑️ باشقۇرغۇچى تېلېگراممىدىن ئۆچۈرۈش / يۇيۇشنى بۇيرۇغان بولسا
+            const isDeleteOrder = /^(\/delete|\/del|\/wipe|\/clear|ئۆچۈر|يۇي|ئۆچۈرۈۋەت|ھەممىنى ئۆچۈر)/i.test(replyContent);
+            if (isDeleteOrder || replyContent.includes('wipe') || replyContent.includes('clear')) {
+              const wipeAllForCust = /^\/(wipe|clear|ھەممىنى ئۆچۈر|پاراڭنى يۇي)/i.test(replyContent) || replyContent.includes('ھەممىنى');
+              if (wipeAllForCust) {
+                localStorage.removeItem(CHAT_STORAGE_KEY);
+                renderChatMessages();
+                if (typeof showToast === 'function') {
+                  showToast('ئالىي باشقۇرغۇچى تەرىپىدىن پاراڭ خاتىرىسى پۈتۈنلەي تازىلاندى.', 'info');
+                }
+              } else {
+                let h = getChatHistory();
+                if (h.length > 1) {
+                  h.pop();
+                  saveChatHistory(h);
+                  renderChatMessages();
+                }
+              }
+              continue;
+            }
+
+            // 💬 ئالىي باشقۇرغۇچى يازغان رەسمىي جاۋابنى قوشۇش
             const alreadyExists = history.some(item => item.telegramMsgId === msg.message_id);
-            if (!alreadyExists) {
+            if (!alreadyExists && replyContent) {
               const newReplyObj = {
                 id: 'admin-tg-' + msg.message_id,
                 telegramMsgId: msg.message_id,
@@ -4469,6 +4497,90 @@ function initTeklimakanApp() {
       });
     }
 
+    // ⚡ تېز سۈرۈشتۈرۈش كۇنۇپكىلىرىنى بىر تەرەپ قىلىش (ئاپتوماتىك سوئال ۋە جاۋاب)
+    async function handleQuickAction(actionKey, buttonText) {
+      const custName = (nameInput && nameInput.value.trim()) || localStorage.getItem('teklimakan_customer_name') || 'خېرىدار';
+      const custPhone = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
+
+      if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
+      if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
+
+      let questionText = buttonText || 'سۈرۈشتۈرۈش';
+      let answerText = '';
+
+      if (actionKey === 'track' || buttonText.includes('زاكاز')) {
+        questionText = '📦 زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.';
+        answerText = `📦 ھۆرمەتلىك خېرىدار! زاكاز ئەھۋالىڭىزنى سۈرۈشتۈرۈش ئۇسۇللىرى:\n\n1. تور بېكىتىمىزنىڭ ئەڭ ئۈستىدىكى «📦 زاكازلىرىم» كۇنۇپكىسىنى چەكسىڭىز، تېلېفون نومۇرىڭىزنى كىرگۈزۈش ئارقىلىق بىر نەچچە يىل ئىلگىرىكى زاكازلىرىڭىزنىمۇ دەرھال كۆرەلەيسىز.\n\n2. ياكى زاكاز نومۇرىڭىزنى مۇشۇ يەرگە يېزىپ قالدۇرسىڭىز، بىز ئەھۋالىنى دەرھال تەكشۈرۈپ جاۋاب قايتۇرىمىز.`;
+      } else if (actionKey === 'bank' || buttonText.includes('بانكا')) {
+        questionText = '💳 پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.';
+        answerText = `🏦 تەكلىماكان سۇپىسى بانكا ھېسابات ئۇچۇرى (Havale / EFT / FAST):\n\n🏛️ بانكا: Ziraat Katılım\n👤 ھېسابات ئىگىسى: GULNISA ABDURAHMAN\n💳 IBAN:\nTR68 0021 0000 0005 3290 8000 01\n\n⚠️ مۇھىم ئەسكەرتىش: پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا پەقەت (kuruyemiş) دەپ يېزىپ قويۇڭ!`;
+      } else if (actionKey === 'cargo' || buttonText.includes('كارگو')) {
+        questionText = '🚚 مال قاچان يوللىنىدۇ، كارگو ئەھۋالى قانداق؟';
+        answerText = `🚚 ھۆرمەتلىك خېرىدار! بارلىق زاكازلار تەستىقلانغاندىن كېيىن 24 سائەت ئىچىدە كېلىشىملىك تېز يەتكۈزۈش (كارگو) شىركىتىگە تاپشۇرۇلىدۇ.\n\nمال يوللانغان ھامان سىزگە ئاپتوماتىك كارگو ئىز قوغلاش كودى ئۇچۇر قىلىپ يوللىنىدۇ. زاكاز نومۇرىڭىزنى يازسىڭىز، كارگونىڭ ھازىر قەيەرگە كەلگەنلىكىنى تەكشۈرۈپ بېرىمىز.`;
+      } else {
+        questionText = buttonText;
+        answerText = 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ  ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...';
+      }
+
+      // 1. خېرىدار سوئالى كۆزنەككە قوشۇلىدۇ
+      const clientMsg = {
+        id: 'msg-' + Date.now(),
+        sender: 'customer',
+        name: custName,
+        phone: custPhone,
+        text: questionText,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString('zh-CN'),
+        timestamp: Date.now()
+      };
+
+      const history = getChatHistory();
+      history.push(clientMsg);
+      saveChatHistory(history);
+      renderChatMessages();
+
+      if (typeof playChime === 'function') playChime('click');
+
+      // 2. ئاپتوماتىك تەپسىلىي جاۋاب خېرىدارغا چىقىرىلىدۇ
+      setTimeout(() => {
+        const replyMsg = {
+          id: 'admin-auto-' + Date.now(),
+          sender: 'admin',
+          name: 'ئالىي باشقۇرغۇچى',
+          text: answerText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('zh-CN'),
+          timestamp: Date.now()
+        };
+        const updated = getChatHistory();
+        updated.push(replyMsg);
+        saveChatHistory(updated);
+        renderChatMessages();
+        if (typeof playChime === 'function') playChime('success');
+      }, 350);
+
+      // 3. ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىلىدۇ (نېمە سورالدى ۋە نېمە ئەۋەتىلدى)
+      if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
+        const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
+        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⚡ <b>تېز سۈرۈشتۈرۈش كۇنۇپكىسى:</b> ${questionText}\n\n🤖 <b>خېرىدارغا چىقىرىلغان ئاپتوماتىك جاۋاب:</b>\n${answerText}\n\n💡 <b>باشقۇرۇش ئۇسۇلى:</b>\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بارىدۇ.\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «ئۆچۈر» ياكى «/del» يازسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «/wipe» يازسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
+
+        window.appStore.sendTelegramAlert({
+          title: `⚡ [تېز سوئال] خېرىدار «${questionText.slice(0, 15)}...» نى چەكتى`,
+          message: tgAlertText,
+          isUrgent: false
+        }).then(res => {
+          if (res && res.data && res.data.result && res.data.result.message_id) {
+            recordMySentTgMsg(res.data.result.message_id);
+          }
+        }).catch(() => {});
+      }
+
+      // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
+      if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
+        window.appStore.recordCustomerChatMessage(clientMsg);
+      }
+    }
+
     // 🚀 ئۇچۇر ئەۋەتىش
     async function sendMessage() {
       if (!msgInput) return;
@@ -4500,10 +4612,10 @@ function initTeklimakanApp() {
 
       if (typeof playChime === 'function') playChime('click');
 
-      // 📲 ئالىي باشقۇرغۇچىنىڭ تېلېگراممىسىغا دەرھال سىگنال ئەۋەتىش (Reply ئىقتىدارىنى ئۆز ئىچىگە ئالىدۇ)
+      // 📲 ئالىي باشقۇرغۇچىغا دەرھال سىگنال ئەۋەتىش
       if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
         const waLink = custPhone ? `https://wa.me/${custPhone.replace(/[\s\-\+]/g, '')}` : 'https://wa.me/905551609999';
-        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n💬 <b>جاۋاب قايتۇرۇش ئۇسۇلى:</b>\nمۇشۇ ئۇچۇرغا «Reply (جاۋاب قايتۇرۇش)» قىلىپ يازسىڭىزلا، خېرىدارنىڭ تور بەت كۆزنىكىگە بىۋاسىتە بارىدۇ!\n(ياكى: <code>/reply ${custSessionId} سىزنىڭ جاۋابىڭىز</code>)\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
+        const tgAlertText = `👤 <b>خېرىدار:</b> ${custName}\n📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>\n🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>\n⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}\n\n📝 <b>ئۇچۇر مەزمۇنى:</b>\n${text}\n\n💬 <b>باشقۇرۇش ئۇسۇلى:</b>\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بارىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «ئۆچۈر» ياكى «/del» يازسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!\n• مۇشۇ ئۇچۇرغا «Reply» قىلىپ «/wipe» يازسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!\n\n👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a>`;
 
         window.appStore.sendTelegramAlert({
           title: '💬 [تور بېكەت خېرىدارى] ئالىي باشقۇرغۇچىغا بىۋاسىتە ئۇچۇر يازدى!',
@@ -4523,7 +4635,7 @@ function initTeklimakanApp() {
         window.appStore.recordCustomerChatMessage(newMsg);
       }
 
-      // 🤖 ئاپتوماتىك سىپايە جاۋاب (ئىشلەتكۈچى بەلگىلىگەن ئۆلچەملىك تېكىست بويىچە)
+      // 🤖 ئاپتوماتىك سىپايە جاۋاب
       setTimeout(() => {
         const reply = {
           id: 'admin-auto-reply-' + Date.now(),
@@ -4555,13 +4667,12 @@ function initTeklimakanApp() {
       });
     }
 
-    // تېز سوئال تاللاش كۇنۇپكىلىرى
+    // تېز سوئال تاللاش كۇنۇپكىلىرىنى ئۇلاش
     document.querySelectorAll('.chat-chip-btn').forEach(chip => {
       chip.addEventListener('click', () => {
-        if (msgInput) {
-          msgInput.value = chip.dataset.msg || chip.textContent;
-          msgInput.focus();
-        }
+        const action = chip.dataset.action || '';
+        const msg = chip.dataset.msg || chip.textContent;
+        handleQuickAction(action, msg);
       });
     });
   }

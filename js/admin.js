@@ -2462,8 +2462,96 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. ئەۋەتىلگەن ئۇچۇرلار خاتىرىسىنى سىزىش
     renderSmsHistoryTable();
 
-    // 4. توپ ئۇچۇر قوبۇل قىلغۇچى تىزىملىكىنى يېڭىلاش
+    // 4. تور بېكەت نەق مەيدان پاراڭ ئۇچۇرلىرى ۋە يىراقتىن يۇيۇش جەدۋىلىنى سىزىش
+    renderLiveChatInboxTable();
+
+    // 5. توپ ئۇچۇر قوبۇل قىلغۇچى تىزىملىكىنى يېڭىلاش
     if (window._refreshBulkContacts) window._refreshBulkContacts();
+  }
+
+  function renderLiveChatInboxTable() {
+    const tbody = document.getElementById('adminLiveChatInboxTableBody');
+    if (!tbody) return;
+
+    let inbox = [];
+    try {
+      inbox = JSON.parse(localStorage.getItem('teklimakan_admin_chat_inbox')) || [];
+    } catch (e) {}
+
+    if (inbox.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">تېخى تور بېكەت خېرىدارلىرىدىن كەلگەن نەق مەيدان پاراڭ ئۇچۇرى يوق.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = inbox.map((msg, idx) => {
+      const custName = msg.name || 'خېرىدار';
+      const custPhone = msg.phone || 'نومۇرسىز';
+      const text = msg.text || '';
+      const timeStr = (msg.date || '') + ' ' + (msg.time || '');
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: 800; color: #0f172a;">${custName}</div>
+            <div style="font-size: 0.75rem; color: #64748b;">${msg.sender === 'customer' ? 'خېرىدار سۈرۈشتۈرۈشى' : 'ئاپتوماتىك'}</div>
+          </td>
+          <td class="number-latin" style="font-weight: 700; color: #0284c7; white-space: nowrap;">${custPhone}</td>
+          <td>
+            <div style="max-width: 320px; font-size: 0.82rem; line-height: 1.5; color: #1e293b; word-break: break-word;">
+              ${text}
+            </div>
+          </td>
+          <td class="number-latin" style="font-size: 0.76rem; color: #64748b; white-space: nowrap;">${timeStr}</td>
+          <td style="white-space: nowrap;">
+            <button type="button" class="btn-wipe-single-chat" data-idx="${idx}" data-phone="${custPhone}" title="بۇ خېرىداردىن مەڭگۈ يۇيۇۋېتىش" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.75rem; color: #dc2626; font-weight: 800;">
+              <i class="fas fa-trash-alt"></i> خېرىداردىن يۇيۇش
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.btn-wipe-single-chat').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const phone = btn.dataset.phone;
+        const confirmed = confirm('بۇ خېرىدارنىڭ پاراڭ خاتىرىسىنى خېرىدارنىڭ تور كۆرگۈسىدىنمۇ مەڭگۈلۈك يۇيۇۋېتەمسىز؟');
+        if (confirmed) {
+          if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
+            await window.appStore.sendTelegramAlert({
+              title: 'COMMAND',
+              message: `/wipe ${phone !== 'نومۇرسىز' ? phone : ''}`
+            });
+          }
+          try {
+            let list = JSON.parse(localStorage.getItem('teklimakan_admin_chat_inbox')) || [];
+            list.splice(idx, 1);
+            localStorage.setItem('teklimakan_admin_chat_inbox', JSON.stringify(list));
+          } catch(e) {}
+          renderLiveChatInboxTable();
+          if (typeof showToast === 'function') showToast('خېرىدارنىڭ كۆزنىكىدىن مەڭگۈ يۇيۇش بۇيرۇقى تارقىتىلدى!', 'success');
+        }
+      });
+    });
+  }
+
+  // بارلىق خېرىدارلاردىن مەڭگۈ يۇيۇۋېتىش كۇنۇپكىسى
+  const btnWipeAll = document.getElementById('btnAdminWipeAllCustomerChats');
+  if (btnWipeAll) {
+    btnWipeAll.addEventListener('click', async () => {
+      const confirmed = confirm('⚠️ جەزملەشتۈرۈش:\n\nبارلىق خېرىدارلارنىڭ كۆزنىكىدىكى پاراڭ خاتىرىلىرىنى تۈپتىن مەڭگۈ تازىلىۋېتەمسىز؟');
+      if (confirmed) {
+        if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
+          await window.appStore.sendTelegramAlert({
+            title: 'COMMAND',
+            message: '/wipe_all'
+          });
+        }
+        localStorage.removeItem('teklimakan_admin_chat_inbox');
+        renderLiveChatInboxTable();
+        if (typeof showToast === 'function') showToast('بارلىق خېرىدارلاردىن يۇيۇش بۇيرۇقى مۇۋەپپەقىيەتلىك ئەۋەتىلدى!', 'success');
+      }
+    });
   }
 
   function renderSmsHistoryTable() {

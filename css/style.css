@@ -835,7 +835,7 @@ html[dir="rtl"] .floating-contact-wrap {
 }
 
 .floating-btn-chat {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
   border: none;
   cursor: pointer;
 }
@@ -4040,7 +4040,7 @@ html[dir="ltr"] .admin-live-chat-box {
 }
 
 .chat-box-header {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #065f46 0%, #047857 100%);
   color: #ffffff;
   padding: 0.85rem 1rem;
   display: flex;
@@ -4263,9 +4263,9 @@ html[dir="rtl"] .chat-bubble-time {
 }
 
 .chat-chip-btn:hover {
-  background: #e0f2fe;
-  border-color: #7dd3fc;
-  color: #0284c7;
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #047857;
 }
 
 .chat-input-area {
@@ -4294,7 +4294,7 @@ html[dir="rtl"] .chat-bubble-time {
 }
 
 .chat-small-input:focus {
-  border-color: #0284c7;
+  border-color: #059669;
   background: #ffffff;
 }
 
@@ -4318,18 +4318,18 @@ html[dir="rtl"] .chat-bubble-time {
 }
 
 .chat-textarea:focus {
-  border-color: #0284c7;
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
 }
 
 .chat-send-btn {
   width: 44px;
   height: 48px;
   border-radius: 10px;
-  background: #0284c7;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
   border: none;
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -4339,8 +4339,9 @@ html[dir="rtl"] .chat-bubble-time {
 }
 
 .chat-send-btn:hover {
-  background: #0369a1;
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
 }
 
 .chat-bottom-wa-link {

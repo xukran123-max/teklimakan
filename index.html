@@ -13,7 +13,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260916_v7">
-  <link rel="stylesheet" href="css/style.css?v=20260923_v5">
+  <link rel="stylesheet" href="css/style.css?v=20260923_v7">
 </head>
 <body class="font-modern">
 
@@ -1144,9 +1144,9 @@
 
     <!-- Quick prompt chips -->
     <div class="chat-quick-chips">
-      <button type="button" class="chat-chip-btn" data-msg="زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.">📦 زاكاز سۈرۈشتۈرۈش</button>
-      <button type="button" class="chat-chip-btn" data-msg="پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.">💳 بانكا ئۇچۇرى</button>
-      <button type="button" class="chat-chip-btn" data-msg="مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟">🚚 كارگو ئەھۋالى</button>
+      <button type="button" class="chat-chip-btn" data-action="track" data-msg="زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.">📦 زاكاز سۈرۈشتۈرۈش</button>
+      <button type="button" class="chat-chip-btn" data-action="bank" data-msg="پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.">💳 بانكا ئۇچۇرى</button>
+      <button type="button" class="chat-chip-btn" data-action="cargo" data-msg="مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟">🚚 كارگو ئەھۋالى</button>
     </div>
 
     <!-- Input Form -->
@@ -1158,7 +1158,7 @@
       <div class="chat-input-row">
         <textarea id="chatMessageInput" class="chat-textarea" placeholder="ئالىي باشقۇرغۇچىغا ئۇچۇر يېزىڭ... (Enter بىلەن ئەۋەتىلىدۇ)" rows="2"></textarea>
         <button type="button" id="btnSendChatMessage" class="chat-send-btn" title="ئەۋەتىش">
-          <i class="fas fa-paper-plane"></i>
+          <i class="fas fa-arrow-left"></i>
         </button>
       </div>
       <div class="chat-bottom-wa-link">
@@ -1354,8 +1354,8 @@
   <script src="js/supabase.js?v=20260921_v1"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260923_v6"></script>
-  <script src="js/store.js?v=20260923_v6"></script>
-  <script src="js/app.js?v=20260923_v6"></script>
+  <script src="js/i18n.js?v=20260923_v7"></script>
+  <script src="js/store.js?v=20260923_v7"></script>
+  <script src="js/app.js?v=20260923_v7"></script>
 </body>
 </html>

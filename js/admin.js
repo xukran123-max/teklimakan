@@ -43,9 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (overlay) overlay.style.display = 'flex';
       if (app) app.style.display = 'none';
+      const userInput = document.getElementById('adminUsernameInput');
       const pwInput = document.getElementById('adminPasswordInput');
-      if (pwInput) {
-        if (!pwInput.value) pwInput.value = 'teklimakan2026';
+      if (userInput) {
+        setTimeout(() => userInput.focus(), 150);
+      } else if (pwInput) {
         setTimeout(() => pwInput.focus(), 150);
       }
       return false;
@@ -54,12 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setupAuthEvents() {
     const loginForm = document.getElementById('adminLoginForm');
+    const userInput = document.getElementById('adminUsernameInput');
     const pwInput = document.getElementById('adminPasswordInput');
     const toggleBtn = document.getElementById('btnToggleAdminPw');
     const iconToggle = document.getElementById('iconToggleAdminPw');
     const errorMsg = document.getElementById('adminLoginErrorMsg');
     const logoutBtn = document.getElementById('adminLogoutBtn');
-    const defaultPwCode = document.getElementById('defaultPwCodeHint');
 
     if (toggleBtn && pwInput && iconToggle) {
       toggleBtn.addEventListener('click', () => {
@@ -69,26 +71,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    if (defaultPwCode && pwInput && loginForm) {
-      defaultPwCode.addEventListener('click', () => {
-        pwInput.value = 'teklimakan2026';
-        loginForm.dispatchEvent(new Event('submit'));
-      });
-    }
-
     if (loginForm && pwInput) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        let inputVal = pwInput.value.trim();
+        const userVal = userInput ? userInput.value.trim().toLowerCase() : 'admin';
+        const pwVal = pwInput.value.trim();
+        const validUser = (localStorage.getItem('teklimakan_admin_username') || 'admin').toLowerCase();
         const validPw = localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026';
 
-        // ئەگەر ئىشلەتكۈچى بوش قويۇپلا باسقان بولسا، سۈكۈتتىكى پارول بىلەن بىۋاستە كىرگۈزۈش
-        if (!inputVal) {
-          inputVal = 'teklimakan2026';
-          pwInput.value = 'teklimakan2026';
-        }
+        const isUserOk = userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
+        const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
 
-        if (inputVal === validPw || inputVal === 'teklimakan2026') {
+        if (isUserOk && isPwOk) {
           localStorage.setItem('teklimakan_admin_auth', 'true');
           sessionStorage.setItem('teklimakan_admin_auth', 'true');
           localStorage.setItem('teklimakan_admin_device', 'true');
@@ -98,11 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
           showAdminToast('باشقۇرۇش سىستېمىسىغا مۇۋەپپەقىيەتلىك كىردىڭىز!', 'success');
         } else {
           if (errorMsg) {
-            errorMsg.textContent = '❌ پارول خاتا! (سۈكۈتتىكى پارول: teklimakan2026)';
+            errorMsg.textContent = '❌ باشقۇرغۇچى نامى ياكى پارول خاتا!';
             errorMsg.style.display = 'block';
           }
+          pwInput.value = '';
           pwInput.focus();
-          pwInput.select();
         }
       });
     }

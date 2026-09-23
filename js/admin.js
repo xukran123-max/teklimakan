@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const validPw = localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026';
 
-        const isUserOk = userVal === validUser || userVal === 'seidiye';
+        const isUserOk = userVal === 'seidiye' || userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
         const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
 
         if (isUserOk && isPwOk) {

@@ -3155,19 +3155,15 @@ body {
   flex: 1;
   min-width: 0;
   gap: 0.15rem;
-  text-align: right;
-  align-items: flex-start;
+  text-align: center !important;
+  align-items: center !important;
   justify-content: center;
 }
 
-html[dir="rtl"] .footer-accordion-text-box {
-  text-align: right;
-  align-items: flex-start;
-}
-
+html[dir="rtl"] .footer-accordion-text-box,
 html[dir="ltr"] .footer-accordion-text-box {
-  text-align: left;
-  align-items: flex-start;
+  text-align: center !important;
+  align-items: center !important;
 }
 
 .footer-accordion-main-title {
@@ -3176,6 +3172,8 @@ html[dir="ltr"] .footer-accordion-text-box {
   color: #ffffff;
   letter-spacing: 0.2px;
   line-height: 1.3;
+  text-align: center;
+  width: 100%;
 }
 
 .footer-accordion-sub-title {
@@ -3183,11 +3181,13 @@ html[dir="ltr"] .footer-accordion-text-box {
   color: #94a3b8;
   font-weight: 500;
   line-height: 1.2;
+  text-align: center;
+  width: 100%;
 }
 
 .footer-accordion-chevron-box {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -1524,10 +1524,10 @@ function initTeklimakanApp() {
             <span>💬 دەرھال WhatsApp تا ئېلىش</span>
           </button>
 
-          <!-- 🔗 پەقەت ئۇلانمىنى ھەمبەھىرلەش كۇنۇپكىسى (رەسىمنى چۈشۈرمەي بىۋاسىتە ئۇلانما ھەمبەھىرلەش) -->
+          <!-- 🔗 مەھسۇلات رەسىمى ۋە ئۇلانمىسىنى ھەمبەھىرلەش كۇنۇپكىسى -->
           <button type="button" id="modalShareProductBtn" class="btn-share-product">
-            <i class="fas fa-share-alt"></i>
-            <span>🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش (ئۇلانما كۆچۈرۈش)</span>
+            <i class="fas fa-share-nodes"></i>
+            <span>🔗 مەھسۇلات رەسىمى ۋە ئۇلانمىسىنى ھەمبەھىرلەش</span>
           </button>
         </div>
       </div>
@@ -1594,9 +1594,37 @@ function initTeklimakanApp() {
         const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}`;
         const fullShareMessage = `${shareDesc}\n\n🔗 مەھسۇلاتنى كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
 
-        // 1. يانفون سىستېمىلىق ھەمبەھىرلەش تىزىملىكى (navigator.share)
-        // دىققەت: WhatsApp قا ئەۋەتكەندە تېكىست ئىچىگىمۇ ھەم url گىمۇ بەرسە، ئۇلانما ئىككى قېتىم تەكرارلىنىپ چىقىدۇ
-        // شۇڭا text قا مەزمۇننى، url قا ئايرىم ئۇلانمىنى بېرىمىز (ئەپلەر ئۆزى بوشلۇق قويۇپ پاكىز تەڭشەيدۇ).
+        // 1. مەھسۇلات رەسىمىنى ئېلىپ، WhatsApp / يانفون ھەمبەھىرلەشكە رەسىملىك تەييارلاش
+        let shareFile = null;
+        if (product.image && typeof navigator.canShare === 'function') {
+          try {
+            const resp = await fetch(product.image, { mode: 'cors' });
+            if (resp.ok) {
+              const blob = await resp.blob();
+              const ext = blob.type.includes('png') ? 'png' : 'jpg';
+              const file = new File([blob], `${product.id || 'product'}.${ext}`, { type: blob.type || 'image/jpeg' });
+              if (navigator.canShare({ files: [file] })) {
+                shareFile = file;
+              }
+            }
+          } catch (imgErr) {}
+        }
+
+        // 2. ئەگەر سىستېما رەسىم بىلەن ھەمبەھىرلەشنى قوللىسا، بىۋاسىتە رەسىم بىلەن تېكىستنى بىللە ئەۋەتىش
+        if (shareFile && navigator.share) {
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: fullShareMessage,
+              files: [shareFile]
+            });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return;
+          }
+        }
+
+        // 3. ئەگەر رەسىم بىلەن ھەمبەھىرلەشنى قوللىمىسا، سىستېمىلىق ئۇلانما ھەمبەھىرلەش
         if (navigator.share) {
           try {
             await navigator.share({
@@ -1610,7 +1638,7 @@ function initTeklimakanApp() {
           }
         }
 
-        // 2. چاپلاش تاختىسىغا كۆچۈرۈش زاپاس قىسمى (Clipboard fallback)
+        // 4. چاپلاش تاختىسىغا كۆچۈرۈش زاپاس قىسمى (Clipboard fallback)
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(fullShareMessage);

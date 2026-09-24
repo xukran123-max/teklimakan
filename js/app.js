@@ -115,9 +115,8 @@ function initTeklimakanApp() {
   // ==================== تىل ۋە تېكىستلەر ====================
   function updateStaticTranslations() {
     const i18n = window.appI18n;
-    const lang = i18n.getLang();
-
-    document.title = `${i18n.t('storeName')} | ${i18n.t('storeSubtitle')}`;
+    // بەت ماۋزۇسى پەقەت دۇكان نامى بولىدۇ، تىل ئالماشقاندا ئاپتوماتىك ئۆزگىرىدۇ
+    document.title = i18n.t('storeName');
 
     const annEl = document.getElementById('topAnnouncementText');
     if (annEl) annEl.textContent = i18n.t('announcement');

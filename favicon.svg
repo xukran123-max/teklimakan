@@ -1,0 +1,95 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Background Gradient: Deep Royal Lapis Blue -->
+    <radialGradient id="tkBlueGrad" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1e40af"/>
+      <stop offset="55%" stop-color="#0f2b5c"/>
+      <stop offset="100%" stop-color="#071329"/>
+    </radialGradient>
+
+    <!-- Outer Gold Gradient -->
+    <linearGradient id="tkGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="25%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="75%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+
+    <!-- Inner Gold Shimmer -->
+    <linearGradient id="tkGoldShimmer" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="50%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- 3D Box Gold/Amber Gradient -->
+    <linearGradient id="tkBoxTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#fde047"/>
+    </linearGradient>
+    <linearGradient id="tkBoxLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="tkBoxRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="tkDropShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Border Ring (Heavy Gold) -->
+  <circle cx="64" cy="64" r="60" fill="url(#tkBlueGrad)" stroke="url(#tkGoldGrad)" stroke-width="7" filter="url(#tkDropShadow)"/>
+
+  <!-- Ornate Inner Gold Bead Ring -->
+  <circle cx="64" cy="64" r="52" fill="none" stroke="url(#tkGoldShimmer)" stroke-width="2" stroke-dasharray="3.5, 2.5"/>
+
+  <!-- Top Arabic Calligraphy Arc Emulation (Crisp Curved Gold Banner) -->
+  <path d="M 36 30 Q 64 20 92 30" fill="none" stroke="url(#tkGoldShimmer)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Decorative top diamond dot -->
+  <polygon points="64,19 67.5,23 64,27 60.5,23" fill="#fef08a"/>
+
+  <!-- Package / Box Inside Cart (Isometric 3D) -->
+  <!-- Top Face -->
+  <polygon points="64,35 83,44 64,53 45,44" fill="url(#tkBoxTop)" stroke="#92400e" stroke-width="1"/>
+  <!-- Left Face -->
+  <polygon points="45,44 64,53 64,72 45,63" fill="url(#tkBoxLeft)" stroke="#92400e" stroke-width="1"/>
+  <!-- Right Face -->
+  <polygon points="64,53 83,44 83,63 64,72" fill="url(#tkBoxRight)" stroke="#92400e" stroke-width="1"/>
+  <!-- Box Tape/Ribbon -->
+  <polygon points="61.5,42.5 66.5,45 66.5,65 61.5,62.5" fill="#d97706" opacity="0.7"/>
+
+  <!-- Speed Motion Lines behind cart -->
+  <line x1="26" y1="58" x2="38" y2="58" stroke="url(#tkGoldShimmer)" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <line x1="22" y1="65" x2="36" y2="65" stroke="url(#tkGoldShimmer)" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Shopping Cart (Heavy Golden Wireframe) -->
+  <!-- Handle and Main Basket Rim -->
+  <path d="M 32 46 L 42 46 L 50 78 L 86 78 L 94 52 L 44 52" 
+        fill="none" stroke="url(#tkGoldGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Basket Grid Lines -->
+  <line x1="53" y1="61" x2="90" y2="61" stroke="url(#tkGoldShimmer)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="56" y1="70" x2="84" y2="70" stroke="url(#tkGoldShimmer)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="62" y1="52" x2="60" y2="78" stroke="url(#tkGoldShimmer)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="74" y1="52" x2="72" y2="78" stroke="url(#tkGoldShimmer)" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Cart Undercarriage -->
+  <path d="M 50 86 L 82 86" stroke="url(#tkGoldGrad)" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Cart Wheels -->
+  <circle cx="54" cy="94" r="6" fill="url(#tkGoldGrad)" stroke="#92400e" stroke-width="1.5"/>
+  <circle cx="54" cy="94" r="2.5" fill="#071329"/>
+  <circle cx="80" cy="94" r="6" fill="url(#tkGoldGrad)" stroke="#92400e" stroke-width="1.5"/>
+  <circle cx="80" cy="94" r="2.5" fill="#071329"/>
+
+  <!-- Bottom Arch Calligraphy Hint (Crisp Curved Gold Banner) -->
+  <path d="M 40 107 Q 64 115 88 107" fill="none" stroke="url(#tkGoldShimmer)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Decorative bottom diamond dot -->
+  <polygon points="64,116 67.5,112.5 64,109 60.5,112.5" fill="#fef08a"/>
+</svg>

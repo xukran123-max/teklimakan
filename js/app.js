@@ -1724,66 +1724,173 @@ function initTeklimakanApp() {
     });
   }
 
-  // ==================== 🛒 جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Live Sales Popups) ====================
+  // ==================== 🛒 جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Professional Live Sales Toast) ====================
   function initLiveSalesPopups() {
-    const sampleBuyers = [
-      {
-        name: 'Murat',
-        city: { ug: 'ئىستانبۇل', tr: 'İstanbul', en: 'Istanbul' },
-        item: { ug: 'خوتەن قاشتېشى بىلەيزۈكى', tr: 'Hoten Yeşim Bileziği', en: 'Hotan Jade Bangle' }
+    // تىللار بويىچە خېرىدارلار ۋە تۈركىيە مەركەز قىلىنغان رايونلار
+    const buyerData = {
+      ug: {
+        names: ['مەھمۇت ئەپەندى', 'پاتىمە خانىم', 'ئەكرەم ب.', 'زۆھرەگۈل خانىم', 'ئابدۇقادىر ئ.', 'ئايشەمگۈل خانىم', 'ئېلىيار س.', 'گۈلزار خانىم', 'ئابدۇللا ج.', 'مەلىكە خانىم'],
+        // رايۇن تەۋەلىكى ئۇيغۇرچىدا تۈركىيەنى ئاساس قىلىش
+        cities: [
+          'ئىستانبۇل (فاتىھ)',
+          'ئىستانبۇل (زەيتىنبۇرنۇ)',
+          'ئىستانبۇل (باشاقشەھەر)',
+          'ئىستانبۇل (سەفاكۆي)',
+          'ئەنقەرە (چانکايالىق)',
+          'بۇرسا (نىلۈفەر)',
+          'كونيە (سەلجۇقلۇ)',
+          'قەيسەرى (مەلىكغازى)',
+          'ئىزمىر (قوناق)',
+          'ئانتاليا (مۇراتپاشا)'
+        ]
       },
-      {
-        name: 'ئەلى مۇھەممەت',
-        nameTr: 'Ali Mehmet',
-        nameEn: 'Ali Mehmet',
-        city: { ug: 'ئۈرۈمچى', tr: 'Urumçi', en: 'Urumqi' },
-        item: { ug: 'يىپەك ئەتلەس كۆينەك', tr: 'Saf İpek Atlas Elbise', en: 'Pure Silk Atlas Dress' }
+      tr: {
+        names: ['Ahmet Y.', 'Elif K.', 'Mehmet B.', 'Zeynep S.', 'Burak D.', 'Emre T.', 'Ayşe H.', 'Mustafa Ç.', 'Gülşah D.', 'Canan R.'],
+        // Bölge Türkiye merkezli
+        cities: [
+          'İstanbul (Fatih)',
+          'İstanbul (Zeytinburnu)',
+          'İstanbul (Başakşehir)',
+          'İstanbul (Kadıköy)',
+          'Ankara (Çankaya)',
+          'Bursa (Nilüfer)',
+          'Konya (Selçuklu)',
+          'Kayseri (Melikgazi)',
+          'İzmir (Bornova)',
+          'Antalya (Muratpaşa)'
+        ]
       },
-      {
-        name: 'John S.',
-        city: { ug: 'لوندون', tr: 'Londra', en: 'London' },
-        item: { ug: 'تۇرپان قارا كىشمىش قۇرۇق ئۈزۈمى', tr: 'Turpan Doğal Siyah Kuşüzümü', en: 'Turpan Dried Black Raisins' }
-      },
-      {
-        name: 'Gülşah',
-        city: { ug: 'ئەنقەرە', tr: 'Ankara', en: 'Ankara' },
-        item: { ug: 'رىزە ئالىي قارا چاي يۈرۈشلۈكى', tr: 'Rize Çay Seti', en: 'Rize Premium Tea Set' }
-      },
-      {
-        name: 'ئابلىكىم',
-        nameTr: 'Ablikim',
-        nameEn: 'Ablikim',
-        city: { ug: 'قەشقەر', tr: 'Kaşgar', en: 'Kashgar' },
-        item: { ug: 'Bluetooth شاۋقۇن چەكلىگۈچ قۇلاقلىق Pro', tr: 'Bluetooth ANC Kulaklık Pro', en: 'Bluetooth ANC Headphones Pro' }
+      en: {
+        names: ['David M.', 'Sarah W.', 'Michael B.', 'Emma L.', 'James T.', 'Alexander K.', 'Sophia H.', 'Oliver P.'],
+        cities: [
+          'London, UK',
+          'Berlin, Germany',
+          'New York, USA',
+          'Toronto, Canada',
+          'Frankfurt, Germany',
+          'Amsterdam, Netherlands',
+          'Sydney, Australia'
+        ]
       }
-    ];
+    };
 
-    setInterval(() => {
+    function triggerSinglePopup() {
+      // ئەگەر نۆۋەتتە چىقىپ تۇرغان بولسا يوقىتىش
+      const existing = document.querySelector('.live-sales-popup');
+      if (existing) existing.remove();
+
       const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
-      const rawBuyer = sampleBuyers[Math.floor(Math.random() * sampleBuyers.length)];
-      const buyerName = (lang === 'tr' && rawBuyer.nameTr) ? rawBuyer.nameTr :
-                        (lang === 'en' && rawBuyer.nameEn) ? rawBuyer.nameEn : rawBuyer.name;
-      const buyerCity = rawBuyer.city[lang] || rawBuyer.city.ug;
-      const buyerItem = rawBuyer.item[lang] || rawBuyer.item.ug;
+      const pool = buyerData[lang] || buyerData.ug;
+
+      const randomBuyer = pool.names[Math.floor(Math.random() * pool.names.length)];
+      const randomCity = pool.cities[Math.floor(Math.random() * pool.cities.length)];
+
+      // ھەقىقىي تەكلىماكان تاۋارلىرى ئامبىرىدىن تاللاش
+      const allProds = window.appStore ? window.appStore.getProducts() : [];
+      const activeProds = allProds.filter(p => !p.approvalStatus || p.approvalStatus === 'تەستىقلاندى');
+      const product = (activeProds.length > 0)
+        ? activeProds[Math.floor(Math.random() * activeProds.length)]
+        : { name: 'رىزە ئالىي قارا چاي يۈرۈشلۈكى', price: 180, image: 'images/default_product.jpg', id: 'TK-101' };
+
+      // مەھسۇلات نامىنى نۆۋەتتىكى تىلغا ماسلاشتۇرۇش
+      let prodName = product.name;
+      if (lang === 'tr' && product.translations?.tr?.name) {
+        prodName = product.translations.tr.name;
+      } else if (lang === 'en' && product.translations?.en?.name) {
+        prodName = product.translations.en.name;
+      } else if (lang === 'ug' && product.translations?.ug?.name) {
+        prodName = product.translations.ug.name;
+      }
+
+      // ۋاقىت ئۇچۇرى (مەسىلەن: «ھازىرلا» ياكى «2 مىنۇت بۇرۇن»)
+      const justNowStr = window.appI18n ? window.appI18n.t('liveTimeJustNow') : 'ھازىرلا';
+      const minsAgoStr = window.appI18n ? window.appI18n.t('liveTimeMinutesAgo') : 'مىنۇت بۇرۇن';
+      const isJustNow = Math.random() < 0.45;
+      const timeDisplay = isJustNow ? justNowStr : `${Math.floor(Math.random() * 4) + 1} ${minsAgoStr}`;
+
+      const verifiedBadgeText = window.appI18n ? (window.appI18n.t('liveVerifiedBadge') || 'تەستىقلانغان زاكاز') : 'تەستىقلانغان زاكاز';
+      const priceFormatted = window.appStore ? window.appStore.formatPrice(product.price) : `${product.price} ₺`;
+      const prodImg = product.image || 'images/default_product.jpg';
 
       const popup = document.createElement('div');
       popup.className = 'live-sales-popup';
+      popup.setAttribute('role', 'status');
+      popup.setAttribute('aria-live', 'polite');
+
       popup.innerHTML = `
-        <div style="width: 38px; height: 38px; border-radius: 50%; background: #dcfce7; color: #166534; display: flex; align-items: center; justify-content: center;">
-          <i class="fas fa-shopping-bag"></i>
-        </div>
-        <div style="font-size: 0.82rem; line-height: 1.4;">
-          <div><strong>${buyerName}</strong> (${buyerCity})</div>
-          <div style="color: var(--text-muted);">${window.appI18n.t('livePurchased')} <span style="color: var(--primary-color);">${buyerItem}</span></div>
+        <button type="button" class="live-sales-close" title="تاقاش" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+        <img src="${prodImg}" class="live-sales-thumb" alt="${prodName}" onerror="this.src='images/default_product.jpg'">
+        <div style="flex: 1; min-width: 0; line-height: 1.35;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; margin-bottom: 2px;">
+            <span style="font-weight: 800; font-size: 0.82rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${randomBuyer}
+            </span>
+            <span style="font-size: 0.72rem; color: #64748b; white-space: nowrap;">
+              <i class="fas fa-location-dot" style="color: #ef4444; font-size: 0.68rem;"></i> ${randomCity}
+            </span>
+          </div>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;" title="${prodName}">
+            ${prodName}
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; flex-wrap: wrap;">
+            <span class="number-latin" style="font-weight: 900; color: #0284c7; font-size: 0.84rem;">
+              ${priceFormatted}
+            </span>
+            <span style="font-size: 0.7rem; color: #16a34a; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; background: #f0fdf4; padding: 1px 6px; border-radius: 4px; border: 1px solid #bbf7d0;">
+              <i class="fas fa-shield-halved" style="font-size: 0.65rem;"></i> ${verifiedBadgeText}
+            </span>
+            <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 600;">
+              ${timeDisplay}
+            </span>
+          </div>
         </div>
       `;
+
+      // تاقاش كۇنۇپكىسى
+      const closeBtn = popup.querySelector('.live-sales-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popup.style.opacity = '0';
+          popup.style.transform = 'translateY(15px) scale(0.95)';
+          setTimeout(() => popup.remove(), 350);
+        });
+      }
+
+      // مەھسۇلاتنى چەككەندە شۇ مەھسۇلاتقا سىلىق يۆتكىلىش ياكى كۆرۈش
+      popup.addEventListener('click', () => {
+        const prodCard = document.querySelector(`[data-product-id="${product.id}"]`);
+        if (prodCard) {
+          prodCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          prodCard.style.outline = '3px solid #3b82f6';
+          prodCard.style.transition = 'outline 0.3s ease';
+          setTimeout(() => { prodCard.style.outline = 'none'; }, 2200);
+        } else {
+          const catalogSec = document.getElementById('catalogSection');
+          if (catalogSec) catalogSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+
       document.body.appendChild(popup);
 
+      // 6 سېكۇنتتىن كېيىن سىلىق غايىب بولۇش
       setTimeout(() => {
-        popup.style.opacity = '0';
-        setTimeout(() => popup.remove(), 400);
-      }, 4500);
-    }, 22000);
+        if (document.body.contains(popup)) {
+          popup.style.opacity = '0';
+          popup.style.transform = 'translateY(15px) scale(0.95)';
+          setTimeout(() => popup.remove(), 350);
+        }
+      }, 6000);
+    }
+
+    // دەسلەپكى كۆرۈنۈش: بەت يۈكلىنىپ 6 سېكۇنتتىن كېيىن
+    setTimeout(() => {
+      triggerSinglePopup();
+      // ھەر 20 سېكۇنتتا يېڭى زاكازنى كۆرسىتىش
+      setInterval(triggerSinglePopup, 20000);
+    }, 6000);
   }
 
   // ==================== ھادىسىلەر ====================

@@ -1015,33 +1015,83 @@ html[dir="rtl"] .floating-contact-tooltip {
   box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
 }
 
-/* جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Live Sales Popup) */
+/* جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Professional Live Sales Toast) */
 .live-sales-popup {
   position: fixed;
-  bottom: 8.5rem;
-  right: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 1rem;
-  box-shadow: var(--shadow-lg);
+  bottom: 2rem;
+  left: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  z-index: 1000;
-  max-width: 320px;
-  animation: slideInBottom 0.4s ease;
-  transition: opacity 0.4s ease;
+  z-index: 1030;
+  max-width: 340px;
+  animation: slideInPopup 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  cursor: pointer;
+  direction: ltr;
+  text-align: left;
 }
 
 html[dir="rtl"] .live-sales-popup {
-  right: auto;
-  left: 1.5rem;
+  left: auto;
+  right: 1.5rem;
+  direction: rtl;
+  text-align: right;
 }
 
-@keyframes slideInBottom {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.live-sales-popup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.16);
+}
+
+.live-sales-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1.5px solid #f1f5f9;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+
+.live-sales-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
+  padding: 0;
+}
+
+html[dir="rtl"] .live-sales-close {
+  right: auto;
+  left: 8px;
+}
+
+.live-sales-close:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+@keyframes slideInPopup {
+  from { opacity: 0; transform: translateY(25px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ==================== باش تىزىملىك (Navbar) ==================== */
@@ -3388,18 +3438,18 @@ html[dir="rtl"] .live-sales-popup {
 
   /* سېتىلىش ئۇقتۇرۇشى (Live Sales Popup) */
   .live-sales-popup {
-    bottom: 5.2rem;
-    max-width: 270px;
-    font-size: 0.78rem;
-    padding: 0.55rem 0.75rem;
+    bottom: 5.8rem;
+    max-width: 320px;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
   }
   html[dir="rtl"] .live-sales-popup {
-    left: 1rem;
-    right: auto;
+    right: 0.85rem !important;
+    left: auto !important;
   }
   html[dir="ltr"] .live-sales-popup {
-    right: 1rem;
-    left: auto;
+    left: 0.85rem !important;
+    right: auto !important;
   }
 
   /* ئاستى قىسمى (Footer) */

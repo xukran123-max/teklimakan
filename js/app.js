@@ -1524,10 +1524,10 @@ function initTeklimakanApp() {
             <span>💬 دەرھال WhatsApp تا ئېلىش</span>
           </button>
 
-          <!-- 🔗 مەھسۇلات رەسىمى ۋە ئۇلانمىسىنى ھەمبەھىرلەش كۇنۇپكىسى -->
+          <!-- 🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش كۇنۇپكىسى -->
           <button type="button" id="modalShareProductBtn" class="btn-share-product">
-            <i class="fas fa-share-nodes"></i>
-            <span>🔗 مەھسۇلات رەسىمى ۋە ئۇلانمىسىنى ھەمبەھىرلەش</span>
+            <i class="fas fa-share-alt"></i>
+            <span>🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش</span>
           </button>
         </div>
       </div>
@@ -1573,7 +1573,7 @@ function initTeklimakanApp() {
       instantWaBtn.addEventListener('click', () => {
         const phone = '905551609999';
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
-        const itemUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
+        const itemUrl = `${window.location.origin}/p/${encodeURIComponent(product.id)}.html`;
         const msg = encodeURIComponent(
           `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
           `📦 مەھسۇلات: ${product.name}\n` +
@@ -1589,42 +1589,14 @@ function initTeklimakanApp() {
     const shareBtn = document.getElementById('modalShareProductBtn');
     if (shareBtn) {
       shareBtn.addEventListener('click', async () => {
-        const shareUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
+        const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.id)}.html`;
         const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
         const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}`;
-        const fullShareMessage = `${shareDesc}\n\n🔗 مەھسۇلاتنى كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
+        const fullShareMessage = `${shareDesc}\n\n🔗 كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
 
-        // 1. مەھسۇلات رەسىمىنى ئېلىپ، WhatsApp / يانفون ھەمبەھىرلەشكە رەسىملىك تەييارلاش
-        let shareFile = null;
-        if (product.image && typeof navigator.canShare === 'function') {
-          try {
-            const resp = await fetch(product.image, { mode: 'cors' });
-            if (resp.ok) {
-              const blob = await resp.blob();
-              const ext = blob.type.includes('png') ? 'png' : 'jpg';
-              const file = new File([blob], `${product.id || 'product'}.${ext}`, { type: blob.type || 'image/jpeg' });
-              if (navigator.canShare({ files: [file] })) {
-                shareFile = file;
-              }
-            }
-          } catch (imgErr) {}
-        }
-
-        // 2. ئەگەر سىستېما رەسىم بىلەن ھەمبەھىرلەشنى قوللىسا، بىۋاسىتە رەسىم بىلەن تېكىستنى بىللە ئەۋەتىش
-        if (shareFile && navigator.share) {
-          try {
-            await navigator.share({
-              title: shareTitle,
-              text: fullShareMessage,
-              files: [shareFile]
-            });
-            return;
-          } catch (e) {
-            if (e.name === 'AbortError') return;
-          }
-        }
-
-        // 3. ئەگەر رەسىم بىلەن ھەمبەھىرلەشنى قوللىمىسا، سىستېمىلىق ئۇلانما ھەمبەھىرلەش
+        // 1. يانفون سىستېمىلىق ھەمبەھىرلەش:
+        // ئارتۇق رەسىم ھۆججىتى كۆپەيتىلمەيدۇ؛ ئۇلانما شۇ مەھسۇلاتنىڭ مەخسۇس ئالدىن كۆرۈنۈش بېتىگە ئۇلىنىدۇ.
+        // WhatsApp ۋە باشقا ئەپلەر مەزكۇر بەتتىكى og:image ئارقىلىق دەل شۇ مەھسۇلاتنىڭ ئۆز رەسىمىنى قۇتىدا كۆرسىتىدۇ.
         if (navigator.share) {
           try {
             await navigator.share({
@@ -1638,7 +1610,7 @@ function initTeklimakanApp() {
           }
         }
 
-        // 4. چاپلاش تاختىسىغا كۆچۈرۈش زاپاس قىسمى (Clipboard fallback)
+        // 2. چاپلاش تاختىسىغا كۆچۈرۈش
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(fullShareMessage);
@@ -1656,7 +1628,6 @@ function initTeklimakanApp() {
           showToast('🔗 ئۇلانما: ' + shareUrl, 'info');
         }
       });
-    }
   }
 
   // ==================== چىقىم ====================

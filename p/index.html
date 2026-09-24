@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="ug" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تەكلىماكان سودا تورى</title>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || params.get('product') || params.get('p');
+    if (id) {
+      window.location.replace('/?id=' + encodeURIComponent(id));
+    } else {
+      window.location.replace('/');
+    }
+  </script>
+</head>
+<body>
+  <p>يۆتكىلىۋاتىدۇ...</p>
+</body>
+</html>

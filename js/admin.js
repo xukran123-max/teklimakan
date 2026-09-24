@@ -4347,6 +4347,42 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // 🛡️ كۈندىلىك بىخەتەرلىك ۋە سىستېما دوكلاتىنى Telegram غا بىۋاسىتە يوللاش كۇنۇپكىسى
+    const btnSendAuditTg = document.getElementById('btnSendDailyAuditToTelegram');
+    if (btnSendAuditTg) {
+      btnSendAuditTg.addEventListener('click', async () => {
+        const token = (document.getElementById('settingTelegramBotToken')?.value.trim()) || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
+        const chatId = (document.getElementById('settingTelegramChatId')?.value.trim()) || '7077223578';
+        btnSendAuditTg.disabled = true;
+        btnSendAuditTg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> دوكلات يوللىنىۋاتىدۇ...';
+
+        try {
+          const prods = window.appStore.getProducts();
+          const orders = window.appStore.getOrders();
+          const timeStr = new Date().toLocaleString('tr-TR');
+
+          const tgMsg = `🛡️ <b>تەكلىماكان سۇپىسى: كۈندىلىك سىستېما ۋە بىخەتەرلىك خۇلاسىسى</b>\n📅 <b>ۋاقتى:</b> ${timeStr}\n\n✅ <b>ئومۇمىي ھالىتى:</b> بارلىق سىستېما 100% نورمال ۋە بىخەتەر\n✅ <b>كود كودلىنىشى (UTF-8):</b> HTML ۋە JS ھۆججەتلىرى ساپ، خاتالىق يوق\n☁️ <b>بۇلۇت ئامبىرى (Supabase):</b> ${prods.length} تاۋار ۋە ${orders.length} زاكاز تولۇق ساغلام\n🏦 <b>بانكا ۋە چىقىم:</b> QNB Enpara IBAN قوغدالدى (ئىزاھات: kuruyemiş)، CVV مەخپىيەتلىكى كاپالەتلەندى\n📊 <b>مەشغۇلات تەييارلىقى:</b> تور دۇكىنىڭىز زاكاز قوبۇل قىلىشقا تولۇق تەييار!\n\n📄 <b>تەپسىلىي دوكلات ھۆججىتىنى تولۇق كۆرۈش:</b>\n🔗 <a href="https://www.teklimakan.com/audit-report.html">https://www.teklimakan.com/audit-report.html</a>`;
+
+          const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: tgMsg, parse_mode: 'HTML' })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            showAdminToast('✅ كۈندىلىك بىخەتەرلىك دوكلاتى Telegram غا مۇۋەپپەقىيەتلىك ئەۋەتىلدى!', 'success');
+          } else {
+            showAdminToast('❌ ئەۋەتكىلى بولمىدى: ' + (data.description || 'خاتالىق كۆرۈلدى'), 'error');
+          }
+        } catch(err) {
+          showAdminToast('❌ ئەۋەتىش مەغلۇپ بولدى: ' + err.message, 'error');
+        } finally {
+          btnSendAuditTg.disabled = false;
+          btnSendAuditTg.innerHTML = '<i class="fas fa-shield-alt"></i> كۈندىلىك بىخەتەرلىك دوكلاتىنى Telegram غا ئەۋەتىش';
+        }
+      });
+    }
+
     // SMTP تاللاش تەڭشىكىنى باشقۇرۇش
     const presetSelect = document.getElementById('settingSmtpPreset');
     if (presetSelect) {

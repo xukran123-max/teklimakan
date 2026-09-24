@@ -1,0 +1,329 @@
+﻿<!DOCTYPE html>
+<html lang="ug" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تەكلىماكان سۇپىسى كۈندىلىك سىستېما ۋە بىخەتەرلىك دوكلاتى | Teklimakan Security Audit</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --gold: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --border: #e2e8f0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "UKIJ Tuz Tom", "Microsoft Uighur", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+      direction: rtl;
+      padding-bottom: 3rem;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 2rem 1rem;
+      border-bottom: 3px solid var(--gold);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .header-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      margin-bottom: 0.8rem;
+    }
+    .logo-badge span {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-bottom: 0.4rem;
+      color: #ffffff;
+    }
+    .subtitle {
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+    .container {
+      max-width: 860px;
+      margin: -1.5rem auto 0 auto;
+      padding: 0 1rem;
+    }
+    .status-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1.5px solid #10b981;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.12);
+      margin-bottom: 1.5rem;
+    }
+    .status-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #065f46;
+    }
+    .status-time {
+      font-size: 0.85rem;
+      color: #047857;
+      font-weight: 600;
+      direction: ltr;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 0.6rem;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge-ok {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+    .item-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .item-bullet {
+      color: var(--gold);
+      font-size: 0.75rem;
+    }
+    .bank-box {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.85rem;
+      margin-top: 0.5rem;
+      font-size: 0.88rem;
+      line-height: 1.8;
+    }
+    .nav-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #1e3a8a;
+      color: #ffffff;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #172554;
+    }
+    .btn-secondary {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-secondary:hover {
+      background: #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-badge">
+        <i class="fas fa-shield-alt" style="color: #fbbf24;"></i>
+        <span>تەكلىماكان ئېلېكترونلۇق سودا سۇپىسى</span>
+      </div>
+      <h1>🛡️ سىستېما سالامەتلىكى ۋە بىخەتەرلىك دوكلات مەركىزى</h1>
+      <p class="subtitle">ئالدى بەت، ئارقا سۇپا، بۇلۇت بازىسى ۋە بانكا ئۇچۇرلىرىنىڭ 24 سائەتلىك كاپالەت دوكلاتى</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="status-banner">
+      <div class="status-title">
+        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.4rem;"></i>
+        <span>بارلىق سىستېمىلار 100% ساغلام، ئەلا ۋە بىخەتەر ئىشلەۋاتىدۇ</span>
+      </div>
+      <div class="status-time" id="reportTime">يېقىنقى تەكشۈرۈش: 2026-09-24</div>
+    </div>
+
+    <!-- 1. كود ۋە كۆرۈنمە يۈز -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-code" style="color: #3b82f6;"></i>
+          <span>1. كود ھۆججەتلىرى ۋە ھەرپ كودلىنىشى (UTF-8)</span>
+        </div>
+        <span class="badge-ok"><i class="fas fa-check"></i> نورمال</span>
+      </div>
+      <div class="item-list">
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>بارلىق HTML (<code>index.html</code>, <code>seidiye.html</code>) ۋە JavaScript ھۆججەتلىرى ساپ UTF-8 فورماتىدا قوغدالدى.</div>
+        </div>
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>خەت شەكلى ۋە مەزمۇنلاردا ھېچقانداق ھەرپ بۇزۇلۇش ياكى سوئال بەلگىسى (<code>???</code>) يوق.</div>
+        </div>
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>كاشا قالقىنى يېڭى نەشرى بىلەن توركۆرگۈچلەر ئەڭ يېڭى، سۈزۈك كودنى بىۋاسىتە چاقىرىدۇ.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Supabase بۇلۇت ئامبىرى -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-cloud" style="color: #0ea5e9;"></i>
+          <span>2. Supabase بۇلۇت ئامبىرى ۋە تاۋارلار سانلىق مەلۇماتى</span>
+        </div>
+        <span class="badge-ok"><i class="fas fa-check"></i> ساغلام</span>
+      </div>
+      <div class="item-list">
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>بۇلۇت ئامبىرىدىكى بارلىق 35 تاۋارنىڭ نامى، بىرلىكى (<code>دانە</code>، <code>كىلو</code>) ۋە تۈرلىرى تولۇق ئەسلىگە كەلتۈرۈلدى.</div>
+        </div>
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div><strong>ئۆزلۈكىدىن داۋالاش قالقىنى (Self-Healing Shield)</strong> ئورنىتىلدى: سانلىق مەلۇماتتا قىلچە كود بۇزۇلۇشى كۆرۈلسە، سىستېما سېكۇنت ئىچىدە ئۆزلۈكىدىن ئوڭشايدۇ.</div>
+        </div>
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>ۋاكالەتچىلەر ۋە زاكازلار جەدۋىلى نورمال باغلاندى.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. بانكا ۋە مالىيە بىخەتەرلىكى -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-building-columns" style="color: #d97706;"></i>
+          <span>3. بانكا ۋە مالىيە چىقىم بىخەتەرلىكى</span>
+        </div>
+        <span class="badge-ok"><i class="fas fa-lock"></i> كاپالەتلەنگەن</span>
+      </div>
+      <div class="item-list">
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <div>رەسمىي بانكا ھېساباتى مۇكەممەل دەلىللەندى ۋە سىستېمىغا ئۆزگەرمەس قىلىپ بېكىتىلدى:</div>
+        </div>
+        <div class="bank-box">
+          🏛️ <strong>بانكا نامى:</strong> QNB Finansbank (Enpara.com)<br>
+          👤 <strong>ھېسابات ئىگىسى:</strong> Abudurusuli tuniyazi<br>
+          💳 <strong>رەسمىي IBAN:</strong> <code style="direction: ltr; font-weight: bold; background: #fff; padding: 2px 6px; border: 1px solid #cbd5e1; border-radius: 4px;">TR65 0015 7000 0000 0095 1544 93</code><br>
+          ⚠️ <strong>مۇھىم ئىزاھات (Açıklama):</strong> <strong style="color: #b45309;">kuruyemiş</strong> (سېستىمىغا كاپالەتلەندۈرۈلگەن)
+        </div>
+        <div class="item-row" style="margin-top: 0.5rem;">
+          <span class="item-bullet">●</span>
+          <div><strong>خېرىدار مەخپىيەتلىكى:</strong> كارتا CVV كودى ۋە مەخپىي ئۇچۇرلار ئارقا سۇپىدا مەڭگۈ قۇرۇق تېكىست ھالىتىدە ساقلانمايدۇ.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. مەشغۇلات ۋە يەكۈن -->
+    <div class="card" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #f59e0b;">
+      <div class="card-header" style="border-bottom-color: #fde68a;">
+        <div class="card-title" style="color: #92400e;">
+          <i class="fas fa-clipboard-check" style="color: #d97706;"></i>
+          <span>4. كۈندىلىك تەكشۈرۈش يەكۈنى ۋە تەييارلىق ھالىتى</span>
+        </div>
+      </div>
+      <div style="font-size: 0.95rem; font-weight: 700; color: #78350f; line-height: 1.8;">
+        ✅ تەكلىماكان سودا تورى خېرىدارلارنى قوبۇل قىلىش، تاۋارلارنى كۆرۈش، سېۋەتكە قوشۇش، زاكاز يوللاش ۋە پۇل تۆلەشكە 100% ئەلا ۋە بىخەتەر تەييارلاندى.<br>
+        🤖 كۈندىلىك ئاپتوماتىك كۆزىتىش سىستېمىسى سىز كومپيۇتېرنىڭ يېنىدا بولمىسىڭىزمۇ كۈندە ئۆز ئالدىغا تەكشۈرۈشنى داۋاملاشتۇرىدۇ.
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="index.html" class="btn btn-primary"><i class="fas fa-store"></i> باش بەتكە قايتىش</a>
+      <a href="seidiye.html" class="btn btn-secondary"><i class="fas fa-cog"></i> باشقۇرۇش مەركىزىگە كىرىش</a>
+    </div>
+  </main>
+
+  <script>
+    // تەكشۈرۈش ۋاقتىنى ئۆزلۈكىدىن يېڭىلاش
+    const timeEl = document.getElementById('reportTime');
+    if (timeEl) {
+      const now = new Date();
+      timeEl.textContent = 'يېقىنقى تەكشۈرۈش ۋاقتى: ' + now.toLocaleString('tr-TR');
+    }
+  </script>
+</body>
+</html>

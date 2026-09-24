@@ -172,8 +172,14 @@ function initTeklimakanApp() {
     document.querySelectorAll('.brand-store-name').forEach(el => el.textContent = i18n.t('storeName'));
     document.querySelectorAll('.brand-store-sub').forEach(el => el.textContent = i18n.t('storeSubtitle'));
 
-    const cartBtnSpan = document.querySelector('#cartToggleBtn .nav-cart-text') || document.querySelector('#cartToggleBtn span');
-    if (cartBtnSpan) cartBtnSpan.textContent = i18n.t('cartBtn');
+    const cartBtnSpan = document.getElementById('navCartText') || document.querySelector('#cartToggleBtn .nav-cart-text') || document.querySelector('#cartToggleBtn span');
+    if (cartBtnSpan) cartBtnSpan.textContent = i18n.t('cartBtn') || 'سېۋەت';
+
+    const wishBtnSpan = document.getElementById('navWishlistText') || document.querySelector('#wishlistToggleBtn span');
+    if (wishBtnSpan) wishBtnSpan.textContent = i18n.t('wishlistBtn') || 'ياقتۇرغانلىرىم';
+
+    const ordersBtnSpan = document.getElementById('navOrdersText') || document.querySelector('#trackOrderNavBtn span');
+    if (ordersBtnSpan) ordersBtnSpan.textContent = i18n.t('navOrdersText') || 'سېتىۋالغىنىم';
 
 
 
@@ -938,10 +944,10 @@ function initTeklimakanApp() {
     const freeShippingBar = document.getElementById('cartShippingProgressFill');
     const freeShippingText = document.getElementById('cartFreeShippingText');
 
-    if (cartCountBadge) {
-      cartCountBadge.textContent = cartData.count;
-      cartCountBadge.style.display = cartData.count > 0 ? 'flex' : 'none';
-    }
+    document.querySelectorAll('.cart-counter-badge, #cartCounterBadge').forEach(badge => {
+      badge.textContent = cartData.count;
+      badge.style.display = cartData.count > 0 ? 'inline-flex' : 'none';
+    });
 
     if (!drawerBody) return;
 
@@ -1062,11 +1068,10 @@ function initTeklimakanApp() {
     const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
     const items = store.getWishlistDetailed(lang);
 
-    const badge = document.getElementById('wishlistCounterBadge');
-    if (badge) {
+    document.querySelectorAll('.wishlist-counter-badge, #wishlistCounterBadge').forEach(badge => {
       badge.textContent = items.length;
       badge.style.display = items.length > 0 ? 'inline-flex' : 'none';
-    }
+    });
 
     const drawerBody = document.getElementById('wishlistDrawerItems');
     if (!drawerBody) return;
@@ -1960,8 +1965,9 @@ function initTeklimakanApp() {
       updateCartUI();
     });
 
-    const cartToggleBtn = document.getElementById('cartToggleBtn');
-    if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCartDrawer);
+    document.querySelectorAll('.cart-toggle-btn, #cartToggleBtn').forEach(btn => {
+      btn.addEventListener('click', openCartDrawer);
+    });
 
     const closeDrawerBtn = document.getElementById('closeCartDrawerBtn');
     if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeCartDrawer);
@@ -1974,8 +1980,9 @@ function initTeklimakanApp() {
     }
 
     // ❤️ ياقتۇرغانلار تارتما كۆزنىكىنى ئېچىش ۋە تاقاش
-    const wishlistToggleBtn = document.getElementById('wishlistToggleBtn');
-    if (wishlistToggleBtn) wishlistToggleBtn.addEventListener('click', openWishlistDrawer);
+    document.querySelectorAll('.wishlist-toggle-btn, #wishlistToggleBtn').forEach(btn => {
+      btn.addEventListener('click', openWishlistDrawer);
+    });
 
     const closeWishlistDrawerBtn = document.getElementById('closeWishlistDrawerBtn');
     if (closeWishlistDrawerBtn) closeWishlistDrawerBtn.addEventListener('click', closeWishlistDrawer);
@@ -2018,8 +2025,9 @@ function initTeklimakanApp() {
     }
 
     // 🚚 زاكاز ئىز قوغلاش كۆزنىكىنى ئېچىش ۋە سۈرۈشتۈرۈش
-    const trackOrderNavBtn = document.getElementById('trackOrderNavBtn');
-    if (trackOrderNavBtn) trackOrderNavBtn.addEventListener('click', () => openTrackOrderModal());
+    document.querySelectorAll('.track-order-btn, #trackOrderNavBtn').forEach(btn => {
+      btn.addEventListener('click', () => openTrackOrderModal());
+    });
 
     const fLinkTrackOrder = document.getElementById('fLinkTrackOrder');
     if (fLinkTrackOrder) {

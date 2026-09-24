@@ -824,7 +824,7 @@ html[dir="ltr"] .flash-sale-btn i {
 /* ==================== لەيلىمە تېز ئالاقە كۇنۇپكىلىرى (Floating Quick Contact Buttons) ==================== */
 .floating-contact-wrap {
   position: fixed;
-  bottom: 2rem;
+  bottom: 5.5rem;
   right: 1.5rem;
   z-index: 1040;
   display: flex;
@@ -1334,7 +1334,230 @@ html[dir="rtl"] .live-sales-close {
 }
 
 /* باش تىزىملىكتىكى مەشغۇلات كونۇپكىلىرى (سېۋەت، تىل، پۇل، تۈن ھالىتى) */
-/* ==================== باش سەرلەۋھىدىكى 2 گۇرۇپپىلىق زامانىۋى مەشغۇلات كۇنۇپكىلىرى (Option 1) ==================== */
+/* ==================== باش سەرلەۋھىدىكى لوگو ۋە تىل تاللاش گۇرۇپپىسى ==================== */
+.brand-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  order: 1;
+}
+
+.header-lang-near-logo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-lang-near-logo .lang-select-dropdown {
+  height: 38px;
+  padding: 0 0.85rem;
+  gap: 0.45rem;
+  border-radius: var(--radius-full, 9999px) !important;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-main, #1e293b);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-lang-near-logo .lang-select-dropdown:hover {
+  border-color: var(--primary-color, #2563eb);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.nav-actions-minimal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  order: 3;
+}
+
+.nav-actions-minimal .theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-main, #1e293b);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.nav-actions-minimal .theme-toggle-btn:hover {
+  border-color: var(--primary-color, #2563eb);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+/* ==================== 📱 ئېكران ئاستى تېز مەشغۇلات تاختىسى (Store Bottom Navigation Bar) ==================== */
+.store-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1045;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: 0 -4px 22px rgba(0, 0, 0, 0.09);
+  padding: 0.35rem 1rem max(0.45rem, env(safe-area-inset-bottom));
+  transition: all 0.3s ease;
+}
+
+html[data-theme="dark"] .store-bottom-nav {
+  background: rgba(15, 23, 42, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.45);
+}
+
+.store-bottom-nav-container {
+  max-width: 580px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: relative;
+}
+
+html[dir="ltr"] .store-bottom-nav-container {
+  flex-direction: row-reverse;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  color: var(--text-main, #334155);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  user-select: none;
+  flex: 1;
+  max-width: 140px;
+  position: relative;
+  outline: none;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item:active {
+  color: var(--primary-color, #2563eb);
+}
+
+.bottom-nav-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.bottom-nav-item:hover .bottom-nav-icon-wrap {
+  transform: translateY(-2px);
+}
+
+.bottom-nav-orders i {
+  color: #0284c7;
+}
+
+.bottom-nav-wishlist i {
+  color: #f43f5e;
+}
+
+.bottom-nav-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-top: 2px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+/* مەركىزىي سېۋەت كۇنۇپكىسى (Elevated Highlighted Cart Button) */
+.bottom-nav-cart {
+  position: relative;
+  margin-top: -14px;
+}
+
+.bottom-nav-cart-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+  border: 3px solid var(--bg-card, #ffffff);
+  font-size: 1.25rem;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+}
+
+html[data-theme="dark"] .bottom-nav-cart-circle {
+  border-color: #0f172a;
+}
+
+.bottom-nav-cart:hover .bottom-nav-cart-circle {
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.55);
+}
+
+.bottom-nav-cart .bottom-nav-text {
+  color: var(--primary-color, #2563eb);
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+/* ھېسابلىغۇچ نۇقتىلىرى (Badge Counters) */
+.bottom-nav-item .badge-counter {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--bg-card, #ffffff);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .bottom-nav-item .badge-counter {
+  border-color: #0f172a;
+}
+
+/* بەت ئاستى بوشلۇقى (Body Safe Padding) */
+body {
+  padding-bottom: 74px !important;
+}
+
+/* ==================== باش تىزىملىكتىكى مەشغۇلات كۇنۇپكىلىرى ==================== */
 .nav-actions {
   display: flex;
   align-items: center;
@@ -3204,30 +3427,55 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     gap: 0.65rem;
   }
 
-  /* 1-قۇر: دۇكان لوگوسى مەركەزگە كۆركەم ماسلاشتۇرۇلدى */
-  .brand-logo {
+  /* 1-قۇر: دۇكان لوگوسى، تىل تاللاش كۇنۇپكىسى ۋە تۈن ھالىتى */
+  .brand-logo-group {
     order: 1;
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.55rem;
-    padding: 4px 0;
-    margin: 0 auto;
-    width: 100%;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0;
+    margin: 0;
   }
   .logo-img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 2px solid #eab308;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    margin: 2px 0;
+    margin: 0;
   }
   .brand-store-name {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--primary-color);
     white-space: nowrap;
+  }
+  .header-lang-near-logo .lang-select-dropdown {
+    height: 34px;
+    padding: 0 0.55rem;
+    font-size: 0.8rem;
+    gap: 0.3rem;
+  }
+  .header-lang-near-logo .lang-flag-img {
+    width: 18px;
+    height: 13px;
+  }
+  .nav-actions-minimal {
+    order: 1;
+    display: flex;
+    align-items: center;
+    margin-inline-start: auto;
+  }
+  .nav-actions-minimal .theme-toggle-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.88rem;
   }
 
   /* 2-قۇر: تولۇق كەڭلىكتىكى ئىزدەش رامكىسى */
@@ -3235,7 +3483,7 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     order: 2;
     max-width: 100%;
     width: 100%;
-    margin-top: 0.15rem;
+    margin-top: 0.25rem;
     padding: 0.2rem 0.35rem;
     box-sizing: border-box;
   }
@@ -3255,74 +3503,6 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     height: 36px;
     font-size: 0.95rem;
     flex-shrink: 0;
-  }
-
-  /* 3-قۇر: ياردەمچى مەشغۇلات كونۇپكىلىرى (سېۋەت، تىل، پۇل، تۈن ھالىتى) */
-  .nav-actions {
-    order: 3;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0.35rem 0 0.2rem;
-    padding: 0.45rem 0.25rem;
-    border-top: 1px dashed var(--border-light);
-    flex-wrap: nowrap;
-    box-sizing: border-box;
-  }
-
-  .lang-select-dropdown,
-  .nav-action-cart-btn,
-  .nav-action-wish-btn,
-  .nav-action-orders-btn,
-  .nav-action-track-btn {
-    height: 38px;
-    font-size: 0.86rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .lang-select-dropdown {
-    padding: 0 0.75rem;
-    gap: 0.4rem;
-  }
-
-  .theme-toggle-btn {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    font-size: 0.95rem;
-  }
-
-  .nav-action-cart-btn {
-    padding: 0 0.8rem;
-    gap: 0.35rem;
-  }
-
-  .nav-action-wish-btn,
-  .nav-action-orders-btn,
-  .nav-action-track-btn {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    padding: 0;
-    border-radius: 50% !important;
-    justify-content: center;
-  }
-
-  .nav-action-cart-btn .nav-cart-text,
-  .nav-action-wish-btn .nav-cart-text,
-  .nav-action-orders-btn .nav-cart-text,
-  .nav-action-track-btn .nav-cart-text {
-    display: none;
-  }
-
-  .nav-action-cart-btn i,
-  .nav-action-wish-btn i,
-  .nav-action-orders-btn i,
-  .nav-action-track-btn i {
-    font-size: 1rem;
   }
 
   /* چوڭ تەشۋىقات بەلبېغى (Hero Slider) */
@@ -3558,7 +3738,7 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
 
   /* تېز ئالاقە لەيلىمە كۇنۇپكىلىرى */
   .floating-contact-wrap {
-    bottom: 1.25rem;
+    bottom: 5.5rem;
     gap: 0.6rem;
     z-index: 1040;
   }

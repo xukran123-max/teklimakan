@@ -17,7 +17,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260924_v54">
+  <link rel="stylesheet" href="css/style.css?v=20260924_v55">
 </head>
 <body class="font-modern">
 
@@ -85,11 +85,27 @@
   <!-- ئاساسىي باش تىزىملىك (Navbar) -->
   <header class="main-navbar">
     <div class="container nav-wrapper">
-      <!-- 1. دۇكان لوگوسى ۋە نامى (Logo & Brand Name) -->
-      <a href="index.html" class="brand-logo">
-        <img src="images/logo_circle.png" class="logo-img" alt="تەكلىماكان سودا تورى لوگوسى">
-        <span class="brand-store-name">تەكلىماكان سودا تورى</span>
-      </a>
+      <!-- 1. دۇكان لوگوسى ۋە نامى + تىل تاللاش كۇنۇپكىسى (لوگونىڭ سول تەرىپىدە) -->
+      <div class="brand-logo-group">
+        <a href="index.html" class="brand-logo">
+          <img src="images/logo_circle.png" class="logo-img" alt="تەكلىماكان سودا تورى لوگوسى">
+          <span class="brand-store-name">تەكلىماكان سودا تورى</span>
+        </a>
+
+        <!-- تىل تاللاش كۇنۇپكىسى (لوگونىڭ سول تەرىپىدە) -->
+        <div class="lang-selector-wrap header-lang-near-logo">
+          <button type="button" id="languagePickerBtn" class="lang-select-dropdown" title="تىل تاللاش / Dil / Language">
+            <img id="navLangFlag" src="images/flag_uyghur.png" alt="ئۇيغۇرچە" class="lang-flag-img">
+            <span id="navLangLabel" class="nav-lang-text">ئۇيغۇرچە</span>
+            <i class="fas fa-chevron-down nav-lang-arrow"></i>
+          </button>
+          <select id="languageSelect" style="display: none;" title="تىل تاللاش / Dil / Language">
+            <option value="ug">ئۇيغۇرچە</option>
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
 
       <!-- 2. ئىزدەش بۆلىكى -->
       <div class="search-bar-container">
@@ -110,61 +126,11 @@
         <div id="searchAutocompleteDropdown" class="search-autocomplete-dropdown"></div>
       </div>
 
-      <!-- 3. قوشۇمچە كۇنۇپكىلار (سېۋەت، تىل، پۇل، تۈن ھالىتى - 2 گۇرۇپپىغا ئايرىلغان زامانىۋى قۇرۇلما) -->
-      <div class="nav-actions">
-        <!-- 🛒 1-گۇرۇپپا: خېرىدار سودا ۋە زاكاز مەركىزى (Shopping & Orders) -->
-        <div class="nav-btn-group nav-group-shopping">
-          <!-- 1. سودا سېۋىتى (ئوڭدىن بىرىنچى) -->
-          <button id="cartToggleBtn" class="action-btn nav-action-cart-btn" title="سودا سېۋىتى">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="nav-cart-text" id="navCartText">سېۋەت</span>
-            <span id="cartCounterBadge" class="badge-counter" style="display: none;">0</span>
-          </button>
-
-          <!-- 2. ياقتۇرغانلىرىم (Wishlist) -->
-          <button type="button" id="wishlistToggleBtn" class="action-btn nav-action-wish-btn" title="ياقتۇرغان تاۋارلىرىم (Wishlist)">
-            <i class="fas fa-heart"></i>
-            <span class="nav-cart-text" id="navWishlistText">ياقتۇرغانلار</span>
-            <span id="wishlistCounterBadge" class="badge-counter" style="display: none;">0</span>
-          </button>
-
-          <!-- 3. زاكازلىرىم (سۈرۈشتۈرۈش / ئىز قوغلاش) -->
-          <button type="button" id="trackOrderNavBtn" class="action-btn nav-action-orders-btn" title="مېنىڭ زاكازلىرىم (سۈرۈشتۈرۈش)">
-            <i class="fas fa-box"></i>
-            <span class="nav-cart-text" id="navOrdersText">زاكازلىرىم</span>
-          </button>
-        </div>
-
-        <!-- ⚜️ نەپىس ئايرىش سىزىقى (Visual Group Divider) -->
-        <div class="nav-group-divider" aria-hidden="true"></div>
-
-        <!-- ⚙️ 2-گۇرۇپپا: سۇپا ۋە تەڭشەك مەركىزى (Preferences & Settings) -->
-        <div class="nav-btn-group nav-group-settings">
-          <!-- تىل تاللاش -->
-          <div class="lang-selector-wrap">
-            <button type="button" id="languagePickerBtn" class="lang-select-dropdown" title="تىل تاللاش / Dil / Language">
-              <img id="navLangFlag" src="images/flag_uyghur.png" alt="ئۇيغۇرچە" class="lang-flag-img">
-              <span id="navLangLabel" class="nav-lang-text">ئۇيغۇرچە</span>
-              <i class="fas fa-chevron-down nav-lang-arrow"></i>
-            </button>
-            <select id="languageSelect" style="display: none;" title="تىل تاللاش / Dil / Language">
-              <option value="ug">ئۇيغۇرچە</option>
-              <option value="tr">Türkçe</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-
-          <!-- پۇل بىرلىكى (يوشۇرۇن، تىل تاللاش بىلەن ئاپتوماتىك باغلىنىدۇ: UG/TR=TRY, EN=USD) -->
-          <select id="currencySelect" style="display: none;" title="پۇل بىرلىكى">
-            <option value="TRY">₺ TRY</option>
-            <option value="USD">$ USD</option>
-          </select>
-
-          <!-- تۈن ھالىتى (كېچە-كۈندۈز) -->
-          <button id="themeToggleBtn" class="action-btn theme-toggle-btn" title="تۈن ۋە كۈندۈز تەڭشىكى">
-            <i class="fas fa-moon"></i>
-          </button>
-        </div>
+      <!-- 3. تۈن ھالىتى كۇنۇپكىسى (كېچە-كۈندۈز) -->
+      <div class="nav-actions-minimal">
+        <button id="themeToggleBtn" class="action-btn theme-toggle-btn" title="تۈن ۋە كۈندۈز تەڭشىكى">
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
     </div>
   </header>
@@ -1690,6 +1656,43 @@
         <div id="footerCopyright">بارلىق نەشر ھوقۇقى قوغدىلىدۇ <a href="seidiye" title="باشقۇرۇش" style="color: inherit; text-decoration: none; cursor: default;">©</a> 2026 تەكلىماكان سودا تورى.</div>
       </div>
     </div>
+  </footer>
+
+  <!-- 📱 ئېكران ئاستى تېز مەشغۇلات تاختىسى (Store Bottom Navigation Bar) -->
+  <nav class="store-bottom-nav" id="storeBottomNav" aria-label="ئېكران ئاستى تىزىملىكى">
+    <div class="store-bottom-nav-container">
+
+      <!-- 1. ئوڭدا: سېتىۋالغىنىم (My Orders / Purchases) -->
+      <button type="button" class="bottom-nav-item bottom-nav-orders track-order-btn" id="trackOrderNavBtn" title="سېتىۋالغىنىم / زاكازلىرىم">
+        <div class="bottom-nav-icon-wrap">
+          <i class="fas fa-box"></i>
+        </div>
+        <span class="bottom-nav-text" id="navOrdersText">سېتىۋالغىنىم</span>
+      </button>
+
+      <!-- 2. ئوتتۇرىدا: سېۋەت (Shopping Cart - كۆزگە چېلىقىدىغان مەركىزىي كۇنۇپكا) -->
+      <button type="button" class="bottom-nav-item bottom-nav-cart cart-toggle-btn" id="cartToggleBtn" title="سودا سېۋىتى">
+        <div class="bottom-nav-cart-badge-wrap">
+          <div class="bottom-nav-cart-circle">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCounterBadge" class="badge-counter cart-counter-badge" style="display: none;">0</span>
+          </div>
+        </div>
+        <span class="bottom-nav-text" id="navCartText">سېۋەت</span>
+      </button>
+
+      <!-- 3. سولدا: ياقتۇرغانلىرىم (Wishlist / Favorites) -->
+      <button type="button" class="bottom-nav-item bottom-nav-wishlist wishlist-toggle-btn" id="wishlistToggleBtn" title="ياقتۇرغانلىرىم">
+        <div class="bottom-nav-icon-wrap">
+          <i class="fas fa-heart"></i>
+          <span id="wishlistCounterBadge" class="badge-counter wishlist-counter-badge" style="display: none;">0</span>
+        </div>
+        <span class="bottom-nav-text" id="navWishlistText">ياقتۇرغانلىرىم</span>
+      </button>
+
+    </div>
+  </nav>
+
   <!-- 🔐 لەيلىمە ئارقا سۇپا كۇنۇپكىسى (پەقەت سىزنىڭ ئۈسكۈنىڭىزدىلا كۆرۈنىدۇ) -->
   <a href="seidiye" id="adminFloatingBadge" class="admin-floating-badge" style="display: none;" title="ئارقا سۇپىغا كىرىش (پەقەت سىزگىلا كۆرۈنىدۇ)">
     <i class="fas fa-shield-alt"></i>
@@ -1701,8 +1704,8 @@
   <script src="js/supabase.js?v=20260924_v42"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260924_v54"></script>
-  <script src="js/store.js?v=20260924_v54"></script>
-  <script src="js/app.js?v=20260924_v54"></script>
+  <script src="js/i18n.js?v=20260924_v55"></script>
+  <script src="js/store.js?v=20260924_v55"></script>
+  <script src="js/app.js?v=20260924_v55"></script>
 </body>
 </html>

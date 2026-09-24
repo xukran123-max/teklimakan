@@ -722,20 +722,137 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbody = document.getElementById('adminCategoriesTbody');
     if (!tbody) return;
 
-    const categories = window.appStore.getCategories('ug').filter(c => c.id !== 'all');
+    let categories = window.appStore.getCategories('ug').filter(c => c.id !== 'all');
     const products = window.appStore.getProducts();
 
+    const searchInput = document.getElementById('categorySearchInput');
+    const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    if (q) {
+      categories = categories.filter(c => 
+        (c.name && c.name.toLowerCase().includes(q)) || 
+        (c.id && c.id.toLowerCase().includes(q)) ||
+        (c.translations?.tr && c.translations.tr.toLowerCase().includes(q)) ||
+        (c.translations?.en && c.translations.en.toLowerCase().includes(q))
+      );
+    }
+
+    if (categories.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 1rem; font-weight: 700;">مۇناسىۋەتلىك تۈر تېپىلمىدى</td></tr>';
+      return;
+    }
+
     tbody.innerHTML = '';
-    categories.forEach(cat => {
-      const prodCount = products.filter(p => p.category === cat.id).length;
+    categories.forEach((cat, index) => {
+      const prodCount = products.filter(p => p.category === cat.id || p.category === cat.name).length;
       const tr = document.createElement('tr');
+      
+      const trLang = cat.translations?.tr || '-';
+      const enLang = cat.translations?.en || '-';
+      const isHidden = (cat.status === 'hidden');
+
       tr.innerHTML = `
-        <td><i class="${cat.icon}" style="margin-left: 0.5rem; color: var(--primary-color);"></i> <strong>${cat.name}</strong></td>
-        <td><span class="status-pill status-in-stock">${prodCount} دانە تاۋار</span></td>
-        <td><span class="number-latin">${cat.translations ? `${cat.translations.tr || ''} / ${cat.translations.en || ''}` : ''}</span></td>
+        <td style="text-align: center;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; font-weight: 800; font-size: 0.85rem;">
+            ${index + 1}
+          </span>
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; border: 1px solid #bfdbfe;">
+              <i class="${cat.icon || 'fas fa-tag'}"></i>
+            </div>
+            <div>
+              <strong style="font-size: 0.95rem; color: #0f172a; display: block;">${cat.name}</strong>
+              <span class="number-latin" style="font-size: 0.72rem; color: var(--text-muted);">${cat.id}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="status-pill status-in-stock" style="font-weight: 700; font-size: 0.82rem; padding: 4px 10px;">
+            ${prodCount} دانە تاۋار
+          </span>
+        </td>
+        <td>
+          <div style="font-size: 0.82rem; line-height: 1.45;">
+            <div style="color: #334155;"><span style="color: #64748b; font-size: 0.74rem; font-weight: 700;">TR:</span> ${trLang}</div>
+            <div style="color: #334155;"><span style="color: #64748b; font-size: 0.74rem; font-weight: 700;">EN:</span> ${enLang}</div>
+          </div>
+        </td>
+        <td style="text-align: center;">
+          ${isHidden
+            ? '<span class="status-pill" style="background:#fee2e2; color:#991b1b; font-weight:700; padding: 3px 9px; border-radius: 12px; font-size: 0.75rem;"><i class="fas fa-eye-slash"></i> يوشۇرۇن</span>'
+            : '<span class="status-pill status-approved" style="font-weight:700; padding: 3px 9px; border-radius: 12px; font-size: 0.75rem;"><i class="fas fa-check-circle"></i> ئاكتىپ</span>'
+          }
+        </td>
+        <td style="text-align: center;">
+          <div style="display: flex; gap: 0.45rem; justify-content: center; align-items: center;">
+            <button type="button" class="btn-action-edit btn-edit-category" data-id="${cat.id}" title="تۈرنى تەھرىرلەش" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.38rem 0.75rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s;">
+              <i class="fas fa-edit"></i>
+              <span>تەھرىرلەش</span>
+            </button>
+            <button type="button" class="btn-action-delete btn-delete-category" data-id="${cat.id}" data-name="${cat.name}" title="تۈرنى ئۆچۈرۈش" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
       `;
       tbody.appendChild(tr);
     });
+
+    // ✏️ تەھرىرلەش كۇنۇپكىلىرىنى ئۇلاش
+    tbody.querySelectorAll('.btn-edit-category').forEach(btn => {
+      btn.onclick = () => openEditCategoryModal(btn.dataset.id);
+    });
+
+    // 🗑️ ئۆچۈرۈش كۇنۇپكىلىرىنى ئۇلاش
+    tbody.querySelectorAll('.btn-delete-category').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        if (confirm(`«${name}» تۈرىنى راستتىنلا ئۆچۈرەمسىز؟`)) {
+          const res = window.appStore.deleteCategory(id);
+          if (res.success) {
+            renderCategoriesTable();
+            populateCategoryDropdowns();
+            renderProductsTable();
+            showAdminToast(res.message, 'success');
+          } else {
+            alert(res.message);
+            showAdminToast(res.message, 'error');
+          }
+        }
+      };
+    });
+  }
+
+  function openEditCategoryModal(catId) {
+    const modal = document.getElementById('editCategoryModal');
+    if (!modal) return;
+
+    const categories = window.appStore.getCategories('ug');
+    const cat = categories.find(c => c.id === catId || c.name === catId);
+    if (!cat) {
+      showAdminToast('تۈر تېپىلمىدى!', 'error');
+      return;
+    }
+
+    document.getElementById('editCategoryId').value = cat.id;
+    document.getElementById('editCategoryName').value = cat.name;
+    document.getElementById('editCategoryTr').value = (cat.translations && cat.translations.tr) || '';
+    document.getElementById('editCategoryEn').value = (cat.translations && cat.translations.en) || '';
+    
+    const iconInput = document.getElementById('editCategoryIcon');
+    const iconPreview = document.getElementById('editCategoryIconPreview');
+    const iconVal = cat.icon || 'fas fa-tag';
+    if (iconInput) iconInput.value = iconVal;
+    if (iconPreview) iconPreview.innerHTML = `<i class="${iconVal}"></i>`;
+
+    const statusToggle = document.getElementById('editCategoryStatusToggle');
+    if (statusToggle) {
+      statusToggle.checked = (cat.status !== 'hidden');
+    }
+
+    window.showModal('editCategoryModal');
   }
 
   // ==================== ۋاكالەتچىلەر ۋە ماركا ھوقۇقى (Agents & Brand Auth) ====================
@@ -3543,7 +3660,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-modal-close').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const m = e.target.closest('.modal-backdrop');
-        if (m) m.classList.remove('active');
+        if (m) window.hideModal(m);
+      });
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(m => {
+      m.addEventListener('click', (e) => {
+        if (e.target === m) window.hideModal(m);
       });
     });
 
@@ -3804,6 +3927,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const success = window.appStore.addCategory(catName, catIcon, { tr: catTr, en: catEn });
           if (success) {
             document.getElementById('newCategoryName').value = '';
+            document.getElementById('newCategoryTr').value = '';
+            document.getElementById('newCategoryEn').value = '';
             renderCategoriesTable();
             populateCategoryDropdowns();
             showAdminToast('يېڭى تۈر قوشۇلدى!', 'success');
@@ -3811,6 +3936,78 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+
+    // 🏷️ تۈر تەھرىرلەش جەدۋىلىنى ساقلاش (Edit Category Form Submit)
+    const editCatForm = document.getElementById('editCategoryForm');
+    if (editCatForm) {
+      editCatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editCategoryId').value;
+        const name = document.getElementById('editCategoryName').value.trim();
+        const tr = document.getElementById('editCategoryTr')?.value.trim() || name;
+        const en = document.getElementById('editCategoryEn')?.value.trim() || name;
+        const icon = document.getElementById('editCategoryIcon')?.value.trim() || 'fas fa-tag';
+        const isActive = document.getElementById('editCategoryStatusToggle') ? document.getElementById('editCategoryStatusToggle').checked : true;
+
+        if (!name) {
+          alert('تۈر نامىنى كىرگۈزۈڭ!');
+          return;
+        }
+
+        const success = window.appStore.updateCategory(id, {
+          name,
+          icon,
+          status: isActive ? 'active' : 'hidden',
+          translations: { ug: name, tr, en }
+        });
+
+        if (success) {
+          window.hideModal('editCategoryModal');
+          renderCategoriesTable();
+          populateCategoryDropdowns();
+          renderProductsTable();
+          showAdminToast(`«${name}» تۈرى مۇۋەپپەقىيەتلىك يېڭىلاندى!`, 'success');
+        } else {
+          showAdminToast('تۈرنى ساقلاش مەغلۇپ بولدى!', 'error');
+        }
+      });
+    }
+
+    // 🔍 تۈر ئىزدەش كىرگۈزۈش رامكىسى (Category Realtime Search)
+    const catSearch = document.getElementById('categorySearchInput');
+    if (catSearch) {
+      catSearch.addEventListener('input', () => {
+        renderCategoriesTable();
+      });
+    }
+
+    // 🎨 تۈر سىنبەلگىسى پالىتراسىنى ئۇلاش (Icon Palettes)
+    document.querySelectorAll('.category-icon-palette .icon-pick-btn').forEach(btn => {
+      btn.onclick = () => {
+        const palette = btn.closest('.category-icon-palette');
+        const targetId = palette ? palette.dataset.target : null;
+        const icon = btn.dataset.icon;
+        if (!targetId || !icon) return;
+
+        const input = document.getElementById(targetId);
+        if (input) {
+          input.value = icon;
+          const preview = document.getElementById(targetId + 'Preview');
+          if (preview) preview.innerHTML = `<i class="${icon}"></i>`;
+        }
+      };
+    });
+
+    ['newCategoryIcon', 'editCategoryIcon'].forEach(id => {
+      const inp = document.getElementById(id);
+      const prev = document.getElementById(id + 'Preview');
+      if (inp && prev) {
+        inp.addEventListener('input', () => {
+          const v = inp.value.trim() || 'fas fa-tag';
+          prev.innerHTML = `<i class="${v}"></i>`;
+        });
+      }
+    });
 
     const settingsForm = document.getElementById('systemSettingsForm');
     if (settingsForm) {

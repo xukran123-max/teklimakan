@@ -2287,23 +2287,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewBox) previewBox.style.display = 'none';
       }
 
-      // تەرجىمىلىرىنى تولدۇرۇش
-      if (product.translations) {
-        if (product.translations.tr) {
-          document.getElementById('formProductNameTr').value = product.translations.tr.name || '';
-          document.getElementById('formProductDescTr').value = product.translations.tr.description || '';
-        }
-        if (product.translations.en) {
-          document.getElementById('formProductNameEn').value = product.translations.en.name || '';
-          document.getElementById('formProductDescEn').value = product.translations.en.description || '';
-        }
-      }
+      // تەرجىمىلىرىنى تولدۇرۇش ۋە خاس تەھرىرلەش ھالىتىنى بەلگىلەش
+      const nameTrEl = document.getElementById('formProductNameTr');
+      const nameEnEl = document.getElementById('formProductNameEn');
+      const descTrEl = document.getElementById('formProductDescTr');
+      const descEnEl = document.getElementById('formProductDescEn');
+
+      const trName = (product.translations?.tr?.name) || '';
+      const trDesc = (product.translations?.tr?.description) || '';
+      const enName = (product.translations?.en?.name) || '';
+      const enDesc = (product.translations?.en?.description) || '';
+
+      if (nameTrEl) { nameTrEl.value = trName; nameTrEl.dataset.manuallyEdited = trName ? "true" : "false"; }
+      if (nameEnEl) { nameEnEl.value = enName; nameEnEl.dataset.manuallyEdited = enName ? "true" : "false"; }
+      if (descTrEl) { descTrEl.value = trDesc; descTrEl.dataset.manuallyEdited = trDesc ? "true" : "false"; }
+      if (descEnEl) { descEnEl.value = enDesc; descEnEl.dataset.manuallyEdited = enDesc ? "true" : "false"; }
     } else {
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
       document.getElementById('formProductId').value = '';
       if (brandInput) brandInput.value = 'تەكلىماكان كىلاسسىك';
       if (unitInput) unitInput.value = 'دانە';
       if (unitSelect) unitSelect.value = 'دانە';
+
+      const nameTrEl = document.getElementById('formProductNameTr');
+      const nameEnEl = document.getElementById('formProductNameEn');
+      const descTrEl = document.getElementById('formProductDescTr');
+      const descEnEl = document.getElementById('formProductDescEn');
+      if (nameTrEl) { nameTrEl.value = ''; nameTrEl.dataset.manuallyEdited = "false"; }
+      if (nameEnEl) { nameEnEl.value = ''; nameEnEl.dataset.manuallyEdited = "false"; }
+      if (descTrEl) { descTrEl.value = ''; descTrEl.dataset.manuallyEdited = "false"; }
+      if (descEnEl) { descEnEl.value = ''; descEnEl.dataset.manuallyEdited = "false"; }
+
       if (scopeSelect) {
         scopeSelect.value = 'all';
         updateLanguageFieldsVisibility('all');
@@ -4008,6 +4022,120 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
+
+    // 🌐 ئۇيغۇرچە يازغان ھامان تۈركچە ۋە ئىنگلىزچىغا ئاپتوماتىك ئۆرىلىش ۋە تەھرىرلەش ئىقتىدارى
+    function setupProductAutoTranslation() {
+      const nameUg = document.getElementById('formProductNameUg');
+      const descUg = document.getElementById('formProductDescUg');
+      const nameTr = document.getElementById('formProductNameTr');
+      const nameEn = document.getElementById('formProductNameEn');
+      const descTr = document.getElementById('formProductDescTr');
+      const descEn = document.getElementById('formProductDescEn');
+
+      // خاس تەھرىرلەشنى بايقاش ۋە ساقلاپ قېلىش
+      [nameTr, nameEn, descTr, descEn].forEach(el => {
+        if (el) {
+          el.addEventListener('input', () => {
+            el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
+          });
+        }
+      });
+
+      function doAutoTranslateName() {
+        if (!nameUg || !window.appI18n) return;
+        const text = nameUg.value.trim();
+        if (!text) {
+          if (nameTr && nameTr.dataset.manuallyEdited !== "true") nameTr.value = '';
+          if (nameEn && nameEn.dataset.manuallyEdited !== "true") nameEn.value = '';
+          return;
+        }
+        if (nameTr && nameTr.dataset.manuallyEdited !== "true") {
+          nameTr.value = window.appI18n.autoTranslateUyghur(text, 'tr');
+        }
+        if (nameEn && nameEn.dataset.manuallyEdited !== "true") {
+          nameEn.value = window.appI18n.autoTranslateUyghur(text, 'en');
+        }
+      }
+
+      function doAutoTranslateDesc() {
+        if (!descUg || !window.appI18n) return;
+        const text = descUg.value.trim();
+        if (!text) {
+          if (descTr && descTr.dataset.manuallyEdited !== "true") descTr.value = '';
+          if (descEn && descEn.dataset.manuallyEdited !== "true") descEn.value = '';
+          return;
+        }
+        if (descTr && descTr.dataset.manuallyEdited !== "true") {
+          descTr.value = window.appI18n.autoTranslateUyghur(text, 'tr');
+        }
+        if (descEn && descEn.dataset.manuallyEdited !== "true") {
+          descEn.value = window.appI18n.autoTranslateUyghur(text, 'en');
+        }
+      }
+
+      if (nameUg) {
+        nameUg.addEventListener('input', doAutoTranslateName);
+      }
+      if (descUg) {
+        descUg.addEventListener('input', doAutoTranslateDesc);
+      }
+
+      const btnAuto = document.getElementById('btnAutoTranslateProduct');
+      if (btnAuto) {
+        btnAuto.addEventListener('click', () => {
+          if (nameTr) nameTr.dataset.manuallyEdited = "false";
+          if (nameEn) nameEn.dataset.manuallyEdited = "false";
+          if (descTr) descTr.dataset.manuallyEdited = "false";
+          if (descEn) descEn.dataset.manuallyEdited = "false";
+          doAutoTranslateName();
+          doAutoTranslateDesc();
+          showAdminToast('تۈركچە ۋە ئىنگلىزچە تەرجىمىسى قايتا ھاسىللاندى!', 'info');
+        });
+      }
+
+      // تۈرلەر كۆزنىكىدىمۇ ئاپتوماتىك تەرجىمە
+      const newCatName = document.getElementById('newCategoryName');
+      const newCatTr = document.getElementById('newCategoryTr');
+      const newCatEn = document.getElementById('newCategoryEn');
+      if (newCatName && newCatTr && newCatEn) {
+        [newCatTr, newCatEn].forEach(el => {
+          el.addEventListener('input', () => {
+            el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
+          });
+        });
+        newCatName.addEventListener('input', () => {
+          const val = newCatName.value.trim();
+          if (newCatTr.dataset.manuallyEdited !== "true") {
+            newCatTr.value = val ? window.appI18n.autoTranslateUyghur(val, 'tr') : '';
+          }
+          if (newCatEn.dataset.manuallyEdited !== "true") {
+            newCatEn.value = val ? window.appI18n.autoTranslateUyghur(val, 'en') : '';
+          }
+        });
+      }
+
+      const editCatName = document.getElementById('editCategoryName');
+      const editCatTr = document.getElementById('editCategoryTr');
+      const editCatEn = document.getElementById('editCategoryEn');
+      if (editCatName && editCatTr && editCatEn) {
+        [editCatTr, editCatEn].forEach(el => {
+          el.addEventListener('input', () => {
+            el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
+          });
+        });
+        editCatName.addEventListener('input', () => {
+          const val = editCatName.value.trim();
+          if (editCatTr.dataset.manuallyEdited !== "true") {
+            editCatTr.value = val ? window.appI18n.autoTranslateUyghur(val, 'tr') : '';
+          }
+          if (editCatEn.dataset.manuallyEdited !== "true") {
+            editCatEn.value = val ? window.appI18n.autoTranslateUyghur(val, 'en') : '';
+          }
+        });
+      }
+    }
+
+    setupProductAutoTranslation();
 
     const settingsForm = document.getElementById('systemSettingsForm');
     if (settingsForm) {

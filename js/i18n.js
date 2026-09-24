@@ -780,7 +780,25 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'كىشمىش', tr: 'Kuşüzümü', en: 'Currants' },
   { ug: 'قارا كىشمىش', tr: 'Siyah Kuşüzümü', en: 'Black Raisins' },
   { ug: 'ياڭاق', tr: 'Ceviz', en: 'Walnut' },
+  { ug: 'ياقاق', tr: 'Yaka Süsü', en: 'Collar Ornament' },
   { ug: 'بادام', tr: 'Badem', en: 'Almond' },
+  { ug: 'پىستە', tr: 'Antep Fıstığı', en: 'Pistachio' },
+  { ug: 'ھەسەل', tr: 'Doğal Bal', en: 'Pure Honey' },
+  { ug: 'قوغۇن', tr: 'Kavun', en: 'Melon' },
+  { ug: 'ئۆرۈك', tr: 'Kayısı', en: 'Apricot' },
+  { ug: 'چىلان', tr: 'Hünnap', en: 'Jujube Dates' },
+  { ug: 'ئەنجۈر', tr: 'İncir', en: 'Fig' },
+  { ug: 'مەلھەم', tr: 'Şifalı Merhem', en: 'Healing Balm' },
+  { ug: 'مەلھىمى', tr: 'Merhemi', en: 'Balm' },
+  { ug: 'شىپالىق', tr: 'Şifalı', en: 'Healing' },
+  { ug: 'بىلەزۈك', tr: 'Bilezik', en: 'Bracelet' },
+  { ug: 'ئۈزۈك', tr: 'Yüzük', en: 'Ring' },
+  { ug: 'زەنجىر', tr: 'Kolye', en: 'Necklace' },
+  { ug: 'دوپپا', tr: 'Uygur Doppası', en: 'Traditional Cap' },
+  { ug: 'رومال', tr: 'İpek Eşarp', en: 'Silk Scarf' },
+  { ug: 'ياستۇق', tr: 'Yastık', en: 'Pillow' },
+  { ug: 'سوپۇن', tr: 'Doğal Sabun', en: 'Natural Soap' },
+  { ug: 'ئەتىر', tr: 'Doğal Parfüm', en: 'Natural Perfume' },
   { ug: 'پەشمەك', tr: 'Pişmaniye', en: 'Cotton Candy' },
   { ug: 'چاي', tr: 'Çay', en: 'Tea' },
   { ug: 'ساپ', tr: 'Saf', en: 'Pure' },
@@ -1001,13 +1019,65 @@ class I18nManager {
       }
     });
 
-    // 3. يەنە ئۇيغۇرچە ھەرپ قېلىپ قالدىمۇ؟
+    // 3. يەنە ئۇيغۇرچە ھەرپ قېلىپ قالغان بولسا لاتىنچىغا تەلەپپۇز بويىچە ئايلاندۇرۇش
     if (/[\u0600-\u06FF]/.test(translated)) {
-      // ئارقا بەتكە تەرجىمە يېتىشمىگەنلىك ئۇقتۇرۇشى ئەۋەتىش
-      this.reportMissingTranslation(text, lang);
+      translated = this.uyghurToLatin(translated, lang);
     }
 
-    return translated;
+    return translated.trim();
+  }
+
+  // ئۇيغۇرچىنى لاتىنچىغا ئەقلىي ئايلاندۇرۇش (Uyghur to Latin Phonetic Transliteration)
+  uyghurToLatin(text, targetLang = 'tr') {
+    if (!text || typeof text !== 'string') return text;
+    
+    return text.split(/(\s+|[.,!?:;"'()\-–—]+)/).map(segment => {
+      if (!/[\u0600-\u06FF]/.test(segment)) return segment;
+      
+      let s = segment;
+      // سوزۇق تاۋۇشلار
+      s = s.replace(/ئۆ/g, 'Ö').replace(/ۆ/g, 'ö');
+      s = s.replace(/ئۈ/g, 'Ü').replace(/ۈ/g, 'ü');
+      s = s.replace(/ئې/g, 'E').replace(/ې/g, 'e');
+      s = s.replace(/ئى/g, targetLang === 'tr' ? 'İ' : 'I').replace(/ى/g, 'i');
+      s = s.replace(/ئا/g, 'A').replace(/ا/g, 'a');
+      s = s.replace(/ئە/g, 'E').replace(/ە/g, 'e');
+      s = s.replace(/ئو/g, 'O').replace(/و/g, 'o');
+      s = s.replace(/ئۇ/g, 'U').replace(/ۇ/g, 'u');
+      
+      // ئۈزۈك تاۋۇشلار
+      s = s.replace(/ب/g, 'b');
+      s = s.replace(/پ/g, 'p');
+      s = s.replace(/ت/g, 't');
+      s = s.replace(/ج/g, targetLang === 'en' ? 'j' : 'c');
+      s = s.replace(/چ/g, targetLang === 'en' ? 'ch' : 'ç');
+      s = s.replace(/خ/g, targetLang === 'en' ? 'kh' : 'h');
+      s = s.replace(/د/g, 'd');
+      s = s.replace(/ر/g, 'r');
+      s = s.replace(/ز/g, 'z');
+      s = s.replace(/ژ/g, targetLang === 'en' ? 'zh' : 'j');
+      s = s.replace(/س/g, 's');
+      s = s.replace(/ش/g, targetLang === 'en' ? 'sh' : 'ş');
+      s = s.replace(/غ/g, targetLang === 'en' ? 'gh' : 'g');
+      s = s.replace(/ف/g, 'f');
+      s = s.replace(/ق/g, targetLang === 'en' ? 'q' : 'k');
+      s = s.replace(/ك/g, 'k');
+      s = s.replace(/گ/g, 'g');
+      s = s.replace(/ڭ/g, 'ng');
+      s = s.replace(/ل/g, 'l');
+      s = s.replace(/م/g, 'm');
+      s = s.replace(/ن/g, 'n');
+      s = s.replace(/ھ/g, 'h');
+      s = s.replace(/ۋ/g, 'v');
+      s = s.replace(/ي/g, 'y');
+      s = s.replace(/ئ/g, '');
+
+      // سۆزنىڭ باش ھەرپىنى چوڭايتىش
+      if (s.length > 0) {
+        s = s.charAt(0).toUpperCase() + s.slice(1);
+      }
+      return s;
+    }).join('');
   }
 
   // تەرجىمە قىلىنالمىغان ھەر قانداق سۆز كۆرۈلسە، ئارقا بەتكە جىددىي ئۇقتۇرۇش قىلىپ سېلىش

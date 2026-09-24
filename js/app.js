@@ -3760,8 +3760,16 @@ function initTeklimakanApp() {
           languageScope,
           translations: {
             ug: { name, description: desc, category },
-            tr: { name, description: desc, category },
-            en: { name, description: desc, category }
+            tr: { 
+              name: window.appI18n ? window.appI18n.autoTranslateUyghur(name, 'tr') : name, 
+              description: window.appI18n ? window.appI18n.autoTranslateUyghur(desc, 'tr') : desc, 
+              category: window.appI18n ? window.appI18n.getCategoryName(category) : category 
+            },
+            en: { 
+              name: window.appI18n ? window.appI18n.autoTranslateUyghur(name, 'en') : name, 
+              description: window.appI18n ? window.appI18n.autoTranslateUyghur(desc, 'en') : desc, 
+              category: window.appI18n ? window.appI18n.getCategoryName(category) : category 
+            }
           }
         };
 

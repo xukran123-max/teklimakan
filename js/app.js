@@ -811,7 +811,6 @@ function initTeklimakanApp() {
         <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
           <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
           <div class="image-shield-overlay"></div>
-          <div class="image-watermark-badge">تەكلىماكان ©</div>
           <div class="product-badges">
             ${badgeHtml}
           </div>
@@ -1385,7 +1384,7 @@ function initTeklimakanApp() {
         <div class="quick-view-media" style="position: relative;">
           <img src="${product.image}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
           <div class="image-shield-overlay"></div>
-          <div class="image-watermark-badge"><i class="fas fa-shield-alt"></i> تەكلىماكان © TEKLIMAKAN</div>
+          <div class="image-watermark-badge"><i class="fas fa-shield-alt" style="color: #60a5fa; font-size: 0.72rem;"></i> Teklimakan.com</div>
         </div>
         <div class="quick-view-details">
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.55rem; flex-wrap: wrap;">

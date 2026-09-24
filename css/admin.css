@@ -1952,5 +1952,22 @@ body.dark-mode select#agentFilterStatus {
   color: #2563eb !important;
 }
 
+/* 🛡️ رەسىملەرنى قوغداش ۋە چۈشۈرۈۋېلىش / كۆچۈرۈۋېلىشنى چەكلەش */
+img {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  user-drag: none !important;
+  pointer-events: none !important;
+}
+
+.table-product-thumb, .agent-cert-preview {
+  position: relative;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
 
 

@@ -810,6 +810,8 @@ function initTeklimakanApp() {
       card.innerHTML = `
         <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
           <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+          <div class="image-shield-overlay"></div>
+          <div class="image-watermark-badge">تەكلىماكان ©</div>
           <div class="product-badges">
             ${badgeHtml}
           </div>
@@ -1380,8 +1382,10 @@ function initTeklimakanApp() {
 
     modalBody.innerHTML = `
       <div class="quick-view-grid">
-        <div class="quick-view-media">
-          <img src="${product.image}" alt="${product.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+        <div class="quick-view-media" style="position: relative;">
+          <img src="${product.image}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+          <div class="image-shield-overlay"></div>
+          <div class="image-watermark-badge"><i class="fas fa-shield-alt"></i> تەكلىماكان © TEKLIMAKAN</div>
         </div>
         <div class="quick-view-details">
           <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.55rem; flex-wrap: wrap;">
@@ -1422,6 +1426,12 @@ function initTeklimakanApp() {
           <button type="button" id="modalInstantBuyWaBtn" class="btn-whatsapp-instant" style="width: 100%; min-height: 44px; margin-top: 0.75rem; background: #25D366; color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.28);">
             <i class="fab fa-whatsapp" style="font-size: 1.3rem;"></i>
             <span>💬 دەرھال WhatsApp تا ئېلىش</span>
+          </button>
+
+          <!-- 🔗 پەقەت ئۇلانمىنى ھەمبەھىرلەش كۇنۇپكىسى (رەسىمنى چۈشۈرمەي بىۋاسىتە ئۇلانما ھەمبەھىرلەش) -->
+          <button type="button" id="modalShareProductBtn" class="btn-share-product">
+            <i class="fas fa-share-alt"></i>
+            <span>🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش (ئۇلانما كۆچۈرۈش)</span>
           </button>
         </div>
       </div>
@@ -1470,6 +1480,43 @@ function initTeklimakanApp() {
           `زاكازنى تەستىقلاپ، ھېسابات ئۇچۇرىنى بەرسىڭىز، رەھمەت!`
         );
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
+      });
+    }
+
+    const shareBtn = document.getElementById('modalShareProductBtn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
+        const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
+        const shareText = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n🔗 ئۇلانمىسى: ${shareUrl}`;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: shareUrl
+            });
+            return;
+          } catch (e) {}
+        }
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = shareUrl;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+          if (typeof playChime === 'function') playChime('click');
+          showToast('🔗 مەھسۇلات ئۇلانمىسى كۆچۈرۈلدى! خالىغان كىشىگە ھەمبەھىرلىيەلەيسىز.', 'success');
+        } catch (err) {
+          showToast('🔗 ئۇلانما: ' + shareUrl, 'info');
+        }
       });
     }
   }
@@ -5010,6 +5057,21 @@ ${text}
       window.location.href = 'seidiye';
     }
   });
+
+  // 🛡️ تور بېكەتتىكى بارلىق رەسىملەرنىڭ چۈشۈرۈلۈشى ۋە كۆچۈرۈلۈشىنى چەكلەش (Image Anti-Save & Anti-Theft)
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.tagName === 'IMG' || e.target.closest('img, .quick-view-media, .product-card-thumb, .image-shield-overlay')) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.tagName === 'IMG' || e.target.closest('img, .quick-view-media, .product-card-thumb')) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
 
   window.showToast = showToast;
   window.openTrackOrderModal = openTrackOrderModal;

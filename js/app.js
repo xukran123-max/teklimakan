@@ -3412,6 +3412,26 @@ function initTeklimakanApp() {
       if (badgePend) badgePend.textContent = pending;
       if (badgeNeeds) badgeNeeds.textContent = needsImg;
       if (switcherBadge) switcherBadge.textContent = products.length;
+
+      // 💰 زاكاز، سېتىش، يوللانغان، تاماملانغان، بىكار قىلىنغان، قايتىپ كەلگەن ۋە پايدا كۆرسەتكۈچلىرىنى يېڭىلاش
+      if (window.appStore && typeof window.appStore.getAgentSalesOrderStats === 'function') {
+        const orderStats = window.appStore.getAgentSalesOrderStats(agent.id);
+        const soldEl = document.getElementById('dashCountSold');
+        const shippedEl = document.getElementById('dashCountShipped');
+        const completedEl = document.getElementById('dashCountCompleted');
+        const cancelledEl = document.getElementById('dashCountCancelled');
+        const returnedEl = document.getElementById('dashCountReturned');
+        const profitEl = document.getElementById('dashAmountProfit');
+        const rateBadge = document.getElementById('dashCommissionRateBadge');
+
+        if (soldEl) soldEl.textContent = orderStats.soldCount;
+        if (shippedEl) shippedEl.textContent = orderStats.shippedCount;
+        if (completedEl) completedEl.textContent = orderStats.completedCount;
+        if (cancelledEl) cancelledEl.textContent = orderStats.cancelledCount;
+        if (returnedEl) returnedEl.textContent = orderStats.returnedCount;
+        if (profitEl) profitEl.textContent = `₺${orderStats.profitCommission.toLocaleString('tr-TR')}`;
+        if (rateBadge) rateBadge.textContent = `پايدا: ${orderStats.commissionRate}%`;
+      }
     }
 
     function checkAgentSession() {

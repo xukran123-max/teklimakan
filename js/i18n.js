@@ -134,7 +134,7 @@ const I18N_TRANSLATIONS = {
     custNotes: 'ئالاھىدە تەلەپ (ئىختىيارىي)',
     submitOrderBtn: 'زاكازنى جەزملەپ تاپشۇرۇش',
 
-    orderSuccessTitle: 'زاكازىڭىز مۇۋەپپەقىيەتلىك بېرىلدى!',
+    orderSuccessTitle: 'سېتىۋېلىش مۇۋەپپەقىيەتلىك بولدى!',
     orderNumberLabel: 'زاكاز نۇمۇرىڭىز:',
     continueShopping: 'خېرىدارلىقنى داۋاملاشتۇرۇش',
     viewInAdmin: 'ئارقا بەتتە كۆرۈش',

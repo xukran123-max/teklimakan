@@ -2840,24 +2840,27 @@ class StoreManager {
       finalLanguageScope = 'ug';
     }
 
-    // 3. سۈرەت بىخەتەرلىكىنى ۋاكالەتچى سۈپىتىدە تەكشۈرۈش (isAdmin: false -> 5 دەخلىسىز قائىدە قاتتىق سۈزۈش!)
-    const secCheck = this.validateProductImageSecurity(
-      productData.image, 
-      (productData.name || '') + ' ' + (productData.description || ''),
-      false,
-      {
-        fileName: productData.fileName || '',
-        width: productData.imageWidth,
-        height: productData.imageHeight,
-        isProcessed: true
-      }
-    );
+    // 3. سۈرەت بىخەتەرلىكىنى ۋاكالەتچى سۈپىتىدە تەكشۈرۈش
+    // ئەگەر ۋاكالەتچى سۈرەتنى باشقۇرغۇچىنىڭ يۈكلىشىنى تاللىغان بولسا تەكشۈرۈشتىن ئۆتۈشكە يول قويۇلىدۇ
+    if (!productData.needsAdminImage) {
+      const secCheck = this.validateProductImageSecurity(
+        productData.image, 
+        (productData.name || '') + ' ' + (productData.description || ''),
+        false,
+        {
+          fileName: productData.fileName || '',
+          width: productData.imageWidth,
+          height: productData.imageHeight,
+          isProcessed: true
+        }
+      );
 
-    if (!secCheck.valid) {
-      return {
-        success: false,
-        message: secCheck.message
-      };
+      if (!secCheck.valid) {
+        return {
+          success: false,
+          message: secCheck.message
+        };
+      }
     }
 
     // 4. 🚫 تېلېفون نومۇرى ۋە تاشقى ئۇلىنىش سۈزگۈچى (Strict Phone & Link Prohibition)
@@ -2882,6 +2885,7 @@ class StoreManager {
       agentName: `${agent.name} (${agent.email})`,
       merchantBadge: productData.merchantBadge || agent.reputation || 'ئىشەنچىلىك سودىگەر',
       approvalStatus: 'تەستىق كۈتۈۋاتىدۇ',
+      needsAdminImage: !!productData.needsAdminImage,
       hasLinkViolation: hasViolation,
       hasPhoneViolation: violType === 'phone',
       detectedLink: violMatch,
@@ -3552,6 +3556,9 @@ class StoreManager {
       product.approvalStatus = 'تەستىقلاندى';
       product.approvedAt = new Date().toISOString();
       product.isUserEdited = true;
+      if (product.needsAdminImage) {
+        product.needsAdminImage = false;
+      }
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
       this.saveUserEdit(product);
       this.notifyDataChange('products');

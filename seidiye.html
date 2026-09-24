@@ -158,6 +158,12 @@
             <span class="header-btn-text">تەرجىمە تەستىقى</span>
             <span id="translationAlertBadge" class="badge-counter" style="display: none; background: #0284c7; color: white; font-size: 0.72rem; padding: 2px 6px; border-radius: 9999px; margin-right: 4px;">0</span>
           </button>
+          <!-- 📷 رەسىم ئەكىرىش ئۇقتۇرۇشى (Agent Image Request Notification) -->
+          <button id="adminPendingImgAlertBtn" class="action-btn" title="ۋاكالەتچى سۈرەت يۈكلەش تەلەپ قىلغان تاۋارلار" style="position: relative; border-color: #f59e0b; color: #b45309;">
+            <i class="fas fa-camera"></i>
+            <span class="header-btn-text">سۈرەت ئەكىرىش</span>
+            <span id="pendingImgBadgeHeader" class="badge-counter" style="display: none; background: #f59e0b; color: white; font-size: 0.72rem; padding: 2px 6px; border-radius: 9999px; margin-right: 4px;">0</span>
+          </button>
           <button id="adminThemeToggleBtn" class="action-btn" title="تۈن ھالىتى">
             <i class="fas fa-moon"></i>
           </button>
@@ -182,6 +188,26 @@
                 <!-- ==================== 1. كۆرسەتكۈچ تاختىسى (Dashboard / Overview) ==================== -->
         <div id="tab-dashboard" class="admin-tab-pane active">
           
+          <!-- 📷 ۋاكالەتچى سۈرەت يۈكلەش تەلەپ قىلغان تاۋارلار جىددىي ئۇقتۇرۇش تاختىسى (Agent Image Upload Request Alert Banner) -->
+          <div id="adminPendingImgAlertBanner" style="display: none; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; color: #92400e; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: #d97706; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);">
+                <i class="fas fa-camera-retro"></i>
+              </div>
+              <div>
+                <strong style="font-size: 1rem; display: block; color: #78350f;">
+                  🔔 دىققەت: <span id="pendingImgCountBadge">0</span> دانە مەھسۇلاتقا ۋاكالەتچى تەرىپىدىن سۈرەت يۈكلەش تەلەپ قىلىندى!
+                </strong>
+                <span style="font-size: 0.84rem; color: #92400e;">
+                  ۋاكالەتچى سۈرەتنى سىزنىڭ (باشقۇرغۇچىنىڭ) تولۇقلاپ بېرىشىڭىزنى تاللىغان. دەرھال سۈپەتلىك سۈرەت قوشۇپ تەستىقلاڭ.
+                </span>
+              </div>
+            </div>
+            <button type="button" id="btnGoToPendingImageProducts" class="btn-checkout" style="background: #b45309 !important; border-color: #b45309 !important; padding: 0.55rem 1.2rem; font-size: 0.88rem; font-weight: 800; white-space: nowrap; cursor: pointer;">
+              <i class="fas fa-images"></i> <span>سۈرەت تولۇقلايدىغانلارنى كۆرۈش</span>
+            </button>
+          </div>
+
           <!-- 1. 8 دانە باشقۇرۇش KPI سىتاتىستىكا كارتىلىرى (4 + 4 تەڭپۇڭلاشتۇرۇلغان كۆركەم كاتەكچە) -->
           <div class="metrics-grid dashboard-metrics-grid">
             <!-- 1-قۇر: كىرىم ۋە زاكازلار -->
@@ -3059,11 +3085,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260924_v40"></script>
+  <script src="js/supabase.js?v=20260924_v41"></script>
 
-  <script src="js/i18n.js?v=20260924_v40"></script>
-  <script src="js/store.js?v=20260924_v40"></script>
-  <script src="js/admin.js?v=20260924_v40"></script>
+  <script src="js/i18n.js?v=20260924_v41"></script>
+  <script src="js/store.js?v=20260924_v41"></script>
+  <script src="js/admin.js?v=20260924_v41"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

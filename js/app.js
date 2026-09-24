@@ -3668,6 +3668,13 @@ function initTeklimakanApp() {
       if (agentUnitInput) agentUnitInput.value = 'دانە';
       if (agentUnitSelect) agentUnitSelect.value = 'دانە';
 
+      const needsAdminImgInput = document.getElementById('agentNeedsAdminImage');
+      const adminImgCard = document.getElementById('agentAdminImageChosenCard');
+      const tipBox = document.getElementById('agentImgHelpTipBox');
+      if (needsAdminImgInput) needsAdminImgInput.value = 'false';
+      if (adminImgCard) adminImgCard.style.display = 'none';
+      if (tipBox) tipBox.style.display = 'block';
+
       const scopeSelect = document.getElementById('agentProdLanguageScope');
       if (scopeSelect && currentVerifiedAgent) {
         scopeSelect.value = currentVerifiedAgent.canPublishMultilingual ? 'all' : 'ug';
@@ -3933,31 +3940,32 @@ function initTeklimakanApp() {
       });
     }
 
-    if (agentFileInputCamera) {
-      agentFileInputCamera.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        processAgentProductFile(file);
+    const btnRequestAdminImg = document.getElementById('btnRequestAdminImageUpload');
+    const btnCancelAdminImg = document.getElementById('btnCancelAdminImageRequest');
+    const adminImgCard = document.getElementById('agentAdminImageChosenCard');
+    const needsAdminImgInput = document.getElementById('agentNeedsAdminImage');
+    const tipBox = document.getElementById('agentImgHelpTipBox');
+
+    if (btnRequestAdminImg) {
+      btnRequestAdminImg.addEventListener('click', () => {
+        if (needsAdminImgInput) needsAdminImgInput.value = 'true';
+        if (adminImgCard) adminImgCard.style.display = 'block';
+        if (tipBox) tipBox.style.display = 'none';
+        if (previewWrap) previewWrap.style.display = 'none';
+        if (agentImageInput) {
+          agentImageInput.value = 'images/default_product.jpg';
+        }
+        showToast('👑 «باشقۇرغۇچى يۈكلەش» تاللاندى! رەسىمسىزمۇ مەھسۇلاتنى تەستىققا يوللىيالايسىز.', 'success');
       });
     }
 
-    if (btnPasteAgentProdImg) {
-      btnPasteAgentProdImg.addEventListener('click', async () => {
-        try {
-          if (navigator.clipboard && navigator.clipboard.read) {
-            const items = await navigator.clipboard.read();
-            for (const item of items) {
-              const imageType = item.types.find(type => type.startsWith('image/'));
-              if (imageType) {
-                const blob = await item.getType(imageType);
-                processAgentProductFile(blob);
-                return;
-              }
-            }
-          }
-        } catch (clipErr) {
-          console.warn('Clipboard read error:', clipErr);
-        }
-        alert('📋 قىستۇرما تاختىدىن چاپلاش ئۈچۈن: رەسىمنى كۆچۈرۈپ بولۇپ، كۇنۇپكىلار تاختىسىدىن Ctrl + V نى بېسىڭ ياكى يانفوندا رەسىمنى بىۋاسىتە تاللاڭ.');
+    if (btnCancelAdminImg) {
+      btnCancelAdminImg.addEventListener('click', () => {
+        if (needsAdminImgInput) needsAdminImgInput.value = 'false';
+        if (adminImgCard) adminImgCard.style.display = 'none';
+        if (tipBox) tipBox.style.display = 'block';
+        if (agentImageInput) agentImageInput.value = '';
+        showToast('ئۆزىڭىز سۈرەت تاللاشنى داۋاملاشتۇرالايسىز', 'info');
       });
     }
 
@@ -4014,17 +4022,25 @@ function initTeklimakanApp() {
         const desc = document.getElementById('agentProdDesc').value.trim();
         const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
 
+        const needsAdminImgVal = (document.getElementById('agentNeedsAdminImage')?.value === 'true');
+        let finalImage = image;
+
         // 📷 تاۋار سۈرىتى تەكشۈرۈش
-        if (!image || image.length < 15) {
-          alert('⚠️ تاۋار سۈرىتى تاللانمىدى! «سۈرەت تاللاش» كۇنۇپكىسىنى بېسىپ سۈرەت يۈكلەڭ ياكى سۈرەت ئۇلانمىسىنى كىرگۈزۈڭ.');
-          showToast('⚠️ تاۋار سۈرىتى كىرگۈزۈلمىدى!', 'warning');
-          const fileBtn = document.querySelector('label[for="agentFileInput"]');
-          if (fileBtn) {
-            fileBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            fileBtn.style.outline = '2px solid #ef4444';
-            setTimeout(() => { if (fileBtn) fileBtn.style.outline = 'none'; }, 3000);
+        if (needsAdminImgVal) {
+          // ۋاكالەتچى سۈرەتنى باشقۇرغۇچىنىڭ يۈكلىشىنى تاللىغان بولسا رەسىمسىزمۇ تەستىققا ئۆتىدۇ!
+          finalImage = (image && image.length > 15) ? image : 'images/default_product.jpg';
+        } else {
+          if (!finalImage || finalImage.length < 15) {
+            alert('⚠️ تاۋار سۈرىتى تاللانمىدى! «سۈرەت تاللاش» كۇنۇپكىسىنى بېسىپ سۈرەت يۈكلەڭ ياكى سۈرەتسىز يوللاش ئۈچۈن «👑 باشقۇرغۇچى يۈكلەش» كۇنۇپكىسىنى تاللاڭ.');
+            showToast('⚠️ تاۋار سۈرىتى كىرگۈزۈلمىدى!', 'warning');
+            const fileBtn = document.querySelector('label[for="agentFileInput"]');
+            if (fileBtn) {
+              fileBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              fileBtn.style.outline = '2px solid #ef4444';
+              setTimeout(() => { if (fileBtn) fileBtn.style.outline = 'none'; }, 3000);
+            }
+            return;
           }
-          return;
         }
 
         const scopeVal = document.getElementById('agentProdLanguageScope')?.value || 'ug';
@@ -4038,7 +4054,8 @@ function initTeklimakanApp() {
           oldPrice,
           stock,
           unit,
-          image,
+          image: finalImage,
+          needsAdminImage: needsAdminImgVal,
           description: desc,
           languageScope,
           translations: {

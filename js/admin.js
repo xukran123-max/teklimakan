@@ -304,6 +304,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🌐 تەرجىمە ئۇقتۇرۇشلىرى ستاتىستىكىسى ۋە بەلگىسى
     renderTranslationAlertMetrics();
+
+    // 📷 ۋاكالەتچى سۈرەت تولۇقلاش تەلەپ قىلغان تاۋارلار ستاتىستىكىسى ۋە ئەسكەرتىشى
+    renderPendingImageAlertMetrics();
+  }
+
+  function renderPendingImageAlertMetrics() {
+    const products = window.appStore.getProducts('none') || [];
+    const pendingImgProds = products.filter(p => 
+      (p.needsAdminImage === true || p.needsAdminImage === 'true') && 
+      (p.approvalStatus !== 'رەت قىلىندى')
+    );
+    const count = pendingImgProds.length;
+
+    const banner = document.getElementById('adminPendingImgAlertBanner');
+    const countBadge = document.getElementById('pendingImgCountBadge');
+    const headerBadge = document.getElementById('pendingImgBadgeHeader');
+
+    if (banner) {
+      banner.style.display = count > 0 ? 'flex' : 'none';
+    }
+    if (countBadge) countBadge.textContent = count;
+    if (headerBadge) {
+      if (count > 0) {
+        headerBadge.textContent = count;
+        headerBadge.style.display = 'inline-block';
+      } else {
+        headerBadge.style.display = 'none';
+      }
+    }
+
+    // ئارقا سۇپىغا كىرگەن ھامان كۆزگە چېلىقىپ تۇرىدىغان ئەسكەرتىش (Toast) بېرىش
+    if (count > 0 && !window._adminPendingImgAlertShown) {
+      window._adminPendingImgAlertShown = true;
+      setTimeout(() => {
+        showAdminToast(`📷 دىققەت: ${count} دانە تاۋارغا ۋاكالەتچى تەرىپىدىن سۈرەت يۈكلەش تەلەپ قىلىندى! دەرھال سۈرەت تولۇقلاپ تەستىقلاڭ.`, 'warning');
+      }, 700);
+    }
+  }
+
+  function goToPendingImageProducts() {
+    switchTab('products');
+    productFilterApproval = 'needs_image';
+    const filterSelect = document.getElementById('adminProductApprovalFilter');
+    if (filterSelect) {
+      let opt = filterSelect.querySelector('option[value="needs_image"]');
+      if (!opt) {
+        opt = document.createElement('option');
+        opt.value = 'needs_image';
+        opt.textContent = '📷 سۈرەت تولۇقلايدىغانلار';
+        filterSelect.appendChild(opt);
+      }
+      filterSelect.value = 'needs_image';
+    }
+    renderProductsTable();
+  }
+
+  // كۇنۇپكىلارغا چېكىلىش ۋەقەلىرىنى ئۇلاش
+  const btnGoToPendingImg = document.getElementById('btnGoToPendingImageProducts');
+  if (btnGoToPendingImg) {
+    btnGoToPendingImg.addEventListener('click', goToPendingImageProducts);
+  }
+  const btnPendingImgHeader = document.getElementById('adminPendingImgAlertBtn');
+  if (btnPendingImgHeader) {
+    btnPendingImgHeader.addEventListener('click', goToPendingImageProducts);
   }
 
   function renderTranslationAlertMetrics() {
@@ -405,7 +469,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تەستىق ھالىتى بويىچە
     if (productFilterApproval !== 'all') {
-      products = products.filter(p => (p.approvalStatus || 'تەستىقلاندى') === productFilterApproval);
+      if (productFilterApproval === 'needs_image') {
+        products = products.filter(p => (p.needsAdminImage === true || p.needsAdminImage === 'true') && p.approvalStatus !== 'رەت قىلىندى');
+      } else {
+        products = products.filter(p => (p.approvalStatus || 'تەستىقلاندى') === productFilterApproval);
+      }
     }
     // تۈر بويىچە
     if (productFilterCat !== 'all') {
@@ -488,6 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // تەستىق ھالىتى بەلگىسى
       const approval = product.approvalStatus || 'تەستىقلاندى';
       const hasViolation = !!product.hasLinkViolation;
+      const needsAdminImg = !!product.needsAdminImage || product.needsAdminImage === 'true';
       let approvalBadge = '';
       let quickApprovalAction = '';
 
@@ -522,16 +591,26 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
+      if (needsAdminImg) {
+        approvalBadge += `<div style="margin-top: 4px;"><span class="status-pill" style="background:#fff1f2; color:#be123c; border:1.5px solid #fda4af; font-weight:800; font-size:0.75rem;"><i class="fas fa-camera"></i> باشقۇرغۇچى سۈرەت تولۇقلايدۇ</span></div>`;
+      }
+
       const violationAlertHtml = hasViolation ? `
         <div style="margin-top: 5px; display: inline-flex; align-items: center; gap: 4px; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.74rem; padding: 2px 7px; border-radius: 6px; font-weight: 800;">
           <i class="fas fa-exclamation-triangle"></i> تاشقى ئۇلىنىش (${product.linkViolationField || 'مەزمۇندا'}): <code style="font-family: monospace; direction: ltr; font-weight: bold; background: #fff; padding: 1px 4px; border-radius: 4px; border: 1px solid #fca5a5;">${product.detectedLink || ''}</code>
         </div>
       ` : '';
 
+      const pendingImgAlertHtml = needsAdminImg ? `
+        <div style="margin-top: 5px; display: inline-flex; align-items: center; gap: 4px; background: #fff1f2; color: #be123c; border: 1.5px solid #fda4af; font-size: 0.74rem; padding: 2px 7px; border-radius: 6px; font-weight: 800;">
+          <i class="fas fa-camera"></i> ۋاكالەتچى سۈرەت يۈكلەشنى تاپشۇرغان (سۈرەت تولۇقلاڭ)
+        </div>
+      ` : '';
+
       tr.innerHTML = `
         <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
-            <img src="${product.image}" class="table-product-thumb" alt="${displayName}" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+            <img src="${product.image}" class="table-product-thumb" alt="${displayName}" onerror="this.src='images/default_product.jpg'">
             <div style="min-width: 0; flex: 1;">
               <div class="table-product-title">${displayName}</div>
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
@@ -540,6 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
               <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light); font-weight: 600;">${product.id}</div>
               ${violationAlertHtml}
+              ${pendingImgAlertHtml}
             </div>
           </div>
         </td>
@@ -3783,7 +3863,8 @@ document.addEventListener('DOMContentLoaded', () => {
             languageScope: scope,
             translations,
             isAdmin: true,
-            approvalStatus: 'تەستىقلاندى'
+            approvalStatus: 'تەستىقلاندى',
+            needsAdminImage: false
           };
 
           if (id) data.id = id;

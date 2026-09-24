@@ -3553,9 +3553,10 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     box-sizing: border-box;
   }
   .search-category-select {
-    max-width: 95px;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.82rem;
+    max-width: 112px;
+    padding: 0.4rem 0.35rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
   .search-input {
     min-width: 0;
@@ -3952,6 +3953,12 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     height: 34px;
     min-width: 34px;
     font-size: 0.82rem;
+  }
+  .search-category-select {
+    max-width: 105px;
+    padding: 0.35rem 0.25rem;
+    font-size: 0.76rem;
+    white-space: nowrap;
   }
   .nav-actions {
     gap: 0.35rem;

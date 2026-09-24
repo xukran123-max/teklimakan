@@ -1659,17 +1659,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 📊 ئايلىق سېتىش نەتىجىسى ۋە كومىسسىيە خۇلاسە كۆزنىكىنى ئېچىش
-  function openAgentMonthlySummaryModal() {
-    const modal = document.getElementById('agentMonthlySummaryModal');
-    if (!modal) return;
-
-    const summary = window.appStore.getMonthlyAgentPerformanceSummary();
+  // 📊 ئايلىق سېتىش نەتىجىسى ۋە كومىسسىيە خۇلاسە جەدۋىلىنى سىزىش
+  function renderAgentMonthlySummaryTable(customPeriod) {
+    const period = customPeriod || localStorage.getItem('teklimakan_summary_period') || '2026-يىلى 9-ئاي';
+    const summary = window.appStore.getMonthlyAgentPerformanceSummary(period);
     const totalSalesEl = document.getElementById('modalSummaryTotalSales');
     const totalOrdersEl = document.getElementById('modalSummaryTotalOrders');
     const totalCommissionEl = document.getElementById('modalSummaryTotalCommission');
+    const periodBadge = document.getElementById('modalSummaryPeriodBadge');
     const tbody = document.getElementById('modalMonthlySummaryTbody');
 
+    if (periodBadge) periodBadge.textContent = summary.monthTitle || period;
     if (totalSalesEl) totalSalesEl.textContent = `\u20BA${summary.totalSales.toLocaleString('tr-TR')}`;
     if (totalOrdersEl) totalOrdersEl.textContent = `${summary.totalOrders} دانە`;
     if (totalCommissionEl) totalCommissionEl.textContent = `\u20BA${summary.totalCommission.toLocaleString('tr-TR')}`;
@@ -1686,22 +1686,143 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><span style="font-weight: 800; color: ${a.tier === 'gold' ? '#b45309' : (a.tier === 'silver' ? '#0369a1' : '#6d28d9')};">${a.badgeLabel || a.tierBadge}</span></td>
             <td style="font-weight: 800; color: #0f172a;"><span class="number-latin">\u20BA${a.monthlySales.toLocaleString('tr-TR')}</span></td>
             <td><span class="number-latin">${a.monthlyOrders}</span> دانە</td>
-            <td><span class="number-latin">${a.commissionRate}%</span></td>
+            <td>
+              <div style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: center;">
+                <span class="number-latin" style="font-weight: 800; color: #1e3a8a; font-size: 0.88rem;">${a.commissionRate}%</span>
+                <button type="button" class="btn-edit-agent-commission-single" data-id="${a.id}" data-name="${a.name}" data-rate="${a.commissionRate}" title="${a.name} نىڭ كومىسسىيە نىسبىتىنى تەھرىرلەش" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #2563eb; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; transition: all 0.2s;">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </td>
             <td style="font-weight: 900; color: #15803d;"><span class="number-latin">\u20BA${a.monthlyCommission.toLocaleString('tr-TR')}</span></td>
           </tr>
         `).join('');
+
+        // يەككە تەھرىرلەش كۇنۇپكىلىرىغا باغلاش
+        tbody.querySelectorAll('.btn-edit-agent-commission-single').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const agId = btn.getAttribute('data-id');
+            openEditCommissionModal(agId);
+          });
+        });
+      }
+    }
+  }
+
+  // 📊 ئايلىق سېتىش نەتىجىسى ۋە كومىسسىيە خۇلاسە كۆزنىكىنى ئېچىش
+  function openAgentMonthlySummaryModal() {
+    const modal = document.getElementById('agentMonthlySummaryModal');
+    if (!modal) return;
+    renderAgentMonthlySummaryTable();
+    modal.classList.add('active');
+  }
+
+  // 📅 ۋاقىت ۋە مەزگىلنى تەھرىرلەش كۆزنىكىنى ئېچىش
+  function openEditSummaryPeriodModal() {
+    const modal = document.getElementById('modalEditSummaryPeriod');
+    if (!modal) return;
+    const currentPeriod = localStorage.getItem('teklimakan_summary_period') || '2026-يىلى 9-ئاي';
+    const input = document.getElementById('customPeriodInput');
+    const select = document.getElementById('quickPeriodSelect');
+    if (input) input.value = currentPeriod;
+    if (select) {
+      let matched = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === currentPeriod) {
+          select.selectedIndex = i;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && select.querySelector('option[value="custom"]')) {
+        select.value = 'custom';
+      }
+    }
+    modal.classList.add('active');
+  }
+
+  // ⚙️ كومىسسىيە نىسبىتىنى تەھرىرلەش كۆزنىكىنى ئېچىش
+  function openEditCommissionModal(targetAgentId = null) {
+    const modal = document.getElementById('modalEditCommission');
+    if (!modal) return;
+
+    const select = document.getElementById('commAgentSelect');
+    const rateInput = document.getElementById('commAgentRateInput');
+    const agents = window.appStore.getAgents('name');
+
+    if (select) {
+      select.innerHTML = agents.map(a => `
+        <option value="${a.id}" data-rate="${a.commissionRate !== undefined ? a.commissionRate : 15}">
+          ${a.name} (${a.id}) - ھازىرقى كومىسسىيەسى: ${a.commissionRate !== undefined ? a.commissionRate : 15}%
+        </option>
+      `).join('');
+
+      if (targetAgentId) {
+        select.value = targetAgentId;
+      }
+      const selOpt = select.selectedOptions[0];
+      if (selOpt && rateInput) {
+        rateInput.value = selOpt.getAttribute('data-rate') || 15;
       }
     }
 
+    // Default to Single Tab
+    switchCommissionTab('single');
     modal.classList.add('active');
+  }
+
+  function switchCommissionTab(tabName) {
+    const tabSingle = document.getElementById('tabCommissionSingle');
+    const tabBatch = document.getElementById('tabCommissionBatch');
+    const tabTiers = document.getElementById('tabCommissionTiers');
+    const formSingle = document.getElementById('formCommissionSingle');
+    const formBatch = document.getElementById('formCommissionBatch');
+    const formTiers = document.getElementById('formCommissionTiers');
+
+    [tabSingle, tabBatch, tabTiers].forEach(t => {
+      if (t) {
+        t.style.background = 'transparent';
+        t.style.color = '#64748b';
+        t.style.boxShadow = 'none';
+      }
+    });
+
+    if (formSingle) formSingle.style.display = 'none';
+    if (formBatch) formBatch.style.display = 'none';
+    if (formTiers) formTiers.style.display = 'none';
+
+    if (tabName === 'single') {
+      if (tabSingle) {
+        tabSingle.style.background = '#ffffff';
+        tabSingle.style.color = '#1e3a8a';
+        tabSingle.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      }
+      if (formSingle) formSingle.style.display = 'block';
+    } else if (tabName === 'batch') {
+      if (tabBatch) {
+        tabBatch.style.background = '#ffffff';
+        tabBatch.style.color = '#166534';
+        tabBatch.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      }
+      if (formBatch) formBatch.style.display = 'block';
+    } else if (tabName === 'tiers') {
+      if (tabTiers) {
+        tabTiers.style.background = '#ffffff';
+        tabTiers.style.color = '#6b21a8';
+        tabTiers.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      }
+      if (formTiers) formTiers.style.display = 'block';
+    }
   }
 
   // 📥 فورمات 1: Excel (CSV) ھۆججىتى چۈشۈرۈش (UTF-8 BOM بىلەن)
   function exportMonthlySummaryCsv() {
-    const summary = window.appStore.getMonthlyAgentPerformanceSummary();
+    const period = localStorage.getItem('teklimakan_summary_period') || '2026-يىلى 9-ئاي';
+    const summary = window.appStore.getMonthlyAgentPerformanceSummary(period);
     const agentList = summary.agents || summary.list || [];
-    const headers = ['ۋاكالەتچى ID', 'ئىسىم', 'شەھەر', 'تېلېفون', 'ئېلخەت', 'ئايلىق دەرىجە', 'ئايلىق سېتىش (TL)', 'ئايلىق زاكاز سانى', 'كومىسسىيە نىسبىتى (%)', 'بېرىلىدىغان پۇل (TL)', 'كىنىشكا نومۇرى'];
+    const headers = ['دوكلات مەزگىلى', 'ۋاكالەتچى ID', 'ئىسىم', 'شەھەر', 'تېلېفون', 'ئېلخەت', 'ئايلىق دەرىجە', 'ئايلىق سېتىش (TL)', 'ئايلىق زاكاز سانى', 'كومىسسىيە نىسبىتى (%)', 'بېرىلىدىغان پۇل (TL)', 'كىنىشكا نومۇرى'];
     const rows = agentList.map(a => [
+      `"${(summary.monthTitle || period).replace(/"/g, '""')}"`,
       `"${a.id}"`,
       `"${a.name.replace(/"/g, '""')}"`,
       `"${(a.city || '').replace(/"/g, '""')}"`,
@@ -1721,8 +1842,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    const dateStr = new Date().toISOString().slice(0, 10);
-    link.setAttribute('download', `agent_monthly_summary_${dateStr}.csv`);
+    const safePeriod = (summary.monthTitle || period).replace(/[\\/:*?"<>| ]/g, '_');
+    link.setAttribute('download', `agent_monthly_summary_${safePeriod}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1737,10 +1858,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 📋 فورمات 3: تېكىست نۇسخىسىنى كۆچۈرۈۋېلىش
   function exportMonthlySummaryCopy() {
-    const summary = window.appStore.getMonthlyAgentPerformanceSummary();
+    const period = localStorage.getItem('teklimakan_summary_period') || '2026-يىلى 9-ئاي';
+    const summary = window.appStore.getMonthlyAgentPerformanceSummary(period);
     const agentList = summary.agents || summary.list || [];
     let text = `============================================================\n`;
     text += `تەكلىماكان سۈپەت - ۋاكالەتچىلەر ئايلىق سېتىش ۋە كومىسسىيە خۇلاسىسى\n`;
+    text += `دوكلات مەزگىلى: ${summary.monthTitle || period}\n`;
     text += `تەييارلانغان ۋاقىت: ${new Date().toLocaleDateString('tr-TR')}\n`;
     text += `ئومۇمىي سېتىش: \u20BA${summary.totalSales.toLocaleString('tr-TR')} | زاكاز: ${summary.totalOrders} دانە | ئومۇمىي پايدا: \u20BA${summary.totalCommission.toLocaleString('tr-TR')}\n`;
     text += `============================================================\n\n`;
@@ -1762,6 +1885,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.initAdmin = initAdmin;
   window.openAgentCertificateModal = openAgentCertificateModal;
   window.openAgentMonthlySummaryModal = openAgentMonthlySummaryModal;
+  window.renderAgentMonthlySummaryTable = renderAgentMonthlySummaryTable;
+  window.openEditSummaryPeriodModal = openEditSummaryPeriodModal;
+  window.openEditCommissionModal = openEditCommissionModal;
   window.openAgentContractArchiveModal = openAgentContractArchiveModal;
   window.openAddAgentModal = openAddAgentModal;
   window.openManageBrandsModal = openManageBrandsModal;
@@ -4797,6 +4923,112 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExportCopy) {
       btnExportCopy.addEventListener('click', () => {
         exportMonthlySummaryCopy();
+      });
+    }
+
+    // 📅 دوكلات مەزگىلى / ۋاقتىنى تەھرىرلەش مەشغۇلاتلىرى
+    const btnEditPeriod = document.getElementById('btnEditSummaryPeriod');
+    if (btnEditPeriod) {
+      btnEditPeriod.addEventListener('click', () => {
+        openEditSummaryPeriodModal();
+      });
+    }
+
+    const quickPeriodSelect = document.getElementById('quickPeriodSelect');
+    if (quickPeriodSelect) {
+      quickPeriodSelect.addEventListener('change', () => {
+        const customInput = document.getElementById('customPeriodInput');
+        if (quickPeriodSelect.value !== 'custom' && customInput) {
+          customInput.value = quickPeriodSelect.value;
+        }
+      });
+    }
+
+    const formEditPeriod = document.getElementById('formEditSummaryPeriod');
+    if (formEditPeriod) {
+      formEditPeriod.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const customInput = document.getElementById('customPeriodInput');
+        const periodVal = customInput ? customInput.value.trim() : '';
+        if (!periodVal) return;
+        localStorage.setItem('teklimakan_summary_period', periodVal);
+        renderAgentMonthlySummaryTable(periodVal);
+        const modal = document.getElementById('modalEditSummaryPeriod');
+        if (modal) modal.classList.remove('active');
+        showAdminToast(`✅ دوكلات مەزگىلى «${periodVal}» قىلىپ يېڭىلاندى!`, 'success');
+      });
+    }
+
+    // ⚙️ كومىسسىيە نىسبىتىنى تەھرىرلەش كۇنۇپكىسى ۋە جەدۋەل مەشغۇلاتلىرى
+    const btnEditBatchComm = document.getElementById('btnEditBatchCommission');
+    if (btnEditBatchComm) {
+      btnEditBatchComm.addEventListener('click', () => {
+        openEditCommissionModal();
+      });
+    }
+
+    // modalEditCommission ئىچىدىكى خەتكۈچلەر (Tabs)
+    const tabSingle = document.getElementById('tabCommissionSingle');
+    const tabBatch = document.getElementById('tabCommissionBatch');
+    const tabTiers = document.getElementById('tabCommissionTiers');
+    if (tabSingle) tabSingle.addEventListener('click', () => switchCommissionTab('single'));
+    if (tabBatch) tabBatch.addEventListener('click', () => switchCommissionTab('batch'));
+    if (tabTiers) tabTiers.addEventListener('click', () => switchCommissionTab('tiers'));
+
+    const commAgentSelect = document.getElementById('commAgentSelect');
+    if (commAgentSelect) {
+      commAgentSelect.addEventListener('change', () => {
+        const rateInput = document.getElementById('commAgentRateInput');
+        const selOpt = commAgentSelect.selectedOptions[0];
+        if (selOpt && rateInput) {
+          rateInput.value = selOpt.getAttribute('data-rate') || 15;
+        }
+      });
+    }
+
+    const formCommSingle = document.getElementById('formCommissionSingle');
+    if (formCommSingle) {
+      formCommSingle.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const agId = document.getElementById('commAgentSelect')?.value;
+        const rate = parseFloat(document.getElementById('commAgentRateInput')?.value || 15);
+        if (!agId) return;
+        window.appStore.updateAgentCommissionRate(agId, rate);
+        renderAgentMonthlySummaryTable();
+        renderAgentsTable();
+        const modal = document.getElementById('modalEditCommission');
+        if (modal) modal.classList.remove('active');
+        showAdminToast(`✅ ۋاكالەتچى كومىسسىيەسى ${rate}% قىلىپ ساقلاندى!`, 'success');
+      });
+    }
+
+    const formCommBatch = document.getElementById('formCommissionBatch');
+    if (formCommBatch) {
+      formCommBatch.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rate = parseFloat(document.getElementById('commBatchRateInput')?.value || 15);
+        window.appStore.updateBatchCommissionRates(rate);
+        renderAgentMonthlySummaryTable();
+        renderAgentsTable();
+        const modal = document.getElementById('modalEditCommission');
+        if (modal) modal.classList.remove('active');
+        showAdminToast(`✅ بارلىق ۋاكالەتچىلەرنىڭ كومىسسىيەسى ${rate}% قىلىپ يېڭىلاندى!`, 'success');
+      });
+    }
+
+    const formCommTiers = document.getElementById('formCommissionTiers');
+    if (formCommTiers) {
+      formCommTiers.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const gold = parseFloat(document.getElementById('commTierGoldInput')?.value || 15);
+        const silver = parseFloat(document.getElementById('commTierSilverInput')?.value || 12);
+        const bronze = parseFloat(document.getElementById('commTierBronzeInput')?.value || 10);
+        window.appStore.updateTierCommissionRates({ gold, silver, bronze });
+        renderAgentMonthlySummaryTable();
+        renderAgentsTable();
+        const modal = document.getElementById('modalEditCommission');
+        if (modal) modal.classList.remove('active');
+        showAdminToast('✅ دەرىجىلەر بويىچە كومىسسىيە پىرسەنتلىرى يېڭىلاندى!', 'success');
       });
     }
 

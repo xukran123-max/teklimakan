@@ -1940,7 +1940,7 @@ class StoreManager {
     }
   }
 
-  getMonthlyAgentPerformanceSummary() {
+  getMonthlyAgentPerformanceSummary(customPeriod) {
     const agents = this.getAgents('name');
     let totalSales = 0;
     let totalOrders = 0;
@@ -1950,7 +1950,7 @@ class StoreManager {
       const tier = this.getAgentPerformanceTier(a);
       const mSales = Number(a.monthlySales || 0);
       const mOrders = Number(a.monthlyOrders || 0);
-      const rate = Number(a.commissionRate || 15);
+      const rate = Number(a.commissionRate !== undefined ? a.commissionRate : 15);
       const mCommission = Math.round(mSales * (rate / 100));
 
       totalSales += mSales;
@@ -1978,8 +1978,10 @@ class StoreManager {
       };
     });
 
+    const savedPeriod = customPeriod || localStorage.getItem('teklimakan_summary_period') || '2026-يىلى 9-ئاي';
+
     return {
-      monthTitle: '2026-يىلى 9-ئاي (ھازىرقى ئاي)',
+      monthTitle: savedPeriod,
       generatedDate: new Date().toISOString().split('T')[0],
       totalAgents: agents.length,
       totalSales,
@@ -1988,6 +1990,52 @@ class StoreManager {
       list,
       agents: list
     };
+  }
+
+  // ⚙️ ۋاكالەتچى كومىسسىيە نىسبىتىنى يەككە يېڭىلاش
+  updateAgentCommissionRate(agentId, rate) {
+    let agents = this.getAgents('none');
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return false;
+    agent.commissionRate = Number(rate);
+    localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    this.notifyDataChange('agents');
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+      try { window.TeklimakanSupabase.upsertAgent(agent); } catch(e) {}
+    }
+    return true;
+  }
+
+  // 👥 بارلىق ۋاكالەتچىلەرنىڭ كومىسسىيە نىسبىتىنى بىر تۇتاش يېڭىلاش
+  updateBatchCommissionRates(newRate) {
+    let agents = this.getAgents('none');
+    const numRate = Number(newRate);
+    agents.forEach(a => {
+      a.commissionRate = numRate;
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+        try { window.TeklimakanSupabase.upsertAgent(a); } catch(e) {}
+      }
+    });
+    localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    this.notifyDataChange('agents');
+    return true;
+  }
+
+  // 👑 دەرىجىلەر بويىچە كومىسسىيە نىسبىتىنى يېڭىلاش
+  updateTierCommissionRates(tierRates) {
+    let agents = this.getAgents('none');
+    agents.forEach(a => {
+      const tier = this.getAgentPerformanceTier(a);
+      if (tierRates && tierRates[tier.key] !== undefined) {
+        a.commissionRate = Number(tierRates[tier.key]);
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+          try { window.TeklimakanSupabase.upsertAgent(a); } catch(e) {}
+        }
+      }
+    });
+    localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    this.notifyDataChange('agents');
+    return true;
   }
 
   saveAgent(agentData) {

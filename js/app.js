@@ -1628,6 +1628,7 @@ function initTeklimakanApp() {
           showToast('🔗 ئۇلانما: ' + shareUrl, 'info');
         }
       });
+    }
   }
 
   // ==================== چىقىم ====================

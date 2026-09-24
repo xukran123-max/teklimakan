@@ -523,27 +523,40 @@ document.addEventListener('DOMContentLoaded', () => {
       ` : '';
 
       tr.innerHTML = `
-        <td>
+        <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
             <img src="${product.image}" class="table-product-thumb" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
-            <div>
+            <div style="min-width: 0; flex: 1;">
               <div class="table-product-title">${product.name}</div>
-              <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.2rem 0;">
+              <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
                 <span style="font-size: 0.78rem; color: #475569; font-weight: 700;"><i class="fas fa-award"></i> ${product.brand || 'تەكلىماكان'}</span>
                 ${getReputationBadgeHtml(window.appStore.getProductMerchantBadge(product))}
               </div>
-              <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light);">${product.id}</div>
+              <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light); font-weight: 600;">${product.id}</div>
               ${violationAlertHtml}
             </div>
           </div>
         </td>
-        <td><span class="status-pill" style="background:var(--primary-light); color:var(--primary-color);">${product.category}</span></td>
-        <td>${langBadge}</td>
-        <td><strong>${window.appStore.formatPrice(product.price)}${product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;"> / ${product.unit}</span>` : ''}</strong></td>
-        <td>${stockPill}</td>
-        <td>${approvalBadge}</td>
-        <td>
-          <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+        <td style="min-width: 130px; text-align: right;">
+          <span class="status-pill" style="background:#eff6ff; color:#1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">${product.category}</span>
+        </td>
+        <td style="min-width: 120px; text-align: center;">
+          ${langBadge}
+        </td>
+        <td style="min-width: 130px; text-align: right;">
+          <div style="white-space: nowrap; font-weight: 800; font-size: 0.95rem; color: #0f172a; display: inline-flex; align-items: baseline; gap: 4px;">
+            <span class="number-latin" style="color: #0284c7; font-weight: 900; font-size: 1.05rem;">${window.appStore.formatPrice(product.price)}</span>
+            ${product.unit ? `<span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">/ ${product.unit}</span>` : ''}
+          </div>
+        </td>
+        <td style="min-width: 120px; text-align: center;">
+          ${stockPill}
+        </td>
+        <td style="min-width: 135px; text-align: center;">
+          ${approvalBadge}
+        </td>
+        <td style="min-width: 120px; text-align: center;">
+          <div style="display: flex; gap: 0.4rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             ${quickApprovalAction}
             <button class="btn-action-edit" data-id="${product.id}" title="تەھرىرلەش">
               <i class="fas fa-edit"></i>

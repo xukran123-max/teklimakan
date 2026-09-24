@@ -11,7 +11,7 @@ html, body, .admin-app, .admin-sidebar, .menu-item, .admin-header, .stat-card,
 p, span:not([class*="fa-"]):not([class^="fa-"]), a:not([class*="fa-"]):not([class^="fa-"]), 
 label, input, select, textarea, button, .modal-title, .form-label,
 .sidebar-brand-name, .metric-num, .table-title, .admin-table th, .admin-table td {
-  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'UKIJ Tuz', 'ALKATIP Tor Tom', 'Microsoft Uighur', serif;
 }
 
 /* 2. 🛡️ FontAwesome بەلگىلىرىنىڭ (Icons) سۇئال بەلگىسى [?] بولۇپ قالماسلىقىنى قەتئىي قوغداش */
@@ -360,6 +360,7 @@ body, .admin-app, input, select, textarea, button {
 .table-product-thumb {
   width: 54px;
   height: 54px;
+  flex-shrink: 0 !important;
   border-radius: var(--radius-sm);
   object-fit: contain;
   background: #ffffff;
@@ -372,14 +373,22 @@ body, .admin-app, input, select, textarea, button {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .table-product-title {
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   color: var(--admin-text);
-  max-width: 300px;
+  max-width: 380px;
   line-height: 1.5;
+  word-break: break-word;
+}
+
+#tab-products .admin-table th,
+#tab-products .admin-table td {
+  padding: 0.8rem 0.65rem !important;
+  vertical-align: middle !important;
 }
 
 /* ھالەت بەلگىلىرى (Status Badges) */

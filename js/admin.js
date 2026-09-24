@@ -2376,11 +2376,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const agentCount = allAgents.filter(a => a.authorizedBrands && a.authorizedBrands.includes(brandName)).length;
 
           return `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; gap: 0.75rem; flex-wrap: wrap;">
+            <div class="brand-list-row" data-brand="${brandName}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; gap: 0.75rem; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.92rem; color: #1e3a8a; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 8px;">
                   <i class="fas fa-tag" style="color: #8b5cf6;"></i>
-                  <span>${brandName}</span>
+                  <span class="brand-name-text">${brandName}</span>
                 </span>
                 ${isDefaultAll ? `<span style="font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">(ئاساسىي تۈر)</span>` : ''}
                 <div style="display: flex; gap: 0.4rem; align-items: center;">
@@ -2396,7 +2396,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${isDefaultAll ? `
                   <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">سۈكۈتتىكى</span>
                 ` : `
-                  <button type="button" class="action-btn btn-delete-brand-row" data-brand="${brandName}" title="ئۆچۈرۈش" style="color: #ef4444; border-color: #fca5a5; padding: 0.3rem 0.7rem; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                  <button type="button" class="action-btn btn-edit-brand-row" data-brand="${brandName}" title="تەھرىرلەش" style="color: #2563eb; border-color: #bfdbfe; background: #eff6ff; padding: 0.3rem 0.7rem; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-edit"></i> <span>تەھرىرلەش</span>
+                  </button>
+                  <button type="button" class="action-btn btn-delete-brand-row" data-brand="${brandName}" title="ئۆچۈرۈش" style="color: #ef4444; border-color: #fca5a5; background: #ffffff; padding: 0.3rem 0.7rem; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 6px; cursor: pointer;">
                     <i class="fas fa-trash"></i> <span>ئۆچۈرۈش</span>
                   </button>
                 `}
@@ -2407,6 +2410,92 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
+    // ✏️ ماركا نامىنى تەھرىرلەش (Inline Edit)
+    container.querySelectorAll('.btn-edit-brand-row').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const brandName = btn.dataset.brand;
+        const row = btn.closest('.brand-list-row');
+        if (!row) return;
+
+        const prodCount = allProducts.filter(p => p.brand === brandName).length;
+        const agentCount = allAgents.filter(a => a.authorizedBrands && a.authorizedBrands.includes(brandName)).length;
+
+        row.innerHTML = `
+          <div style="width: 100%; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 0.85rem; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
+              <span style="font-weight: 800; font-size: 0.88rem; color: #166534; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <i class="fas fa-pen-to-square"></i> «${brandName}» ماركىسىنى تەھرىرلەش:
+              </span>
+              <span style="font-size: 0.75rem; color: #15803d; background: #dcfce7; padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                <i class="fas fa-link"></i> ${prodCount} تاۋار، ${agentCount} ۋاكالەتچىگە باغلانغان
+              </span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <input type="text" class="form-control brand-inline-edit-input" value="${brandName}" style="flex: 1; min-width: 200px; font-weight: 800; font-size: 0.95rem; background: #ffffff; border-color: #22c55e;" placeholder="يېڭى ماركا نامىنى كىرگۈزۈڭ...">
+              <button type="button" class="btn-save-inline-brand" style="background: #16a34a; color: #ffffff; border: none; padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 800; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);">
+                <i class="fas fa-check"></i> ساقلاش
+              </button>
+              <button type="button" class="btn-cancel-inline-brand" style="background: #e2e8f0; color: #475569; border: none; padding: 0.5rem 0.9rem; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
+                <i class="fas fa-times"></i> ئەمەلدىن قالدۇرۇش
+              </button>
+            </div>
+            <div style="font-size: 0.75rem; color: #166534; margin-top: 0.45rem; line-height: 1.5;">
+              <i class="fas fa-info-circle"></i> ئەسكەرتىش: نامىنى ئۆزگەرتسىڭىز، بۇ ماركىغا باغلانغان بارلىق مەھسۇلات ۋە ۋاكالەتچىلەر ئاپتوماتىك قوشۇلۇپ يېڭىلىنىدۇ.
+            </div>
+          </div>
+        `;
+
+        const input = row.querySelector('.brand-inline-edit-input');
+        const saveBtn = row.querySelector('.btn-save-inline-brand');
+        const cancelBtn = row.querySelector('.btn-cancel-inline-brand');
+
+        if (input) {
+          input.focus();
+          input.select();
+        }
+
+        const handleSave = () => {
+          const newName = input ? input.value.trim() : '';
+          if (!newName) {
+            showAdminToast('ماركا نامى بوش بولماسلىقى كېرەك!', 'error');
+            if (input) input.focus();
+            return;
+          }
+          if (newName === brandName) {
+            renderManageBrandsList();
+            return;
+          }
+          const res = window.appStore.updateBrand(brandName, newName);
+          if (res.success) {
+            showAdminToast(res.message, 'success');
+            renderManageBrandsList();
+            populateAgentFilterDropdowns();
+            populateCategoryDropdowns();
+            renderProductsTable();
+            renderAgentsView();
+          } else {
+            showAdminToast(res.message, 'error');
+          }
+        };
+
+        if (saveBtn) saveBtn.addEventListener('click', handleSave);
+        if (cancelBtn) cancelBtn.addEventListener('click', () => renderManageBrandsList());
+
+        if (input) {
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSave();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              renderManageBrandsList();
+            }
+          });
+        }
+      });
+    });
+
+    // 🗑️ ماركىنى ئۆچۈرۈش
     container.querySelectorAll('.btn-delete-brand-row').forEach(btn => {
       btn.addEventListener('click', () => {
         const bName = btn.dataset.brand;
@@ -2422,6 +2511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderManageBrandsList();
             populateAgentFilterDropdowns();
             populateCategoryDropdowns();
+            renderProductsTable();
             renderAgentsView();
           } else {
             showAdminToast(res.message, 'error');

@@ -3148,6 +3148,88 @@ class StoreManager {
     return { success: true, message: `«${name}» ناملىق ماركا مۇۋەپپەقىيەتلىك ئۆچۈرۈلدى!` };
   }
 
+  updateBrand(oldBrandName, newBrandName) {
+    if (!oldBrandName || typeof oldBrandName !== 'string') {
+      return { success: false, message: 'كونا ماركا نامى كۆرسىتىلمىگەن!' };
+    }
+    if (!newBrandName || typeof newBrandName !== 'string') {
+      return { success: false, message: 'يېڭى ماركا نامىنى كىرگۈزۈڭ!' };
+    }
+    const oldName = oldBrandName.trim();
+    const newName = newBrandName.trim();
+
+    if (!newName) {
+      return { success: false, message: 'يېڭى ماركا نامى بوش بولماسلىقى كېرەك!' };
+    }
+    if (oldName === 'بارلىق ماركىلار') {
+      return { success: false, message: 'بۇ سۈكۈتتىكى سىستېما تۈرى بولۇپ ئۆزگەرتىشكە بولمايدۇ!' };
+    }
+    if (oldName === newName) {
+      return { success: true, message: 'ماركا نامىدا ئۆزگىرىش بولمىدى.' };
+    }
+
+    let brands = this.getBrands();
+    if (!brands.includes(oldName)) {
+      return { success: false, message: 'تەھرىرلەنمەكچى بولغان ماركا تېپىلمىدى!' };
+    }
+    if (brands.includes(newName)) {
+      return { success: false, message: `«${newName}» ناملىق ماركا ئاللىقاچان مەۋجۇت!` };
+    }
+
+    // 1. ماركا تىزىملىكىدە ئۆزگەرتىش
+    brands = brands.map(b => (b === oldName ? newName : b));
+    localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(brands));
+
+    // 2. مەزكۇر ماركىغا تەۋە تاۋارلارنىڭ ماركىسىنى يېڭىلاش
+    let products = this.getProducts();
+    let prodsUpdated = 0;
+    products = products.map(p => {
+      if (p.brand === oldName) {
+        prodsUpdated++;
+        return { ...p, brand: newName };
+      }
+      return p;
+    });
+    if (prodsUpdated > 0) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.saveProduct === 'function') {
+        products.filter(p => p.brand === newName).forEach(p => {
+          window.TeklimakanSupabase.saveProduct(p).catch(err => console.warn('Supabase product brand sync error:', err));
+        });
+      }
+    }
+
+    // 3. ۋاكالەتچىلەرنىڭ authorizedBrands تىزىملىكىنى يېڭىلاش
+    let agents = this.getAgents();
+    let agentsUpdated = 0;
+    agents = agents.map(a => {
+      if (Array.isArray(a.authorizedBrands) && a.authorizedBrands.includes(oldName)) {
+        agentsUpdated++;
+        const newAuth = a.authorizedBrands.map(b => (b === oldName ? newName : b));
+        const updatedAgent = { ...a, authorizedBrands: newAuth };
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+          window.TeklimakanSupabase.upsertAgent(updatedAgent).catch(err => console.warn('Supabase agent brand sync error:', err));
+        }
+        return updatedAgent;
+      }
+      return a;
+    });
+    if (agentsUpdated > 0) {
+      localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    }
+
+    this.notifyDataChange('brands');
+    if (prodsUpdated > 0) this.notifyDataChange('products');
+    if (agentsUpdated > 0) this.notifyDataChange('agents');
+
+    return {
+      success: true,
+      oldBrand: oldName,
+      newBrand: newName,
+      message: `«${oldName}» ماركىسى «${newName}» غا مۇۋەپپەقىيەتلىك يېڭىلاندى!`
+    };
+  }
+
   // ==================== تاۋارلار ====================
   getProducts() {
     let prods = [];

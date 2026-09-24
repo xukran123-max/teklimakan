@@ -1822,7 +1822,7 @@ function initTeklimakanApp() {
           <i class="fas fa-times"></i>
         </button>
         <img src="${prodImg}" class="live-sales-thumb" alt="${prodName}" onerror="this.src='images/default_product.jpg'">
-        <div style="flex: 1; min-width: 0; line-height: 1.35;">
+        <div class="live-sales-content">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; margin-bottom: 2px;">
             <span style="font-weight: 800; font-size: 0.82rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               ${randomBuyer}

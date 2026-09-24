@@ -4565,6 +4565,30 @@ class StoreManager {
     return false;
   }
 
+  updateOrderCustomer(orderId, updatedCustomer) {
+    const orders = this.getOrders();
+    const order = orders.find(o => String(o.id) === String(orderId));
+    if (!order) return { success: false, message: 'زاكاز تېپىلمىدى!' };
+    order.customer = {
+      ...order.customer,
+      name: updatedCustomer.name !== undefined ? updatedCustomer.name.trim() : order.customer.name,
+      phone: updatedCustomer.phone !== undefined ? updatedCustomer.phone.trim() : order.customer.phone,
+      city: updatedCustomer.city !== undefined ? updatedCustomer.city.trim() : (order.customer.city || ''),
+      address: updatedCustomer.address !== undefined ? updatedCustomer.address.trim() : order.customer.address
+    };
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    this.notifyDataChange('orders');
+    try {
+      if (updatedCustomer.name) localStorage.setItem('teklimakan_customer_name', updatedCustomer.name.trim());
+      if (updatedCustomer.phone) localStorage.setItem('teklimakan_customer_phone', updatedCustomer.phone.trim());
+      if (updatedCustomer.address) localStorage.setItem('teklimakan_checkout_address', updatedCustomer.address.trim());
+    } catch (e) {}
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderCustomer === 'function') {
+      window.TeklimakanSupabase.updateOrderCustomer(order.id, order.customer);
+    }
+    return { success: true, order: order, message: 'ئۇچۇرلىرىڭىز مۇۋەپپەقىيەتلىك يېڭىلاندى!' };
+  }
+
   deleteOrder(orderId) {
     let orders = this.getOrders();
     orders = orders.filter(o => String(o.id) !== String(orderId));

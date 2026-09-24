@@ -161,6 +161,18 @@ window.TeklimakanSupabase = {
     }
   },
 
+  // خېرىدار شەخسىي ئۇچۇرىنى يېڭىلاش
+  async updateOrderCustomer(orderId, customer) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const { error } = await sb.from('orders').update({ customer }).eq('id', orderId);
+      return !error;
+    } catch (e) {
+      return false;
+    }
+  },
+
   // ۋاكالەتچىلەرنى ئوقۇش
   async fetchAgents() {
     const sb = getSupabase();

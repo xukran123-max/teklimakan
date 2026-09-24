@@ -2992,6 +2992,80 @@ function initTeklimakanApp() {
     }
   }
 
+  function escapeModalHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  window.toggleSuccessOrderEdit = function(showEdit) {
+    const viewEl = document.getElementById('orderSuccessCustomerView');
+    const editEl = document.getElementById('orderSuccessCustomerEdit');
+    if (!viewEl || !editEl) return;
+    if (showEdit) {
+      viewEl.style.display = 'none';
+      editEl.style.display = 'block';
+      const nameInput = document.getElementById('succEditName');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.select();
+      }
+    } else {
+      editEl.style.display = 'none';
+      viewEl.style.display = 'block';
+    }
+  };
+
+  window.saveSuccessOrderCustomer = function(orderId) {
+    const nameInput = document.getElementById('succEditName');
+    const phoneInput = document.getElementById('succEditPhone');
+    const cityInput = document.getElementById('succEditCity');
+    const addressInput = document.getElementById('succEditAddress');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const city = cityInput ? cityInput.value.trim() : '';
+    const address = addressInput ? addressInput.value.trim() : '';
+
+    if (!name || !phone || !address) {
+      if (typeof showToast === 'function') {
+        showToast('ئىسىم، تېلېفون ۋە ئادرېسنى تولۇق كىرگۈزۈڭ!', 'warning');
+      } else {
+        alert('ئىسىم، تېلېفون ۋە ئادرېسنى تولۇق كىرگۈزۈڭ!');
+      }
+      return;
+    }
+
+    if (window.appStore && typeof window.appStore.updateOrderCustomer === 'function') {
+      const res = window.appStore.updateOrderCustomer(orderId, { name, phone, city, address });
+      if (res && res.success) {
+        const nameEl = document.getElementById('succOrderName');
+        const phoneEl = document.getElementById('succOrderPhone');
+        const addressEl = document.getElementById('succOrderAddress');
+        if (nameEl) nameEl.textContent = name;
+        if (phoneEl) phoneEl.textContent = phone;
+        if (addressEl) addressEl.textContent = (city ? city + ' ' : '') + address;
+
+        const waBtn = document.getElementById('orderSuccessWhatsAppBtn');
+        if (waBtn && res.order) {
+          waBtn.href = getWhatsAppOrderUrl(res.order, window.appI18n ? window.appI18n.getLang() : 'ug');
+        }
+
+        window.toggleSuccessOrderEdit(false);
+        if (typeof showToast === 'function') {
+          showToast('شەخسىي ئۇچۇرلىرىڭىز مۇۋەپپەقىيەتلىك يېڭىلاندى!', 'success');
+        }
+      } else {
+        if (typeof showToast === 'function') {
+          showToast(res?.message || 'ئۇچۇرنى يېڭىلاش مەغلۇپ بولدى', 'error');
+        }
+      }
+    }
+  };
+
   function openOrderSuccessModal(order) {
     const modal = document.getElementById('orderSuccessModal');
     const content = document.getElementById('orderSuccessModalContent');
@@ -3035,6 +3109,12 @@ function initTeklimakanApp() {
       `;
     }
 
+    const custName = escapeModalHtml(order.customer?.name || '');
+    const custPhone = escapeModalHtml(order.customer?.phone || '');
+    const custCity = escapeModalHtml(order.customer?.city || '');
+    const custAddress = escapeModalHtml(order.customer?.address || '');
+    const fullAddressDisplay = (custCity ? custCity + ' ' : '') + custAddress;
+
     content.innerHTML = `
       <div style="text-align: center; margin-bottom: 1.25rem;">
         <div style="width: 65px; height: 65px; background: #dcfce7; color: #166534; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 0.75rem;">
@@ -3044,18 +3124,79 @@ function initTeklimakanApp() {
         <p style="color: var(--text-muted); font-size: 0.95rem;">${window.appI18n.t('orderNumberLabel')} <strong class="number-latin" style="color: var(--primary-color);">${order.id}</strong></p>
       </div>
 
+      <!-- خېرىدار ئۇچۇرلىرى بۆلىكى (كۆرۈش ۋە تەھرىرلەش) -->
       <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1rem; line-height: 1.8;">
-        <div><strong>${window.appI18n.t('custName')}:</strong> ${order.customer.name}</div>
-        <div><strong>${window.appI18n.t('custPhone')}:</strong> ${order.customer.phone}</div>
-        <div><strong>${window.appI18n.t('custAddress')}:</strong> ${order.customer.city} ${order.customer.address}</div>
-        <div><strong>${window.appI18n.t('paymentMethod')}:</strong> <span style="color: ${isWhatsapp ? '#16a34a' : isCard ? '#4338ca' : '#059669'}; font-weight: 700;">${order.paymentMethod}</span></div>
-        <div><strong>${window.appI18n.t('checkoutTotalLabel')}</strong> <strong style="color: var(--danger-color); font-size: 1.15rem;">${order.totalFormatted}</strong></div>
+        <!-- كۆرۈش ھالىتى -->
+        <div id="orderSuccessCustomerView">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.45rem;">
+            <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-user-check" style="color: var(--primary-color);"></i>
+              <span>تاپشۇرۇۋالغۇچى ئۇچۇرلىرى</span>
+            </div>
+            <button type="button" onclick="window.toggleSuccessOrderEdit(true)" class="btn btn-sm" style="background: var(--bg-surface); border: 1px solid var(--primary-color); color: var(--primary-color); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; transition: all 0.2s;">
+              <i class="fas fa-user-edit"></i>
+              <span>ئۇچۇرنى ئۆزگەرتىش</span>
+            </button>
+          </div>
+          <div><strong>${window.appI18n.t('custName')}:</strong> <span id="succOrderName">${custName}</span></div>
+          <div><strong>${window.appI18n.t('custPhone')}:</strong> <span id="succOrderPhone" class="number-latin">${custPhone}</span></div>
+          <div><strong>${window.appI18n.t('custAddress')}:</strong> <span id="succOrderAddress">${fullAddressDisplay}</span></div>
+          <div><strong>${window.appI18n.t('paymentMethod')}:</strong> <span style="color: ${isWhatsapp ? '#16a34a' : isCard ? '#4338ca' : '#059669'}; font-weight: 700;">${order.paymentMethod}</span></div>
+          <div><strong>${window.appI18n.t('checkoutTotalLabel')}</strong> <strong style="color: var(--danger-color); font-size: 1.15rem;">${order.totalFormatted}</strong></div>
+        </div>
+
+        <!-- تەھرىرلەش ھالىتى -->
+        <div id="orderSuccessCustomerEdit" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.45rem;">
+            <div style="font-weight: 700; color: var(--primary-color); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-edit"></i>
+              <span>شەخسىي ئۇچۇرلارنى تەھرىرلەش</span>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">زاكاز: <strong class="number-latin">${order.id}</strong></span>
+          </div>
+
+          <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.65rem; line-height: 1.5;">
+            ئىسىم، تېلېفون ياكى ئادرېسىڭىزدا خاتالىق بولسا تۆۋەندە تۈزىتىپ <strong>«ساقلاش»</strong> نى بېسىڭ:
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 0.85rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">ئىسىم فامىلە <span style="color: var(--danger-color);">*</span></label>
+              <input type="text" id="succEditName" value="${custName}" class="form-input" placeholder="ئىسمىڭىزنى تولۇق كىرگۈزۈڭ" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">تېلېفون نومۇرى <span style="color: var(--danger-color);">*</span></label>
+              <input type="tel" id="succEditPhone" value="${custPhone}" class="form-input number-latin" placeholder="05XXXXXXXXX" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; direction: ltr; text-align: right; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">شەھەر / رايون</label>
+              <input type="text" id="succEditCity" value="${custCity}" class="form-input" placeholder="مەسىلەن: İstanbul / Fatih" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">تەپسىلىي يەتكۈزۈش ئادرېسى <span style="color: var(--danger-color);">*</span></label>
+              <textarea id="succEditAddress" class="form-input" rows="2" placeholder="مەھەللە، كوچا، بىنا ۋە ئۆي نومۇرى" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main); resize: vertical;">${custAddress}</textarea>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <button type="button" onclick="window.toggleSuccessOrderEdit(false)" class="btn btn-sm" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted); padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+              بىكار قىلىش
+            </button>
+            <button type="button" id="succSaveBtn" onclick="window.saveSuccessOrderCustomer('${order.id}')" class="btn btn-sm" style="background: var(--primary-color); border: none; color: #ffffff; padding: 0.45rem 1.15rem; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;">
+              <i class="fas fa-save"></i>
+              <span>ساقلاش</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       ${methodDetailsHtml}
 
       ${isWhatsapp ? `
-        <a href="${waUrl}" target="_blank" class="btn-checkout" style="background: #25D366; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none; margin-bottom: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(37,211,102,0.35);">
+        <a id="orderSuccessWhatsAppBtn" href="${waUrl}" target="_blank" class="btn-checkout" style="background: #25D366; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none; margin-bottom: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(37,211,102,0.35);">
           <i class="fab fa-whatsapp" style="font-size: 1.4rem;"></i>
           <span>${window.appI18n.t('payWhatsappBtn')}</span>
         </a>

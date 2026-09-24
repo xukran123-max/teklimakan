@@ -1739,16 +1739,23 @@ body.dark-mode select#agentFilterStatus {
 
 /* 🔐 1. باشقۇرغۇچى كىرىش كۆزنىكى تېلېفون ماسلىشىشچانلىقى */
 .admin-login-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-  background: #0b1329 !important;
-  z-index: 99999 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 1.25rem !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
+  position: fixed;
+  inset: 0;
+  background: #0b1329;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-login-overlay.is-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .admin-login-card {

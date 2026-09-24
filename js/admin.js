@@ -64,12 +64,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isAuth) {
       localStorage.setItem('teklimakan_admin_auth', 'true');
       sessionStorage.setItem('teklimakan_admin_auth', 'true');
-      if (overlay) overlay.style.display = 'none';
-      if (app) app.style.display = 'flex';
+      if (overlay) {
+        overlay.classList.add('is-hidden');
+        overlay.style.setProperty('display', 'none', 'important');
+        overlay.style.setProperty('visibility', 'hidden', 'important');
+        overlay.style.setProperty('opacity', '0', 'important');
+        overlay.style.setProperty('pointer-events', 'none', 'important');
+      }
+      if (app) {
+        app.style.setProperty('display', 'flex', 'important');
+        app.style.setProperty('visibility', 'visible', 'important');
+        app.style.setProperty('opacity', '1', 'important');
+      }
       return true;
     } else {
-      if (overlay) overlay.style.display = 'flex';
-      if (app) app.style.display = 'none';
+      if (overlay) {
+        overlay.classList.remove('is-hidden');
+        overlay.style.setProperty('display', 'flex', 'important');
+        overlay.style.setProperty('visibility', 'visible', 'important');
+        overlay.style.setProperty('opacity', '1', 'important');
+        overlay.style.setProperty('pointer-events', 'auto', 'important');
+      }
+      if (app) {
+        app.style.setProperty('display', 'none', 'important');
+      }
       const userInput = document.getElementById('adminUsernameInput');
       const pwInput = document.getElementById('adminPasswordInput');
       if (userInput) {
@@ -81,54 +99,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function doAdminLoginAction() {
+    const userInput = document.getElementById('adminUsernameInput');
+    const pwInput = document.getElementById('adminPasswordInput');
+    const errorMsg = document.getElementById('adminLoginErrorMsg');
+
+    const userVal = userInput ? userInput.value.trim().toLowerCase() : '';
+    const pwVal = pwInput ? pwInput.value.trim() : '';
+
+    let validUser = (localStorage.getItem('teklimakan_admin_username') || 'seidiye').toLowerCase().trim();
+    if (validUser === 'admin') {
+      validUser = 'seidiye';
+      localStorage.setItem('teklimakan_admin_username', 'seidiye');
+    }
+    const validPw = (localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026').trim();
+
+    const isUserOk = userVal === 'seidiye' || userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
+    const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
+
+    if (isUserOk && isPwOk) {
+      localStorage.setItem('teklimakan_admin_auth', 'true');
+      sessionStorage.setItem('teklimakan_admin_auth', 'true');
+      localStorage.setItem('teklimakan_admin_device', 'true');
+      if (errorMsg) errorMsg.style.display = 'none';
+      checkAdminAuth();
+      try {
+        initAdmin();
+      } catch (err) {
+        console.error('Error during initAdmin:', err);
+      }
+      showAdminToast('باشقۇرۇش سىستېمىسىغا مۇۋەپپەقىيەتلىك كىردىڭىز!', 'success');
+    } else {
+      if (errorMsg) {
+        errorMsg.textContent = '❌ باشقۇرغۇچى نامى ياكى پارول خاتا!';
+        errorMsg.style.display = 'block';
+      }
+      if (pwInput) {
+        pwInput.value = '';
+        pwInput.focus();
+      }
+    }
+  }
+  window.doAdminLoginAction = doAdminLoginAction;
+
   function setupAuthEvents() {
     const loginForm = document.getElementById('adminLoginForm');
     const userInput = document.getElementById('adminUsernameInput');
     const pwInput = document.getElementById('adminPasswordInput');
     const toggleBtn = document.getElementById('btnToggleAdminPw');
     const iconToggle = document.getElementById('iconToggleAdminPw');
-    const errorMsg = document.getElementById('adminLoginErrorMsg');
     const logoutBtn = document.getElementById('adminLogoutBtn');
 
     if (toggleBtn && pwInput && iconToggle) {
-      toggleBtn.addEventListener('click', () => {
+      toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const isPw = pwInput.type === 'password';
         pwInput.type = isPw ? 'text' : 'password';
         iconToggle.className = isPw ? 'fas fa-eye-slash' : 'fas fa-eye';
       });
     }
 
-    if (loginForm && pwInput) {
+    if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userVal = userInput ? userInput.value.trim().toLowerCase() : '';
-        const pwVal = pwInput.value.trim();
-        let validUser = (localStorage.getItem('teklimakan_admin_username') || 'seidiye').toLowerCase();
-        if (validUser === 'admin') {
-          validUser = 'seidiye';
-          localStorage.setItem('teklimakan_admin_username', 'seidiye');
-        }
-        const validPw = localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026';
-
-        const isUserOk = userVal === 'seidiye' || userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
-        const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
-
-        if (isUserOk && isPwOk) {
-          localStorage.setItem('teklimakan_admin_auth', 'true');
-          sessionStorage.setItem('teklimakan_admin_auth', 'true');
-          localStorage.setItem('teklimakan_admin_device', 'true');
-          if (errorMsg) errorMsg.style.display = 'none';
-          checkAdminAuth();
-          initAdmin();
-          showAdminToast('باشقۇرۇش سىستېمىسىغا مۇۋەپپەقىيەتلىك كىردىڭىز!', 'success');
-        } else {
-          if (errorMsg) {
-            errorMsg.textContent = '❌ باشقۇرغۇچى نامى ياكى پارول خاتا!';
-            errorMsg.style.display = 'block';
-          }
-          pwInput.value = '';
-          pwInput.focus();
-        }
+        doAdminLoginAction();
       });
     }
 

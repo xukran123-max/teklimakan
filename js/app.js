@@ -55,6 +55,7 @@ function initTeklimakanApp() {
   try { initAboutUsModal(); } catch (e) { console.error('initAboutUsModal error:', e); }
   try { initAdminDeviceButton(); } catch (e) { console.error('initAdminDeviceButton error:', e); }
   try { initLiveExchangeRatesTicker(); } catch (e) { console.error('initLiveExchangeRatesTicker error:', e); }
+  try { initFooterContactAccordion(); } catch (e) { console.error('initFooterContactAccordion error:', e); }
 
   function initStore() {
     try { updateStaticTranslations(); } catch (e) { console.error('updateStaticTranslations error:', e); }
@@ -369,7 +370,17 @@ function initTeklimakanApp() {
       else fCol2.textContent = i18n.t('footerCol2');
     }
     const fCol3 = document.getElementById('footerCol3Title');
-    if (fCol3) fCol3.textContent = i18n.t('footerCol3');
+    if (fCol3) {
+      const col3Span = fCol3.querySelector('#fCol3TitleText') || fCol3.querySelector('span');
+      if (col3Span) col3Span.textContent = i18n.t('footerCol3');
+      else fCol3.textContent = i18n.t('footerCol3');
+    }
+    const fHint = document.getElementById('footerContactHint');
+    const fList = document.getElementById('footerContactList');
+    if (fHint && fList) {
+      const isCol = fList.classList.contains('is-collapsed');
+      fHint.textContent = isCol ? (i18n.t('accordionExpand') || 'ئېچىش') : (i18n.t('accordionCollapse') || 'يىغىش');
+    }
 
     const flGuide = document.getElementById('fLinkGuide');
     if (flGuide) flGuide.textContent = i18n.t('fLinkGuide');
@@ -4905,6 +4916,56 @@ function initTeklimakanApp() {
       toast.style.opacity = '0';
       setTimeout(() => toast.remove(), 300);
     }, 3200);
+  }
+
+  // ==================== 📞 ئالاقە كۇنۇپكىلىرى سىيرىلما كۆزنىكى (Footer Contact Accordion) ====================
+  function initFooterContactAccordion() {
+    const titleBtn = document.getElementById('footerCol3Title');
+    const contactList = document.getElementById('footerContactList');
+    const chevron = document.getElementById('footerContactChevron');
+    const hint = document.getElementById('footerContactHint');
+
+    if (!titleBtn || !contactList) return;
+
+    function getTranslate(key, fallback) {
+      if (window.appI18n && typeof window.appI18n.t === 'function') {
+        const val = window.appI18n.t(key);
+        if (val && val !== key) return val;
+      }
+      return fallback;
+    }
+
+    function toggleAccordion(forceOpen = null) {
+      const isCurrentlyCollapsed = contactList.classList.contains('is-collapsed');
+      const shouldOpen = forceOpen !== null ? forceOpen : isCurrentlyCollapsed;
+
+      if (shouldOpen) {
+        contactList.classList.remove('is-collapsed');
+        titleBtn.classList.add('is-open');
+        titleBtn.classList.remove('is-collapsed');
+        if (chevron) {
+          chevron.style.transform = 'rotate(180deg)';
+        }
+        if (hint) {
+          hint.textContent = getTranslate('accordionCollapse', 'يىغىش');
+        }
+      } else {
+        contactList.classList.add('is-collapsed');
+        titleBtn.classList.remove('is-open');
+        titleBtn.classList.add('is-collapsed');
+        if (chevron) {
+          chevron.style.transform = 'rotate(0deg)';
+        }
+        if (hint) {
+          hint.textContent = getTranslate('accordionExpand', 'ئېچىش');
+        }
+      }
+    }
+
+    titleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAccordion();
+    });
   }
 
   // ==================== 🔐 مەخپىي باشقۇرغۇچى كۇنۇپكىسى (پەقەت باشقۇرغۇچى ئۈسكۈنىسىدىلا كۆرۈنىدۇ) ====================

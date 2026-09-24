@@ -2806,36 +2806,145 @@ html[dir="rtl"] .live-sales-close {
   padding-right: 4px;
 }
 
-/* ==================== ئالاقىلىشىش تىزىملىكى (Footer Contact List) ==================== */
-.footer-contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  font-size: 0.94rem;
-  margin-top: 0.35rem;
+/* ==================== ئالاقىلىشىش تىزىملىكى ۋە سىيرىلما كۆزنىكى (Footer Contact List & Sliding Accordion) ==================== */
+.footer-accordion-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  margin: -0.45rem -0.65rem 0.75rem -0.65rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s ease;
 }
 
-.footer-contact-item {
+.footer-accordion-header:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.footer-accordion-title-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  line-height: 1.5;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.footer-accordion-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #38bdf8;
   transition: all 0.2s ease;
 }
 
-.footer-contact-item i {
-  width: 22px;
-  height: 22px;
+.footer-accordion-header:hover .footer-accordion-action-pill {
+  background: rgba(14, 165, 233, 0.28);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.footer-accordion-chevron {
+  font-size: 0.78rem;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-accordion-content {
+  overflow: hidden;
+  max-height: 500px;
+  opacity: 1;
+  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease, margin 0.35s ease, padding 0.35s ease;
+}
+
+.footer-accordion-content.is-collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  pointer-events: none;
+}
+
+.footer-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+  margin-top: 0.25rem;
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  line-height: 1.4;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-contact-btn-item {
+  padding: 0.6rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  text-decoration: none !important;
+  color: #ffffff !important;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.footer-contact-btn-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  transform: translateX(-5px);
+}
+
+html[dir="ltr"] .footer-contact-btn-item:hover {
+  transform: translateX(5px);
+}
+
+.footer-contact-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.05rem;
   flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.footer-contact-btn-item:hover .footer-contact-icon-box {
+  transform: scale(1.15) rotate(-4deg);
+}
+
+.footer-contact-text-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 0.15rem;
 }
 
 .footer-contact-label {
   color: #94a3b8;
   font-weight: 600;
+  font-size: 0.82rem;
   white-space: nowrap;
   letter-spacing: 0.2px;
 }
@@ -2843,14 +2952,29 @@ html[dir="rtl"] .live-sales-close {
 .footer-contact-link {
   color: #ffffff !important;
   font-weight: 700;
+  font-size: 0.95rem;
   direction: ltr;
   text-decoration: none !important;
   letter-spacing: 0.5px;
   transition: color 0.2s ease;
 }
 
-.footer-contact-link:hover {
-  color: #38bdf8 !important;
+.footer-contact-arrow {
+  font-size: 0.78rem;
+  color: #64748b;
+  opacity: 0.6;
+  transition: all 0.25s ease;
+  margin-inline-start: auto;
+}
+
+.footer-contact-btn-item:hover .footer-contact-arrow {
+  color: #38bdf8;
+  opacity: 1;
+  transform: translateX(-4px);
+}
+
+html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
+  transform: translateX(4px) rotate(180deg);
 }
 
 .footer-bottom {
@@ -3507,33 +3631,23 @@ html[dir="rtl"] .live-sales-close {
     padding: 0.5rem 0.85rem;
     font-size: 0.84rem;
     height: 40px;
+  .footer-accordion-header {
+    max-width: 340px;
+    margin: 0 auto 0.65rem auto !important;
   }
   .footer-contact-list {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     width: 100%;
-    max-width: 320px;
-    margin: 0.5rem auto 0 auto;
+    max-width: 340px;
+    margin: 0.25rem auto 0 auto;
   }
   .footer-contact-item {
     display: flex;
     width: 100%;
-    justify-content: center;
-    align-items: center;
-    gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 0.65rem 1rem;
     box-sizing: border-box;
     backdrop-filter: blur(4px);
-    transition: all 0.2s ease;
-  }
-  .footer-contact-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(56, 189, 248, 0.35);
   }
   .footer-bottom {
     flex-direction: column;

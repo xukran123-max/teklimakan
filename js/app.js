@@ -3145,6 +3145,9 @@ function initTeklimakanApp() {
 
         paneApply.style.display = 'none';
         paneSubmit.style.display = 'block';
+        if (typeof checkAgentSession === 'function') {
+          checkAgentSession();
+        }
       }
     }
 
@@ -3290,8 +3293,12 @@ function initTeklimakanApp() {
       });
     }
 
-    // 2. ۋاكالەتچى كىملىكىنى دەلىللەش
+    // 2. ۋاكالەتچى كىملىكىنى دەلىللەش ۋە باشقۇرۇش تاختىسى (Agent Portal & Dashboard)
     const btnVerify = document.getElementById('btnVerifyAgentLogin');
+    const btnCheckStatus = document.getElementById('btnCheckAppStatus');
+    const btnQuickLogin = document.getElementById('btnQuickAgentLogin');
+    const btnSwitchAccount = document.getElementById('btnSwitchAgentAccount');
+    const btnLogout = document.getElementById('btnAgentLogout');
     const loginInput = document.getElementById('agentLoginInput');
     const verifyMsg = document.getElementById('agentVerifyMsg');
     const formProductSubmit = document.getElementById('formAgentProductSubmit');
@@ -3301,25 +3308,105 @@ function initTeklimakanApp() {
 
     let currentVerifiedAgent = null;
 
-    if (btnVerify && loginInput) {
-      btnVerify.addEventListener('click', () => {
-        const val = loginInput.value.trim();
-        if (!val) {
-          showToast('ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!', 'warning');
+    function updateAgentDashboard(agent) {
+      if (!agent) return;
+      const dashHeader = document.getElementById('agentDashboardHeader');
+      const verifyWrap = document.getElementById('agentVerifyWrap');
+      const quickCard = document.getElementById('agentQuickSessionCard');
+      const nameEl = document.getElementById('dashAgentName');
+      const codeEl = document.getElementById('dashAgentCode');
+      const brandsEl = document.getElementById('dashAgentBrands');
+      const scopeEl = document.getElementById('dashAgentScope');
+      const totalEl = document.getElementById('dashCountTotal');
+      const appEl = document.getElementById('dashCountApproved');
+      const pendEl = document.getElementById('dashCountPending');
+
+      if (dashHeader) dashHeader.style.display = 'block';
+      if (verifyWrap) verifyWrap.style.display = 'none';
+      if (quickCard) quickCard.style.display = 'none';
+
+      if (nameEl) nameEl.textContent = agent.name;
+      if (codeEl) codeEl.textContent = `كود: ${agent.id} • 📞 ${agent.phone || ''}`;
+
+      const brands = agent.authorizedBrands && agent.authorizedBrands.length > 0
+        ? agent.authorizedBrands.join('، ')
+        : 'بارلىق ماركىلار';
+      if (brandsEl) brandsEl.textContent = brands;
+
+      if (scopeEl) {
+        scopeEl.textContent = agent.canPublishMultilingual ? '🌍 بارلىق تىللار' : '🌙 پەقەت ئۇيغۇرچە';
+        scopeEl.style.background = agent.canPublishMultilingual ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 0, 0, 0.2)';
+      }
+
+      // تاۋارلار سانى
+      const products = window.appStore.getProductsByAgent(agent.id) || [];
+      const approved = products.filter(p => (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى').length;
+      const pending = products.filter(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ').length;
+
+      if (totalEl) totalEl.textContent = products.length;
+      if (appEl) appEl.textContent = approved;
+      if (pendEl) pendEl.textContent = pending;
+    }
+
+    function checkAgentSession() {
+      const quickCard = document.getElementById('agentQuickSessionCard');
+      const quickName = document.getElementById('quickAgentName');
+      const quickSub = document.getElementById('quickAgentSub');
+      const verifyWrap = document.getElementById('agentVerifyWrap');
+      const dashHeader = document.getElementById('agentDashboardHeader');
+
+      if (currentVerifiedAgent) {
+        updateAgentDashboard(currentVerifiedAgent);
+        return;
+      }
+
+      try {
+        const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
+        if (saved && saved.id) {
+          if (quickCard) quickCard.style.display = 'block';
+          if (quickName) quickName.textContent = saved.name || 'ۋاكالەتچى';
+          if (quickSub) quickSub.textContent = `كودىڭىز: ${saved.id} • تەستىقلانغان سودىگەر`;
+          if (verifyWrap) verifyWrap.style.display = 'none';
+          if (dashHeader) dashHeader.style.display = 'none';
           return;
         }
+      } catch(e) {}
 
-        const res = window.appStore.verifyAgentLogin(val);
-        verifyMsg.style.display = 'block';
+      if (quickCard) quickCard.style.display = 'none';
+      if (verifyWrap) verifyWrap.style.display = 'block';
+      if (dashHeader) dashHeader.style.display = 'none';
+    }
 
-        if (res.success) {
-          currentVerifiedAgent = res.agent;
-          verifiedIdInput.value = res.agent.id;
+    // پۈتۈن بەت دائىرىسىدە زىيارەت قىلىش ئۈچۈن window غا باغلاش
+    window.checkAgentSession = checkAgentSession;
 
-          const brands = res.agent.authorizedBrands && res.agent.authorizedBrands.length > 0 
-            ? res.agent.authorizedBrands 
-            : window.appStore.getBrands();
+    function performAgentVerification(val, isStatusCheckOnly = false) {
+      if (!val) {
+        showToast('ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!', 'warning');
+        return;
+      }
 
+      const res = window.appStore.verifyAgentLogin(val);
+      if (verifyMsg) verifyMsg.style.display = 'block';
+
+      if (res.success) {
+        currentVerifiedAgent = res.agent;
+        if (verifiedIdInput) verifiedIdInput.value = res.agent.id;
+
+        // ئەستە تۇتۇش (Remember Session)
+        try {
+          localStorage.setItem('teklimakan_agent_session', JSON.stringify({
+            id: res.agent.id,
+            name: res.agent.name,
+            phone: res.agent.phone
+          }));
+        } catch(e) {}
+
+        const brands = res.agent.authorizedBrands && res.agent.authorizedBrands.length > 0 
+          ? res.agent.authorizedBrands 
+          : window.appStore.getBrands();
+
+        if (verifyMsg) {
           verifyMsg.className = 'agent-verify-success';
           verifyMsg.style.color = '#065f46';
           verifyMsg.style.background = '#ecfdf5';
@@ -3330,153 +3417,213 @@ function initTeklimakanApp() {
             <strong><i class="fas fa-check-circle" style="color: #10b981;"></i> تەستىقلانغان ۋاكالەتچى:</strong> ${res.agent.name} (${res.agent.id})<br>
             <span style="font-size: 0.8rem; color: #047857;">رۇخسەت قىلىنغان ماركىلار: <strong>${brands.join('، ')}</strong></span>
           `;
+        }
 
-          // ماركا تاللىغۇچنى تولدۇرۇش
-          if (prodBrandSelect) {
-            prodBrandSelect.innerHTML = brands.map(b => `<option value="${b}">${b}</option>`).join('');
-          }
+        // ماركا تاللىغۇچنى تولدۇرۇش
+        if (prodBrandSelect) {
+          prodBrandSelect.innerHTML = brands.map(b => `<option value="${b}">${b}</option>`).join('');
+        }
 
-          // تۈرلەرنى تولدۇرۇش
-          if (prodCatSelect) {
-            const categories = window.appStore.getCategories();
-            prodCatSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-          }
+        // تۈرلەرنى تولدۇرۇش
+        if (prodCatSelect) {
+          const categories = window.appStore.getCategories();
+          prodCatSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
 
-          // 🌐 تىل ھوقۇقىنى تەكشۈرۈش ۋە تەڭشەش (Language Scope)
-          const scopeSelect = document.getElementById('agentProdLanguageScope');
-          const scopeBadge = document.getElementById('agentScopeNoticeBadge');
-          const scopeHelp = document.getElementById('agentScopeHelpText');
+        // 🌐 تىل ھوقۇقىنى تەكشۈرۈش ۋە تەڭشەش
+        const scopeSelect = document.getElementById('agentProdLanguageScope');
+        const scopeBadge = document.getElementById('agentScopeNoticeBadge');
+        const scopeHelp = document.getElementById('agentScopeHelpText');
 
-          if (scopeSelect) {
-            if (res.agent.canPublishMultilingual) {
-              scopeSelect.disabled = false;
-              scopeSelect.value = 'all';
-              Array.from(scopeSelect.options).forEach(opt => opt.disabled = false);
-              if (scopeBadge) {
-                scopeBadge.textContent = '🌍 بارلىق تىللارغا رۇخسەت بار';
-                scopeBadge.style.background = '#dcfce7';
-                scopeBadge.style.color = '#15803d';
-              }
-              if (scopeHelp) {
-                scopeHelp.innerHTML = '✅ سىزگە ئالىي باشقۇرغۇچى تەرىپىدىن بارلىق تىللاردا (ئۇيغۇرچە، تۈركچە، ئىنگلىزچە) ئەركىن ئېلان قىلىش ھوقۇقى بېرىلگەن.';
-              }
-            } else {
-              scopeSelect.value = 'ug';
-              Array.from(scopeSelect.options).forEach(opt => {
-                opt.disabled = (opt.value !== 'ug');
-              });
-              if (scopeBadge) {
-                scopeBadge.textContent = '🔒 پەقەت ئۇيغۇرچە رۇخسەت قىلىنغان';
-                scopeBadge.style.background = '#f1f5f9';
-                scopeBadge.style.color = '#475569';
-              }
-              if (scopeHelp) {
-                scopeHelp.innerHTML = '🔒 سىزگە نۆۋەتتە پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلىش ھوقۇقى بېرىلگەن. باشقا تىللاردا ئېلان قىلىش ئۈچۈن سۇپا باشقۇرغۇچىسى بىلەن ئالاقىلىشىڭ.';
-              }
+        if (scopeSelect) {
+          if (res.agent.canPublishMultilingual) {
+            scopeSelect.disabled = false;
+            scopeSelect.value = 'all';
+            Array.from(scopeSelect.options).forEach(opt => opt.disabled = false);
+            if (scopeBadge) {
+              scopeBadge.textContent = '🌍 بارلىق تىللارغا رۇخسەت بار';
+              scopeBadge.style.background = '#dcfce7';
+              scopeBadge.style.color = '#15803d';
+            }
+            if (scopeHelp) {
+              scopeHelp.innerHTML = '✅ سىزگە بارلىق تىللاردا (ئۇيغۇرچە، تۈركچە، ئىنگلىزچە) ئەركىن ئېلان قىلىش ھوقۇقى بېرىلگەن.';
+            }
+          } else {
+            scopeSelect.value = 'ug';
+            Array.from(scopeSelect.options).forEach(opt => {
+              opt.disabled = (opt.value !== 'ug');
+            });
+            if (scopeBadge) {
+              scopeBadge.textContent = '🔒 پەقەت ئۇيغۇرچە رۇخسەت قىلىنغان';
+              scopeBadge.style.background = '#f1f5f9';
+              scopeBadge.style.color = '#475569';
+            }
+            if (scopeHelp) {
+              scopeHelp.innerHTML = '🔒 سىزگە نۆۋەتتە پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلىش ھوقۇقى بېرىلگەن.';
             }
           }
+        }
 
-          // 🚨 كۆزگە چېلىقىپ تۇرىدىغان خىلاپلىق ۋە توختىتىش تاختىسىنى يېڭىلاش
-          const violCard = document.getElementById('agentViolationAlertCard');
+        // Dashboard تاختىسىنى يېڭىلاش
+        updateAgentDashboard(res.agent);
+
+        // 🚨 خىلاپلىق تاختىسى
+        const violCard = document.getElementById('agentViolationAlertCard');
+        if (violCard) {
+          const vCount = Number(res.agent.violationsCount || 0);
+          if (vCount > 0) {
+            violCard.style.display = 'block';
+            violCard.style.background = '#fff1f2';
+            violCard.style.border = '2px solid #f43f5e';
+            violCard.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #e11d48; font-size: 1.1rem;"><i class="fas fa-exclamation-triangle"></i></span>
+                  <strong style="color: #9f1239; font-size: 0.95rem;">سۇپا بەلگىلىمىسىگە خىلاپلىق قىلىش خاتىرىسى:</strong>
+                </div>
+                <span style="background: #e11d48; color: #ffffff; padding: 2px 10px; border-radius: 9999px; font-weight: 900; font-size: 0.82rem;">
+                  ⚠️ جەمئىي: ${vCount} قېتىم خىلاپلىق قىلىنغان
+                </span>
+              </div>
+              <div style="font-size: 0.82rem; color: #881337; line-height: 1.5;">
+                سۇپا قائىدىسى بويىچە مەھسۇلاتقا تېلېفون نومۇرى ياكى تور ئۇلانمىسى قوشۇش قەتئىي مەنئى قىلىنىدۇ.
+              </div>
+            `;
+          } else {
+            violCard.style.display = 'none';
+          }
+        }
+
+        formProductSubmit.style.display = 'block';
+        renderAgentProductsList(res.agent.id);
+        showToast(`خۇش كەپسىز، ${res.agent.name}!`, 'success');
+      } else {
+        currentVerifiedAgent = null;
+        formProductSubmit.style.display = 'none';
+        if (myProductsWrap) myProductsWrap.style.display = 'none';
+
+        const violCard = document.getElementById('agentViolationAlertCard');
+        const dashHeader = document.getElementById('agentDashboardHeader');
+        if (dashHeader) dashHeader.style.display = 'none';
+
+        if (res.isSuspended) {
+          if (verifyMsg) verifyMsg.style.display = 'none';
           if (violCard) {
-            const vCount = Number(res.agent.violationsCount || 0);
-            if (vCount > 0) {
-              violCard.style.display = 'block';
-              violCard.style.background = '#fff1f2';
-              violCard.style.border = '2px solid #f43f5e';
-              violCard.innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem;">
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #e11d48; font-size: 1.1rem;"><i class="fas fa-exclamation-triangle"></i></span>
-                    <strong style="color: #9f1239; font-size: 0.95rem;">سۇپا بەلگىلىمىسىگە خىلاپلىق قىلىش خاتىرىسى:</strong>
+            const vCount = res.violationsCount || (res.agent ? res.agent.violationsCount : 1) || 1;
+            const untilStr = res.suspendedUntil 
+              ? new Date(res.suspendedUntil).toLocaleString('ug-CN', { dateStyle: 'medium', timeStyle: 'short' }) 
+              : 'باشقۇرغۇچى چەكلەشنى ئاچقۇچە';
+
+            violCard.style.display = 'block';
+            violCard.style.background = '#fef2f2';
+            violCard.style.border = '2.5px solid #dc2626';
+            violCard.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="width: 46px; height: 46px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; border: 2px solid #fca5a5;">
+                  <i class="fas fa-ban"></i>
+                </div>
+                <div>
+                  <h5 style="color: #991b1b; font-size: 1.05rem; font-weight: 900; margin: 0 0 2px 0;">
+                    ⛔ ھېساباتىڭىز ۋاقىتلىق توختىتىلدى (${vCount} كۈن جازا)!
+                  </h5>
+                  <div style="font-size: 0.8rem; color: #b91c1c; font-weight: 700;">
+                    سەۋەبى: تېلېفون نومۇرى ياكى تور ئۇلانمىسى قوشۇش قائىدىسىگە خىلاپلىق قىلىنغان
                   </div>
-                  <span style="background: #e11d48; color: #ffffff; padding: 2px 10px; border-radius: 9999px; font-weight: 900; font-size: 0.82rem;">
-                    ⚠️ جەمئىي: ${vCount} قېتىم خىلاپلىق قىلىنغان
-                  </span>
                 </div>
-                <div style="font-size: 0.82rem; color: #881337; line-height: 1.5;">
-                  سۇپا قائىدىسى بويىچە مەھسۇلاتقا تېلېفون نومۇرى ياكى تور ئۇلانمىسى قوشۇش قەتئىي مەنئى قىلىنىدۇ. ھەربىر خىلاپلىق كۆرۈلگەندە، خىلاپلىق قېتىم سانىچە كۈن بارلىق مەشغۇلاتىڭىز ئاپتوماتىك توختىتىلىدۇ.
-                </div>
-              `;
-            } else {
-              violCard.style.display = 'none';
-            }
+              </div>
+              <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">
+                ℹ️ <strong>ئەسكەرتىش:</strong> توختاش ئاخىرلىشىش ۋاقتى: <strong class="number-latin" style="color: #1e3a8a;">${untilStr}</strong>.
+              </div>
+            `;
           }
-
-          formProductSubmit.style.display = 'block';
-          renderAgentProductsList(res.agent.id);
-          showToast(`خۇش كەپسىز، ${res.agent.name}! مەھسۇلات ئۇچۇرلىرىنى كىرگۈزەلەيسىز.`, 'success');
-        } else {
-          currentVerifiedAgent = null;
-          formProductSubmit.style.display = 'none';
-          if (myProductsWrap) myProductsWrap.style.display = 'none';
-
-          const violCard = document.getElementById('agentViolationAlertCard');
-
-          if (res.isSuspended) {
-            verifyMsg.style.display = 'none';
-            if (violCard) {
-              const vCount = res.violationsCount || (res.agent ? res.agent.violationsCount : 1) || 1;
-              const untilStr = res.suspendedUntil 
-                ? new Date(res.suspendedUntil).toLocaleString('ug-CN', { dateStyle: 'medium', timeStyle: 'short' }) 
-                : 'باشقۇرغۇچى چەكلەشنى ئاچقۇچە';
-
-              violCard.style.display = 'block';
-              violCard.style.background = '#fef2f2';
-              violCard.style.border = '2.5px solid #dc2626';
-              violCard.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                  <div style="width: 46px; height: 46px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; border: 2px solid #fca5a5;">
-                    <i class="fas fa-ban"></i>
-                  </div>
-                  <div>
-                    <h5 style="color: #991b1b; font-size: 1.05rem; font-weight: 900; margin: 0 0 2px 0;">
-                      ⛔ ھېساباتىڭىز ۋاقىتلىق توختىتىلدى (${vCount} كۈن جازا)!
-                    </h5>
-                    <div style="font-size: 0.8rem; color: #b91c1c; font-weight: 700;">
-                      سەۋەبى: تېلېفون نومۇرى ياكى تور ئۇلانمىسى قوشۇش قائىدىسىگە خىلاپلىق قىلىنغان
-                    </div>
-                  </div>
-                </div>
-
-                <div style="background: #ffffff; border: 1.5px dashed #f87171; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem;">
-                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.35rem;">
-                    <span style="color: #475569; font-weight: 700;">خىلاپلىق قىلغان قېتىم سانى:</span>
-                    <strong style="color: #dc2626; font-size: 0.95rem;">${vCount} قېتىم</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.35rem;">
-                    <span style="color: #475569; font-weight: 700;">جازا كۈن سانى (1 قېتىم = 1 كۈن):</span>
-                    <strong style="color: #b91c1c;">${vCount} كۈن پۈتۈنلەي تاقالدى</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                    <span style="color: #475569; font-weight: 700;">توختاش ئاخىرلىشىش ۋاقتى:</span>
-                    <strong class="number-latin" style="color: #1e3a8a;">${untilStr}</strong>
-                  </div>
-                </div>
-
-                <div style="font-size: 0.82rem; color: #4b5563; line-height: 1.5;">
-                  ℹ️ <strong>ئەسكەرتىش:</strong> توختىتىش مۆھلىتى توشقاندا سىستېما ھېساباتىڭىزنى ئاپتوماتىك قايتا ئاچىدۇ، ياكى <strong>ئالىي باشقۇرغۇچى</strong> بىلەن ئالاقىلىشىپ چەكلەشنى بالدۇرراق ئەمەلدىن قالدۇرۇشنى ئىلتىماس قىلسىڭىز بولىدۇ.
-                </div>
-              `;
-            }
-          } else if (res.isPending) {
-            if (violCard) violCard.style.display = 'none';
+        } else if (res.isPending) {
+          if (violCard) violCard.style.display = 'none';
+          if (verifyMsg) {
             verifyMsg.style.color = '#92400e';
             verifyMsg.style.background = '#fffbeb';
-            verifyMsg.style.padding = '0.65rem';
+            verifyMsg.style.padding = '0.75rem';
             verifyMsg.style.borderRadius = '8px';
-            verifyMsg.style.border = '1px solid #fde68a';
-            verifyMsg.innerHTML = `<i class="fas fa-hourglass-half"></i> ${res.message}`;
-          } else {
-            if (violCard) violCard.style.display = 'none';
+            verifyMsg.style.border = '1.5px solid #fde68a';
+            verifyMsg.innerHTML = `<i class="fas fa-hourglass-half" style="color: #d97706;"></i> <strong>ئىلتىماس ھالىتى:</strong> ${res.message}`;
+          }
+        } else {
+          if (violCard) violCard.style.display = 'none';
+          if (verifyMsg) {
             verifyMsg.style.color = '#991b1b';
             verifyMsg.style.background = '#fef2f2';
-            verifyMsg.style.padding = '0.65rem';
+            verifyMsg.style.padding = '0.75rem';
             verifyMsg.style.borderRadius = '8px';
             verifyMsg.style.border = '1px solid #fecaca';
             verifyMsg.innerHTML = `<i class="fas fa-times-circle"></i> ${res.message}`;
           }
         }
+      }
+    }
+
+    if (btnVerify && loginInput) {
+      btnVerify.addEventListener('click', () => {
+        const val = loginInput.value.trim();
+        performAgentVerification(val, false);
+      });
+      loginInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          btnVerify.click();
+        }
+      });
+    }
+
+    if (btnCheckStatus && loginInput) {
+      btnCheckStatus.addEventListener('click', () => {
+        const val = loginInput.value.trim();
+        if (!val) {
+          showToast('سۈرۈشتۈرمەكچى بولغان تېلېفون، ئېلخەت ياكى كودنى كىرگۈزۈڭ!', 'warning');
+          loginInput.focus();
+          return;
+        }
+        performAgentVerification(val, true);
+      });
+    }
+
+    if (btnQuickLogin) {
+      btnQuickLogin.addEventListener('click', () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
+          if (saved && saved.id) {
+            performAgentVerification(saved.id);
+          }
+        } catch(e) {}
+      });
+    }
+
+    if (btnSwitchAccount) {
+      btnSwitchAccount.addEventListener('click', () => {
+        const quickCard = document.getElementById('agentQuickSessionCard');
+        if (quickCard) quickCard.style.display = 'none';
+        const verifyWrap = document.getElementById('agentVerifyWrap');
+        if (verifyWrap) verifyWrap.style.display = 'block';
+        if (loginInput) {
+          loginInput.value = '';
+          loginInput.focus();
+        }
+      });
+    }
+
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        currentVerifiedAgent = null;
+        try { localStorage.removeItem('teklimakan_agent_session'); } catch(e) {}
+        const dashHeader = document.getElementById('agentDashboardHeader');
+        if (dashHeader) dashHeader.style.display = 'none';
+        if (formProductSubmit) formProductSubmit.style.display = 'none';
+        if (myProductsWrap) myProductsWrap.style.display = 'none';
+        const verifyWrap = document.getElementById('agentVerifyWrap');
+        if (verifyWrap) verifyWrap.style.display = 'block';
+        const quickCard = document.getElementById('agentQuickSessionCard');
+        if (quickCard) quickCard.style.display = 'none';
+        if (loginInput) loginInput.value = '';
+        if (verifyMsg) verifyMsg.style.display = 'none';
+        showToast('ھېساباتتىن چىقتىڭىز', 'info');
       });
     }
 
@@ -3530,14 +3677,40 @@ function initTeklimakanApp() {
     if (btnAddNewMode) btnAddNewMode.addEventListener('click', resetToNewProductMode);
     if (btnCancelEdit) btnCancelEdit.addEventListener('click', resetToNewProductMode);
 
-    function renderAgentProductsList(agentId) {
+    const myProductsSearchInput = document.getElementById('agentMyProductsSearchInput');
+    if (myProductsSearchInput) {
+      myProductsSearchInput.addEventListener('input', (e) => {
+        if (!currentVerifiedAgent) return;
+        const q = e.target.value.trim().toLowerCase();
+        renderAgentProductsList(currentVerifiedAgent.id, q);
+      });
+    }
+
+    function renderAgentProductsList(agentId, filterQuery = '') {
       if (!myProductsWrap || !myProductsList) return;
-      const products = window.appStore.getProductsByAgent(agentId);
+      let products = window.appStore.getProductsByAgent(agentId) || [];
       if (!products || products.length === 0) {
         myProductsWrap.style.display = 'none';
         return;
       }
       myProductsWrap.style.display = 'block';
+
+      if (filterQuery) {
+        products = products.filter(p => 
+          (p.name && p.name.toLowerCase().includes(filterQuery)) || 
+          (p.category && p.category.toLowerCase().includes(filterQuery))
+        );
+      }
+
+      if (products.length === 0) {
+        myProductsList.innerHTML = `
+          <div style="text-align: center; padding: 1rem; color: #94a3b8; font-size: 0.85rem;">
+            <i class="fas fa-search"></i> «${filterQuery}» غا ماس كېلىدىغان تاۋار تېپىلمىدى.
+          </div>
+        `;
+        return;
+      }
+
       myProductsList.innerHTML = products.map(p => {
         const isPending = (p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ');
         const isApproved = (p.approvalStatus === 'تەستىقلاندى');

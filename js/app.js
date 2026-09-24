@@ -55,7 +55,7 @@ function initTeklimakanApp() {
   try { initAboutUsModal(); } catch (e) { console.error('initAboutUsModal error:', e); }
   try { initAdminDeviceButton(); } catch (e) { console.error('initAdminDeviceButton error:', e); }
   try { initLiveExchangeRatesTicker(); } catch (e) { console.error('initLiveExchangeRatesTicker error:', e); }
-  try { initFooterContactAccordion(); } catch (e) { console.error('initFooterContactAccordion error:', e); }
+  try { initFooterAccordions(); } catch (e) { console.error('initFooterAccordions error:', e); }
 
   function initStore() {
     try { updateStaticTranslations(); } catch (e) { console.error('updateStaticTranslations error:', e); }
@@ -369,17 +369,31 @@ function initTeklimakanApp() {
 
     const fCol1 = document.getElementById('footerCol1Title');
     if (fCol1) fCol1.textContent = i18n.t('footerCol1');
-    const fCol2 = document.getElementById('footerCol2Title');
+    const fColRates = document.getElementById('fColRatesTitleText');
+    if (fColRates) fColRates.textContent = i18n.t('footerRatesTitle') || 'پېرېۋوت باھاسى (TRY)';
+    const fCol2 = document.getElementById('fCol2TitleText') || document.getElementById('footerCol2Title');
     if (fCol2) {
       const col2Span = fCol2.querySelector('span');
       if (col2Span) col2Span.textContent = i18n.t('footerCol2');
       else fCol2.textContent = i18n.t('footerCol2');
     }
-    const fCol3 = document.getElementById('footerCol3Title');
+    const fCol3 = document.getElementById('fCol3TitleText') || document.getElementById('footerCol3Title');
     if (fCol3) {
-      const col3Span = fCol3.querySelector('#fCol3TitleText') || fCol3.querySelector('span');
+      const col3Span = fCol3.querySelector('span');
       if (col3Span) col3Span.textContent = i18n.t('footerCol3');
       else fCol3.textContent = i18n.t('footerCol3');
+    }
+    const fHintRates = document.getElementById('footerRatesHint');
+    const fBoxRates = document.getElementById('footerRatesBox');
+    if (fHintRates && fBoxRates) {
+      const isCol = fBoxRates.classList.contains('is-collapsed');
+      fHintRates.textContent = isCol ? (i18n.t('accordionExpand') || 'ئېچىش') : (i18n.t('accordionCollapse') || 'يىغىش');
+    }
+    const fHintAbout = document.getElementById('footerAboutHint');
+    const fListAbout = document.getElementById('footerAboutList');
+    if (fHintAbout && fListAbout) {
+      const isCol = fListAbout.classList.contains('is-collapsed');
+      fHintAbout.textContent = isCol ? (i18n.t('accordionExpand') || 'ئېچىش') : (i18n.t('accordionCollapse') || 'يىغىش');
     }
     const fHint = document.getElementById('footerContactHint');
     const fList = document.getElementById('footerContactList');
@@ -4884,7 +4898,6 @@ function initTeklimakanApp() {
     const shopBtn = document.getElementById('btnStartShoppingFromAbout');
 
     if (openBtn) openBtn.addEventListener('click', openModal);
-    if (titleBtn) titleBtn.addEventListener('click', openModal);
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (shopBtn) {
       shopBtn.addEventListener('click', () => {
@@ -4926,14 +4939,28 @@ function initTeklimakanApp() {
     }, 3200);
   }
 
-  // ==================== 📞 ئالاقە كۇنۇپكىلىرى سىيرىلما كۆزنىكى (Footer Contact Accordion) ====================
-  function initFooterContactAccordion() {
-    const titleBtn = document.getElementById('footerCol3Title');
-    const contactList = document.getElementById('footerContactList');
-    const chevron = document.getElementById('footerContactChevron');
-    const hint = document.getElementById('footerContactHint');
-
-    if (!titleBtn || !contactList) return;
+  // ==================== 📞 تۆۋەنكى پۇت قىسمى سىيرىلما كۆزنەكلىرى (Footer Sliding Accordions) ====================
+  function initFooterAccordions() {
+    const accordions = [
+      {
+        headerId: 'footerColRatesTitle',
+        contentId: 'footerRatesBox',
+        chevronId: 'footerRatesChevron',
+        hintId: 'footerRatesHint'
+      },
+      {
+        headerId: 'footerCol2Title',
+        contentId: 'footerAboutList',
+        chevronId: 'footerAboutChevron',
+        hintId: 'footerAboutHint'
+      },
+      {
+        headerId: 'footerCol3Title',
+        contentId: 'footerContactList',
+        chevronId: 'footerContactChevron',
+        hintId: 'footerContactHint'
+      }
+    ];
 
     function getTranslate(key, fallback) {
       if (window.appI18n && typeof window.appI18n.t === 'function') {
@@ -4943,36 +4970,46 @@ function initTeklimakanApp() {
       return fallback;
     }
 
-    function toggleAccordion(forceOpen = null) {
-      const isCurrentlyCollapsed = contactList.classList.contains('is-collapsed');
-      const shouldOpen = forceOpen !== null ? forceOpen : isCurrentlyCollapsed;
+    accordions.forEach(cfg => {
+      const titleBtn = document.getElementById(cfg.headerId);
+      const contentEl = document.getElementById(cfg.contentId);
+      const chevron = document.getElementById(cfg.chevronId);
+      const hint = document.getElementById(cfg.hintId);
 
-      if (shouldOpen) {
-        contactList.classList.remove('is-collapsed');
-        titleBtn.classList.add('is-open');
-        titleBtn.classList.remove('is-collapsed');
-        if (chevron) {
-          chevron.style.transform = 'rotate(180deg)';
-        }
-        if (hint) {
-          hint.textContent = getTranslate('accordionCollapse', 'يىغىش');
-        }
-      } else {
-        contactList.classList.add('is-collapsed');
-        titleBtn.classList.remove('is-open');
-        titleBtn.classList.add('is-collapsed');
-        if (chevron) {
-          chevron.style.transform = 'rotate(0deg)';
-        }
-        if (hint) {
-          hint.textContent = getTranslate('accordionExpand', 'ئېچىش');
+      if (!titleBtn || !contentEl) return;
+
+      function toggleAccordion(forceOpen = null) {
+        const isCurrentlyCollapsed = contentEl.classList.contains('is-collapsed');
+        const shouldOpen = forceOpen !== null ? forceOpen : isCurrentlyCollapsed;
+
+        if (shouldOpen) {
+          contentEl.classList.remove('is-collapsed');
+          titleBtn.classList.add('is-open');
+          titleBtn.classList.remove('is-collapsed');
+          if (chevron) {
+            chevron.style.transform = 'rotate(180deg)';
+          }
+          if (hint) {
+            hint.textContent = getTranslate('accordionCollapse', 'يىغىش');
+          }
+        } else {
+          contentEl.classList.add('is-collapsed');
+          titleBtn.classList.remove('is-open');
+          titleBtn.classList.add('is-collapsed');
+          if (chevron) {
+            chevron.style.transform = 'rotate(0deg)';
+          }
+          if (hint) {
+            hint.textContent = getTranslate('accordionExpand', 'ئېچىش');
+          }
         }
       }
-    }
 
-    titleBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleAccordion();
+      titleBtn.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        e.preventDefault();
+        toggleAccordion();
+      });
     });
   }
 

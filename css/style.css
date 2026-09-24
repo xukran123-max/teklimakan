@@ -3132,12 +3132,31 @@ body {
   pointer-events: none;
 }
 
+.footer-about-list,
 .footer-contact-list {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
   font-size: 0.92rem;
   margin-top: 0.25rem;
+}
+
+@media (min-width: 769px) {
+  .footer-accordion-header {
+    cursor: default !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 0 1.2rem 0 !important;
+  }
+  .footer-accordion-action-pill {
+    display: none !important;
+  }
+  .footer-accordion-content.is-collapsed {
+    max-height: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
 .footer-contact-item {
@@ -3878,16 +3897,19 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     padding: 0.5rem 0.85rem;
     font-size: 0.84rem;
     height: 40px;
+  }
   .footer-accordion-header {
-    max-width: 340px;
+    max-width: 360px;
     margin: 0 auto 0.65rem auto !important;
   }
+  .footer-rates-box,
+  .footer-about-list,
   .footer-contact-list {
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
     margin: 0.25rem auto 0 auto;
   }
   .footer-contact-item {

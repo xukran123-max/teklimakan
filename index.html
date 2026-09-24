@@ -17,7 +17,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260924_v60">
+  <link rel="stylesheet" href="css/style.css?v=20260924_v61">
 </head>
 <body class="font-modern">
 
@@ -1475,8 +1475,19 @@
         </div>
 
         <!-- 📈 بازار پېرېۋوت باھاسى (نەق مەيدان دوللار ۋە ياۋرو كۇرسى) -->
+        <!-- 📈 بازار پېرېۋوت باھاسى (نەق مەيدان دوللار ۋە ياۋرو كۇرسى) -->
         <div class="footer-column footer-rates-column">
-          <div class="footer-rates-box">
+          <h4 id="footerColRatesTitle" class="footer-accordion-header" title="پېرېۋوت كۇرسىنى كۆرۈش ياكى يىغىش">
+            <span class="footer-accordion-title-wrap">
+              <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+              <span id="fColRatesTitleText">پېرېۋوت باھاسى (TRY)</span>
+            </span>
+            <span class="footer-accordion-action-pill">
+              <span class="footer-accordion-hint" id="footerRatesHint">ئېچىش</span>
+              <i id="footerRatesChevron" class="fas fa-chevron-down footer-accordion-chevron"></i>
+            </span>
+          </h4>
+          <div class="footer-rates-box footer-accordion-content is-collapsed" id="footerRatesBox">
             <!-- دوللار (USD / TRY) -->
             <div class="rate-card-item rate-card-usd">
               <div class="rate-card-meta">
@@ -1526,17 +1537,55 @@
           </div>
         </div>
 
-        <div class="footer-column">
-          <h4 id="footerCol2Title" onclick="window.openAboutUsModal && window.openAboutUsModal(event)" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; color: #ffffff;" title="سۇپا ھەققىدە تولۇق مەلۇماتنى ئېچىش">
-            <i class="fas fa-info-circle" style="color: #60a5fa;"></i>
-            <span>سۇپا ھەققىدە</span>
-            <i class="fas fa-chevron-left" style="font-size: 0.75rem; color: #60a5fa; margin-right: 0.2rem;"></i>
+        <!-- ℹ️ سۇپا ھەققىدە مەلۇمات بۆلىكى -->
+        <div class="footer-column footer-about-column">
+          <h4 id="footerCol2Title" class="footer-accordion-header" title="سۇپا ھەققىدە ئۇچۇرلارنى كۆرۈش ياكى يىغىش">
+            <span class="footer-accordion-title-wrap">
+              <i class="fas fa-circle-info" style="color: #60a5fa;"></i>
+              <span id="fCol2TitleText">سۇپا ھەققىدە</span>
+            </span>
+            <span class="footer-accordion-action-pill">
+              <span class="footer-accordion-hint" id="footerAboutHint">ئېچىش</span>
+              <i id="footerAboutChevron" class="fas fa-chevron-down footer-accordion-chevron"></i>
+            </span>
           </h4>
-          <ul class="footer-links">
-            <li><a href="javascript:void(0)" id="fLinkAbout" onclick="window.openAboutUsModal && window.openAboutUsModal(event)" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-info-circle" style="color: #60a5fa;"></i> <span id="fLinkAboutSpan">بىز ھەققىدە</span></a></li>
-            <li><a href="javascript:void(0)" id="fLinkAgentPortal" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-handshake" style="color: #f59e0b;"></i> <span id="fLinkAgentPortalSpan">ۋاكالەتچى مەركىزى</span></a></li>
-            <li><a href="javascript:void(0)" id="fLinkTrackOrder" onclick="window.openTrackOrderModal && window.openTrackOrderModal()" style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;"><i class="fas fa-truck-fast" style="color: #38bdf8;"></i> <span id="fLinkTrackOrderSpan">كارگو ئەھۋالىنى تەكشۈرۈش</span></a></li>
-          </ul>
+          <div class="footer-about-list footer-accordion-content is-collapsed" id="footerAboutList">
+            <!-- بىز ھەققىدە -->
+            <a href="javascript:void(0)" id="fLinkAbout" onclick="window.openAboutUsModal && window.openAboutUsModal(event)" class="footer-contact-item footer-contact-btn-item" title="بىز ھەققىدە مەلۇمات">
+              <div class="footer-contact-icon-box" style="background: rgba(96, 165, 250, 0.15); color: #60a5fa;">
+                <i class="fas fa-circle-info"></i>
+              </div>
+              <div class="footer-contact-text-box">
+                <span id="fLinkAboutSpan" class="footer-contact-label" style="color: #ffffff; font-size: 0.95rem; font-weight: 700;">بىز ھەققىدە</span>
+                <span style="color: #94a3b8; font-size: 0.78rem;">سۇپا تونۇشتۇرۇشى ۋە ئۇچۇرلىرى</span>
+              </div>
+              <i class="fas fa-arrow-left footer-contact-arrow"></i>
+            </a>
+
+            <!-- ۋاكالەتچى مەركىزى -->
+            <a href="javascript:void(0)" id="fLinkAgentPortal" class="footer-contact-item footer-contact-btn-item" title="ۋاكالەتچى مەركىزىگە كىرىش">
+              <div class="footer-contact-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                <i class="fas fa-handshake"></i>
+              </div>
+              <div class="footer-contact-text-box">
+                <span id="fLinkAgentPortalSpan" class="footer-contact-label" style="color: #ffffff; font-size: 0.95rem; font-weight: 700;">ۋاكالەتچى مەركىزى</span>
+                <span style="color: #94a3b8; font-size: 0.78rem;">ھەمكارلىق ۋە ۋاكالەتچىلىك</span>
+              </div>
+              <i class="fas fa-arrow-left footer-contact-arrow"></i>
+            </a>
+
+            <!-- كارگو ئەھۋالىنى تەكشۈرۈش -->
+            <a href="javascript:void(0)" id="fLinkTrackOrder" onclick="window.openTrackOrderModal && window.openTrackOrderModal()" class="footer-contact-item footer-contact-btn-item" title="كارگو ئەھۋالىنى سۈرۈشتۈرۈش">
+              <div class="footer-contact-icon-box" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+                <i class="fas fa-truck-fast"></i>
+              </div>
+              <div class="footer-contact-text-box">
+                <span id="fLinkTrackOrderSpan" class="footer-contact-label" style="color: #ffffff; font-size: 0.95rem; font-weight: 700;">كارگو ئەھۋالىنى تەكشۈرۈش</span>
+                <span style="color: #94a3b8; font-size: 0.78rem;">زاكاز ۋە يەتكۈزۈش سۈرۈشتۈرۈش</span>
+              </div>
+              <i class="fas fa-arrow-left footer-contact-arrow"></i>
+            </a>
+          </div>
         </div>
 
         <div class="footer-column footer-contact-column">
@@ -1682,6 +1731,6 @@
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
   <script src="js/i18n.js?v=20260924_v55"></script>
   <script src="js/store.js?v=20260924_v55"></script>
-  <script src="js/app.js?v=20260924_v55"></script>
+  <script src="js/app.js?v=20260924_v56"></script>
 </body>
 </html>

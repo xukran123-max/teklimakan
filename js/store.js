@@ -195,10 +195,10 @@ const INITIAL_AGENTS = [
   }
 ];
 
-// پۇل بىرلىكى نىسبەتلىرى (پەقەت لىرا ۋە دوللار)
+// پۇل بىرلىكى نىسبەتلىرى (ئاساسىي پۇل بىرلىكى: تۈرك لىراسى ₺)
 const CURRENCY_RATES = {
-  'TRY': { symbol: '₺', rate: 4.8, freeThreshold: 1000, name: 'Lira (₺)' },
-  'USD': { symbol: '$', rate: 0.14, freeThreshold: 30, name: 'Dollar ($)' }
+  'TRY': { symbol: '₺', rate: 1.0, freeThreshold: 1000, name: 'Lira (₺)' },
+  'USD': { symbol: '$', rate: 0.029, freeThreshold: 30, name: 'Dollar ($)' }
 };
 
 // داڭلىق ماركىلار تىزىملىكى (تىرناقسىز ساپ ئۇيغۇرچە نامى)
@@ -1815,17 +1815,21 @@ class StoreManager {
     }
   }
 
-  // CNY باھاسىنى ھازىرقى تاللانغان پۇلغا ئايلاندۇرۇش
-  convertPrice(amountInCny) {
+  // باھاسىنى ھازىرقى تاللانغان پۇلغا ئايلاندۇرۇش (ئاساسىي پۇل: لىرا ₺)
+  convertPrice(amountInTry) {
     const info = this.getCurrencyInfo();
-    return Math.round(amountInCny * info.rate);
+    return Math.round(Number(amountInTry || 0) * (info ? info.rate : 1.0));
   }
 
-  formatPrice(amountInCny) {
+  formatPrice(amountInTry) {
     const info = this.getCurrencyInfo();
-    const converted = Math.round(amountInCny * info.rate);
+    const rate = info ? info.rate : 1.0;
+    const converted = Math.round(Number(amountInTry || 0) * rate);
     const formattedNum = converted.toLocaleString('en-US');
-    return `${info.symbol} ${formattedNum}`;
+    if (this.currentCurrency === 'USD') {
+      return `$${formattedNum}`;
+    }
+    return `${formattedNum} ₺`;
   }
 
   getFreeShippingThreshold() {

@@ -193,6 +193,434 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadSettingsForm();
     populateCategoryDropdowns();
+    initGlobalAdminSearch();
+  }
+
+  // ==================== 🔍 ئارقا سۇپا مەركىزى ئومۇمىي ئىزدەش سىستېمىسى (Global Admin Search) ====================
+  let globalSearchInitialized = false;
+  function initGlobalAdminSearch() {
+    const wrap = document.getElementById('adminSearchWrap');
+    const input = document.getElementById('adminGlobalSearchInput');
+    const clearBtn = document.getElementById('adminSearchClearBtn');
+    const dropdown = document.getElementById('adminSearchResultsDropdown');
+
+    if (!wrap || !input || !dropdown) return;
+    if (globalSearchInitialized) return;
+    globalSearchInitialized = true;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    let selectedIndex = -1;
+    let searchDebounceTimer = null;
+
+    function closeDropdown() {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      selectedIndex = -1;
+    }
+
+    function highlightText(text, query) {
+      if (!text || !query) return escapeHtml(text || '');
+      const str = String(text);
+      const idx = str.toLowerCase().indexOf(query.toLowerCase());
+      if (idx === -1) return escapeHtml(str);
+      const before = escapeHtml(str.slice(0, idx));
+      const match = escapeHtml(str.slice(idx, idx + query.length));
+      const after = escapeHtml(str.slice(idx + query.length));
+      return `${before}<mark style="background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 3px; font-weight: 800;">${match}</mark>${after}`;
+    }
+
+    function doSearch() {
+      const q = input.value.trim().toLowerCase();
+      if (!q) {
+        if (clearBtn) clearBtn.style.display = 'none';
+        closeDropdown();
+        return;
+      }
+
+      if (clearBtn) clearBtn.style.display = 'inline-flex';
+
+      const allProducts = (window.appStore && typeof window.appStore.getProducts === 'function') 
+        ? window.appStore.getProducts() 
+        : [];
+      const allOrders = (window.appStore && typeof window.appStore.getOrders === 'function') 
+        ? window.appStore.getOrders() 
+        : [];
+      const allAgents = (window.appStore && typeof window.appStore.getAgents === 'function') 
+        ? window.appStore.getAgents() 
+        : [];
+      
+      let allCustomers = [];
+      if (window.appStore && typeof window.appStore.getCustomersSummary === 'function') {
+        allCustomers = (window.appStore.getCustomersSummary().customers) || [];
+      }
+
+      // 1. تاۋارلار سۈزۈش
+      const matchedProducts = allProducts.filter(p => {
+        const idMatch = p.id && String(p.id).toLowerCase().includes(q);
+        const nameMatch = p.name && p.name.toLowerCase().includes(q);
+        const brandMatch = p.brand && p.brand.toLowerCase().includes(q);
+        const catMatch = p.category && p.category.toLowerCase().includes(q);
+        const descMatch = p.description && p.description.toLowerCase().includes(q);
+        const nameTr = p.name_tr && p.name_tr.toLowerCase().includes(q);
+        const nameEn = p.name_en && p.name_en.toLowerCase().includes(q);
+        return idMatch || nameMatch || brandMatch || catMatch || descMatch || nameTr || nameEn;
+      }).slice(0, 6);
+
+      // 2. زاكازلار سۈزۈش
+      const matchedOrders = allOrders.filter(o => {
+        const idMatch = o.id && String(o.id).toLowerCase().includes(q);
+        const cust = (typeof o.customer === 'string') ? JSON.parse(o.customer || '{}') : (o.customer || {});
+        const nameMatch = cust.name && cust.name.toLowerCase().includes(q);
+        const phoneMatch = cust.phone && cust.phone.includes(q);
+        const addrMatch = cust.address && cust.address.toLowerCase().includes(q);
+        const trackingMatch = o.cargoTrackingNo && o.cargoTrackingNo.toLowerCase().includes(q);
+        return idMatch || nameMatch || phoneMatch || addrMatch || trackingMatch;
+      }).slice(0, 5);
+
+      // 3. ۋاكالەتچىلەر سۈزۈش
+      const matchedAgents = allAgents.filter(a => {
+        const idMatch = a.id && String(a.id).toLowerCase().includes(q);
+        const nameMatch = a.name && a.name.toLowerCase().includes(q);
+        const phoneMatch = a.phone && a.phone.includes(q);
+        const emailMatch = a.email && a.email.toLowerCase().includes(q);
+        const cityMatch = a.city && a.city.toLowerCase().includes(q);
+        const certMatch = a.certCode && a.certCode.toLowerCase().includes(q);
+        return idMatch || nameMatch || phoneMatch || emailMatch || cityMatch || certMatch;
+      }).slice(0, 5);
+
+      // 4. خېرىدارلار سۈزۈش
+      const matchedCustomers = allCustomers.filter(c => {
+        const nameMatch = c.name && c.name.toLowerCase().includes(q);
+        const phoneMatch = c.phone && c.phone.includes(q);
+        const cityMatch = c.city && c.city.toLowerCase().includes(q);
+        return nameMatch || phoneMatch || cityMatch;
+      }).slice(0, 4);
+
+      const totalMatches = matchedProducts.length + matchedOrders.length + matchedAgents.length + matchedCustomers.length;
+
+      if (totalMatches === 0) {
+        dropdown.innerHTML = `
+          <div class="admin-search-empty-state">
+            <div style="font-size: 2.2rem; margin-bottom: 0.5rem; color: #94a3b8;"><i class="fas fa-search"></i></div>
+            <div style="font-weight: 800; font-size: 1rem; color: #1e293b; margin-bottom: 0.35rem;">«${escapeHtml(q)}» بويىچە نەتىجە تېپىلمىدى</div>
+            <div style="font-size: 0.82rem; color: #64748b;">تاۋار نامى، زاكاز كودى، خېرىدار ياكى ۋاكالەتچى تېلېفونىنى قايتا سىناپ بېقىڭ.</div>
+          </div>
+          <div class="admin-search-footer-hint">
+            <span><i class="fas fa-lightbulb" style="color: #f59e0b;"></i> تاۋار كودى (#TK-...) ياكى تېلېفون نومۇرى بويىچە ئىزدەڭ</span>
+            <span class="number-latin">ESC بېسىپ تاقاڭ</span>
+          </div>
+        `;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      let html = '';
+
+      // تاۋارلار نەتىجىسى
+      if (matchedProducts.length > 0) {
+        html += `
+          <div class="admin-search-section-header">
+            <span><i class="fas fa-boxes" style="color: #2563eb;"></i> تاۋارلار</span>
+            <span style="font-size: 0.72rem; background: #eff6ff; color: #2563eb; padding: 1px 8px; border-radius: 9999px; font-weight: 700;">${matchedProducts.length} دانە</span>
+          </div>
+        `;
+        matchedProducts.forEach(prod => {
+          const thumb = prod.image || 'images/default_product.jpg';
+          const priceStr = window.appStore ? window.appStore.formatPrice(prod.price) : `${prod.price} ₺`;
+          const stockColor = (prod.stock || 0) <= 5 ? '#dc2626' : '#16a34a';
+          const stockBg = (prod.stock || 0) <= 5 ? '#fef2f2' : '#f0fdf4';
+          html += `
+            <div class="admin-search-item" data-type="product" data-id="${escapeHtml(prod.id)}" data-name="${escapeHtml(prod.name)}">
+              <img src="${escapeHtml(thumb)}" class="admin-search-item-thumb" alt="${escapeHtml(prod.name)}" onerror="this.src='images/default_product.jpg'">
+              <div class="admin-search-item-content">
+                <div class="admin-search-item-title">${highlightText(prod.name, q)}</div>
+                <div class="admin-search-item-sub">
+                  <span><i class="fas fa-tag" style="color: #60a5fa;"></i> ${highlightText(prod.brand || 'تەكلىماكان', q)}</span>
+                  <span><i class="fas fa-folder" style="color: #a78bfa;"></i> ${highlightText(prod.category || '', q)}</span>
+                  <code class="number-latin" style="font-size: 0.72rem; color: #64748b;">#${highlightText(prod.id, q)}</code>
+                </div>
+              </div>
+              <div class="admin-search-item-meta">
+                <div class="number-latin" style="font-weight: 900; font-size: 0.95rem; color: #0284c7;">${priceStr}</div>
+                <span class="number-latin" style="font-size: 0.72rem; font-weight: 700; background: ${stockBg}; color: ${stockColor}; padding: 1px 6px; border-radius: 4px;">
+                  ${prod.stock} دانە زاپاس
+                </span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // زاكازلار نەتىجىسى
+      if (matchedOrders.length > 0) {
+        html += `
+          <div class="admin-search-section-header">
+            <span><i class="fas fa-shopping-cart" style="color: #10b981;"></i> زاكازلار</span>
+            <span style="font-size: 0.72rem; background: #ecfdf5; color: #10b981; padding: 1px 8px; border-radius: 9999px; font-weight: 700;">${matchedOrders.length} زاكاز</span>
+          </div>
+        `;
+        matchedOrders.forEach(order => {
+          const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
+          const custName = cust.name || 'خېرىدار';
+          const custPhone = cust.phone || '-';
+          const orderTotal = order.totalFormatted || (window.appStore ? window.appStore.formatPrice(order.totalCny || order.total || 0) : `₺${order.total || 0}`);
+          const statusClass = getStatusClass(order.status);
+          html += `
+            <div class="admin-search-item" data-type="order" data-id="${escapeHtml(order.id)}">
+              <div class="admin-search-item-icon-box" style="background: #ecfdf5; color: #059669;">
+                <i class="fas fa-receipt"></i>
+              </div>
+              <div class="admin-search-item-content">
+                <div class="admin-search-item-title">
+                  <span class="number-latin" style="font-weight: 800; color: #0f172a;">#${highlightText(order.id, q)}</span> - ${highlightText(custName, q)}
+                </div>
+                <div class="admin-search-item-sub">
+                  <span class="number-latin"><i class="fas fa-phone" style="color: #38bdf8;"></i> ${highlightText(custPhone, q)}</span>
+                  <span><i class="fas fa-map-marker-alt" style="color: #f87171;"></i> ${highlightText(cust.city || 'ئىستانبۇل', q)}</span>
+                  <span class="number-latin" style="color: #94a3b8;">${order.date || ''}</span>
+                </div>
+              </div>
+              <div class="admin-search-item-meta">
+                <div class="number-latin" style="font-weight: 900; font-size: 0.95rem; color: #10b981;">${orderTotal}</div>
+                <span class="status-pill ${statusClass}" style="font-size: 0.72rem; padding: 2px 7px;">${order.status || 'ساقلاۋاتىدۇ'}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // ۋاكالەتچىلەر نەتىجىسى
+      if (matchedAgents.length > 0) {
+        html += `
+          <div class="admin-search-section-header">
+            <span><i class="fas fa-users-cog" style="color: #8b5cf6;"></i> سېتىش ۋاكالەتچىلىرى</span>
+            <span style="font-size: 0.72rem; background: #f5f3ff; color: #8b5cf6; padding: 1px 8px; border-radius: 9999px; font-weight: 700;">${matchedAgents.length} نەپەر</span>
+          </div>
+        `;
+        matchedAgents.forEach(agent => {
+          const initial = (agent.name || 'ۋ').charAt(0);
+          const commRate = agent.commissionRate !== undefined ? agent.commissionRate : 15;
+          const statusClass = getStatusClass(agent.status);
+          html += `
+            <div class="admin-search-item" data-type="agent" data-id="${escapeHtml(agent.id)}" data-name="${escapeHtml(agent.name)}">
+              <div class="admin-search-item-icon-box" style="background: #f5f3ff; color: #7c3aed; font-weight: 900; font-size: 1.15rem;">
+                ${initial}
+              </div>
+              <div class="admin-search-item-content">
+                <div class="admin-search-item-title">${highlightText(agent.name, q)}</div>
+                <div class="admin-search-item-sub">
+                  <span><i class="fas fa-map-marker-alt" style="color: #f87171;"></i> ${highlightText(agent.city || 'ئىستانبۇل', q)}</span>
+                  <span class="number-latin"><i class="fas fa-phone" style="color: #38bdf8;"></i> ${highlightText(agent.phone || 'نومۇرسىز', q)}</span>
+                  <code class="number-latin" style="font-size: 0.72rem; color: #64748b;">${highlightText(agent.certCode || agent.id, q)}</code>
+                </div>
+              </div>
+              <div class="admin-search-item-meta">
+                <span class="number-latin" style="font-weight: 800; font-size: 0.85rem; color: #d97706; background: #fffbeb; padding: 1px 6px; border-radius: 4px; border: 1px solid #fde68a;">
+                  %${commRate} كومىسسىيە
+                </span>
+                <span class="status-pill ${statusClass}" style="font-size: 0.72rem; padding: 2px 7px;">${agent.status || 'تەستىقلاندى'}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // خېرىدارلار نەتىجىسى
+      if (matchedCustomers.length > 0) {
+        html += `
+          <div class="admin-search-section-header">
+            <span><i class="fas fa-user-friends" style="color: #0284c7;"></i> خېرىدارلار (CRM)</span>
+            <span style="font-size: 0.72rem; background: #f0f9ff; color: #0284c7; padding: 1px 8px; border-radius: 9999px; font-weight: 700;">${matchedCustomers.length} نەپەر</span>
+          </div>
+        `;
+        matchedCustomers.forEach(cust => {
+          const totalSpentStr = window.appStore ? window.appStore.formatPrice(cust.totalSpent || 0) : `₺${cust.totalSpent || 0}`;
+          html += `
+            <div class="admin-search-item" data-type="customer" data-name="${escapeHtml(cust.name)}" data-phone="${escapeHtml(cust.phone)}">
+              <div class="admin-search-item-icon-box" style="background: #e0f2fe; color: #0284c7;">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="admin-search-item-content">
+                <div class="admin-search-item-title">${highlightText(cust.name, q)}</div>
+                <div class="admin-search-item-sub">
+                  <span class="number-latin"><i class="fas fa-phone" style="color: #38bdf8;"></i> ${highlightText(cust.phone || '-', q)}</span>
+                  <span><i class="fas fa-city" style="color: #64748b;"></i> ${highlightText(cust.city || '', q)}</span>
+                </div>
+              </div>
+              <div class="admin-search-item-meta">
+                <div class="number-latin" style="font-weight: 800; font-size: 0.88rem; color: #0f172a;">${totalSpentStr}</div>
+                <span class="number-latin" style="font-size: 0.72rem; color: #64748b;">${cust.orderCount || 0} زاكاز</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      html += `
+        <div class="admin-search-footer-hint">
+          <span><i class="fas fa-arrows-up-down"></i> تاللاپ Enter بېسىڭ ياكى چېكىڭ</span>
+          <span class="number-latin">ESC بېسىپ تاقاڭ</span>
+        </div>
+      `;
+
+      dropdown.innerHTML = html;
+      dropdown.style.display = 'block';
+      selectedIndex = -1;
+
+      // نەتىجە تۈرلىرىگە چېكىش ھەرىكىتىنى ئۇلاش
+      dropdown.querySelectorAll('.admin-search-item').forEach(item => {
+        item.addEventListener('click', () => {
+          handleSearchResultSelect(item);
+        });
+      });
+    }
+
+    function handleSearchResultSelect(item) {
+      const type = item.dataset.type;
+      closeDropdown();
+
+      if (type === 'product') {
+        const prodId = item.dataset.id;
+        const prodName = item.dataset.name;
+        switchTab('products');
+        const pInput = document.getElementById('adminProductSearchInput');
+        if (pInput) {
+          pInput.value = prodId || prodName;
+          renderProductsTable();
+        }
+        if (typeof openProductModal === 'function') {
+          openProductModal(prodId);
+        }
+      } else if (type === 'order') {
+        const orderId = item.dataset.id;
+        switchTab('orders');
+        const oInput = document.getElementById('orderSearchInput');
+        if (oInput) {
+          oInput.value = orderId;
+          renderOrdersTable();
+        }
+        if (typeof openOrderInvoiceModal === 'function') {
+          openOrderInvoiceModal(orderId);
+        }
+      } else if (type === 'agent') {
+        const agentId = item.dataset.id;
+        const agentName = item.dataset.name;
+        switchTab('agents');
+        const aInput = document.getElementById('agentSearchInput');
+        if (aInput) {
+          aInput.value = agentName || agentId;
+          renderAgentsView();
+        }
+        if (typeof openAgentBrandAuthModal === 'function') {
+          openAgentBrandAuthModal(agentId);
+        }
+      } else if (type === 'customer') {
+        const custPhone = item.dataset.phone;
+        const custName = item.dataset.name;
+        switchTab('customers');
+        const cInput = document.getElementById('crmCustomerSearchInput');
+        if (cInput) {
+          cInput.value = custPhone || custName;
+          renderCustomersTable();
+        }
+      }
+    }
+
+    // تېكىست كىرگۈزۈش ۋە Debounce
+    input.addEventListener('input', () => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(doSearch, 100);
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length > 0) {
+        doSearch();
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        input.value = '';
+        clearBtn.style.display = 'none';
+        closeDropdown();
+        input.focus();
+      });
+    }
+
+    // كۇنۇپكا بىلەن يول باشلاش (ArrowDown, ArrowUp, Enter, Escape)
+    input.addEventListener('keydown', (e) => {
+      const items = dropdown.querySelectorAll('.admin-search-item');
+      if (dropdown.style.display === 'none' || items.length === 0) {
+        if (e.key === 'Escape') {
+          closeDropdown();
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        updateItemSelection(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        updateItemSelection(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < items.length) {
+          handleSearchResultSelect(items[selectedIndex]);
+        } else if (items.length > 0) {
+          handleSearchResultSelect(items[0]);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeDropdown();
+      }
+    });
+
+    function updateItemSelection(items) {
+      items.forEach((it, idx) => {
+        if (idx === selectedIndex) {
+          it.classList.add('is-selected');
+          it.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+          it.classList.remove('is-selected');
+        }
+      });
+    }
+
+    // پۈتۈن بەت كۇنۇپكا قىسقا يولى (Ctrl+K ياكى /)
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      } else if (e.key === '/' && document.activeElement !== input) {
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) {
+          e.preventDefault();
+          input.focus();
+          input.select();
+        }
+      }
+    });
+
+    // سىرتىنى چەككەندە تاقاش
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) {
+        closeDropdown();
+      }
+    });
   }
 
   // ==================== بەتلەرنى ئالماشتۇرۇش ====================
@@ -241,6 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loadSettingsForm();
     }
   }
+  window.switchTab = switchTab;
 
   // ==================== ستاتىستىكا ====================
   function renderDashboardMetrics() {
@@ -2141,6 +2570,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modal.classList.add('active');
   }
+  window.openAgentBrandAuthModal = openAgentBrandAuthModal;
 
   // 4. يېڭى ۋاكالەتچى كىرگۈزۈش كۆزنىكىنى ئېچىش (ماركا كۇنۇپكىلىرى بىلەن)
   function openAddAgentModal() {
@@ -2697,6 +3127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modal.classList.add('active');
   }
+  window.openProductModal = openProductModal;
 
   function populateCategoryDropdowns() {
     const categories = window.appStore.getCategories('ug').filter(c => c.id !== 'all');

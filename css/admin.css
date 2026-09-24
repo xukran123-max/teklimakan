@@ -215,6 +215,320 @@ body, .admin-app, input, select, textarea, button {
   gap: 1rem;
 }
 
+/* ==================== 🔍 مەركىزى ئومۇمىي ئىزدەش سىستېمىسى (Global Admin Search) ==================== */
+.admin-search-wrap {
+  flex: 1;
+  max-width: 520px;
+  margin: 0 1.25rem;
+  position: relative;
+  z-index: 95;
+}
+
+.admin-search-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0 1rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-search-input-box:focus-within {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-search-icon {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-left: 0.65rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.admin-search-input-box:focus-within .admin-search-icon {
+  color: #2563eb;
+}
+
+.admin-search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0;
+  font-size: 0.94rem;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.admin-search-input::placeholder {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.admin-search-clear {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.85rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.admin-search-clear:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+/* ئىزدەش نەتىجىلىرى تىزىملىكى (Dropdown) */
+.admin-search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -6px rgba(15, 23, 42, 0.2), 0 8px 16px -2px rgba(15, 23, 42, 0.08);
+  max-height: 480px;
+  overflow-y: auto;
+  direction: rtl;
+  text-align: right;
+  z-index: 1000;
+  animation: adminSearchSlideDown 0.2s ease-out;
+}
+
+@keyframes adminSearchSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-search-section-header {
+  background: #f8fafc;
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #475569;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-search-section-header:first-child {
+  border-top: none;
+  border-radius: 16px 16px 0 0;
+}
+
+.admin-search-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.15s ease;
+}
+
+.admin-search-item:last-child {
+  border-bottom: none;
+}
+
+.admin-search-item:hover,
+.admin-search-item.is-selected {
+  background: #eff6ff;
+}
+
+.admin-search-item-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+
+.admin-search-item-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.admin-search-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-search-item-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.admin-search-item-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.admin-search-item-meta {
+  text-align: left;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.admin-search-footer-hint {
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-search-empty-state {
+  padding: 2.25rem 1rem;
+  text-align: center;
+  color: #64748b;
+}
+
+/* تۈن ھالىتى (Dark Mode) */
+body.dark-mode .admin-search-input-box {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .admin-search-input-box:focus-within {
+  background: #1e293b;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+body.dark-mode .admin-search-input {
+  color: #f8fafc;
+}
+
+body.dark-mode .admin-search-input::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .admin-search-icon {
+  color: #94a3b8;
+}
+
+body.dark-mode .admin-search-clear {
+  color: #64748b;
+}
+
+body.dark-mode .admin-search-clear:hover {
+  color: #f87171;
+  background: #334155;
+}
+
+body.dark-mode .admin-search-results-dropdown {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 40px -6px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .admin-search-section-header {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+body.dark-mode .admin-search-item {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .admin-search-item:hover,
+body.dark-mode .admin-search-item.is-selected {
+  background: #273549;
+}
+
+body.dark-mode .admin-search-item-title {
+  color: #f8fafc;
+}
+
+body.dark-mode .admin-search-item-sub {
+  color: #94a3b8;
+}
+
+body.dark-mode .admin-search-footer-hint {
+  background: #0f172a;
+  border-top-color: #334155;
+  color: #64748b;
+}
+
+body.dark-mode .admin-search-empty-state {
+  color: #94a3b8;
+}
+
+/* كۆچمە ئېكران ماسلىشىشچانلىقى (Mobile Search Responsive) */
+@media (max-width: 992px) {
+  .admin-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .admin-search-wrap {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: 100%;
+    margin: 0.35rem 0 0;
+  }
+
+  .admin-search-results-dropdown {
+    max-height: 60vh;
+  }
+}
+
+
 .admin-body {
   padding: 1.75rem;
   flex: 1;

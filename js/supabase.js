@@ -49,14 +49,20 @@ window.TeklimakanSupabase = {
     const sb = getSupabase();
     if (!sb) return false;
     try {
+      // unit نى translations JSONB ئىچىگە پۈتۈپ، بىرلىكنىڭ يوقاپ كەتمەسلىكىگە كاپالەتلىك قىلىش
+      const translations = { ...(product.translations || {}) };
+      if (product.unit) {
+        translations.unit = product.unit;
+      }
+
       const row = {
         id: product.id,
         name: product.name,
         brand: product.brand || '',
         category: product.category || '',
-        price: product.price,
-        old_price: product.oldPrice || null,
-        stock: product.stock !== undefined ? product.stock : 0,
+        price: Number(product.price),
+        old_price: product.oldPrice ? Number(product.oldPrice) : null,
+        stock: product.stock !== undefined ? Number(product.stock) : 0,
         sales: product.sales || 0,
         rating: product.rating || 5.0,
         rating_count: product.ratingCount || 1,
@@ -69,18 +75,33 @@ window.TeklimakanSupabase = {
         merchant_badge: product.merchantBadge || 'ئىشەنچىلىك سودىگەر',
         agent_id: product.agentId || null,
         agent_name: product.agentName || null,
-        translations: product.translations || {}
+        translations: translations
       };
-      const { error } = await sb.from('products').upsert(row);
-      if (error) console.warn('Supabase upsertProduct خاتالىقى:', error.message);
-      return !error;
+      const { error } = await sb.from('products').upsert(row, { onConflict: 'id' });
+      if (error) {
+        console.warn('Supabase upsertProduct خاتالىقى:', error.message);
+        return false;
+      }
+      return true;
     } catch (e) {
       console.warn('Supabase product ساقلاش خاتالىقى:', e);
       return false;
     }
   },
 
-  // زاكازلارنى ئوقۇش
+  // تاۋارنى بۇلۇتتىن ئۆچۈرۈش
+  async deleteProduct(productId) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const { error } = await sb.from('products').delete().eq('id', productId);
+      if (error) console.warn('Supabase deleteProduct خاتالىقى:', error.message);
+      return !error;
+    } catch (e) {
+      console.warn('Supabase product ئۆچۈرۈش خاتالىقى:', e);
+      return false;
+    }
+  },
   async fetchOrders() {
     const sb = getSupabase();
     if (!sb) return null;

@@ -3720,71 +3720,88 @@ document.addEventListener('DOMContentLoaded', () => {
     // تاۋار جەدۋىلىنى ساقلاش (ماركا نامى ۋە تىل بىلەن)
     const productForm = document.getElementById('productForm');
     if (productForm) {
-      productForm.addEventListener('submit', (e) => {
+      productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const id = document.getElementById('formProductId').value;
-        const scope = document.getElementById('formLanguageScope').value;
-        const brand = document.getElementById('formProductBrand').value.trim() || 'تەكلىماكان سۈپەت';
-        const nameUg = document.getElementById('formProductNameUg').value.trim();
-        const category = document.getElementById('formProductCategory').value;
-        const price = parseFloat(document.getElementById('formProductPrice').value);
-        const oldPriceVal = document.getElementById('formProductOldPrice').value;
-        const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
-        const stock = parseInt(document.getElementById('formProductStock').value, 10);
-        const unit = (document.getElementById('formProductUnit')?.value.trim()) || 'دانە';
-        let image = document.getElementById('formProductImage').value.trim();
-        const badge = document.getElementById('formProductBadge').value;
-        const descUg = document.getElementById('formProductDescUg').value.trim();
-
-        const nameTr = document.getElementById('formProductNameTr')?.value.trim() || nameUg;
-        const descTr = document.getElementById('formProductDescTr')?.value.trim() || descUg;
-
-        const nameEn = document.getElementById('formProductNameEn')?.value.trim() || nameUg;
-        const descEn = document.getElementById('formProductDescEn')?.value.trim() || descUg;
-
-        if (!image) {
-          image = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
+        const submitBtn = productForm.querySelector('button[type="submit"]');
+        const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ساقلىنىۋاتىدۇ...';
         }
 
-        // سۈرەتنى باشقۇرغۇچى سۈپىتىدە تەكشۈرۈش (باشقۇرغۇچىغا چەكلىمە يوق)
-        const secCheck = window.appStore.validateProductImageSecurity(image, '', true);
+        try {
+          const id = document.getElementById('formProductId').value;
+          const scope = document.getElementById('formLanguageScope').value;
+          const brand = document.getElementById('formProductBrand').value.trim() || 'تەكلىماكان سۈپەت';
+          const nameUg = document.getElementById('formProductNameUg').value.trim();
+          const category = document.getElementById('formProductCategory').value;
+          const price = parseFloat(document.getElementById('formProductPrice').value);
+          const oldPriceVal = document.getElementById('formProductOldPrice').value;
+          const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
+          const stock = parseInt(document.getElementById('formProductStock').value, 10);
+          const unit = (document.getElementById('formProductUnit')?.value.trim()) || 'دانە';
+          let image = document.getElementById('formProductImage').value.trim();
+          const badge = document.getElementById('formProductBadge').value;
+          const descUg = document.getElementById('formProductDescUg').value.trim();
 
-        const translations = {
-          ug: { name: nameUg, description: descUg, category: category },
-          tr: { name: nameTr, description: descTr, category: category },
-          en: { name: nameEn, description: descEn, category: category }
-        };
+          const nameTr = document.getElementById('formProductNameTr')?.value.trim() || nameUg;
+          const descTr = document.getElementById('formProductDescTr')?.value.trim() || descUg;
 
-        const data = {
-          name: nameUg,
-          brand,
-          category,
-          price,
-          oldPrice,
-          stock,
-          unit,
-          image,
-          badge,
-          description: descUg,
-          languageScope: scope,
-          translations,
-          isAdmin: true,
-          approvalStatus: 'تەستىقلاندى'
-        };
+          const nameEn = document.getElementById('formProductNameEn')?.value.trim() || nameUg;
+          const descEn = document.getElementById('formProductDescEn')?.value.trim() || descUg;
 
-        if (id) data.id = id;
+          if (!image) {
+            image = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
+          }
 
-        const saveRes = window.appStore.saveProduct(data);
-        if (!saveRes.success) {
-          alert(saveRes.message);
-          showAdminToast(saveRes.message, 'error');
-          return;
+          // سۈرەتنى باشقۇرغۇچى سۈپىتىدە تەكشۈرۈش (باشقۇرغۇچىغا چەكلىمە يوق)
+          const secCheck = window.appStore.validateProductImageSecurity(image, '', true);
+
+          const translations = {
+            ug: { name: nameUg, description: descUg, category: category },
+            tr: { name: nameTr, description: descTr, category: category },
+            en: { name: nameEn, description: descEn, category: category }
+          };
+
+          const data = {
+            name: nameUg,
+            brand,
+            category,
+            price,
+            oldPrice,
+            stock,
+            unit,
+            image,
+            badge,
+            description: descUg,
+            languageScope: scope,
+            translations,
+            isAdmin: true,
+            approvalStatus: 'تەستىقلاندى'
+          };
+
+          if (id) data.id = id;
+
+          const saveRes = await window.appStore.saveProductAsync(data);
+          if (!saveRes.success) {
+            alert(saveRes.message);
+            showAdminToast(saveRes.message, 'error');
+            return;
+          }
+
+          document.getElementById('productFormModal').classList.remove('active');
+          renderProductsTable();
+          renderDashboardMetrics();
+          showAdminToast(id ? 'تاۋار ئۇچۇرى مەڭگۈلۈك يېڭىلاندى ھەمدە بۇلۇتقا ساقلاندى!' : `«${brand}» ماركىلىق تاۋار ئېلان قىلىندى!`, 'success');
+        } catch (err) {
+          console.error('تاۋار ساقلاش خاتالىقى:', err);
+          showAdminToast('ساقلاش جەريانىدا خاتالىق كۆرۈلدى', 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+          }
         }
-
-        document.getElementById('productFormModal').classList.remove('active');
-        renderProductsTable();
-        renderDashboardMetrics();
-        showAdminToast(id ? 'تاۋار ئۇچۇرى يېڭىلاندى!' : `«${brand}» ماركىلىق تاۋار ئېلان قىلىندى!`, 'success');
       });
     }
 

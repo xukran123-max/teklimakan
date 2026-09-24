@@ -7,6 +7,8 @@
 
 const STORAGE_KEYS = {
   PRODUCTS: 'teklimakan_ecom_products_v12',
+  USER_EDITS: 'teklimakan_ecom_user_edits_v1',
+  DELETED_PRODUCTS: 'teklimakan_ecom_deleted_products_v1',
   ORDERS: 'teklimakan_ecom_orders_v4',
   CATEGORIES: 'teklimakan_ecom_categories_v8',
   BRANDS: 'teklimakan_ecom_brands_v4',
@@ -215,14 +217,51 @@ const INITIAL_BRANDS = [
 // دەسلەپكى تاۋارلار تىزىملىكى (ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
 const INITIAL_PRODUCTS = [
   {
+    id: 'PRD-908',
+    brand: 'تەكلىماكان كىلاسسىك',
+    languageScope: 'all',
+    name: 'ياڭاق',
+    category: 'ئۆسۈملۈك دورىلار',
+    price: 2400,
+    oldPrice: 2800,
+    unit: 'دانە',
+    stock: 30,
+    sales: 24,
+    rating: 5.0,
+    ratingCount: 18,
+    image: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80',
+    description: 'تەبىئىي، تاللانغان ئەلا سۈپەتلىك نېپىز قېپى تەبىئىي ياڭاق.',
+    translations: {
+      ug: {
+        name: 'ياڭاق',
+        category: 'ئۆسۈملۈك دورىلار',
+        description: 'تەبىئىي، تاللانغان ئەلا سۈپەتلىك نېپىز قېپى تەبىئىي ياڭاق.'
+      },
+      tr: {
+        name: 'Doğal İnce Kabuklu Ceviz',
+        category: 'Bitkisel İlaçlar',
+        description: 'Doğal, seçkin ve lezzetli ince kabuklu ceviz.'
+      },
+      en: {
+        name: 'Organic Thin Shell Walnuts',
+        category: 'Herbal Remedies',
+        description: 'Premium hand-picked thin-shell organic walnuts.'
+      }
+    },
+    badge: 'ئەڭ ياخشى سېتىلغان',
+    featured: true,
+    approvalStatus: 'تەستىقلاندى',
+    merchantBadge: 'ئىشەنچىلىك سودىگەر'
+  },
+  {
     id: 'PRD-100',
     brand: 'تەكلىماكان تىبابىتى',
     languageScope: 'all',
     name: 'تەبىئىي شىپالىق پىننە گۈلقەنتى 1kg (ئاشقازان ۋە ھەزىمگە مەنپەئەتلىك)',
     category: 'ئۇيغۇر تىبابىتى',
-    price: 185,
-    oldPrice: 240,
-    unit: 'كىلو',
+    price: 888,
+    oldPrice: 1200,
+    unit: 'دانە',
     stock: 45,
     sales: 128,
     rating: 5.0,
@@ -1413,85 +1452,57 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(INITIAL_BRANDS));
     }
     const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-    if (!storedProducts || !storedProducts.includes('PRD-100') || storedProducts.includes('Hotan Heritage') || storedProducts.includes('photo-1611591475836') || storedProducts.includes('photo-1607006314546') || storedProducts.includes('photo-1595231712325')) {
-      // دەسلەپكى تاۋارلارغا تەستىقلانغان دەپ ھالەت بېرىش ھەمدە كونا/بۇزۇق رەسىملەرنى ئەسلىگە كەلتۈرۈش
+    let prods = [];
+    try {
+      prods = storedProducts ? JSON.parse(storedProducts) : [];
+    } catch (e) {
+      prods = [];
+    }
+
+    if (!Array.isArray(prods) || prods.length === 0) {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
-    } else {
-      // كونا تاۋارلارغا ئەگەر تەستىق ھالىتى بولمىسا تەستىقلاندى قىلىپ بېكىتىش ھەمدە تەستىق كۈتۈۋاتقان تاۋارلارنى تولۇقلاش
-      try {
-        let prods = JSON.parse(storedProducts);
-        let updated = false;
+      prods = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+    }
 
-        // ھەر بىر تاۋارنىڭ approvalStatus ۋە كۆپ تىللىق تەرجىمىسىنىڭ تولۇقلىقىغا كاپالەتلىك قىلىش
-        prods = prods.map(p => {
-          if (!p.unit) {
-            p.unit = 'دانە';
-            updated = true;
-          }
-          if (!p.approvalStatus) {
-            p.approvalStatus = 'تەستىقلاندى';
-            updated = true;
-          }
-          // كونا تۈرلەرنى يېڭى 4 تۈرگە ئايلاندۇرۇش (ئۇيغۇر تىبابىتى، پىششىق دورىلار، ئۆسۈملۈك دورىلار، تەبىئىي ياغلار)
-          const catMap = {
-            'مىللىي زىبۇ-زىننەت': 'ئۇيغۇر تىبابىتى',
-            'كىتاب-مەدەنىيەت': 'ئۇيغۇر تىبابىتى',
-            'تۇرمۇش لازىمەتلىكلىرى': 'ئۇيغۇر تىبابىتى',
-            'كىيىم-كېچەك': 'پىششىق دورىلار',
-            'ئېلېكترون': 'پىششىق دورىلار',
-            'مىللىي تەبىئىي مەھسۇلاتلار': 'ئۆسۈملۈك دورىلار',
-            'گۈزەللىك ۋە ساقلىق': 'تەبىئىي ياغلار'
-          };
-          if (catMap[p.category]) {
-            p.category = catMap[p.category];
-            updated = true;
-          }
-          // ئادەم رەسىمى، قول، باش، بەدەن ئەزالىرى بار كونا رەسىملەرنى ساپ تەبىئىي رەسىملەر بىلەن ئالماشتۇرۇش
-          if (p.image && (
-            p.image.includes('photo-1596704017254') ||
-            p.image.includes('photo-1607604276583') ||
-            p.image.includes('photo-1600003014755') || 
-            p.image.includes('photo-1576092768241') || 
-            p.image.includes('photo-1576871337622') || 
-            p.image.includes('photo-1616683693504') ||
-            p.image.includes('photo-1608248597359') ||
-            p.image.includes('photo-1615655406736') ||
-            p.image.includes('photo-1607006314546') || 
-            p.image.includes('photo-1595231712325')
-          )) {
-            const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
-            if (initMatch) {
-              p.image = initMatch.image;
-              updated = true;
-            }
-          }
-          // دەسلەپكى تاۋارلارنىڭ كەم قالغان تەرجىمىلىرىنى INITIAL_PRODUCTS دىن تولۇقلاش
-          const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
-          if (initMatch && initMatch.translations) {
-            if (!p.translations || !p.translations.tr || !p.translations.tr.name) {
-              p.translations = initMatch.translations;
-              updated = true;
-            }
-          }
-          return p;
-        });
+    // ئابونت / باشقۇرغۇچى تەھرىرلىگەن ئۇچۇرلار ۋە ئۆچۈرۈلگەن تاۋارلارنى دەلىللەش
+    const userEdits = this.getUserEdits();
+    const deletedIds = this.getDeletedProductIds();
+    let updated = false;
 
-        // ئەگەر تەستىق كۈتۈۋاتقان تاۋارلار (PRD-117, PRD-118) قوشۇلمىغان بولسا، سىناش ۋە كۆرۈش ئۈچۈن قوشۇپ قويۇش
-        const hasPending = prods.some(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ');
-        if (!hasPending) {
-          const samplePending = INITIAL_PRODUCTS.filter(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ');
-          samplePending.forEach(sp => {
-            if (!prods.some(p => p.id === sp.id)) {
-              prods.unshift(sp);
-              updated = true;
-            }
-          });
-        }
+    // ئۆچۈرۈلگەنلەرنى چىقىرىۋېتىش
+    if (deletedIds.length > 0) {
+      const origLen = prods.length;
+      prods = prods.filter(p => !deletedIds.includes(p.id));
+      if (prods.length !== origLen) updated = true;
+    }
 
-        if (updated) {
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
-        }
-      } catch (e) {}
+    // ھەر بىر تاۋارغا ئابونتنىڭ يېقىنقى تەھرىرىنى قايتا سىڭدۈرۈش
+    prods = prods.map(p => {
+      if (userEdits && userEdits[p.id]) {
+        updated = true;
+        return { ...p, ...userEdits[p.id], isUserEdited: true };
+      }
+      if (!p.unit) {
+        p.unit = 'دانە';
+        updated = true;
+      }
+      if (!p.approvalStatus) {
+        p.approvalStatus = 'تەستىقلاندى';
+        updated = true;
+      }
+      return p;
+    });
+
+    // ئابونت ساقلىغان تاۋارلار يەرلىك تىزىملىكتە بولمىسا دەرھال قوشۇش
+    Object.values(userEdits).forEach(ue => {
+      if (ue && ue.id && !deletedIds.includes(ue.id) && !prods.some(p => p.id === ue.id)) {
+        prods.unshift(ue);
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
     }
     const storedAgents = localStorage.getItem(STORAGE_KEYS.AGENTS);
     if (!storedAgents || storedAgents.includes('(')) {
@@ -1554,10 +1565,35 @@ class StoreManager {
       const remoteProducts = await window.TeklimakanSupabase.fetchProducts();
       if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
         const localProds = this.getProducts();
-        // بۇلۇتتىكى سۈپەتلىك پىششىقلانغان تاۋارلار بىلەن يەرلىكنى بىرىكتۈرۈش
+        const userEdits = this.getUserEdits();
+        const deletedIds = this.getDeletedProductIds();
         const map = new Map();
-        localProds.forEach(p => map.set(p.id, p));
+
+        // 1) ئالدى بىلەن يەرلىكتىكى بارلىق تاۋارلارنى قاچىلاش
+        localProds.forEach(p => {
+          if (!deletedIds.includes(p.id)) {
+            map.set(p.id, p);
+          }
+        });
+
+        // 2) بۇلۇتتىن كەلگەن تاۋارلارنى بىرلەشتۈرۈش
         remoteProducts.forEach(rp => {
+          if (deletedIds.includes(rp.id)) return;
+
+          const localItem = map.get(rp.id);
+          const isLocallyEdited = localItem?.isUserEdited || !!userEdits[rp.id];
+
+          // 🛡️ ئەگەر باشقۇرغۇچى بۇ تاۋارنى ئاللىقاچان تەھرىرلىگەن بولسا، يەرلىك نۇسخا ھەرگىز قاپلانمايدۇ!
+          if (localItem && isLocallyEdited) {
+            // بۇلۇتقا قايتا كاپالەت شەكلىدە يوللاپ قويۇش
+            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+              window.TeklimakanSupabase.upsertProduct(localItem);
+            }
+            return;
+          }
+
+          // تېخى تەھرىرلەنمىگەن بولسا، بۇلۇتتىكى مەلۇمات بىلەن يېڭىلاش
+          const rpUnit = rp.translations?.unit || localItem?.unit || 'دانە';
           map.set(rp.id, {
             id: rp.id,
             name: rp.name,
@@ -1565,27 +1601,29 @@ class StoreManager {
             category: rp.category,
             price: Number(rp.price),
             oldPrice: rp.old_price ? Number(rp.old_price) : null,
-            stock: rp.stock,
-            sales: rp.sales,
-            rating: Number(rp.rating),
-            ratingCount: rp.rating_count,
+            stock: rp.stock !== undefined ? Number(rp.stock) : 0,
+            unit: rpUnit,
+            sales: rp.sales || 0,
+            rating: Number(rp.rating || 5.0),
+            ratingCount: rp.rating_count || 1,
             image: rp.image,
             description: rp.description,
             badge: rp.badge,
-            featured: rp.featured,
+            featured: !!rp.featured,
             approvalStatus: rp.approval_status || 'تەستىقلاندى',
             languageScope: rp.language_scope || 'all',
-            merchantBadge: rp.merchant_badge,
+            merchantBadge: rp.merchant_badge || 'ئىشەنچىلىك سودىگەر',
             agentId: rp.agent_id,
             agentName: rp.agent_name,
             translations: rp.translations || {}
           });
         });
+
         const merged = Array.from(map.values());
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
         this.notifyDataChange('products');
       } else if (Array.isArray(remoteProducts) && remoteProducts.length === 0) {
-        // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا دەسلەپكى قەدەمدە قاچىلاش
+        // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا قاچىلاش
         const currentProds = this.getProducts();
         currentProds.forEach(p => {
           window.TeklimakanSupabase.upsertProduct(p);
@@ -3320,16 +3358,25 @@ class StoreManager {
     const approvalStatus = productData.approvalStatus || (productData.isAgentSubmitted ? 'تەستىق كۈتۈۋاتىدۇ' : 'تەستىقلاندى');
 
     let savedProduct = null;
+    const nowIso = new Date().toISOString();
+
     if (productData.id) {
       const index = products.findIndex(p => p.id === productData.id);
+      const targetUnit = productData.unit || (index !== -1 ? products[index].unit : 'دانە');
+      const updatedProduct = { 
+        ...(index !== -1 ? products[index] : {}), 
+        ...productData,
+        unit: targetUnit,
+        isUserEdited: true,
+        updatedAt: nowIso,
+        approvalStatus: productData.approvalStatus || (index !== -1 ? products[index].approvalStatus : 'تەستىقلاندى')
+      };
       if (index !== -1) {
-        products[index] = { 
-          ...products[index], 
-          ...productData,
-          approvalStatus: productData.approvalStatus || products[index].approvalStatus || 'تەستىقلاندى'
-        };
-        savedProduct = products[index];
+        products[index] = updatedProduct;
+      } else {
+        products.unshift(updatedProduct);
       }
+      savedProduct = updatedProduct;
     } else {
       const newId = 'PRD-' + (Math.floor(100 + Math.random() * 900));
       const newProduct = {
@@ -3337,21 +3384,30 @@ class StoreManager {
         brand: productData.brand || 'تەكلىماكان سۈپەت',
         languageScope: productData.languageScope || 'all',
         approvalStatus: approvalStatus,
+        unit: productData.unit || 'دانە',
         sales: 0,
         rating: 5.0,
         ratingCount: 1,
         featured: false,
         translations: productData.translations || {},
-        createdAt: new Date().toISOString(),
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        isUserEdited: true,
         ...productData
       };
       products.unshift(newProduct);
       savedProduct = newProduct;
     }
+
+    // 1) يەرلىك ئاساسىي ساندانغا يېزىش
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+
+    // 2) مەڭگۈلۈك ئابونت تەھرىر ئامبىرىغا يېزىش (ھېچقانداق بۇلۇت ئۇچۇرى بۇنى قاپلىۋېتەلمەيدۇ)
+    this.saveUserEdit(savedProduct);
+
     this.notifyDataChange('products');
 
-    // ☁️ Supabase بۇلۇتقا ماس قەدەمدە يوللاش
+    // 3) ☁️ Supabase بۇلۇتقا ماس قەدەمدە قايتا ئەۋەتىش
     if (window.TeklimakanSupabase && savedProduct) {
       window.TeklimakanSupabase.upsertProduct(savedProduct);
     }
@@ -3361,8 +3417,66 @@ class StoreManager {
       product: savedProduct,
       message: approvalStatus === 'تەستىق كۈتۈۋاتىدۇ' 
         ? 'مەھسۇلات يوللاندى! باشقۇرغۇچى تەستىقلىغاندىن كېيىن ئېلان قىلىنىدۇ.' 
-        : 'مەھسۇلات ساقلاندى ۋە ئېلان قىلىندى!' 
+        : 'مەھسۇلات مەڭگۈلۈك ساقلاندى ۋە دۇكاندا يېڭىلاندى!' 
     };
+  }
+
+  // ئابونت تەھرىرلىرىنى ئوقۇش
+  getUserEdits() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_EDITS)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // ئابونت تەھرىرىنى مەڭگۈلۈك ساندۇققا پۈتۈش
+  saveUserEdit(product) {
+    if (!product || !product.id) return;
+    try {
+      const edits = this.getUserEdits();
+      edits[product.id] = { ...product, isUserEdited: true, updatedAt: new Date().toISOString() };
+      localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(edits));
+    } catch(e) {}
+  }
+
+  // ئۆچۈرۈلگەن تاۋارلار تىزىملىكى
+  getDeletedProductIds() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.DELETED_PRODUCTS)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // تاۋارنى ئۆچۈرۈلگەنلەر قاتارىغا قوشۇش
+  markProductDeleted(id) {
+    if (!id) return;
+    try {
+      const list = this.getDeletedProductIds();
+      if (!list.includes(id)) {
+        list.push(id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_PRODUCTS, JSON.stringify(list));
+      }
+      const edits = this.getUserEdits();
+      if (edits[id]) {
+        delete edits[id];
+        localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(edits));
+      }
+    } catch(e) {}
+  }
+
+  // تاۋارنى بۇلۇت ۋە يەرلىككە بىرلا ۋاقىتتا پۇختا كاپالەتلىك ساقلاش (Async)
+  async saveProductAsync(productData) {
+    const res = this.saveProduct(productData);
+    if (res.success && res.product && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+      try {
+        await window.TeklimakanSupabase.upsertProduct(res.product);
+      } catch (e) {
+        console.warn('Supabase async upsert خاتالىقى:', e);
+      }
+    }
+    return res;
   }
 
   // ==================== تاۋارلارنى تەستىقلاش مەشغۇلاتلىرى ====================
@@ -3376,8 +3490,13 @@ class StoreManager {
     if (product) {
       product.approvalStatus = 'تەستىقلاندى';
       product.approvedAt = new Date().toISOString();
+      product.isUserEdited = true;
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      this.saveUserEdit(product);
       this.notifyDataChange('products');
+      if (window.TeklimakanSupabase) {
+        window.TeklimakanSupabase.upsertProduct(product);
+      }
       return { success: true, message: `«${product.name}» مەھسۇلاتى مۇۋەپپەقىيەتلىك تەستىقلاندى ۋە دۇكانغا چىقىرىلدى!` };
     }
     return { success: false, message: 'تاۋار تېپىلمىدى!' };
@@ -3389,8 +3508,13 @@ class StoreManager {
     if (product) {
       product.approvalStatus = 'رەت قىلىندى';
       product.rejectReason = reason;
+      product.isUserEdited = true;
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      this.saveUserEdit(product);
       this.notifyDataChange('products');
+      if (window.TeklimakanSupabase) {
+        window.TeklimakanSupabase.upsertProduct(product);
+      }
       return { success: true, message: `«${product.name}» مەھسۇلاتى ئېلان قىلىنىشتىن رەت قىلىندى.` };
     }
     return { success: false, message: 'تاۋار تېپىلمىدى!' };
@@ -3411,7 +3535,11 @@ class StoreManager {
     let products = this.getProducts();
     products = products.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    this.markProductDeleted(id);
     this.notifyDataChange('products');
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteProduct === 'function') {
+      window.TeklimakanSupabase.deleteProduct(id);
+    }
     return true;
   }
 
@@ -3420,8 +3548,14 @@ class StoreManager {
     const product = products.find(p => p.id === id);
     if (product) {
       product.stock = Math.max(0, parseInt(newStock, 10));
+      product.isUserEdited = true;
+      product.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      this.saveUserEdit(product);
       this.notifyDataChange('products');
+      if (window.TeklimakanSupabase) {
+        window.TeklimakanSupabase.upsertProduct(product);
+      }
       return true;
     }
     return false;

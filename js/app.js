@@ -383,18 +383,6 @@ function initTeklimakanApp() {
       if (col3Span) col3Span.textContent = i18n.t('footerCol3');
       else fCol3.textContent = i18n.t('footerCol3');
     }
-    const fHintRates = document.getElementById('footerRatesHint');
-    const fBoxRates = document.getElementById('footerRatesBox');
-    if (fHintRates && fBoxRates) {
-      const isCol = fBoxRates.classList.contains('is-collapsed');
-      fHintRates.textContent = isCol ? (i18n.t('accordionExpand') || 'ئېچىش') : (i18n.t('accordionCollapse') || 'يىغىش');
-    }
-    const fHintAbout = document.getElementById('footerAboutHint');
-    const fListAbout = document.getElementById('footerAboutList');
-    if (fHintAbout && fListAbout) {
-      const isCol = fListAbout.classList.contains('is-collapsed');
-      fHintAbout.textContent = isCol ? (i18n.t('accordionExpand') || 'ئېچىش') : (i18n.t('accordionCollapse') || 'يىغىش');
-    }
     const fHint = document.getElementById('footerContactHint');
     const fList = document.getElementById('footerContactList');
     if (fHint && fList) {
@@ -4942,18 +4930,6 @@ function initTeklimakanApp() {
   // ==================== 📞 تۆۋەنكى پۇت قىسمى سىيرىلما كۆزنەكلىرى (Footer Sliding Accordions) ====================
   function initFooterAccordions() {
     const accordions = [
-      {
-        headerId: 'footerColRatesTitle',
-        contentId: 'footerRatesBox',
-        chevronId: 'footerRatesChevron',
-        hintId: 'footerRatesHint'
-      },
-      {
-        headerId: 'footerCol2Title',
-        contentId: 'footerAboutList',
-        chevronId: 'footerAboutChevron',
-        hintId: 'footerAboutHint'
-      },
       {
         headerId: 'footerCol3Title',
         contentId: 'footerContactList',

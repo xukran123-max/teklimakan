@@ -1301,12 +1301,15 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span>📍 ${agent.city || 'ئىستانبۇل'}</span> | <span class="number-latin">${agent.phone || '-'}</span>
                 </div>
                 <div class="number-latin" style="font-size: 0.7rem; color: #2563eb; font-weight: 600;">${agent.email}</div>
-                <!-- 📜 ئارخىپلانغان كېلىشىمنامە كۇنۇپكىسى -->
-                <div style="margin-top: 4px;">
+                <!-- 📜 ئارخىپلانغان كېلىشىمنامە كۇنۇپكىسى & سېتىش ئۇسۇلى -->
+                <div style="margin-top: 4px; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                   <button type="button" class="btn-agent-contract-archive" data-id="${agent.id}" title="ۋاكالەتچىلىك ئىمزالانغان كېلىشىمنامىسىنى كۆرۈش ۋە چۈشۈرۈش" style="background: #fffbeb; border: 1.5px solid #f59e0b; color: #b45309; padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
                     <i class="fas fa-file-contract" style="color: #d97706;"></i>
                     <span>📜 كېلىشىمنامە [${(agent.legalAgreement && agent.legalAgreement.contractNumber) ? agent.legalAgreement.contractNumber : ('TK-AGR-' + agent.id.replace('AGT-', ''))}]</span>
                   </button>
+                  ${agent.salesMethod === 'تور بېكەت مەھسۇلاتى' 
+                    ? `<span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" title="سېتىش ئۇسۇلى: تور بېكەت مەھسۇلاتى"><i class="fas fa-globe"></i> تور بېكەت مەھسۇلاتى</span>` 
+                    : `<span style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" title="سېتىش ئۇسۇلى: ئۆزۈمنىڭ مەھسۇلاتى"><i class="fas fa-store"></i> ئۆزۈمنىڭ مەھسۇلاتى</span>`}
                 </div>
               </div>
             </div>

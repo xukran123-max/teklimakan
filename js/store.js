@@ -2292,6 +2292,7 @@ class StoreManager {
       agentName: agentData.name.trim(),
       agentEmail: email,
       agentPhone: phone,
+      salesMethod: agentData.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى',
       liabilityClauseAccepted: true,
       liabilityClauseText: 'تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.',
       fiveRulesAccepted: true,
@@ -2308,6 +2309,7 @@ class StoreManager {
       targetAgent.name = agentData.name.trim();
       targetAgent.email = email;
       targetAgent.phone = phone || targetAgent.phone;
+      targetAgent.salesMethod = agentData.salesMethod || targetAgent.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى';
       targetAgent.proposedBrands = agentData.proposedBrands || agentData.categoryInterest || targetAgent.proposedBrands || 'بارلىق تۈرلەر';
       targetAgent.notes = agentData.notes || targetAgent.notes || '';
       targetAgent.status = 'تەستىق كۈتۈۋاتىدۇ'; // ئارقا سۇپىدا كۆرۈنۈشى ئۈچۈن قايتا تەستىق كۈتۈش ھالىتىگە ئۆزگەرتىش
@@ -2320,6 +2322,7 @@ class StoreManager {
         name: agentData.name.trim(),
         email: email,
         phone: phone,
+        salesMethod: agentData.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى',
         status: 'تەستىق كۈتۈۋاتىدۇ',
         canPublishMultilingual: false,
         authorizedBrands: [],
@@ -2365,6 +2368,7 @@ class StoreManager {
       `👤 <b>ئىسىم-فامىلىسى / دۇكان نامى:</b> <b>${targetAgent.name}</b>\n` +
       `📞 <b>تېلېفون نومۇرى:</b> <code>${targetAgent.phone || '-'}</code>\n` +
       `📧 <b>ئېلخەت ئادرېسى:</b> <code>${targetAgent.email}</code>\n` +
+      `📦 <b>سېتىش ئۇسۇلى:</b> <b>${targetAgent.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى'}</b>\n` +
       `🏷️ <b>تەلەپ قىلغان ماركا/تۈر:</b> ${targetAgent.proposedBrands}\n`;
 
     if (targetAgent.notes) {
@@ -2449,6 +2453,7 @@ class StoreManager {
     <div><strong>👤 ۋاكالەتچى نامى:</strong> <span>${agent.name}</span></div>
     <div><strong>📞 تېلېفون نومۇرى:</strong> <span>${agent.phone || '-'}</span></div>
     <div><strong>📧 ئېلخەت ئادرېسى:</strong> <span>${agent.email}</span></div>
+    <div><strong>📦 سېتىش ئۇسۇلى:</strong> <span style="font-weight: 800; color: #b45309;">${agent.salesMethod || (agr && agr.salesMethod) || 'ئۆزۈمنىڭ مەھسۇلاتى'}</span></div>
     <div><strong>🏷️ ئىلتىماس كودى:</strong> <span>${agent.id}</span></div>
   </div>
 

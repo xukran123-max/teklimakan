@@ -2793,6 +2793,7 @@ function initTeklimakanApp() {
         `📧 <b>ئېلخەت:</b> <code>${agent.email}</code>\n` +
         `📞 <b>تېلېفون:</b> <code>${agent.phone || '-'}</code>\n` +
         `🏷️ <b>تەلەپ قىلغان ماركا / تۈر:</b> ${agent.proposedBrands || 'ئومۇمىي'}\n` +
+        `📦 <b>سېتىش ئۇسۇلى:</b> <b>${agent.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى'}</b>\n` +
         (agent.notes ? `📝 <b>ئىزاھات:</b> ${agent.notes}\n` : '') +
         `\n⚠️ <b>ھالىتى:</b> ⏳ <b>تەستىق كۈتۈۋاتىدۇ</b>\n` +
         `⏰ <b>ئىلتىماس ۋاقتى:</b> ${new Date().toLocaleString()}\n\n`;
@@ -2834,6 +2835,7 @@ function initTeklimakanApp() {
         'ئىسىم-فامىلىسى': agent.name,
         'ئېلخەت ئادرېسى': agent.email,
         'تېلېفون نومۇرى': agent.phone || '-',
+        'سېتىش ئۇسۇلى': agent.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى',
         'تەلەپ قىلغان ماركا / تۈر': agent.proposedBrands || 'ئومۇمىي',
         'ئىلتىماس بايانى': agent.notes || '-',
         'ھالىتى': '⏳ تەستىق كۈتۈۋاتىدۇ (ئارقا سۇپىدىن تەستىقلاڭ)',
@@ -3222,9 +3224,45 @@ function initTeklimakanApp() {
       });
     }
 
+    // 🛒 سېتىش ئۇسۇلى تاللاش كۇنۇپكىسىنىڭ چەككەندىكى ئاكتىپ ئۇسلۇبى
+    const salesMethodRadios = document.querySelectorAll('input[name="applySalesMethod"]');
+    function updateSalesMethodStyle() {
+      salesMethodRadios.forEach(r => {
+        const parentLabel = r.closest('.sales-method-btn');
+        if (parentLabel) {
+          if (r.checked) {
+            parentLabel.style.borderColor = '#2563eb';
+            parentLabel.style.background = '#eff6ff';
+            parentLabel.style.boxShadow = '0 0 0 2px rgba(37,99,235,0.2)';
+          } else {
+            parentLabel.style.borderColor = '#cbd5e1';
+            parentLabel.style.background = '#ffffff';
+            parentLabel.style.boxShadow = 'none';
+          }
+        }
+      });
+    }
+    salesMethodRadios.forEach(r => {
+      r.addEventListener('change', updateSalesMethodStyle);
+    });
+
     if (applyForm) {
       applyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // 🛒 سېتىش ئۇسۇلى تاللانغانلىقىنى دەلىللەش (مەجبۇرىي)
+        const salesMethodRadio = applyForm.querySelector('input[name="applySalesMethod"]:checked');
+        if (!salesMethodRadio || !salesMethodRadio.value) {
+          alert('⚠️ داۋاملاشتۇرۇش ئۈچۈن سېتىش ئۇسۇلىنى تاللىشىڭىز مەجبۇرىي! (ئۆزۈمنىڭ مەھسۇلاتى ياكى تور بېكەت مەھسۇلاتى)');
+          showToast('سېتىش ئۇسۇلىنى تاللاڭ!', 'warning');
+          const firstRadio = applyForm.querySelector('input[name="applySalesMethod"]');
+          if (firstRadio) {
+            firstRadio.focus();
+            firstRadio.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+        const salesMethod = salesMethodRadio.value;
 
         // 📜 مەجبۇرىي كېلىشىمنامە ۋە مەسئۇلىيەت بەلگىلىمىسىگە قوشۇلۇشنى تەكشۈرۈش
         const agreeCheck = document.getElementById('applyAgreeTerms');
@@ -3256,6 +3294,7 @@ function initTeklimakanApp() {
             name,
             email,
             phone,
+            salesMethod,
             proposedBrands: categoryInterest,
             notes
           });
@@ -3263,6 +3302,7 @@ function initTeklimakanApp() {
           if (res.success) {
             lastAppliedAgentObj = res.agent;
             applyForm.reset();
+            updateSalesMethodStyle();
             applyForm.style.display = 'none';
             if (successBox) {
               successBox.style.display = 'block';

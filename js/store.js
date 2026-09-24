@@ -3294,8 +3294,10 @@ class StoreManager {
   }
 
   getProductById(id, lang = null) {
+    if (!id) return null;
+    const cleanId = String(id).trim().toLowerCase();
     const products = this.getProducts();
-    const p = products.find(prod => prod.id === id);
+    const p = products.find(prod => String(prod.id).trim().toLowerCase() === cleanId);
     if (!p) return null;
     if (lang) return this.getLocalizedProduct(p, lang);
     return p;

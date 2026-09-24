@@ -56,6 +56,7 @@ function initTeklimakanApp() {
   try { initAdminDeviceButton(); } catch (e) { console.error('initAdminDeviceButton error:', e); }
   try { initLiveExchangeRatesTicker(); } catch (e) { console.error('initLiveExchangeRatesTicker error:', e); }
   try { initFooterAccordions(); } catch (e) { console.error('initFooterAccordions error:', e); }
+  try { checkUrlForProduct(); } catch (e) { console.error('checkUrlForProduct error:', e); }
 
   function initStore() {
     try { updateStaticTranslations(); } catch (e) { console.error('updateStaticTranslations error:', e); }
@@ -1392,10 +1393,80 @@ function initTeklimakanApp() {
     resultsWrap.innerHTML = html;
   }
 
+  // ==================== 🔗 تور ئادرېسى ۋە كۆزنەك باشقۇرۇش ====================
+  function clearUrlProductId() {
+    try {
+      if (window.location.search.includes('id=') || window.location.search.includes('product=') || window.location.search.includes('p=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('id');
+        url.searchParams.delete('product');
+        url.searchParams.delete('prd');
+        url.searchParams.delete('p');
+        const cleanSearch = url.searchParams.toString() ? '?' + url.searchParams.toString() : '';
+        window.history.replaceState(null, '', window.location.pathname + cleanSearch);
+      }
+    } catch (e) {}
+  }
+
+  // ==================== 🔗 تور ئادرېسىدىكى مەھسۇلاتنى ئاپتوماتىك ئېچىش (Deep Linking) ====================
+  function checkUrlForProduct() {
+    try {
+      const url = new URL(window.location.href);
+      let prodId = url.searchParams.get('id') || 
+                   url.searchParams.get('product') || 
+                   url.searchParams.get('prd') || 
+                   url.searchParams.get('p');
+
+      if (!prodId && window.location.hash) {
+        const hash = window.location.hash.replace(/^#/, '').trim();
+        if (hash.toLowerCase().startsWith('prd-') || hash.toLowerCase().startsWith('id=')) {
+          prodId = hash.replace(/^id=/i, '');
+        }
+      }
+
+      if (!prodId) return;
+
+      prodId = decodeURIComponent(prodId).trim();
+
+      // سۇپىدىكى تاۋارلار قاچىلىنىپ بولغۇچە پات-پات سىناپ تەكشۈرۈش
+      let attempts = 0;
+      const maxAttempts = 25;
+      const timer = setInterval(() => {
+        attempts++;
+        if (window.appStore && typeof window.appStore.getProducts === 'function') {
+          const prods = window.appStore.getProducts();
+          if (prods && prods.length > 0) {
+            const found = window.appStore.getProductById(prodId) ||
+                          window.appStore.getProductById('PRD-' + prodId);
+            if (found) {
+              clearInterval(timer);
+              setTimeout(() => {
+                openQuickView(found.id);
+                const el = document.querySelector(`[data-product-id="${found.id}"]`);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 200);
+              return;
+            }
+          }
+        }
+        if (attempts >= maxAttempts) {
+          clearInterval(timer);
+        }
+      }, 150);
+    } catch (e) {
+      console.warn('checkUrlForProduct error:', e);
+    }
+  }
+
   // ==================== تېز كۆرۈش ====================
   function openQuickView(productId) {
-    const lang = window.appI18n.getLang();
-    const product = window.appStore.getProductById(productId, lang);
+    if (!productId) return;
+    const cleanId = String(productId).replace(/^#/, '').trim();
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    const product = window.appStore.getProductById(cleanId, lang) ||
+                    window.appStore.getProductById('PRD-' + cleanId, lang);
     if (!product) return;
 
     const modal = document.getElementById('quickViewModal');
@@ -1464,6 +1535,12 @@ function initTeklimakanApp() {
 
     modal.classList.add('active');
 
+    // كۆزنەك ئېچىلغاندا تور كۆرگۈچ ئادرېسىنى ?id=PRD-xxx قىلىپ يېڭىلاش
+    try {
+      const newUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
+      window.history.replaceState(null, '', newUrl);
+    } catch (e) {}
+
     let currentQty = 1;
     const qtyInput = document.getElementById('modalQtyInput');
     document.getElementById('modalQtyPlus').addEventListener('click', () => {
@@ -1485,6 +1562,7 @@ function initTeklimakanApp() {
         if (typeof playChime === 'function') playChime('success');
         showToast(res.message, 'success');
         modal.classList.remove('active');
+        clearUrlProductId();
         updateCartUI();
         openCartDrawer();
       }
@@ -1495,13 +1573,13 @@ function initTeklimakanApp() {
       instantWaBtn.addEventListener('click', () => {
         const phone = '905551609999';
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
-        const itemUrl = `${window.location.origin}${window.location.pathname}?id=${product.id}`;
+        const itemUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
         const msg = encodeURIComponent(
-          `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە زاكاز قىلماقچىتىم:\n` +
+          `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
           `📦 مەھسۇلات: ${product.name}\n` +
           `💰 باھاسى: ${formattedPrice} (${currentQty} دانە)\n` +
-          `🏷️ تۈرى: ${product.category}\n` +
-          `🔗 ئۇلىنىش: ${itemUrl}\n\n` +
+          `🏷️ تۈرى: ${product.category}\n\n` +
+          `🔗 مەھسۇلات ئۇلانمىسى:\n${itemUrl}\n\n` +
           `زاكازنى تەستىقلاپ، ھېسابات ئۇچۇرىنى بەرسىڭىز، رەھمەت!`
         );
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
@@ -1513,25 +1591,32 @@ function initTeklimakanApp() {
       shareBtn.addEventListener('click', async () => {
         const shareUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
         const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
-        const shareText = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n🔗 ئۇلانمىسى: ${shareUrl}`;
+        const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}`;
+        const fullShareMessage = `${shareDesc}\n\n🔗 مەھسۇلاتنى كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
 
+        // 1. يانفون سىستېمىلىق ھەمبەھىرلەش تىزىملىكى (navigator.share)
+        // دىققەت: WhatsApp قا ئەۋەتكەندە تېكىست ئىچىگىمۇ ھەم url گىمۇ بەرسە، ئۇلانما ئىككى قېتىم تەكرارلىنىپ چىقىدۇ
+        // شۇڭا text قا مەزمۇننى، url قا ئايرىم ئۇلانمىنى بېرىمىز (ئەپلەر ئۆزى بوشلۇق قويۇپ پاكىز تەڭشەيدۇ).
         if (navigator.share) {
           try {
             await navigator.share({
               title: shareTitle,
-              text: shareText,
+              text: shareDesc,
               url: shareUrl
             });
             return;
-          } catch (e) {}
+          } catch (e) {
+            if (e.name === 'AbortError') return;
+          }
         }
 
+        // 2. چاپلاش تاختىسىغا كۆچۈرۈش زاپاس قىسمى (Clipboard fallback)
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(shareUrl);
+            await navigator.clipboard.writeText(fullShareMessage);
           } else {
             const ta = document.createElement('textarea');
-            ta.value = shareUrl;
+            ta.value = fullShareMessage;
             document.body.appendChild(ta);
             ta.select();
             document.execCommand('copy');
@@ -2075,9 +2160,22 @@ function initTeklimakanApp() {
     document.querySelectorAll('.btn-modal-close').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const m = e.target.closest('.modal-backdrop');
-        if (m) m.classList.remove('active');
+        if (m) {
+          m.classList.remove('active');
+          if (m.id === 'quickViewModal') clearUrlProductId();
+        }
       });
     });
+
+    const quickViewModalEl = document.getElementById('quickViewModal');
+    if (quickViewModalEl) {
+      quickViewModalEl.addEventListener('click', (e) => {
+        if (e.target === quickViewModalEl) {
+          quickViewModalEl.classList.remove('active');
+          clearUrlProductId();
+        }
+      });
+    }
 
     // ==================== 🔔 ئاۋاز ئۈنۈمى (Web Audio API Synthesizer) ====================
     function playChime(kind = 'success') {
@@ -6041,6 +6139,8 @@ ${text}
   window.showToast = showToast;
   window.openTrackOrderModal = openTrackOrderModal;
   window.doTrackOrder = doTrackOrder;
+  window.openQuickView = openQuickView;
+  window.checkUrlForProduct = checkUrlForProduct;
 }
 
 if (document.readyState === 'loading') {

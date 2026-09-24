@@ -1824,7 +1824,8 @@ class StoreManager {
   formatPrice(amountInCny) {
     const info = this.getCurrencyInfo();
     const converted = Math.round(amountInCny * info.rate);
-    return `${info.symbol}${converted}`;
+    const formattedNum = converted.toLocaleString('en-US');
+    return `${info.symbol} ${formattedNum}`;
   }
 
   getFreeShippingThreshold() {

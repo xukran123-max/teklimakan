@@ -72,12 +72,13 @@ button i, .btn-action-edit i, .btn-action-delete i, .action-btn i {
   font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
 }
 
-/* سانلار ۋە ئىنگلىزچە بەلگىلەر رەسىمدىكىدەك چىرايلىق چىقىشى */
+/* سانلار ۋە ئىنگلىزچە بەلگىلەر (Latin numbers, currency symbols like ₺/$) */
 .number-latin {
-  direction: ltr;
+  direction: ltr !important;
   display: inline-block;
-  font-family: 'Noto Naskh Arabic', 'Scheherazade New', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.25px;
 }
 
 /* تېما ۋە سەھىپە خەتلىرىنىڭ بىرلىككە كەلگەن فونىتى */

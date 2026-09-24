@@ -393,11 +393,28 @@ body, .admin-app, input, select, textarea, button {
 
 /* ھالەت بەلگىلىرى (Status Badges) */
 .status-pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   padding: 0.3rem 0.75rem;
   border-radius: var(--radius-full);
   font-size: 0.88rem;
   font-weight: 700;
+  line-height: 1.3;
+}
+
+/* سانلار ۋە لىرا بەلگىسىنى تۇتاشتۇرۇۋالماسلىق كاپالىتى (Latin numbers & Turkish Lira symbol shield) */
+.number-latin,
+.admin-table .number-latin,
+.table-product-price,
+.stat-card .number-latin,
+.modal .number-latin {
+  direction: ltr !important;
+  display: inline-block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.25px;
 }
 
 .status-pending { background: #fef3c7; color: #92400e; }

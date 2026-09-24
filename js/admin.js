@@ -1141,8 +1141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span style="font-weight: 800; font-size: 0.72rem; color: ${tier.tier === 'gold' ? '#b45309' : (tier.tier === 'silver' ? '#0369a1' : '#6d28d9')};">${tier.badgeLabel}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; color: var(--text-muted);">
-                <span>سېتىش: <strong class="number-latin" style="color: #0f172a;">₺${monthlySalesFormatted}</strong> (${monthlyOrders} زاكاز)</span>
-                <span>پايدا: <strong class="number-latin" style="color: #15803d; font-weight: 800;">₺${commissionFormatted}</strong></span>
+                <span>سېتىش: <strong class="number-latin" style="color: #0f172a;">₺ ${monthlySalesFormatted}</strong> (${monthlyOrders} زاكاز)</span>
+                <span>پايدا: <strong class="number-latin" style="color: #15803d; font-weight: 800;">₺ ${commissionFormatted}</strong></span>
               </div>
             </div>
 
@@ -1337,13 +1337,13 @@ document.addEventListener('DOMContentLoaded', () => {
           <!-- 4. ئايلىق سېتىش ۋە پايدا -->
           <td>
             <div style="font-size: 0.84rem; font-weight: 800; color: #0f172a;">
-              <span class="number-latin">₺${monthlySalesFormatted}</span>
+              <span class="number-latin">₺ ${monthlySalesFormatted}</span>
             </div>
             <div style="font-size: 0.72rem; color: #15803d; font-weight: 700; margin-top: 0.1rem;">
-              پايدا (${commissionRate}%): <span class="number-latin" style="font-weight: 900;">₺${commissionFormatted}</span>
+              پايدا (${commissionRate}%): <span class="number-latin" style="font-weight: 900;">₺ ${commissionFormatted}</span>
             </div>
             <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 0.1rem;">
-              ئومۇمىي: <span class="number-latin">₺${totalSalesFormatted}</span>
+              ئومۇمىي: <span class="number-latin">₺ ${totalSalesFormatted}</span>
             </div>
           </td>
 

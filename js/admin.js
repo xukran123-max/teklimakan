@@ -1687,11 +1687,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="font-weight: 800; color: #0f172a;"><span class="number-latin">\u20BA${a.monthlySales.toLocaleString('tr-TR')}</span></td>
             <td><span class="number-latin">${a.monthlyOrders}</span> دانە</td>
             <td>
-              <div style="display: inline-flex; align-items: center; gap: 0.35rem; justify-content: center;">
-                <span class="number-latin" style="font-weight: 800; color: #1e3a8a; font-size: 0.88rem;">${a.commissionRate}%</span>
-                <button type="button" class="btn-edit-agent-commission-single" data-id="${a.id}" data-name="${a.name}" data-rate="${a.commissionRate}" title="${a.name} نىڭ كومىسسىيە نىسبىتىنى تەھرىرلەش" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #2563eb; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; transition: all 0.2s;">
-                  <i class="fas fa-edit"></i>
-                </button>
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem;">
+                <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <button type="button" class="btn-edit-agent-commission-single" data-id="${a.id}" data-name="${a.name}" data-rate="${a.commissionRate}" data-period="${a.commissionPeriod || ''}" data-payout="${a.commissionPayoutDay || ''}" title="${a.name} نىڭ كومىسسىيە ۋاقتى ۋە پىرسەنتىنى تەھرىرلەش" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #2563eb; padding: 2px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.74rem; font-weight: 800; transition: all 0.2s;">
+                    <i class="fas fa-edit"></i>
+                    <span class="number-latin" style="font-size: 0.88rem; font-weight: 900; color: #1e3a8a;">${a.commissionRate}%</span>
+                  </button>
+                </div>
+                <div style="font-size: 0.68rem; color: #0284c7; font-weight: 700; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.2rem;" title="بۇ ۋاكالەتچىنىڭ ھېسابلاش مەزگىلى">
+                  <i class="fas fa-calendar-alt" style="font-size: 0.62rem;"></i>
+                  <span>${a.commissionPeriod || summary.monthTitle || '2026-يىلى 9-ئاي'}</span>
+                </div>
               </div>
             </td>
             <td style="font-weight: 900; color: #15803d;"><span class="number-latin">\u20BA${a.monthlyCommission.toLocaleString('tr-TR')}</span></td>
@@ -1741,19 +1747,22 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.add('active');
   }
 
-  // ⚙️ كومىسسىيە نىسبىتىنى تەھرىرلەش كۆزنىكىنى ئېچىش
+  // ⚙️ كومىسسىيە نىسبىتى ۋە ۋاقتىنى تەھرىرلەش كۆزنىكىنى ئېچىش
   function openEditCommissionModal(targetAgentId = null) {
     const modal = document.getElementById('modalEditCommission');
     if (!modal) return;
 
     const select = document.getElementById('commAgentSelect');
     const rateInput = document.getElementById('commAgentRateInput');
+    const periodInput = document.getElementById('commAgentPeriodInput');
+    const periodQuick = document.getElementById('commAgentPeriodQuick');
+    const payoutDayInput = document.getElementById('commAgentPayoutDayInput');
     const agents = window.appStore.getAgents('name');
 
     if (select) {
       select.innerHTML = agents.map(a => `
-        <option value="${a.id}" data-rate="${a.commissionRate !== undefined ? a.commissionRate : 15}">
-          ${a.name} (${a.id}) - ھازىرقى كومىسسىيەسى: ${a.commissionRate !== undefined ? a.commissionRate : 15}%
+        <option value="${a.id}" data-rate="${a.commissionRate !== undefined ? a.commissionRate : 15}" data-period="${a.commissionPeriod || '2026-يىلى 9-ئاي'}" data-payout="${a.commissionPayoutDay || 'ھەر ئاينىڭ 15-كۈنى'}">
+          ${a.name} (${a.id}) - ${a.commissionRate !== undefined ? a.commissionRate : 15}% [${a.commissionPeriod || '2026-يىلى 9-ئاي'}]
         </option>
       `).join('');
 
@@ -1761,8 +1770,24 @@ document.addEventListener('DOMContentLoaded', () => {
         select.value = targetAgentId;
       }
       const selOpt = select.selectedOptions[0];
-      if (selOpt && rateInput) {
-        rateInput.value = selOpt.getAttribute('data-rate') || 15;
+      if (selOpt) {
+        if (rateInput) rateInput.value = selOpt.getAttribute('data-rate') || 15;
+        const curPeriod = selOpt.getAttribute('data-period') || '2026-يىلى 9-ئاي';
+        if (periodInput) periodInput.value = curPeriod;
+        if (payoutDayInput) payoutDayInput.value = selOpt.getAttribute('data-payout') || 'ھەر ئاينىڭ 15-كۈنى';
+        if (periodQuick) {
+          let matched = false;
+          for (let i = 0; i < periodQuick.options.length; i++) {
+            if (periodQuick.options[i].value === curPeriod) {
+              periodQuick.selectedIndex = i;
+              matched = true;
+              break;
+            }
+          }
+          if (!matched && periodQuick.querySelector('option[value="custom"]')) {
+            periodQuick.value = 'custom';
+          }
+        }
       }
     }
 
@@ -4979,9 +5004,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (commAgentSelect) {
       commAgentSelect.addEventListener('change', () => {
         const rateInput = document.getElementById('commAgentRateInput');
+        const periodInput = document.getElementById('commAgentPeriodInput');
+        const periodQuick = document.getElementById('commAgentPeriodQuick');
+        const payoutDayInput = document.getElementById('commAgentPayoutDayInput');
         const selOpt = commAgentSelect.selectedOptions[0];
-        if (selOpt && rateInput) {
-          rateInput.value = selOpt.getAttribute('data-rate') || 15;
+        if (selOpt) {
+          if (rateInput) rateInput.value = selOpt.getAttribute('data-rate') || 15;
+          const curPeriod = selOpt.getAttribute('data-period') || '2026-يىلى 9-ئاي';
+          if (periodInput) periodInput.value = curPeriod;
+          if (payoutDayInput) payoutDayInput.value = selOpt.getAttribute('data-payout') || 'ھەر ئاينىڭ 15-كۈنى';
+          if (periodQuick) {
+            let matched = false;
+            for (let i = 0; i < periodQuick.options.length; i++) {
+              if (periodQuick.options[i].value === curPeriod) {
+                periodQuick.selectedIndex = i;
+                matched = true;
+                break;
+              }
+            }
+            if (!matched && periodQuick.querySelector('option[value="custom"]')) {
+              periodQuick.value = 'custom';
+            }
+          }
+        }
+      });
+    }
+
+    const commAgentPeriodQuick = document.getElementById('commAgentPeriodQuick');
+    if (commAgentPeriodQuick) {
+      commAgentPeriodQuick.addEventListener('change', () => {
+        const periodInput = document.getElementById('commAgentPeriodInput');
+        if (commAgentPeriodQuick.value !== 'custom' && periodInput) {
+          periodInput.value = commAgentPeriodQuick.value;
         }
       });
     }
@@ -4992,13 +5046,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const agId = document.getElementById('commAgentSelect')?.value;
         const rate = parseFloat(document.getElementById('commAgentRateInput')?.value || 15);
+        const period = document.getElementById('commAgentPeriodInput')?.value?.trim() || '2026-يىلى 9-ئاي';
+        const payoutDay = document.getElementById('commAgentPayoutDayInput')?.value?.trim() || 'ھەر ئاينىڭ 15-كۈنى';
         if (!agId) return;
-        window.appStore.updateAgentCommissionRate(agId, rate);
+
+        window.appStore.updateAgentCommissionRate(agId, rate, period, payoutDay);
         renderAgentMonthlySummaryTable();
         renderAgentsTable();
         const modal = document.getElementById('modalEditCommission');
         if (modal) modal.classList.remove('active');
-        showAdminToast(`✅ ۋاكالەتچى كومىسسىيەسى ${rate}% قىلىپ ساقلاندى!`, 'success');
+        showAdminToast(`✅ ۋاكالەتچىنىڭ كومىسسىيە نىسبىتى ${rate}% ھەمدە ۋاقتى «${period}» قىلىپ ساقلاندى!`, 'success');
       });
     }
 

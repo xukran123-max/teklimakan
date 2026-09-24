@@ -1974,7 +1974,9 @@ class StoreManager {
         tierBadge: tier.badge,
         tierTitle: tier.title,
         certCode: a.certCode || '',
-        authorizedBrands: a.authorizedBrands || []
+        authorizedBrands: a.authorizedBrands || [],
+        commissionPeriod: a.commissionPeriod || '2026-يىلى 9-ئاي',
+        commissionPayoutDay: a.commissionPayoutDay || 'ھەر ئاينىڭ 15-كۈنى'
       };
     });
 
@@ -1992,12 +1994,20 @@ class StoreManager {
     };
   }
 
-  // ⚙️ ۋاكالەتچى كومىسسىيە نىسبىتىنى يەككە يېڭىلاش
-  updateAgentCommissionRate(agentId, rate) {
+  // ⚙️ ۋاكالەتچى كومىسسىيە نىسبىتى ۋە ۋاقتىنى يەككە يېڭىلاش
+  updateAgentCommissionRate(agentId, rate, period = null, payoutDay = null) {
     let agents = this.getAgents('none');
     const agent = agents.find(a => a.id === agentId);
     if (!agent) return false;
-    agent.commissionRate = Number(rate);
+    if (rate !== undefined && rate !== null && rate !== '') {
+      agent.commissionRate = Number(rate);
+    }
+    if (period) {
+      agent.commissionPeriod = period.trim();
+    }
+    if (payoutDay) {
+      agent.commissionPayoutDay = payoutDay.trim();
+    }
     localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
     this.notifyDataChange('agents');
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {

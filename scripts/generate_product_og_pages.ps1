@@ -1,45 +1,56 @@
-﻿# ==============================================================================
-# 🛍️ تەكلىماكان سودا سۇپىسى — مەھسۇلات ھەمبەھىرلەش بەتلىرىنى ھاسىللاش (Product OG Pages Generator)
-# ==============================================================================
-
 param(
   [string]$BaseUrl = "https://www.teklimakan.com"
 )
 
 $rootDir = Split-Path -Parent $PSScriptRoot
-$storePath = Join-Path $rootDir "js\store.js"
 $outDir = Join-Path $rootDir "p"
+$imgDir = Join-Path $rootDir "images\products"
 
-if (-not (Test-Path $outDir)) {
-  New-Item -ItemType Directory -Path $outDir -Force | Out-Null
-}
+if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
+if (-not (Test-Path $imgDir)) { New-Item -ItemType Directory -Path $imgDir -Force | Out-Null }
 
-if (-not (Test-Path $storePath)) {
-  Write-Error "store.js tepilmidi: $storePath"
-  exit 1
-}
+$sbFile = Join-Path $rootDir "js\supabase.js"
+$anonKey = (Get-Content $sbFile | Select-String -Pattern "anonKey:\s*'([^']+)'").Matches.Groups[1].Value
 
-$raw = Get-Content $storePath -Raw -Encoding UTF8
-$matches = [regex]::Matches($raw, "id:\s*'(PRD-[^']+)',[\s\S]*?name:\s*'([^']+)',[\s\S]*?price:\s*([0-9.]+),[\s\S]*?image:\s*'([^']+)',[\s\S]*?description:\s*'([^']+)'")
+Write-Host "🔄 Supabase بۇلۇت ئامبىرىدىن ئەڭ يېڭى ھەقىقىي مەھسۇلاتلار ئېلىنماقتا..."
+$products = Invoke-RestMethod -Uri "https://hvvxnnnpukgpmwexcniq.supabase.co/rest/v1/products?select=*" -Headers @{ "apikey" = $anonKey; "Authorization" = "Bearer $anonKey" }
 
-Write-Host "📦 جەمئىي $($matches.Count) دانە مەھسۇلات تېپىلدى..."
+Write-Host "📦 جەمئىي $($products.Count) دانە مەھسۇلات ئوقۇلدى..."
 
 $generatedCount = 0
 
-foreach ($m in $matches) {
-  $id = $m.Groups[1].Value.Trim()
-  $name = $m.Groups[2].Value.Trim()
-  $price = $m.Groups[3].Value.Trim()
-  $rawImg = $m.Groups[4].Value.Trim()
-  $desc = $m.Groups[5].Value.Trim()
-
-  $imgUrl = $rawImg
-  if ($rawImg -notmatch "^https?://") {
-    $cleanPath = $rawImg.TrimStart("/\").Replace("\", "/")
-    $imgUrl = "$BaseUrl/$cleanPath"
+foreach ($p in $products) {
+  $id = $p.id
+  $name = $p.name
+  if ($p.translations -and $p.translations.ug -and $p.translations.ug.name) {
+    $name = $p.translations.ug.name
+  }
+  $price = $p.price
+  $desc = if ($p.description) { $p.description } else { "" }
+  if ($p.translations -and $p.translations.ug -and $p.translations.ug.description) {
+    $desc = $p.translations.ug.description
   }
 
-  $safeDesc = $desc.Replace('"', '&quot;').Replace("'", '&#39;')
+  $imgUrl = ""
+  if ($p.image -match "^data:image/([a-zA-Z]+);base64,(.+)$") {
+    $ext = $matches[1]
+    if ($ext -eq "jpeg") { $ext = "jpg" }
+    $base64 = $matches[2]
+    $bytes = [System.Convert]::FromBase64String($base64)
+    $localImgFile = Join-Path $imgDir "$id.$ext"
+    [System.IO.File]::WriteAllBytes($localImgFile, $bytes)
+    $imgUrl = "$BaseUrl/images/products/$id.$ext"
+  } elseif ($p.image -match "^https?://") {
+    $imgUrl = $p.image
+  } elseif ($p.image) {
+    $cleanPath = $p.image.TrimStart("/\").Replace("\", "/")
+    $imgUrl = "$BaseUrl/$cleanPath"
+  } else {
+    $imgUrl = "$BaseUrl/images/og-share-cover.jpg"
+  }
+
+  $safeName = $name.Replace('"', '&quot;').Trim()
+  $safeDesc = $desc.Replace('"', '&quot;').Replace("'", '&#39;').Trim()
   if ($safeDesc.Length -gt 160) {
     $safeDesc = $safeDesc.Substring(0, 157) + "..."
   }
@@ -50,19 +61,19 @@ foreach ($m in $matches) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>$name — تەكلىماكان سودا تورى</title>
+  <title>$safeName — تەكلىماكان سودا تورى</title>
   
   <!-- 🌐 مەھسۇلات رەسمىي Open Graph ۋە Twitter Cards بەلگىسى (WhatsApp، Telegram، Facebook) -->
   <meta property="og:type" content="product">
   <meta property="og:site_name" content="تەكلىماكان سودا تورى">
-  <meta property="og:title" content="$name — تەكلىماكان">
+  <meta property="og:title" content="$safeName — تەكلىماكان">
   <meta property="og:description" content="باھاسى: $price ₺ | $safeDesc">
   <meta property="og:image" content="$imgUrl">
   <meta property="og:image:secure_url" content="$imgUrl">
   <meta property="og:url" content="$BaseUrl/p/$id.html">
   
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="$name">
+  <meta name="twitter:title" content="$safeName">
   <meta name="twitter:description" content="باھاسى: $price ₺ | تەكلىماكان سودا تورى">
   <meta name="twitter:image" content="$imgUrl">
 
@@ -74,8 +85,8 @@ foreach ($m in $matches) {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f8fafc; color: #1e293b; direction: rtl;">
   <div style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-    <img src="$imgUrl" alt="$name" style="max-width: 100%; height: 260px; object-fit: cover; border-radius: 12px; margin-bottom: 16px;">
-    <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">$name</h2>
+    <img src="$imgUrl" alt="$safeName" style="max-width: 100%; height: 260px; object-fit: cover; border-radius: 12px; margin-bottom: 16px;">
+    <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">$safeName</h2>
     <p style="font-size: 1.35rem; font-weight: 900; color: #dc2626; margin-bottom: 16px;">$price ₺</p>
     <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;">$safeDesc</p>
     <a href="/?id=$id" style="display: inline-block; background: #1e3a8a; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 1rem;">سۇپىدا كۆرۈش ۋە سېتىۋېلىش</a>
@@ -112,4 +123,4 @@ $indexContent = @"
 "@
 [System.IO.File]::WriteAllText((Join-Path $outDir "index.html"), $indexContent, [System.Text.Encoding]::UTF8)
 
-Write-Host "✅ مۇۋەپپەقىيەتلىك ھالدا $generatedCount دانە مەھسۇلات ھەمبەھىرلەش بېتى p/ مۇندەرىجىسىگە قۇرۇلدى!"
+Write-Host "✅ مۇۋەپپەقىيەتلىك ھالدا $generatedCount دانە مەھسۇلات Supabase تىن ئوقۇلۇپ p/ بەتلىرى يېڭىلاندى!"

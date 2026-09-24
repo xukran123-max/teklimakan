@@ -3621,7 +3621,25 @@ function initTeklimakanApp() {
       });
     }
 
-    // تاۋار سۈرىتى تاللاش (ۋاكالەتچى ئۈچۈن قاتتىق بىخەتەرلىك سۈزگۈچى)
+    // 📜 سىيرىلما كۆزنەك نىزامنامىنى ئېچىش / يىغىش (Accordion toggle)
+    const btnToggleAgentRegulations = document.getElementById('btnToggleAgentRegulations');
+    const agentRegulationsBody = document.getElementById('agentRegulationsBody');
+    const agentRegChevron = document.getElementById('agentRegChevron');
+
+    if (btnToggleAgentRegulations && agentRegulationsBody) {
+      btnToggleAgentRegulations.addEventListener('click', () => {
+        const isHidden = agentRegulationsBody.style.display === 'none' || !agentRegulationsBody.style.display;
+        if (isHidden) {
+          agentRegulationsBody.style.display = 'block';
+          if (agentRegChevron) agentRegChevron.style.transform = 'rotate(180deg)';
+        } else {
+          agentRegulationsBody.style.display = 'none';
+          if (agentRegChevron) agentRegChevron.style.transform = 'rotate(0deg)';
+        }
+      });
+    }
+
+    // تاۋار سۈرىتى تاللاش (تېز، ئاپتوماتىك پىرىسلاش ۋە سۇپا تامغىسى بېسىش)
     const agentFileInput = document.getElementById('agentFileInput');
     const agentImageInput = document.getElementById('agentProdImage');
     const previewWrap = document.getElementById('agentImagePreviewWrap');
@@ -3633,28 +3651,20 @@ function initTeklimakanApp() {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
 
-        // 4-قائىدە: فورمات تەكشۈرۈش
-        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedMimes.includes(file.type.toLowerCase())) {
-          alert('🚫 4-قائىدىگە خىلاپ: پەقەت JPG, JPEG, PNG ياكى WEBP سۈرەت فورماتى قوبۇل قىلىنىدۇ!');
-          showToast('پەقەت JPG, PNG, WEBP قوبۇل قىلىنىدۇ', 'error');
+        // ھۆججەت سىغىمى بەك غايەت زور بولسا (35MB تىن ئارتۇق)
+        if (file.size > 35 * 1024 * 1024) {
+          alert('🚫 سۈرەت ھۆججىتى بەك چوڭ (35MB تىن ئارتۇق)! بىر ئاز كىچىكرەك سۈرەت تاللاڭ.');
+          showToast('سۈرەت ھۆججىتى 35MB تىن كىچىك بولۇشى كېرەك', 'error');
           agentFileInput.value = '';
           return;
         }
 
-        // 4-قائىدە: ھۆججەت سىغىمى (2MB تىن ئاشماسلىق)
-        if (file.size > 2 * 1024 * 1024) {
-          alert('🚫 4-قائىدىگە خىلاپ: سۈرەت سىغىمى بەك چوڭ (2MB تىن ئېشىپ كەتتى)!');
-          showToast('سۈرەت سىغىمى 2MB تىن ئېشىپ كەتتى', 'error');
-          agentFileInput.value = '';
-          return;
-        }
-
-        // 1-قائىدە: ھۆججەت نامىدىن تاشقى ئېلان، ئۈندىدار، تېلېفون سۈزۈش
+        // 1-قائىدە: ھۆججەت نامىدىن تاشقى ئېلان، ئالاقە ياكى تېلېفون سۈزۈش
         const nameSec = window.appStore.validateProductImageSecurity(file.name, file.name, false, {
           fileName: file.name,
           fileType: file.type,
-          fileSize: file.size
+          fileSize: file.size,
+          isProcessed: false
         });
         if (!nameSec.valid) {
           alert(nameSec.message);
@@ -3663,26 +3673,27 @@ function initTeklimakanApp() {
           return;
         }
 
+        showToast('سۈرەت تەييارلىنىپ سۇپا تامغىسى بېسىلىۋاتىدۇ...', 'info');
+
         const reader = new FileReader();
+        reader.onerror = () => {
+          showToast('سۈرەت ھۆججىتىنى ئوقۇش مەغلۇپ بولدى', 'error');
+        };
         reader.onload = function(evt) {
           const rawBase64 = evt.target.result;
           const img = new Image();
+          img.onerror = () => {
+            showToast('سۈرەت مەزمۇنىنى ئوقۇش مەغلۇپ بولدى', 'error');
+          };
           img.onload = async function() {
-            // 3-قائىدە: ئېنىقلىق دەرىجىسى (800x800 پىكسېلدىن تۆۋەن بولماسلىق)
-            if (img.width < 800 || img.height < 800) {
-              alert(`🚫 3-قائىدىگە خىلاپ: سۈرەت ئېنىقلىقى بەك تۆۋەن (${img.width}×${img.height} پىكسېل)! 3-قائىدە بويىچە كەم دېگەندە 800×800 پىكسېل بولۇشى شەرت.`);
-              showToast('سۈرەت كەم دېگەندە 800×800 پىكسېل بولۇشى كېرەك', 'error');
-              agentFileInput.value = '';
-              return;
-            }
-
-            // 2-قائىدە & 1-قائىدە: سۈرەتنى ئەتراپلىق تەكشۈرۈش
+            // 2-قائىدە & 1-قائىدە: ئادەم سۈرىتى ياكى تاشقى نومۇرلارنى سۈزۈش
             const sec = window.appStore.validateProductImageSecurity(rawBase64, file.name, false, {
               width: img.width,
               height: img.height,
               fileName: file.name,
               fileType: file.type,
-              fileSize: file.size
+              fileSize: file.size,
+              isProcessed: false
             });
 
             if (!sec.valid) {
@@ -3694,7 +3705,7 @@ function initTeklimakanApp() {
               return;
             }
 
-            // 5-قائىدە: ئاپتوماتىك سۇپا تامغىسى بېسىش («تەكلىماكان كاپالىتى ★ Teklimakan Quality»)
+            // 5-قائىدە: ئاپتوماتىك كۆلەمنى تەڭشەش ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسىنى بېسىش
             let finalImageSrc = rawBase64;
             let displayW = img.width;
             let displayH = img.height;
@@ -3721,14 +3732,17 @@ function initTeklimakanApp() {
             const wmBadge = document.getElementById('agentImgWatermarkBadge');
 
             if (dimBadge) dimBadge.textContent = `${displayW} × ${displayH} px`;
-            if (formatBadge) formatBadge.textContent = file.type.replace('image/', '').toUpperCase();
-            if (sizeBadge) sizeBadge.textContent = `${Math.round(file.size / 1024)} KB`;
+            if (formatBadge) formatBadge.textContent = 'JPEG';
+            if (sizeBadge) {
+              const approxKb = Math.round((finalImageSrc.length * 3 / 4) / 1024);
+              sizeBadge.textContent = `${approxKb} KB`;
+            }
             if (wmBadge) wmBadge.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ★ «تەكلىماكان كاپالىتى» تامغىسى بېسىلدى</span>';
 
             if (secStatus) {
-              secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> 5 دەخلىسىز قائىدىدىن ئۆتتى: سۇپا تامغىسى بېسىلدى</span>';
+              secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت تەييارلاندى ۋە سۇپا تامغىسى بېسىلدى</span>';
             }
-            showToast('✅ سۈرەت تەلىپى قاندۇرۇلدى ۋە سۇپا تامغىسى بېسىلدى!', 'success');
+            showToast('✅ سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى ۋە تامغا بېسىلدى!', 'success');
           };
           img.src = rawBase64;
         };
@@ -3785,9 +3799,22 @@ function initTeklimakanApp() {
         const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
         const stock = parseInt(document.getElementById('agentProdStock').value, 10);
         const unit = (document.getElementById('agentProdUnit')?.value.trim()) || 'دانە';
-        const image = document.getElementById('agentProdImage').value.trim();
+        const image = (document.getElementById('agentProdImage')?.value || '').trim();
         const desc = document.getElementById('agentProdDesc').value.trim();
         const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+
+        // 📷 تاۋار سۈرىتى تەكشۈرۈش
+        if (!image || image.length < 15) {
+          alert('⚠️ تاۋار سۈرىتى تاللانمىدى! «سۈرەت تاللاش» كۇنۇپكىسىنى بېسىپ سۈرەت يۈكلەڭ ياكى سۈرەت ئۇلانمىسىنى كىرگۈزۈڭ.');
+          showToast('⚠️ تاۋار سۈرىتى كىرگۈزۈلمىدى!', 'warning');
+          const fileBtn = document.querySelector('label[for="agentFileInput"]');
+          if (fileBtn) {
+            fileBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            fileBtn.style.outline = '2px solid #ef4444';
+            setTimeout(() => { if (fileBtn) fileBtn.style.outline = 'none'; }, 3000);
+          }
+          return;
+        }
 
         const scopeVal = document.getElementById('agentProdLanguageScope')?.value || 'ug';
         const languageScope = (currentVerifiedAgent && currentVerifiedAgent.canPublishMultilingual) ? scopeVal : 'ug';

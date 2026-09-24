@@ -2789,7 +2789,8 @@ class StoreManager {
       {
         fileName: productData.fileName || '',
         width: productData.imageWidth,
-        height: productData.imageHeight
+        height: productData.imageHeight,
+        isProcessed: true
       }
     );
 
@@ -3248,24 +3249,25 @@ class StoreManager {
       }
     }
 
-    // 4-قائىدە: ھۆججەت سىغىمى (ئەڭ يۇقىرى 2MB)
-    if (options.fileSize && options.fileSize > 2 * 1024 * 1024) {
+    // 4-قائىدە: ھۆججەت سىغىمى (پىششىقلانمىغان خام ھۆججەت 35MB، پىششىقلانغان سۈرەت 6MB تىن ئاشماسلىقى شەرت)
+    const maxAllowedSize = options.isProcessed ? (6 * 1024 * 1024) : (35 * 1024 * 1024);
+    if (options.fileSize && options.fileSize > maxAllowedSize) {
       return {
         valid: false,
         rule: 4,
         reason: 'file_too_large',
-        message: '🚫 4-قائىدىگە خىلاپ: سۈرەت سىغىمى بەك چوڭ (2MB تىن ئېشىپ كەتتى)! سۈرەتنى كىچىكلىتىپ يوللاڭ.'
+        message: '🚫 4-قائىدىگە خىلاپ: سۈرەت سىغىمى بەك چوڭ (35MB تىن ئېشىپ كەتتى)! سۈرەتنى كىچىكلىتىپ يوللاڭ.'
       };
     }
 
-    // 3-قائىدە: سۈرەت ئېنىقلىقى (Width x Height >= 800 x 800)
-    if (options.width && options.height) {
-      if (options.width < 800 || options.height < 800) {
+    // 3-قائىدە: سۈرەت ئېنىقلىقى (پىششىقلانغان سۈرەت كەم دېگەندە 750×750 پىكسېل بولۇشى شەرت؛ خام سۈرەتلەر ئاپتوماتىك تەڭشىلىدۇ)
+    if (options.isProcessed && options.width && options.height) {
+      if (options.width < 750 || options.height < 750) {
         return {
           valid: false,
           rule: 3,
           reason: 'low_resolution',
-          message: `🚫 3-قائىدىگە خىلاپ: سۈرەت ئېنىقلىقى بەك تۆۋەن (${options.width}×${options.height} پىكسېل)! 3-قائىدە بويىچە كەم دېگەندە 800×800 پىكسېل بولۇشى شەرت.`
+          message: `🚫 3-قائىدىگە خىلاپ: سۈرەت ئېنىقلىقى بەك تۆۋەن (${options.width}×${options.height} پىكسېل)! كەم دېگەندە 800×800 پىكسېل بولۇشى شەرت.`
         };
       }
     }

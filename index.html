@@ -709,7 +709,7 @@
 
               <div style="max-height: 140px; overflow-y: auto; background: rgba(255, 255, 255, 0.85); border: 1px solid #fde68a; border-radius: 8px; padding: 0.75rem; font-size: 0.8rem; color: #78350f; line-height: 1.6; margin-bottom: 0.6rem;">
                 <div><strong>1. ئاساسىي بەلگىلىمە:</strong> ۋاكالەتچىلەر تاۋارلىرىنى پەقەت ئۇيغۇرچە بەتتىلا ئېلان قىلالايدۇ، كۆپ تىل ھوقۇقى پەقەت ئالىي باشقۇرغۇچىنىڭ ئالاھىدە تەستىقى بىلەنلا بېرىلىدۇ. بارلىق تاۋارلار ئارقا سۇپىدا تەستىقتىن ئۆتكەندىن كېيىن ئېلان قىلىنىدۇ.</div>
-                <div style="margin-top: 0.4rem;"><strong>2. تاشقى ئالاقە چەكلىمىسى:</strong> تاۋار نامى ياكى چۈشەندۈرۈشىدە تېلېفون نومۇرى، WhatsApp، Telegram، ئۈندىدار ياكى تاشقى ئۇلىنىش يېزىش پۈتۈنلەي چەكلىنىدۇ. خىلاپلىق قىلغان ھەر بىر قېتىمدا قېتىم سانىچە كۈن (N قېتىم = N كۈن) بارلىق مەشغۇلات ئاپتوماتىك توختىتىلىدۇ.</div>
+                <div style="margin-top: 0.4rem;"><strong>2. تاشقى ئالاقە چەكلىمىسى:</strong> تاۋار نامى ياكى چۈشەندۈرۈشىدە تېلېفون نومۇرى، ئىجتىمائىي ئالاقە قوراللىرى ياكى تاشقى ئۇلىنىش يېزىش پۈتۈنلەي چەكلىنىدۇ. خىلاپلىق قىلغان ھەر بىر قېتىمدا قېتىم سانىچە كۈن (N قېتىم = N كۈن) بارلىق مەشغۇلات ئاپتوماتىك توختىتىلىدۇ.</div>
                 <div style="margin-top: 0.4rem;"><strong>3. سۈرەت 5 دەخلىسىز قائىدىسى:</strong> سۈرەتتە تاشقى ئېلان بولماسلىق، ئادەم ياكى مودېل رەسىمى بولماسلىق (پەقەت تاۋار ئۆزى بولۇش)، كەم دېگەندە 800×800 پىكسېل بولۇش، 2MB تىن ئاشماسلىق ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسى بېسىلىدۇ.</div>
                 <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border: 1.5px solid #f43f5e; border-radius: 6px; color: #9f1239; font-weight: 800;">
                   ⚖️ <strong>مەھسۇلات مەسئۇلىيىتى ماددىسى:</strong> تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
@@ -867,49 +867,56 @@
               </div>
             </div>
 
-            <!-- 📜 مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك دەخلىسىز قائىدە ۋە چەكلىمىلەر) -->
-            <div id="agentImgRegulationsCard" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 1rem; margin-bottom: 1.1rem; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+            <!-- 📜 مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك دەخلىسىز قائىدە ۋە چەكلىمىلەر - سىيرىلما كۆزنەك) -->
+            <div id="agentImgRegulationsCard" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 0.85rem; margin-bottom: 1.1rem; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);">
+              <!-- سىيرىلما تېما كۇنۇپكىسى (Accordion Header) -->
+              <div id="btnToggleAgentRegulations" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; padding: 0.35rem 0.5rem; border-radius: 8px; transition: background 0.2s;" title="نىزامنامىنى كۆرۈش ياكى يىغىش">
                 <div style="font-weight: 800; font-size: 0.92rem; color: #92400e; display: flex; align-items: center; gap: 0.45rem;">
                   <i class="fas fa-shield-alt" style="color: #d97706; font-size: 1.1rem;"></i>
-                  <span>مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك دەخلىسىز قائىدە)</span>
+                  <span>مەھسۇلات سۈرىتى يۈكلەش نىزامنامىسى (5 تۈرلۈك قائىدە)</span>
                 </div>
-                <span style="font-size: 0.74rem; font-weight: 800; background: #b45309; color: #ffffff; padding: 2px 8px; border-radius: 6px;">مەجبۇرىي ئۆلچەم</span>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr; gap: 0.45rem; font-size: 0.8rem; color: #78350f; line-height: 1.45;">
-                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
-                  <strong>1️⃣ تاشقى ئالاقە ۋە ئېلانلارنى مۇتلەق چەكلەش:</strong> سۈرەتتە تېلېفون، WhatsApp، Telegram، ئۈندىدار، تاشقى URL، QR كود ۋە باشقا سۇپا تامغىلىرى (Trendyol, Taobao قاتارلىقلار) پۈتۈنلەي مەنئى قىلىنىدۇ.
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
-                  <strong>2️⃣ ئەخلاقىي ۋە مەدەنىيەت ئۆلچىمى:</strong> ئادەم يۈزى، مودېل، تەن، قول ۋە بارماق رەسىملىرىنى سېلىش قەتئىي مەنئى قىلىنىدۇ. پەقەت مەھسۇلاتنىڭ ساپ ئۆزىلا (تەكشى، مانېكېندا ياكى ئاسقۇچتا) بولۇشى شەرت.
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
-                  <strong>3️⃣ سۈرەت ئېنىقلىقى ۋە نىسبىتى:</strong> كەم دېگەندە 800×800 پىكسېل (كۆڭۈلدىكىدەك: 1080×1080)، 1:1 كۋادرات نىسبەت، سۈزۈك، خىرەلەشمىگەن بولۇشى كېرەك.
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
-                  <strong>4️⃣ تېخنىكىلىق فورمات ۋە سىغىم:</strong> پەقەت JPG, JPEG, PNG, WEBP فورماتى بولۇشى، سىغىمى 2MB تىن ئاشماسلىقى شەرت.
-                </div>
-                <div style="background: rgba(255, 255, 255, 0.7); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
-                  <strong>5️⃣ ئاپتوماتىك سۇپا تامغىسى ۋە ئارقا سۇپا تەستىقى:</strong> بارلىق سۈرەتلەرگە «تەكلىماكان كاپالىتى ★ Teklimakan Quality» ئالتۇن تامغىسى ئاپتوماتىك بېسىلىدۇ ۋە ئالىي باشقۇرغۇچىنىڭ تەستىقىغا كىرىدۇ.
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 0.74rem; font-weight: 800; background: #b45309; color: #ffffff; padding: 2px 8px; border-radius: 6px;">كۆرۈش / يىغىش</span>
+                  <i id="agentRegChevron" class="fas fa-chevron-down" style="color: #b45309; transition: transform 0.3s ease; font-size: 0.85rem;"></i>
                 </div>
               </div>
 
-              <!-- ⚖️ قانۇنىي مەسئۇلىيەت ۋە مەھسۇلات جاۋابكارلىقى ئەسكەرتمىسى -->
-              <div style="background: #fff1f2; border: 1.5px dashed #f43f5e; border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 0.65rem; color: #881337; font-size: 0.82rem; line-height: 1.55;">
-                <div style="font-weight: 800; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.2rem; color: #be123c;">
-                  <i class="fas fa-balance-scale"></i> <span>مەھسۇلات مەسئۇلىيىتى ۋە ئاقىۋەت بەلگىلىمىسى:</span>
+              <!-- سىيرىلما مەزمۇن قىسمى (Accordion Content) -->
+              <div id="agentRegulationsBody" style="display: none; margin-top: 0.75rem; border-top: 1px dashed #f59e0b; padding-top: 0.75rem;">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 0.45rem; font-size: 0.8rem; color: #78350f; line-height: 1.45;">
+                  <div style="background: rgba(255, 255, 255, 0.75); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                    <strong>1️⃣ تاشقى ئالاقە ۋە ئېلانلارنى مۇتلەق چەكلەش:</strong> سۈرەتتە تېلېفون نومۇرى، ئىجتىمائىي ئالاقە قوراللىرى، تاشقى تور ئۇلانمىسى (URL)، QR كود ۋە باشقا تاشقى سۇپىلارنىڭ ماركا-تامغىلىرى پۈتۈنلەي مەنئى قىلىنىدۇ.
+                  </div>
+                  <div style="background: rgba(255, 255, 255, 0.75); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                    <strong>2️⃣ ئەخلاقىي ۋە مەدەنىيەت ئۆلچىمى:</strong> ئادەم يۈزى، مودېل، تەن، قول ۋە بارماق رەسىملىرىنى سېلىش قەتئىي مەنئى قىلىنىدۇ. پەقەت مەھسۇلاتنىڭ ساپ ئۆزىلا (تەكشى، مانېكېندا ياكى ئاسقۇچتا) بولۇشى شەرت.
+                  </div>
+                  <div style="background: rgba(255, 255, 255, 0.75); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                    <strong>3️⃣ سۈرەت ئېنىقلىقى ۋە نىسبىتى:</strong> كەم دېگەندە 800×800 پىكسېل، 1:1 كۋادرات نىسبەت، سۈزۈك بولۇشى كېرەك. سىستېما سۈرەت ئۆلچىمىنى ئاپتوماتىك تەڭشەپ بېرىدۇ.
+                  </div>
+                  <div style="background: rgba(255, 255, 255, 0.75); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                    <strong>4️⃣ تېخنىكىلىق سۈرەت تۈرى:</strong> بارلىق ئۆلچەملىك سۈرەت تۈرلىرى (JPG, JPEG, PNG, WEBP) قوبۇل قىلىنىدۇ، ھەجمى ئاپتوماتىك پىرىسلىنىدۇ.
+                  </div>
+                  <div style="background: rgba(255, 255, 255, 0.75); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #fde68a;">
+                    <strong>5️⃣ ئاپتوماتىك سۇپا تامغىسى:</strong> سۈرەتلەرگە «تەكلىماكان كاپالىتى ★ Teklimakan Quality» ئالتۇن تامغىسى ئاپتوماتىك بېسىلىدۇ.
+                  </div>
                 </div>
-                <div>
-                  تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
+
+                <!-- ⚖️ قانۇنىي مەسئۇلىيەت ۋە مەھسۇلات جاۋابكارلىقى ئەسكەرتمىسى -->
+                <div style="background: #fff1f2; border: 1.5px dashed #f43f5e; border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 0.65rem; color: #881337; font-size: 0.82rem; line-height: 1.55;">
+                  <div style="font-weight: 800; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.2rem; color: #be123c;">
+                    <i class="fas fa-balance-scale"></i> <span>مەھسۇلات مەسئۇلىيىتى ۋە ئاقىۋەت بەلگىلىمىسى:</span>
+                  </div>
+                  <div>
+                    تور سۇپىمىزنىڭ ئەمەس بەلكى ئۆزىنىڭ مەھسۇلاتىنى سېتىۋاتقان ۋاكالەتچىلەر ئۆزىنىڭ مەھسۇلاتىدىن كېلىپ چىققان ھەرقانداق ئاقىۋەتكە ئۆزى مەسئۇل، سۇپىمىز ئۆز ئۈستىگە ئالمايدۇ.
+                  </div>
                 </div>
               </div>
 
-              <!-- قوشۇلۇش كۆزنەكچىسى -->
-              <div style="background: #ffffff; border: 1.5px solid #d97706; border-radius: 8px; padding: 0.6rem 0.75rem; margin-top: 0.6rem; display: flex; align-items: center; gap: 0.6rem;">
+              <!-- قوشۇلۇش كۆزنەكچىسى (ھەمىشە ئوچۇق كۆرۈنۈپ تۇرىدۇ) -->
+              <div style="background: #ffffff; border: 1.5px solid #d97706; border-radius: 8px; padding: 0.6rem 0.75rem; margin-top: 0.65rem; display: flex; align-items: center; gap: 0.6rem;">
                 <input type="checkbox" id="agentAgreeImgRules" style="width: 18px; height: 18px; accent-color: #d97706; cursor: pointer;" required>
                 <label for="agentAgreeImgRules" style="font-size: 0.82rem; font-weight: 800; color: #92400e; cursor: pointer; user-select: none;">
-                  مەن يۇقىرىقى 5 دەخلىسىز قائىدە، سۈرەت نىزامنامىسى ۋە ۋاكالەتچى مەھسۇلات مەسئۇلىيىتى بەلگىلىمىسىنى تولۇق ئوقۇدۇم، چۈشەندىم ۋە ئەمەل قىلىشقا قوشۇلىمەن. <span style="color: red;">*</span>
+                  مەن 5 تۈرلۈك سۈرەت نىزامنامىسى ۋە ۋاكالەتچى مەھسۇلات مەسئۇلىيىتى بەلگىلىمىسىگە قوشۇلىمەن. <span style="color: red;">*</span>
                 </label>
               </div>
             </div>
@@ -921,11 +928,11 @@
               </label>
               <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                 <label for="agentFileInput" class="action-btn" style="background: #eff6ff !important; border-color: #3b82f6 !important; color: #1d4ed8 !important; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-weight: 700;">
-                  <i class="fas fa-camera"></i> <span>سۈرەت تاللاش (800×800+)</span>
+                  <i class="fas fa-camera"></i> <span>سۈرەت تاللاش (تېلېفون ياكى ھۆججەت)</span>
                 </label>
-                <input type="file" id="agentFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                <input type="file" id="agentFileInput" accept="image/*" style="display: none;">
               </div>
-              <input type="text" id="agentProdImage" class="form-control number-latin" placeholder="ياكى سۈرەت تور ئۇلانمىسىنى كىرگۈزۈڭ: https://..." required>
+              <input type="text" id="agentProdImage" class="form-control number-latin" placeholder="ياكى سۈرەت تور ئۇلانمىسىنى كىرگۈزۈڭ: https://...">
               
               <!-- ئالدىن كۆرۈش قۇتىسى ۋە تېخنىكىلىق ئۇچۇرلار -->
               <div id="agentImagePreviewWrap" style="display: none; margin-top: 0.6rem; padding: 0.75rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
@@ -1408,11 +1415,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260924_v35"></script>
+  <script src="js/supabase.js?v=20260924_v36"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260924_v35"></script>
-  <script src="js/store.js?v=20260924_v35"></script>
-  <script src="js/app.js?v=20260924_v35"></script>
+  <script src="js/i18n.js?v=20260924_v36"></script>
+  <script src="js/store.js?v=20260924_v36"></script>
+  <script src="js/app.js?v=20260924_v36"></script>
 </body>
 </html>

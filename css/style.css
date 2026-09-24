@@ -3185,32 +3185,24 @@ html[dir="ltr"] .footer-accordion-text-box {
   line-height: 1.2;
 }
 
-.footer-contact-master-card .footer-accordion-action-pill {
+.footer-accordion-chevron-box {
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  padding: 0.28rem 0.68rem;
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #38bdf8;
+  justify-content: center;
   flex-shrink: 0;
-  transition: all 0.25s ease;
-}
-
-.footer-contact-master-card:hover .footer-accordion-action-pill,
-.footer-contact-master-card.is-open .footer-accordion-action-pill {
-  background: rgba(56, 189, 248, 0.26);
-  border-color: #38bdf8;
-  color: #ffffff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
 }
 
 .footer-accordion-chevron {
-  font-size: 0.74rem;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.85rem;
+  color: #94a3b8;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+}
+
+.footer-contact-master-card:hover .footer-accordion-chevron,
+.footer-contact-master-card.is-open .footer-accordion-chevron {
+  color: #38bdf8;
 }
 
 .footer-accordion-content {
@@ -3256,6 +3248,7 @@ html[dir="ltr"] .footer-accordion-text-box {
   .footer-contact-master-card::before {
     display: none !important;
   }
+  .footer-contact-master-card .footer-accordion-chevron-box,
   .footer-contact-master-card .footer-accordion-action-pill {
     display: none !important;
   }

@@ -3708,7 +3708,8 @@ html[dir="rtl"] .live-sales-popup {
 .admin-floating-badge {
   position: fixed;
   bottom: 24px;
-  left: 24px;
+  right: 24px;
+  left: auto !important;
   z-index: 99999;
   display: inline-flex;
   align-items: center;
@@ -3716,11 +3717,11 @@ html[dir="rtl"] .live-sales-popup {
   background: #0f172a;
   color: #fbbf24 !important;
   font-size: 0.88rem;
-  font-weight: 700;
-  padding: 0.6rem 1.15rem;
+  font-weight: 800;
+  padding: 0.65rem 1.25rem;
   border-radius: 9999px;
   text-decoration: none;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(234, 179, 8, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(234, 179, 8, 0.6);
   backdrop-filter: blur(8px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -3732,15 +3733,17 @@ html[dir="rtl"] .live-sales-popup {
 .admin-floating-badge:hover {
   background: #1e293b;
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.6), 0 0 0 2.5px rgba(234, 179, 8, 0.9);
+  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.6), 0 0 0 2.5px rgba(234, 179, 8, 0.95);
 }
 
 @media (max-width: 640px) {
   .admin-floating-badge {
-    bottom: 80px;
-    left: 14px;
-    padding: 0.45rem 0.85rem;
-    font-size: 0.78rem;
+    bottom: 20px;
+    right: 14px;
+    left: auto !important;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.82rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(234, 179, 8, 0.7);
   }
 }
 

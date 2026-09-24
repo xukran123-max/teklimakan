@@ -1064,11 +1064,13 @@ function initTeklimakanApp() {
   function openCartDrawer() {
     const overlay = document.getElementById('cartDrawerOverlay');
     if (overlay) overlay.classList.add('active');
+    document.body.classList.add('cart-drawer-open');
   }
 
   function closeCartDrawer() {
     const overlay = document.getElementById('cartDrawerOverlay');
     if (overlay) overlay.classList.remove('active');
+    document.body.classList.remove('cart-drawer-open');
   }
 
   // ==================== ❤️ ياقتۇرغانلار تىزىملىكى (Wishlist UI) ====================

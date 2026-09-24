@@ -2489,9 +2489,9 @@ body {
 .cart-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(5px);
+  z-index: 2200;
   opacity: 0;
   visibility: hidden;
   transition: var(--transition);
@@ -2509,11 +2509,15 @@ body {
   width: 100%;
   max-width: 420px;
   height: 100%;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   background: var(--bg-card);
   box-shadow: var(--shadow-xl);
-  z-index: 1001;
+  z-index: 2201;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   transform: translateX(-100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -2523,11 +2527,12 @@ body {
 }
 
 .cart-header {
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .cart-header-title {
@@ -2553,9 +2558,12 @@ body {
 }
 
 .cart-body {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0; /* ھەل قىلغۇچ تەڭشەش: سېۋەت ئىچى ئېشىپ كەتسە سىلىق سىيرىلايدۇ ۋە پۇت قىسمى قىسىلىپ قالمايدۇ */
   overflow-y: auto;
-  padding: 1.25rem;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1.25rem;
 }
 
 /* سېۋەت ئىچىدىكى مال قۇتىسى */
@@ -2658,19 +2666,20 @@ body {
 .free-shipping-bar {
   background: var(--primary-light);
   border-radius: var(--radius-sm);
-  padding: 0.85rem;
-  margin-bottom: 1.15rem;
-  font-size: 0.95rem;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.88rem;
 }
 
 .free-shipping-text {
   font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.84rem;
 }
 
 .shipping-progress {
-  height: 8px;
+  height: 6px;
   background: var(--border-color);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -2684,26 +2693,30 @@ body {
 }
 
 .cart-footer {
-  padding: 1.35rem;
+  flex-shrink: 0; /* ھەر ۋاقىت پۈتۈن تەپسىلاتلار ۋە زاكاز كۇنۇپكىسىنىڭ كۆرۈنۈشىگە كاپالەتلىك قىلىدۇ */
+  padding: 0.95rem 1.25rem;
+  padding-bottom: max(1.15rem, env(safe-area-inset-bottom));
   border-top: 1px solid var(--border-color);
   background: var(--bg-card);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .cart-summary-line {
   display: flex;
   justify-content: space-between;
-  font-size: 1.02rem;
+  font-size: 0.94rem;
   color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .cart-summary-line.total {
-  font-size: 1.3rem;
+  font-size: 1.18rem;
   font-weight: 800;
   color: var(--text-main);
   border-top: 1px dashed var(--border-color);
-  padding-top: 0.75rem;
-  margin-top: 0.5rem;
+  padding-top: 0.55rem;
+  margin-top: 0.45rem;
+  margin-bottom: 0.25rem;
 }
 
 .cart-total-price {
@@ -2715,12 +2728,12 @@ body {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #ffffff;
   border: none;
-  padding: 0.85rem;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3968,6 +3981,17 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     width: 48px;
     height: 48px;
     font-size: 1.35rem;
+  }
+
+  /* سېۋەت ياكى كۆزنەك ئوچۇق ۋاقتىدا لەيلىمە كۇنۇپكا خەتلەرنى ۋە باھانى توسۇۋالماسلىقى كېرەك */
+  body.cart-drawer-open .floating-contact-wrap,
+  body:has(.cart-overlay.active) .floating-contact-wrap,
+  body:has(.modal-backdrop[style*="display: flex"]) .floating-contact-wrap,
+  body:has(.modal-backdrop[style*="display: block"]) .floating-contact-wrap {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transform: scale(0.8) !important;
   }
 
   /* سېتىلىش ئۇقتۇرۇشى (Live Sales Popup) */

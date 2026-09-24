@@ -663,7 +663,7 @@
           </div>
 
           <!-- ئىككى تۈۋرۈكلۈك قۇرۇلما: سولدا تۈر قوشۇش، ئوڭدا تۈرلەر جەدۋىلى -->
-          <div style="display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; align-items: start;">
+          <div class="category-view-grid" style="display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; align-items: start;">
             
             <!-- 1. يېڭى تۈر قوشۇش كارتىسى -->
             <div class="data-table-container" style="padding: 1.4rem; height: fit-content;">
@@ -671,17 +671,38 @@
                 <i class="fas fa-folder-plus" style="color: var(--primary-color);"></i> يېڭى تۈر قوشۇش
               </h4>
               <form id="addCategoryForm">
-                <div class="form-group" style="margin-bottom: 0.85rem;">
+                <div class="form-group" style="margin-bottom: 0.65rem;">
                   <label class="form-label" style="font-weight: 700; font-size: 0.86rem;">تۈر نامى (ئۇيغۇرچە) <span style="color: var(--danger-color);">*</span></label>
-                  <input type="text" id="newCategoryName" class="form-control" placeholder="مەسىلەن: مىللىي گىلەملەر" required>
+                  <input type="text" id="newCategoryName" class="form-control" placeholder="مەسىلەن: مىللىي گىلەملەر" required autocomplete="off">
+                </div>
+
+                <!-- تەرجىمە ئەسكەرتىشى ۋە قايتا يېڭىلاش كۇنۇپكىسى -->
+                <div style="background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; padding: 0.4rem 0.6rem; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;">
+                  <span style="font-size: 0.74rem; color: #166534; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-magic" style="color: #15803d;"></i> ئۇيغۇرچە يازغان ھامان باشقا تىللار ئاپتوماتىك ھاسىل بولىدۇ
+                  </span>
+                  <button type="button" id="btnSyncNewCategoryTrEn" style="background: #ffffff; border: 1px solid #16a34a; color: #15803d; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0;" title="ئۇيغۇرچىدىن قايتا ئاپتوماتىك تەرجىمە قىلىش">
+                    <i class="fas fa-sync-alt"></i> قايتا يېڭىلاش
+                  </button>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <label class="form-label" style="font-weight: 700; font-size: 0.86rem; margin: 0;">تۈر نامى (Türkçe)</label>
+                    <span id="badgeNewCatTr" class="auto-tr-badge is-idle" title="خالىسىڭىز خالىغانچە قولدا تەھرىرلىسىڭىزمۇ بولىدۇ">
+                      <i class="fas fa-magic"></i> ئاپتوماتىك
+                    </span>
+                  </div>
+                  <input type="text" id="newCategoryTr" class="form-control number-latin" placeholder="Örn: Geleneksel Halılar" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-bottom: 0.85rem;">
-                  <label class="form-label" style="font-weight: 700; font-size: 0.86rem;">تۈر نامى (Türkçe)</label>
-                  <input type="text" id="newCategoryTr" class="form-control number-latin" placeholder="Örn: Geleneksel Halılar">
-                </div>
-                <div class="form-group" style="margin-bottom: 0.85rem;">
-                  <label class="form-label" style="font-weight: 700; font-size: 0.86rem;">تۈر نامى (English)</label>
-                  <input type="text" id="newCategoryEn" class="form-control number-latin" placeholder="e.g. Traditional Carpets">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <label class="form-label" style="font-weight: 700; font-size: 0.86rem; margin: 0;">تۈر نامى (English)</label>
+                    <span id="badgeNewCatEn" class="auto-tr-badge is-idle" title="خالىسىڭىز خالىغانچە قولدا تەھرىرلىسىڭىزمۇ بولىدۇ">
+                      <i class="fas fa-magic"></i> ئاپتوماتىك
+                    </span>
+                  </div>
+                  <input type="text" id="newCategoryEn" class="form-control number-latin" placeholder="e.g. Traditional Carpets" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-bottom: 0.85rem;">
                   <label class="form-label" style="font-weight: 700; font-size: 0.86rem;">سىنبەلگە (FontAwesome كودى ياكى تاللاڭ)</label>
@@ -2357,19 +2378,34 @@
       <form id="editCategoryForm">
         <input type="hidden" id="editCategoryId">
         
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label" style="font-weight: 700; font-size: 0.88rem;">تۈر نامى (ئۇيغۇرچە) <span style="color: var(--danger-color);">*</span></label>
-          <input type="text" id="editCategoryName" class="form-control" required>
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="font-weight: 700; font-size: 0.88rem; margin: 0;">تۈر نامى (ئۇيغۇرچە) <span style="color: var(--danger-color);">*</span></label>
+            <button type="button" id="btnSyncEditCategoryTrEn" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="ئۇيغۇرچىدىن قايتا ئاپتوماتىك ئايلاندۇرۇش">
+              <i class="fas fa-sync-alt"></i> قايتا تەرجىمە
+            </button>
+          </div>
+          <input type="text" id="editCategoryName" class="form-control" required autocomplete="off">
         </div>
 
         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
           <div>
-            <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">تۈر نامى (Türkçe)</label>
-            <input type="text" id="editCategoryTr" class="form-control number-latin">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.85rem; margin: 0;">تۈر نامى (Türkçe)</label>
+              <span id="badgeEditCatTr" class="auto-tr-badge is-idle">
+                <i class="fas fa-magic"></i> ئاپتوماتىك
+              </span>
+            </div>
+            <input type="text" id="editCategoryTr" class="form-control number-latin" autocomplete="off">
           </div>
           <div>
-            <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">تۈر نامى (English)</label>
-            <input type="text" id="editCategoryEn" class="form-control number-latin">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.85rem; margin: 0;">تۈر نامى (English)</label>
+              <span id="badgeEditCatEn" class="auto-tr-badge is-idle">
+                <i class="fas fa-magic"></i> ئاپتوماتىك
+              </span>
+            </div>
+            <input type="text" id="editCategoryEn" class="form-control number-latin" autocomplete="off">
           </div>
         </div>
 
@@ -2991,11 +3027,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260924_v29"></script>
+  <script src="js/supabase.js?v=20260924_v30"></script>
 
-  <script src="js/i18n.js?v=20260924_v29"></script>
-  <script src="js/store.js?v=20260924_v29"></script>
-  <script src="js/admin.js?v=20260924_v29"></script>
+  <script src="js/i18n.js?v=20260924_v30"></script>
+  <script src="js/store.js?v=20260924_v30"></script>
+  <script src="js/admin.js?v=20260924_v30"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>
@@ -3034,7 +3070,91 @@
         }
       };
 
-      // 3. ھەممە كۆزنەك ۋە كۇنۇپكىلارنى نازارەت قىلىش (Global Click Delegation)
+      // 3. تۈرلەرنىڭ ئۇيغۇرچىدىن باشقا تىللارغا دەل ۋاقتىدا ئاپتوماتىك تەرجىمە قىلىنىشى ۋە تەھرىرلىنىشى
+      function initDirectCategoryTranslation(nameId, trId, enId, badgeTrId, badgeEnId, syncBtnId) {
+        var nameInput = document.getElementById(nameId);
+        var trInput = document.getElementById(trId);
+        var enInput = document.getElementById(enId);
+        var badgeTr = badgeTrId ? document.getElementById(badgeTrId) : null;
+        var badgeEn = badgeEnId ? document.getElementById(badgeEnId) : null;
+        var syncBtn = syncBtnId ? document.getElementById(syncBtnId) : null;
+
+        if (!nameInput || !trInput || !enInput) return;
+
+        function runSync(force) {
+          var val = (nameInput.value || '').trim();
+          if (!val) {
+            if (force || trInput.dataset.manuallyEdited !== "true") {
+              trInput.value = '';
+              trInput.dataset.manuallyEdited = "false";
+              if (badgeTr) { badgeTr.className = 'auto-tr-badge is-idle'; badgeTr.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك'; }
+            }
+            if (force || enInput.dataset.manuallyEdited !== "true") {
+              enInput.value = '';
+              enInput.dataset.manuallyEdited = "false";
+              if (badgeEn) { badgeEn.className = 'auto-tr-badge is-idle'; badgeEn.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك'; }
+            }
+            return;
+          }
+
+          var trRes = (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') 
+            ? window.appI18n.autoTranslateUyghur(val, 'tr') 
+            : val;
+          var enRes = (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') 
+            ? window.appI18n.autoTranslateUyghur(val, 'en') 
+            : val;
+
+          if (force || trInput.dataset.manuallyEdited !== "true") {
+            trInput.value = trRes;
+            if (badgeTr) { badgeTr.className = 'auto-tr-badge is-synced'; badgeTr.innerHTML = '<i class="fas fa-check-circle"></i> ئاپتوماتىك يېزىلدى'; }
+          }
+          if (force || enInput.dataset.manuallyEdited !== "true") {
+            enInput.value = enRes;
+            if (badgeEn) { badgeEn.className = 'auto-tr-badge is-synced'; badgeEn.innerHTML = '<i class="fas fa-check-circle"></i> ئاپتوماتىك يېزىلدى'; }
+          }
+        }
+
+        ['input', 'keyup', 'change', 'paste'].forEach(function(ev) {
+          nameInput.addEventListener(ev, function() { runSync(false); });
+        });
+
+        trInput.addEventListener('input', function() {
+          if (trInput.value.trim().length > 0) {
+            trInput.dataset.manuallyEdited = "true";
+            if (badgeTr) { badgeTr.className = 'auto-tr-badge is-manual'; badgeTr.innerHTML = '<i class="fas fa-pen"></i> سىز تەھرىرلىگەن'; }
+          } else {
+            trInput.dataset.manuallyEdited = "false";
+            runSync(false);
+          }
+        });
+
+        enInput.addEventListener('input', function() {
+          if (enInput.value.trim().length > 0) {
+            enInput.dataset.manuallyEdited = "true";
+            if (badgeEn) { badgeEn.className = 'auto-tr-badge is-manual'; badgeEn.innerHTML = '<i class="fas fa-pen"></i> سىز تەھرىرلىگەن'; }
+          } else {
+            enInput.dataset.manuallyEdited = "false";
+            runSync(false);
+          }
+        });
+
+        if (syncBtn) {
+          syncBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            trInput.dataset.manuallyEdited = "false";
+            enInput.dataset.manuallyEdited = "false";
+            runSync(true);
+            if (typeof window.showAdminToast === 'function') {
+              window.showAdminToast('تۈركچە ۋە ئىنگلىزچە تەرجىمىسى قايتا ھاسىللاندى!', 'info');
+            }
+          });
+        }
+      }
+
+      initDirectCategoryTranslation('newCategoryName', 'newCategoryTr', 'newCategoryEn', 'badgeNewCatTr', 'badgeNewCatEn', 'btnSyncNewCategoryTrEn');
+      initDirectCategoryTranslation('editCategoryName', 'editCategoryTr', 'editCategoryEn', 'badgeEditCatTr', 'badgeEditCatEn', 'btnSyncEditCategoryTrEn');
+
+      // 4. ھەممە كۆزنەك ۋە كۇنۇپكىلارنى نازارەت قىلىش (Global Click Delegation)
       document.addEventListener('click', function(e) {
         // كىنىشكا كۇنۇپكىسى چېكىلگەندە
         var certBtn = e.target.closest('.btn-open-agent-cert, .btn-agent-cert');

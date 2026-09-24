@@ -837,9 +837,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('editCategoryId').value = cat.id;
-    document.getElementById('editCategoryName').value = cat.name;
-    document.getElementById('editCategoryTr').value = (cat.translations && cat.translations.tr) || '';
-    document.getElementById('editCategoryEn').value = (cat.translations && cat.translations.en) || '';
+    const trVal = (cat.translations && cat.translations.tr) || '';
+    const enVal = (cat.translations && cat.translations.en) || '';
+    const editTr = document.getElementById('editCategoryTr');
+    const editEn = document.getElementById('editCategoryEn');
+    const bTr = document.getElementById('badgeEditCatTr');
+    const bEn = document.getElementById('badgeEditCatEn');
+
+    if (editTr) {
+      editTr.value = trVal;
+      editTr.dataset.manuallyEdited = trVal ? "true" : "false";
+      if (bTr) {
+        bTr.className = trVal ? 'auto-tr-badge is-manual' : 'auto-tr-badge is-idle';
+        bTr.innerHTML = trVal ? '<i class="fas fa-check"></i> ساقلانغان' : '<i class="fas fa-magic"></i> ئاپتوماتىك';
+      }
+    }
+    if (editEn) {
+      editEn.value = enVal;
+      editEn.dataset.manuallyEdited = enVal ? "true" : "false";
+      if (bEn) {
+        bEn.className = enVal ? 'auto-tr-badge is-manual' : 'auto-tr-badge is-idle';
+        bEn.innerHTML = enVal ? '<i class="fas fa-check"></i> ساقلانغان' : '<i class="fas fa-magic"></i> ئاپتوماتىك';
+      }
+    }
     
     const iconInput = document.getElementById('editCategoryIcon');
     const iconPreview = document.getElementById('editCategoryIconPreview');
@@ -3941,8 +3961,20 @@ document.addEventListener('DOMContentLoaded', () => {
           const success = window.appStore.addCategory(catName, catIcon, { tr: catTr, en: catEn });
           if (success) {
             document.getElementById('newCategoryName').value = '';
-            document.getElementById('newCategoryTr').value = '';
-            document.getElementById('newCategoryEn').value = '';
+            const newTr = document.getElementById('newCategoryTr');
+            const newEn = document.getElementById('newCategoryEn');
+            if (newTr) {
+              newTr.value = '';
+              newTr.dataset.manuallyEdited = "false";
+            }
+            if (newEn) {
+              newEn.value = '';
+              newEn.dataset.manuallyEdited = "false";
+            }
+            const bTr = document.getElementById('badgeNewCatTr');
+            const bEn = document.getElementById('badgeNewCatEn');
+            if (bTr) { bTr.className = 'auto-tr-badge is-idle'; bTr.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك'; }
+            if (bEn) { bEn.className = 'auto-tr-badge is-idle'; bEn.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك'; }
             renderCategoriesTable();
             populateCategoryDropdowns();
             showAdminToast('يېڭى تۈر قوشۇلدى!', 'success');
@@ -4093,46 +4125,113 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // تۈرلەر كۆزنىكىدىمۇ ئاپتوماتىك تەرجىمە
-      const newCatName = document.getElementById('newCategoryName');
-      const newCatTr = document.getElementById('newCategoryTr');
-      const newCatEn = document.getElementById('newCategoryEn');
-      if (newCatName && newCatTr && newCatEn) {
-        [newCatTr, newCatEn].forEach(el => {
-          el.addEventListener('input', () => {
-            el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
+      // 🌐 تۈرلەر كۆزنىكىدە ھەقىقىي ۋاقىتلىق ئاپتوماتىك تەرجىمە ۋە ئەركىن تەھرىرلەش (Live Auto-translation & Free Editing)
+      function setupCategoryAutoTranslation(nameId, trId, enId, badgeTrId, badgeEnId, syncBtnId) {
+        const nameEl = document.getElementById(nameId);
+        const trEl = document.getElementById(trId);
+        const enEl = document.getElementById(enId);
+        const badgeTr = badgeTrId ? document.getElementById(badgeTrId) : null;
+        const badgeEn = badgeEnId ? document.getElementById(badgeEnId) : null;
+        const syncBtn = syncBtnId ? document.getElementById(syncBtnId) : null;
+
+        if (!nameEl || !trEl || !enEl) return;
+
+        function updateTranslation(force = false) {
+          const rawUg = nameEl.value.trim();
+          if (!rawUg) {
+            if (force || trEl.dataset.manuallyEdited !== "true") {
+              trEl.value = '';
+              trEl.dataset.manuallyEdited = "false";
+              if (badgeTr) {
+                badgeTr.className = 'auto-tr-badge is-idle';
+                badgeTr.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك';
+              }
+            }
+            if (force || enEl.dataset.manuallyEdited !== "true") {
+              enEl.value = '';
+              enEl.dataset.manuallyEdited = "false";
+              if (badgeEn) {
+                badgeEn.className = 'auto-tr-badge is-idle';
+                badgeEn.innerHTML = '<i class="fas fa-magic"></i> ئاپتوماتىك';
+              }
+            }
+            return;
+          }
+
+          const getTr = (lang) => {
+            if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+              return window.appI18n.autoTranslateUyghur(rawUg, lang);
+            }
+            return rawUg;
+          };
+
+          if (force || trEl.dataset.manuallyEdited !== "true") {
+            trEl.value = getTr('tr');
+            if (badgeTr) {
+              badgeTr.className = 'auto-tr-badge is-synced';
+              badgeTr.innerHTML = '<i class="fas fa-check-circle"></i> ئاپتوماتىك يېزىلدى';
+            }
+          }
+
+          if (force || enEl.dataset.manuallyEdited !== "true") {
+            enEl.value = getTr('en');
+            if (badgeEn) {
+              badgeEn.className = 'auto-tr-badge is-synced';
+              badgeEn.innerHTML = '<i class="fas fa-check-circle"></i> ئاپتوماتىك يېزىلدى';
+            }
+          }
+        }
+
+        // ئۇيغۇرچە يازغان ھامان (ھەر بىر ھەرپ، كۆچۈرۈپ چاپلاش، ئۆزگەرتىش)
+        ['input', 'keyup', 'change', 'paste'].forEach(ev => {
+          nameEl.addEventListener(ev, () => updateTranslation(false));
+        });
+
+        // تۈركچە كۆزنەكنى تەھرىرلىگەندە
+        trEl.addEventListener('input', () => {
+          if (trEl.value.trim().length > 0) {
+            trEl.dataset.manuallyEdited = "true";
+            if (badgeTr) {
+              badgeTr.className = 'auto-tr-badge is-manual';
+              badgeTr.innerHTML = '<i class="fas fa-pen"></i> سىز تەھرىرلىگەن';
+            }
+          } else {
+            trEl.dataset.manuallyEdited = "false";
+            updateTranslation(false);
+          }
+        });
+
+        // ئىنگلىزچە كۆزنەكنى تەھرىرلىگەندە
+        enEl.addEventListener('input', () => {
+          if (enEl.value.trim().length > 0) {
+            enEl.dataset.manuallyEdited = "true";
+            if (badgeEn) {
+              badgeEn.className = 'auto-tr-badge is-manual';
+              badgeEn.innerHTML = '<i class="fas fa-pen"></i> سىز تەھرىرلىگەن';
+            }
+          } else {
+            enEl.dataset.manuallyEdited = "false";
+            updateTranslation(false);
+          }
+        });
+
+        // قايتا تەرجىمە كۇنۇپكىسى
+        if (syncBtn) {
+          syncBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            trEl.dataset.manuallyEdited = "false";
+            enEl.dataset.manuallyEdited = "false";
+            updateTranslation(true);
+            showAdminToast('تۈركچە ۋە ئىنگلىزچە تەرجىمىسى قايتا ھاسىللاندى!', 'info');
           });
-        });
-        newCatName.addEventListener('input', () => {
-          const val = newCatName.value.trim();
-          if (newCatTr.dataset.manuallyEdited !== "true") {
-            newCatTr.value = val ? window.appI18n.autoTranslateUyghur(val, 'tr') : '';
-          }
-          if (newCatEn.dataset.manuallyEdited !== "true") {
-            newCatEn.value = val ? window.appI18n.autoTranslateUyghur(val, 'en') : '';
-          }
-        });
+        }
       }
 
-      const editCatName = document.getElementById('editCategoryName');
-      const editCatTr = document.getElementById('editCategoryTr');
-      const editCatEn = document.getElementById('editCategoryEn');
-      if (editCatName && editCatTr && editCatEn) {
-        [editCatTr, editCatEn].forEach(el => {
-          el.addEventListener('input', () => {
-            el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
-          });
-        });
-        editCatName.addEventListener('input', () => {
-          const val = editCatName.value.trim();
-          if (editCatTr.dataset.manuallyEdited !== "true") {
-            editCatTr.value = val ? window.appI18n.autoTranslateUyghur(val, 'tr') : '';
-          }
-          if (editCatEn.dataset.manuallyEdited !== "true") {
-            editCatEn.value = val ? window.appI18n.autoTranslateUyghur(val, 'en') : '';
-          }
-        });
-      }
+      // يېڭى تۈر قوشۇش كارتىسىغا باغلاش
+      setupCategoryAutoTranslation('newCategoryName', 'newCategoryTr', 'newCategoryEn', 'badgeNewCatTr', 'badgeNewCatEn', 'btnSyncNewCategoryTrEn');
+
+      // تۈر تەھرىرلەش مودالىغا باغلاش
+      setupCategoryAutoTranslation('editCategoryName', 'editCategoryTr', 'editCategoryEn', 'badgeEditCatTr', 'badgeEditCatEn', 'btnSyncEditCategoryTrEn');
     }
 
     setupProductAutoTranslation();

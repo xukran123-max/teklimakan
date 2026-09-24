@@ -383,6 +383,13 @@ function initTeklimakanApp() {
       if (col3Span) col3Span.textContent = i18n.t('footerCol3');
       else fCol3.textContent = i18n.t('footerCol3');
     }
+    const fCol3Sub = document.getElementById('fCol3SubtitleText');
+    if (fCol3Sub) {
+      const curLang = (window.appI18n && window.appI18n.currentLang) || 'ug';
+      if (curLang === 'tr') fCol3Sub.textContent = 'Telefon, WhatsApp ve iletişim kanalları';
+      else if (curLang === 'en') fCol3Sub.textContent = 'Phone, WhatsApp & channels';
+      else fCol3Sub.textContent = 'تېلېفون، ۋاتساپ ۋە ئالاقە يوللىرى';
+    }
     const fHint = document.getElementById('footerContactHint');
     const fList = document.getElementById('footerContactList');
     if (fHint && fList) {
@@ -4985,6 +4992,14 @@ function initTeklimakanApp() {
         if (e.target.closest('a')) return;
         e.preventDefault();
         toggleAccordion();
+      });
+
+      titleBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (e.target.closest('a')) return;
+          e.preventDefault();
+          toggleAccordion();
+        }
       });
     });
   }

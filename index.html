@@ -17,7 +17,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260924_v64">
+  <link rel="stylesheet" href="css/style.css?v=20260924_v65">
 </head>
 <body class="font-modern">
 
@@ -1476,16 +1476,22 @@
 
         <!-- 1. بىز بىلەن ئالاقىلىشىڭ (بىرىنچى ئورۇندا ۋە سىيرىلما ھالەتتە) -->
         <div class="footer-column footer-contact-column">
-          <h4 id="footerCol3Title" class="footer-accordion-header" title="ئالاقە ئۇچۇرلىرىنى كۆرۈش ياكى يىغىش">
-            <span class="footer-accordion-title-wrap">
-              <i class="fas fa-headset" style="color: #38bdf8;"></i>
-              <span id="fCol3TitleText">بىز بىلەن ئالاقىلىشىڭ</span>
-            </span>
-            <span class="footer-accordion-action-pill">
+          <div id="footerCol3Title" class="footer-accordion-header footer-contact-master-card" role="button" tabindex="0" title="ئالاقە ئۇچۇرلىرىنى كۆرۈش ياكى يىغىش">
+            <!-- سىنبەلگە قۇتىسى -->
+            <div class="footer-contact-icon-box footer-accordion-icon-box" style="background: rgba(56, 189, 248, 0.16); color: #38bdf8;">
+              <i class="fas fa-headset"></i>
+            </div>
+            <!-- تېكىست رايونى -->
+            <div class="footer-contact-text-box footer-accordion-text-box">
+              <span id="fCol3TitleText" class="footer-accordion-main-title">بىز بىلەن ئالاقىلىشىڭ</span>
+              <span id="fCol3SubtitleText" class="footer-accordion-sub-title">تېلېفون، ۋاتساپ ۋە ئالاقە يوللىرى</span>
+            </div>
+            <!-- ئېچىش كۇنۇپكىسى -->
+            <div class="footer-accordion-action-pill" id="footerContactPill">
               <span class="footer-accordion-hint" id="footerContactHint">ئېچىش</span>
               <i id="footerContactChevron" class="fas fa-chevron-down footer-accordion-chevron"></i>
-            </span>
-          </h4>
+            </div>
+          </div>
           <div class="footer-contact-list footer-accordion-content is-collapsed" id="footerContactList">
             <!-- تېلېفون -->
             <a href="tel:05551609999" class="footer-contact-item footer-contact-btn-item" title="بىۋاسىتە تېلېفون قىلىش">
@@ -1723,6 +1729,6 @@
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
   <script src="js/i18n.js?v=20260924_v55"></script>
   <script src="js/store.js?v=20260924_v55"></script>
-  <script src="js/app.js?v=20260924_v58"></script>
+  <script src="js/app.js?v=20260924_v59"></script>
 </body>
 </html>

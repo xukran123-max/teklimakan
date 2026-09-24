@@ -457,12 +457,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const tr = document.createElement('tr');
 
       let stockPill = '';
+      const displayUnit = product.unit || 'دانە';
       if (product.stock <= 0) {
         stockPill = '<span class="status-pill status-out-stock">تۈگىدى (0)</span>';
       } else if (product.stock <= 8) {
-        stockPill = `<span class="status-pill status-low-stock">ئاز قالدى (${product.stock})</span>`;
+        stockPill = `<span class="status-pill status-low-stock">ئاز قالدى (${product.stock} ${displayUnit})</span>`;
       } else {
-        stockPill = `<span class="status-pill status-in-stock">${product.stock} دانە</span>`;
+        stockPill = `<span class="status-pill status-in-stock">${product.stock} ${displayUnit}</span>`;
       }
 
       // تىل قاپلاش بەلگىسى
@@ -538,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td><span class="status-pill" style="background:var(--primary-light); color:var(--primary-color);">${product.category}</span></td>
         <td>${langBadge}</td>
-        <td><strong>${window.appStore.formatPrice(product.price)}</strong></td>
+        <td><strong>${window.appStore.formatPrice(product.price)}${product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;"> / ${product.unit}</span>` : ''}</strong></td>
         <td>${stockPill}</td>
         <td>${approvalBadge}</td>
         <td>
@@ -2077,6 +2078,25 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
+    // ⚖️ مىقدارى / بىرلىكى (سىيرىلما ۋە ئەركىن كىرگۈزۈش رامكىسىنى باغلاش)
+    const unitSelect = document.getElementById('formProductUnitSelect');
+    const unitInput = document.getElementById('formProductUnit');
+    if (unitSelect && unitInput) {
+      unitSelect.onchange = () => {
+        if (unitSelect.value === 'custom') {
+          unitInput.value = '';
+          unitInput.focus();
+        } else {
+          unitInput.value = unitSelect.value;
+        }
+      };
+      unitInput.oninput = () => {
+        const val = unitInput.value.trim();
+        const match = Array.from(unitSelect.options).find(opt => opt.value === val);
+        unitSelect.value = match ? val : 'custom';
+      };
+    }
+
     if (productId) {
       const product = window.appStore.getProductById(productId);
       if (!product) return;
@@ -2089,6 +2109,14 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('formProductPrice').value = product.price;
       document.getElementById('formProductOldPrice').value = product.oldPrice || '';
       document.getElementById('formProductStock').value = product.stock;
+
+      const pUnit = product.unit || 'دانە';
+      if (unitInput) unitInput.value = pUnit;
+      if (unitSelect) {
+        const match = Array.from(unitSelect.options).find(opt => opt.value === pUnit);
+        unitSelect.value = match ? pUnit : 'custom';
+      }
+
       document.getElementById('formProductImage').value = product.image;
       document.getElementById('formProductBadge').value = product.badge || '';
       document.getElementById('formProductDescUg').value = product.description || '';
@@ -2157,6 +2185,8 @@ document.addEventListener('DOMContentLoaded', () => {
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
       document.getElementById('formProductId').value = '';
       if (brandInput) brandInput.value = 'تەكلىماكان كىلاسسىك';
+      if (unitInput) unitInput.value = 'دانە';
+      if (unitSelect) unitSelect.value = 'دانە';
       if (scopeSelect) {
         scopeSelect.value = 'all';
         updateLanguageFieldsVisibility('all');
@@ -2222,7 +2252,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </td>
         <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${window.appStore.formatPrice(item.price)}</td>
-        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${item.quantity || 1}</td>
+        <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border);">${item.quantity || 1} ${item.unit || (item.product && item.product.unit) || 'دانە'}</td>
         <td style="padding:0.65rem 0.5rem; border-bottom:1px solid var(--admin-border); font-weight:700;">${window.appStore.formatPrice((item.price || 0) * (item.quantity || 1))}</td>
       </tr>
     `).join('');
@@ -3531,6 +3561,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldPriceVal = document.getElementById('formProductOldPrice').value;
         const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
         const stock = parseInt(document.getElementById('formProductStock').value, 10);
+        const unit = (document.getElementById('formProductUnit')?.value.trim()) || 'دانە';
         let image = document.getElementById('formProductImage').value.trim();
         const badge = document.getElementById('formProductBadge').value;
         const descUg = document.getElementById('formProductDescUg').value.trim();
@@ -3561,6 +3592,7 @@ document.addEventListener('DOMContentLoaded', () => {
           price,
           oldPrice,
           stock,
+          unit,
           image,
           badge,
           description: descUg,

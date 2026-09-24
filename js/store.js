@@ -222,6 +222,7 @@ const INITIAL_PRODUCTS = [
     category: 'ئۇيغۇر تىبابىتى',
     price: 185,
     oldPrice: 240,
+    unit: 'كىلو',
     stock: 45,
     sales: 128,
     rating: 5.0,
@@ -1423,6 +1424,10 @@ class StoreManager {
 
         // ھەر بىر تاۋارنىڭ approvalStatus ۋە كۆپ تىللىق تەرجىمىسىنىڭ تولۇقلىقىغا كاپالەتلىك قىلىش
         prods = prods.map(p => {
+          if (!p.unit) {
+            p.unit = 'دانە';
+            updated = true;
+          }
           if (!p.approvalStatus) {
             p.approvalStatus = 'تەستىقلاندى';
             updated = true;
@@ -2904,7 +2909,16 @@ class StoreManager {
 
   // ==================== تاۋارلار ====================
   getProducts() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [];
+    let prods = [];
+    try {
+      prods = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [];
+    } catch (e) {
+      prods = [];
+    }
+    return prods.map(p => {
+      if (!p.unit) p.unit = 'دانە';
+      return p;
+    });
   }
 
   getProductsByLang(lang = 'ug') {

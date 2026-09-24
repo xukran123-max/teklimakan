@@ -839,7 +839,7 @@ function initTeklimakanApp() {
           </div>
 
           <div class="product-pricing">
-            <span class="current-price">${formattedPrice}</span>
+            <span class="current-price">${formattedPrice}${product.unit ? `<small class="unit-text" style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / ${product.unit}</small>` : ''}</span>
             ${formattedOldPrice ? `<span class="original-price">${formattedOldPrice}</span>` : ''}
           </div>
 
@@ -964,7 +964,7 @@ function initTeklimakanApp() {
         <div class="cart-item-info">
           <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fas fa-award"></i> ${i18n.getBrandName(item.product.brand) || 'تەكلىماكان'}</div>
           <h4 class="cart-item-title">${item.product.name}</h4>
-          <div class="cart-item-price">${item.itemTotalFormatted}</div>
+          <div class="cart-item-price">${item.itemTotalFormatted}${item.product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-right:4px;"> (${item.quantity} ${item.product.unit})</span>` : ''}</div>
           <div class="cart-item-controls">
             <div class="qty-control-wrap">
               <button class="qty-btn btn-qty-minus" data-id="${item.product.id}">-</button>
@@ -1087,7 +1087,7 @@ function initTeklimakanApp() {
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
             <div style="display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.35rem;">
-              <span style="font-weight: 800; color: var(--danger-color); font-size: 1rem;">${formattedPrice}</span>
+              <span style="font-weight: 800; color: var(--danger-color); font-size: 1rem;">${formattedPrice}${p.unit ? `<small style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / ${p.unit}</small>` : ''}</span>
               ${formattedOldPrice ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.8rem;">${formattedOldPrice}</span>` : ''}
             </div>
             <div>${stockStatus}</div>
@@ -1394,7 +1394,7 @@ function initTeklimakanApp() {
           <h3 style="font-size: 1.25rem; font-weight: 800; line-height: 1.4; margin-bottom: 0.75rem;">${product.name}</h3>
           
           <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-            <span style="font-size: 1.65rem; font-weight: 900; color: var(--danger-color);">${formattedPrice}</span>
+            <span style="font-size: 1.65rem; font-weight: 900; color: var(--danger-color);">${formattedPrice}${product.unit ? `<small style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-right: 6px;"> / ${product.unit}</small>` : ''}</span>
             ${formattedOldPrice ? `<span style="font-size: 1rem; color: var(--text-light); text-decoration: line-through;">${formattedOldPrice}</span>` : ''}
           </div>
 
@@ -1403,7 +1403,7 @@ function initTeklimakanApp() {
           </div>
 
           <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: ${product.stock > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
-            ${window.appI18n.t('filterStockTitle')}: ${product.stock} ${window.appI18n.t('itemsUnit')}
+            ${window.appI18n.t('filterStockTitle')}: ${product.stock} ${product.unit || window.appI18n.t('itemsUnit')}
           </div>
 
           <div class="quick-view-actions">
@@ -3446,6 +3446,25 @@ function initTeklimakanApp() {
     const submitBtnText = document.getElementById('agentSubmitBtnText');
     const submitBtnIcon = document.getElementById('agentSubmitBtnIcon');
 
+    // ⚖️ ۋاكالەتچى مەھسۇلات مىقدارى / بىرلىكىنى باغلاش
+    const agentUnitSelect = document.getElementById('agentProdUnitSelect');
+    const agentUnitInput = document.getElementById('agentProdUnit');
+    if (agentUnitSelect && agentUnitInput) {
+      agentUnitSelect.addEventListener('change', () => {
+        if (agentUnitSelect.value === 'custom') {
+          agentUnitInput.value = '';
+          agentUnitInput.focus();
+        } else {
+          agentUnitInput.value = agentUnitSelect.value;
+        }
+      });
+      agentUnitInput.addEventListener('input', () => {
+        const val = agentUnitInput.value.trim();
+        const match = Array.from(agentUnitSelect.options).find(opt => opt.value === val);
+        agentUnitSelect.value = match ? val : 'custom';
+      });
+    }
+
     function resetToNewProductMode() {
       if (editProdIdInput) editProdIdInput.value = '';
       if (editBanner) editBanner.style.display = 'none';
@@ -3453,6 +3472,9 @@ function initTeklimakanApp() {
       if (submitBtnIcon) submitBtnIcon.className = 'fas fa-upload';
       if (formProductSubmit) formProductSubmit.reset();
       if (previewWrap) previewWrap.style.display = 'none';
+
+      if (agentUnitInput) agentUnitInput.value = 'دانە';
+      if (agentUnitSelect) agentUnitSelect.value = 'دانە';
 
       const scopeSelect = document.getElementById('agentProdLanguageScope');
       if (scopeSelect && currentVerifiedAgent) {
@@ -3481,6 +3503,7 @@ function initTeklimakanApp() {
             : '<span style="background:#fef2f2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fecaca;"><i class="fas fa-times-circle"></i> رەت قىلىندى</span>');
 
         const priceFormatted = window.appStore.formatPrice(p.price);
+        const pUnit = p.unit || 'دانە';
         return `
           <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.75rem; gap:0.5rem; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:0.6rem;">
@@ -3488,7 +3511,7 @@ function initTeklimakanApp() {
               <div>
                 <strong style="font-size:0.88rem; display:block; color:#1e293b;">${p.name}</strong>
                 <div style="font-size:0.78rem; color:#64748b;">
-                  باھاسى: <b style="color:var(--primary-color);">${priceFormatted}</b> | زاپاس: <b>${p.stock}</b> | ${statusBadge}
+                  باھاسى: <b style="color:var(--primary-color);">${priceFormatted}${p.unit ? ' / ' + p.unit : ''}</b> | زاپاس: <b>${p.stock} ${pUnit}</b> | ${statusBadge}
                 </div>
               </div>
             </div>
@@ -3515,6 +3538,14 @@ function initTeklimakanApp() {
           document.getElementById('agentProdPrice').value = p.price || '';
           document.getElementById('agentProdOldPrice').value = p.oldPrice || '';
           document.getElementById('agentProdStock').value = p.stock || '';
+
+          const pUnit = p.unit || 'دانە';
+          if (agentUnitInput) agentUnitInput.value = pUnit;
+          if (agentUnitSelect) {
+            const match = Array.from(agentUnitSelect.options).find(opt => opt.value === pUnit);
+            agentUnitSelect.value = match ? pUnit : 'custom';
+          }
+
           if (agentImageInput) agentImageInput.value = p.image || '';
           document.getElementById('agentProdDesc').value = p.description || '';
 
@@ -3708,6 +3739,7 @@ function initTeklimakanApp() {
         const oldPriceVal = document.getElementById('agentProdOldPrice').value;
         const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
         const stock = parseInt(document.getElementById('agentProdStock').value, 10);
+        const unit = (document.getElementById('agentProdUnit')?.value.trim()) || 'دانە';
         const image = document.getElementById('agentProdImage').value.trim();
         const desc = document.getElementById('agentProdDesc').value.trim();
         const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
@@ -3722,6 +3754,7 @@ function initTeklimakanApp() {
           price,
           oldPrice,
           stock,
+          unit,
           image,
           description: desc,
           languageScope,

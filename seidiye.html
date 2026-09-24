@@ -1677,20 +1677,44 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-            <div class="form-group">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label">ھازىرقى باھاسى (₺) <span style="color: var(--danger-color);">*</span></label>
-              <input type="number" id="formProductPrice" class="form-control number-latin" step="0.01" min="0" required>
+              <input type="number" id="formProductPrice" class="form-control number-latin" step="0.01" min="0" placeholder="150" required>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label">ئەسلى باھاسى (₺)</label>
-              <input type="number" id="formProductOldPrice" class="form-control number-latin" step="0.01" min="0">
+              <input type="number" id="formProductOldPrice" class="form-control number-latin" step="0.01" min="0" placeholder="180">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label">ئامبار زاپاس سانى <span style="color: var(--danger-color);">*</span></label>
-              <input type="number" id="formProductStock" class="form-control number-latin" min="0" required>
+              <input type="number" id="formProductStock" class="form-control number-latin" min="0" placeholder="50" required>
+            </div>
+
+            <!-- ⚖️ مىقدارى / بىرلىكى (سىيرىلما ۋە ئەركىن تەھرىرلەش ئىقتىدارى بىلەن) -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>مىقدارى / بىرلىكى <span style="color: var(--danger-color);">*</span></span>
+                <span style="font-size: 0.72rem; color: var(--primary-color); font-weight: 700;">(تەھرىرلىگىلى بولىدۇ)</span>
+              </label>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <select id="formProductUnitSelect" class="form-control" style="flex: 1.1; min-width: 95px; padding: 0.45rem 0.35rem; font-weight: 700; background-color: #f0fdf4; border-color: #86efac;" title="بىرلىك تاللاش">
+                  <option value="دانە">دانە (تال)</option>
+                  <option value="كىلو">كىلوگرام (kg)</option>
+                  <option value="گىرام">گىرام (g)</option>
+                  <option value="مىللىلېتىر">مىللىلېتىر (ml)</option>
+                  <option value="لېتىر">لېتىر (L)</option>
+                  <option value="قۇتا">قۇتا (Box)</option>
+                  <option value="تال">تال</option>
+                  <option value="باغلام">باغلام / دەستە</option>
+                  <option value="جۈپ">جۈپ</option>
+                  <option value="مېتىر">مېتىر (m)</option>
+                  <option value="custom">باشقا (خاس يېزىش)...</option>
+                </select>
+                <input type="text" id="formProductUnit" class="form-control" value="دانە" placeholder="مەسىلەن: 500g، كىلو" style="flex: 1; min-width: 85px; font-weight: 700; text-align: center; border-color: #3b82f6;" title="بىرلىكنى ئەركىن تەھرىرلىيەلەيسىز">
+              </div>
             </div>
           </div>
 

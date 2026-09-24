@@ -926,11 +926,28 @@
               <label class="form-label" style="font-weight: 700; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
                 تاۋار رەسىمى <span style="color: red;">*</span> (ئاپتوماتىك سۇپا تامغىسى چۈشىدۇ)
               </label>
-              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; align-items: center;">
+                <!-- ئالبوم ۋە بارلىق ھۆججەتلەر (Android Gray Screen Bypass) -->
                 <label for="agentFileInput" class="action-btn" style="background: #eff6ff !important; border-color: #3b82f6 !important; color: #1d4ed8 !important; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-weight: 700;">
-                  <i class="fas fa-camera"></i> <span>سۈرەت تاللاش (تېلېفون ياكى ھۆججەت)</span>
+                  <i class="fas fa-images"></i> <span>📁 رەسىمخانا ۋە ھۆججەتلەر</span>
                 </label>
-                <input type="file" id="agentFileInput" accept="image/*" style="display: none;">
+                <input type="file" id="agentFileInput" accept="image/jpeg,image/png,image/webp,image/jpg,*/*" style="display: none;">
+
+                <!-- نەق مەيدان كامېرا -->
+                <label for="agentFileInputCamera" class="action-btn" style="background: #f0fdf4 !important; border-color: #22c55e !important; color: #15803d !important; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; font-weight: 700;">
+                  <i class="fas fa-camera"></i> <span>📸 نەق مەيدان كامېرا</span>
+                </label>
+                <input type="file" id="agentFileInputCamera" accept="image/*" capture="environment" style="display: none;">
+
+                <!-- قىستۇرما تاختىدىن چاپلاش (Paste) -->
+                <button type="button" class="action-btn" id="btnPasteAgentProductImage" style="background: #faf5ff !important; border-color: #a855f7 !important; color: #7e22ce !important; padding: 0.5rem 0.9rem; font-weight: 700;">
+                  <i class="fas fa-paste"></i> <span>📋 چاپلاش</span>
+                </button>
+              </div>
+
+              <!-- كۆرسەتمە ئۇچۇرى (Android Gray Fix) -->
+              <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 0.6rem; font-size: 0.8rem; color: #92400e; line-height: 1.45;">
+                💡 <strong>رەسىم كۆرۈنمىسە:</strong> تېلېفوندىن كۆزنەك ئېچىلغاندا ئۈستىدىكى <strong>«Göz at (ھۆججەتلەر)»</strong> ياكى <strong>«Galeri»</strong> نى تاللىسىڭىز بارلىق سۈرەتلەر مەجبۇرىي كۆرۈنىدۇ.
               </div>
               <input type="text" id="agentProdImage" class="form-control number-latin" placeholder="ياكى سۈرەت تور ئۇلانمىسىنى كىرگۈزۈڭ: https://...">
               
@@ -1415,11 +1432,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260924_v38"></script>
+  <script src="js/supabase.js?v=20260924_v39"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260924_v38"></script>
-  <script src="js/store.js?v=20260924_v38"></script>
-  <script src="js/app.js?v=20260924_v38"></script>
+  <script src="js/i18n.js?v=20260924_v39"></script>
+  <script src="js/store.js?v=20260924_v39"></script>
+  <script src="js/app.js?v=20260924_v39"></script>
 </body>
 </html>

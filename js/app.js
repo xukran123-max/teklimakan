@@ -3641,112 +3641,150 @@ function initTeklimakanApp() {
 
     // تاۋار سۈرىتى تاللاش (تېز، ئاپتوماتىك پىرىسلاش ۋە سۇپا تامغىسى بېسىش)
     const agentFileInput = document.getElementById('agentFileInput');
+    const agentFileInputCamera = document.getElementById('agentFileInputCamera');
+    const btnPasteAgentProdImg = document.getElementById('btnPasteAgentProductImage');
     const agentImageInput = document.getElementById('agentProdImage');
     const previewWrap = document.getElementById('agentImagePreviewWrap');
     const previewImg = document.getElementById('agentImagePreviewImg');
     const secStatus = document.getElementById('agentImageSecStatus');
 
+    async function processAgentProductFile(file) {
+      if (!file) return;
+
+      // ھۆججەت سىغىمى بەك غايەت زور بولسا (35MB تىن ئارتۇق)
+      if (file.size > 35 * 1024 * 1024) {
+        alert('🚫 سۈرەت ھۆججىتى بەك چوڭ (35MB تىن ئارتۇق)! بىر ئاز كىچىكرەك سۈرەت تاللاڭ.');
+        showToast('سۈرەت ھۆججىتى 35MB تىن كىچىك بولۇشى كېرەك', 'error');
+        if (agentFileInput) agentFileInput.value = '';
+        if (agentFileInputCamera) agentFileInputCamera.value = '';
+        return;
+      }
+
+      // 1-قائىدە: ھۆججەت نامىدىن تاشقى ئېلان، ئالاقە ياكى تېلېفون سۈزۈش
+      const fileName = file.name || 'image.jpg';
+      const nameSec = window.appStore.validateProductImageSecurity(fileName, fileName, false, {
+        fileName: fileName,
+        fileType: file.type || 'image/jpeg',
+        fileSize: file.size,
+        isProcessed: false
+      });
+      if (!nameSec.valid) {
+        alert(nameSec.message);
+        showToast(nameSec.message, 'error');
+        if (agentFileInput) agentFileInput.value = '';
+        if (agentFileInputCamera) agentFileInputCamera.value = '';
+        return;
+      }
+
+      showToast('سۈرەت تەييارلىنىپ سۇپا تامغىسى بېسىلىۋاتىدۇ...', 'info');
+
+      const reader = new FileReader();
+      reader.onerror = () => {
+        showToast('سۈرەت ھۆججىتىنى ئوقۇش مەغلۇپ بولدى', 'error');
+      };
+      reader.onload = function(evt) {
+        const rawBase64 = evt.target.result;
+        const img = new Image();
+        img.onerror = () => {
+          showToast('سۈرەت مەزمۇنىنى ئوقۇش مەغلۇپ بولدى', 'error');
+        };
+        img.onload = async function() {
+          // 2-قائىدە & 1-قائىدە: ئادەم سۈرىتى ياكى تاشقى نومۇرلارنى سۈزۈش
+          const sec = window.appStore.validateProductImageSecurity(rawBase64, fileName, false, {
+            width: img.width,
+            height: img.height,
+            fileName: fileName,
+            fileType: file.type || 'image/jpeg',
+            fileSize: file.size,
+            isProcessed: false
+          });
+
+          if (!sec.valid) {
+            alert(sec.message);
+            showToast(sec.message, 'error');
+            if (agentFileInput) agentFileInput.value = '';
+            if (agentFileInputCamera) agentFileInputCamera.value = '';
+            if (agentImageInput) agentImageInput.value = '';
+            if (previewWrap) previewWrap.style.display = 'none';
+            return;
+          }
+
+          // 5-قائىدە: ئاپتوماتىك كۆلەمنى تەڭشەش ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسىنى بېسىش
+          let finalImageSrc = rawBase64;
+          let displayW = img.width;
+          let displayH = img.height;
+
+          try {
+            const wmRes = await window.appStore.applyTeklimakanWatermark(img);
+            if (wmRes && wmRes.dataUrl) {
+              finalImageSrc = wmRes.dataUrl;
+              displayW = wmRes.width;
+              displayH = wmRes.height;
+            }
+          } catch (wmErr) {
+            console.warn('Watermark generation error:', wmErr);
+          }
+
+          if (agentImageInput) agentImageInput.value = finalImageSrc;
+          if (previewImg) previewImg.src = finalImageSrc;
+          if (previewWrap) previewWrap.style.display = 'block';
+
+          // تېخنىكىلىق كۆرسەتكۈچلەرنى يېڭىلاش
+          const dimBadge = document.getElementById('agentImgDimBadge');
+          const formatBadge = document.getElementById('agentImgFormatBadge');
+          const sizeBadge = document.getElementById('agentImgSizeBadge');
+          const wmBadge = document.getElementById('agentImgWatermarkBadge');
+
+          if (dimBadge) dimBadge.textContent = `${displayW} × ${displayH} px`;
+          if (formatBadge) formatBadge.textContent = 'JPEG';
+          if (sizeBadge) {
+            const approxKb = Math.round((finalImageSrc.length * 3 / 4) / 1024);
+            sizeBadge.textContent = `${approxKb} KB`;
+          }
+          if (wmBadge) wmBadge.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ★ «تەكلىماكان كاپالىتى» تامغىسى بېسىلدى</span>';
+
+          if (secStatus) {
+            secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت تەييارلاندى ۋە سۇپا تامغىسى بېسىلدى</span>';
+          }
+          showToast('✅ سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى ۋە تامغا بېسىلدى!', 'success');
+        };
+        img.src = rawBase64;
+      };
+      reader.readAsDataURL(file);
+    }
+
     if (agentFileInput) {
-      agentFileInput.addEventListener('change', async (e) => {
+      agentFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
-        if (!file) return;
+        processAgentProductFile(file);
+      });
+    }
 
-        // ھۆججەت سىغىمى بەك غايەت زور بولسا (35MB تىن ئارتۇق)
-        if (file.size > 35 * 1024 * 1024) {
-          alert('🚫 سۈرەت ھۆججىتى بەك چوڭ (35MB تىن ئارتۇق)! بىر ئاز كىچىكرەك سۈرەت تاللاڭ.');
-          showToast('سۈرەت ھۆججىتى 35MB تىن كىچىك بولۇشى كېرەك', 'error');
-          agentFileInput.value = '';
-          return;
-        }
+    if (agentFileInputCamera) {
+      agentFileInputCamera.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        processAgentProductFile(file);
+      });
+    }
 
-        // 1-قائىدە: ھۆججەت نامىدىن تاشقى ئېلان، ئالاقە ياكى تېلېفون سۈزۈش
-        const nameSec = window.appStore.validateProductImageSecurity(file.name, file.name, false, {
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-          isProcessed: false
-        });
-        if (!nameSec.valid) {
-          alert(nameSec.message);
-          showToast(nameSec.message, 'error');
-          agentFileInput.value = '';
-          return;
-        }
-
-        showToast('سۈرەت تەييارلىنىپ سۇپا تامغىسى بېسىلىۋاتىدۇ...', 'info');
-
-        const reader = new FileReader();
-        reader.onerror = () => {
-          showToast('سۈرەت ھۆججىتىنى ئوقۇش مەغلۇپ بولدى', 'error');
-        };
-        reader.onload = function(evt) {
-          const rawBase64 = evt.target.result;
-          const img = new Image();
-          img.onerror = () => {
-            showToast('سۈرەت مەزمۇنىنى ئوقۇش مەغلۇپ بولدى', 'error');
-          };
-          img.onload = async function() {
-            // 2-قائىدە & 1-قائىدە: ئادەم سۈرىتى ياكى تاشقى نومۇرلارنى سۈزۈش
-            const sec = window.appStore.validateProductImageSecurity(rawBase64, file.name, false, {
-              width: img.width,
-              height: img.height,
-              fileName: file.name,
-              fileType: file.type,
-              fileSize: file.size,
-              isProcessed: false
-            });
-
-            if (!sec.valid) {
-              alert(sec.message);
-              showToast(sec.message, 'error');
-              agentFileInput.value = '';
-              if (agentImageInput) agentImageInput.value = '';
-              if (previewWrap) previewWrap.style.display = 'none';
-              return;
-            }
-
-            // 5-قائىدە: ئاپتوماتىك كۆلەمنى تەڭشەش ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسىنى بېسىش
-            let finalImageSrc = rawBase64;
-            let displayW = img.width;
-            let displayH = img.height;
-
-            try {
-              const wmRes = await window.appStore.applyTeklimakanWatermark(img);
-              if (wmRes && wmRes.dataUrl) {
-                finalImageSrc = wmRes.dataUrl;
-                displayW = wmRes.width;
-                displayH = wmRes.height;
+    if (btnPasteAgentProdImg) {
+      btnPasteAgentProdImg.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.read) {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+              const imageType = item.types.find(type => type.startsWith('image/'));
+              if (imageType) {
+                const blob = await item.getType(imageType);
+                processAgentProductFile(blob);
+                return;
               }
-            } catch (wmErr) {
-              console.warn('Watermark generation error:', wmErr);
             }
-
-            if (agentImageInput) agentImageInput.value = finalImageSrc;
-            if (previewImg) previewImg.src = finalImageSrc;
-            if (previewWrap) previewWrap.style.display = 'block';
-
-            // تېخنىكىلىق كۆرسەتكۈچلەرنى يېڭىلاش
-            const dimBadge = document.getElementById('agentImgDimBadge');
-            const formatBadge = document.getElementById('agentImgFormatBadge');
-            const sizeBadge = document.getElementById('agentImgSizeBadge');
-            const wmBadge = document.getElementById('agentImgWatermarkBadge');
-
-            if (dimBadge) dimBadge.textContent = `${displayW} × ${displayH} px`;
-            if (formatBadge) formatBadge.textContent = 'JPEG';
-            if (sizeBadge) {
-              const approxKb = Math.round((finalImageSrc.length * 3 / 4) / 1024);
-              sizeBadge.textContent = `${approxKb} KB`;
-            }
-            if (wmBadge) wmBadge.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ★ «تەكلىماكان كاپالىتى» تامغىسى بېسىلدى</span>';
-
-            if (secStatus) {
-              secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت تەييارلاندى ۋە سۇپا تامغىسى بېسىلدى</span>';
-            }
-            showToast('✅ سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى ۋە تامغا بېسىلدى!', 'success');
-          };
-          img.src = rawBase64;
-        };
-        reader.readAsDataURL(file);
+          }
+        } catch (clipErr) {
+          console.warn('Clipboard read error:', clipErr);
+        }
+        alert('📋 قىستۇرما تاختىدىن چاپلاش ئۈچۈن: رەسىمنى كۆچۈرۈپ بولۇپ، كۇنۇپكىلار تاختىسىدىن Ctrl + V نى بېسىڭ ياكى يانفوندا رەسىمنى بىۋاسىتە تاللاڭ.');
       });
     }
 

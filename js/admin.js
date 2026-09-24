@@ -3840,50 +3840,87 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const productCameraInput = document.getElementById('formProductCameraInput');
+    const btnPasteAdminProdImg = document.getElementById('btnPasteAdminProductImage');
+
+    function handleAdminProductFile(file) {
+      if (!file) return;
+
+      // ھۆججەت تىپىنى تەكشۈرۈش
+      if (!file.type.startsWith('image/')) {
+        alert('⚠️ پەقەت رەسىم ھۆججىتى (JPG, PNG, WebP) تاللاشقا بولىدۇ!');
+        if (productFileInput) productFileInput.value = '';
+        if (productCameraInput) productCameraInput.value = '';
+        return;
+      }
+
+      // ھۆججەتنى ئوقۇش ۋە ئالدىن كۆرسىتىش
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const base64Data = event.target.result;
+
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          // باشقۇرغۇچى بولغاچقا رەسىم بىۋاستە ئەكىرىلىدۇ
+          if (productImageInput) productImageInput.value = base64Data;
+          if (previewImg) previewImg.src = base64Data;
+          if (previewBox) previewBox.style.display = 'block';
+
+          if (secStatus) {
+            secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى';
+            secStatus.style.color = '#2563eb';
+          }
+          if (secDetail) {
+            secDetail.textContent = `ھۆججەت: ${file.name || 'چاپلانغان رەسىم'} (${tempImg.width}x${tempImg.height}px) - باشقۇرغۇچى تەرىپىدىن تەستىقلاندى.`;
+          }
+
+          showAdminToast('✅ رەسىم مۇۋەپپەقىيەتلىك ئەكىرىلدى!', 'success');
+        };
+
+        tempImg.onerror = function() {
+          alert('⚠️ رەسىمنى ئوقۇش مەغلۇپ بولدى، باشقا رەسىم تاللاڭ.');
+          if (productFileInput) productFileInput.value = '';
+          if (productCameraInput) productCameraInput.value = '';
+        };
+
+        tempImg.src = base64Data;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
     if (productFileInput) {
       productFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
-        if (!file) return;
+        handleAdminProductFile(file);
+      });
+    }
 
-        // ھۆججەت تىپىنى تەكشۈرۈش
-        if (!file.type.startsWith('image/')) {
-          alert('⚠️ پەقەت رەسىم ھۆججىتى (JPG, PNG, WebP) تاللاشقا بولىدۇ!');
-          productFileInput.value = '';
-          return;
+    if (productCameraInput) {
+      productCameraInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        handleAdminProductFile(file);
+      });
+    }
+
+    if (btnPasteAdminProdImg) {
+      btnPasteAdminProdImg.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.read) {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+              const imageType = item.types.find(type => type.startsWith('image/'));
+              if (imageType) {
+                const blob = await item.getType(imageType);
+                handleAdminProductFile(blob);
+                return;
+              }
+            }
+          }
+        } catch (clipErr) {
+          console.warn('Clipboard read error:', clipErr);
         }
-
-        // ھۆججەتنى ئوقۇش ۋە ئالدىن كۆرسىتىش
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const base64Data = event.target.result;
-
-          const tempImg = new Image();
-          tempImg.onload = function() {
-            // باشقۇرغۇچى بولغاچقا رەسىم بىۋاستە ئەكىرىلىدۇ
-            if (productImageInput) productImageInput.value = base64Data;
-            if (previewImg) previewImg.src = base64Data;
-            if (previewBox) previewBox.style.display = 'block';
-
-            if (secStatus) {
-              secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى';
-              secStatus.style.color = '#2563eb';
-            }
-            if (secDetail) {
-              secDetail.textContent = `ھۆججەت: ${file.name} (${tempImg.width}x${tempImg.height}px) - باشقۇرغۇچى تەرىپىدىن تەستىقلاندى.`;
-            }
-
-            showAdminToast('✅ رەسىم مۇۋەپپەقىيەتلىك ئەكىرىلدى!', 'success');
-          };
-
-          tempImg.onerror = function() {
-            alert('⚠️ رەسىمنى ئوقۇش مەغلۇپ بولدى، باشقا رەسىم تاللاڭ.');
-            productFileInput.value = '';
-          };
-
-          tempImg.src = base64Data;
-        };
-
-        reader.readAsDataURL(file);
+        alert('📋 قىستۇرما تاختىدىن چاپلاش ئۈچۈن: رەسىمنى كۆچۈرۈپ بولۇپ، كۇنۇپكىلار تاختىسىدىن Ctrl + V نى بېسىڭ ياكى تېلېفوندا رەسىمنى بىۋاسىتە تاللاڭ.');
       });
     }
 

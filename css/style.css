@@ -3167,6 +3167,11 @@ body {
     border: none !important;
     padding: 0 !important;
     margin: 0 0 1.2rem 0 !important;
+    justify-content: flex-start !important;
+  }
+  .footer-column-title {
+    justify-content: flex-start !important;
+    margin-bottom: 1.2rem !important;
   }
   .footer-accordion-action-pill {
     display: none !important;
@@ -3231,6 +3236,9 @@ html[dir="ltr"] .footer-contact-btn-item:hover {
   flex: 1;
   min-width: 0;
   gap: 0.15rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .footer-contact-label {
@@ -3252,11 +3260,16 @@ html[dir="ltr"] .footer-contact-btn-item:hover {
 }
 
 .footer-contact-arrow {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-size: 0.78rem;
   color: #64748b;
   opacity: 0.6;
   transition: all 0.25s ease;
-  margin-inline-start: auto;
 }
 
 .footer-contact-btn-item:hover .footer-contact-arrow {
@@ -3880,7 +3893,7 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
   /* ئاستى قىسمى (Footer) */
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.15rem;
     text-align: center;
   }
   .footer-brand {
@@ -3919,15 +3932,47 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
   }
   .footer-accordion-header {
     max-width: 360px;
-    margin: 0 auto 0.65rem auto !important;
+    margin: 0 auto !important;
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: center !important;
+    text-align: center;
+    padding: 0.5rem 3.8rem !important;
+  }
+  .footer-accordion-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .footer-accordion-action-pill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  html[dir="rtl"] .footer-accordion-action-pill {
+    left: 0.65rem;
+    right: auto;
+  }
+  html[dir="ltr"] .footer-accordion-action-pill {
+    right: 0.65rem;
+    left: auto;
   }
   .footer-column-title {
     max-width: 360px;
-    margin: 1.15rem auto 0.65rem auto !important;
+    margin: 0 auto 0.65rem auto !important;
     padding: 0 0.25rem;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center !important;
+    text-align: center;
+  }
+  .footer-column-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
   .footer-rates-box,
   .footer-about-list,

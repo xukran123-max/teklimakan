@@ -637,17 +637,22 @@
   <!-- 🤝 ۋاكالەتچى ۋە سودىگەرلەر مەركىزى كۆزنىكى (Agent & Vendor Portal Modal) -->
   <div class="modal-backdrop" id="agentPortalModal">
     <div class="modal-content" style="max-width: 680px;">
-      <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #1e40af); color: #ffffff; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 1.25rem 1.5rem;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%); color: #ffffff; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 1.25rem 1.5rem; position: relative; overflow: hidden; border-bottom: 2px solid rgba(245, 158, 11, 0.4);">
+        <div style="position: absolute; top: -30px; left: -30px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%); pointer-events: none;"></div>
         <div>
-          <h4 class="modal-title" style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; font-weight: 800;">
+          <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde68a; font-size: 0.72rem; font-weight: 800; padding: 1px 8px; border-radius: 9999px; margin-bottom: 0.35rem;">
+            <i class="fas fa-crown" style="color: #f59e0b;"></i>
+            <span>تەكلىماكان رەسمىي ۋاكالەتچىلىك سۇپىسى</span>
+          </div>
+          <h4 class="modal-title" style="color: #ffffff; display: flex; align-items: center; gap: 0.5rem; font-size: 1.22rem; font-weight: 900; margin: 0;">
             <i class="fas fa-handshake" style="color: #f59e0b;"></i>
-            <span id="agentPortalTitle">تەكلىماكان ۋاكالەتچى ۋە سودىگەرلەر مەركىزى</span>
+            <span id="agentPortalTitle">تەكلىماكان ۋاكالەتچىلەر مەركىزى</span>
           </h4>
-          <p style="font-size: 0.82rem; color: #bfdbfe; margin: 0.25rem 0 0 0;" id="agentPortalSubtitle">
-            سۇپىمىزغا ۋاكالەتچى بولۇپ قوشۇلۇڭ ياكى مەھسۇلاتلىرىڭىزنى تەكشۈرۈشكە يوللاڭ
+          <p style="font-size: 0.82rem; color: #bfdbfe; margin: 0.35rem 0 0 0; line-height: 1.4;" id="agentPortalSubtitle">
+            ھەمكارلاشقۇچى ۋاكالەتچى ۋە سودىگەرلەرنىڭ تاۋار باشقۇرۇش ۋە ئېلان قىلىش سۇپىسى
           </p>
         </div>
-        <button class="btn-close-drawer btn-modal-close" id="btnCloseAgentPortalModal" style="color: #ffffff; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fas fa-times"></i></button>
+        <button class="btn-close-drawer btn-modal-close" id="btnCloseAgentPortalModal" style="color: #ffffff; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="fas fa-times"></i></button>
       </div>
 
       <!-- تاللاش قۇلاقلىرى (Tabs) -->
@@ -656,7 +661,7 @@
           <i class="fas fa-user-plus"></i> <span id="agentTab1Text">1. ۋاكالەتچى بولۇپ تىزىملىتىش</span>
         </button>
         <button type="button" class="agent-tab-btn" id="tabBtnAgentSubmit" style="flex: 1; padding: 0.85rem 1rem; border: none; background: transparent; font-weight: 700; font-size: 0.92rem; cursor: pointer; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s;">
-          <i class="fas fa-box-open"></i> <span id="agentTab2Text">2. تاۋار سۇنۇش (تەستىقلانغانلار)</span>
+          <i class="fas fa-box-open"></i> <span id="agentTab2Text">2. كىرىش ۋە تاۋار سۇنۇش</span>
         </button>
       </div>
 
@@ -802,48 +807,77 @@
             <div id="agentVerifyMsg" style="margin-top: 0.75rem; font-size: 0.85rem; display: none;"></div>
           </div>
 
-          <!-- 👤 دەلىللەنگەن ۋاكالەتچى كۆرسەتكۈچ تاختىسى (Agent Dashboard Header) -->
-          <div id="agentDashboardHeader" style="display: none; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #ffffff; border-radius: 14px; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);">
+          <!-- 👤 دەلىللەنگەن ۋاكالەتچى كۆرسەتكۈچ تاختىسى (Executive VIP Merchant Dashboard Card) -->
+          <div id="agentDashboardHeader" style="display: none; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1e40af 100%); color: #ffffff; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1.5px solid rgba(245, 158, 11, 0.4); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2); position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.85rem;">
-              <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: #ffffff; color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                  <i class="fas fa-user-tie"></i>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 900; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35); flex-shrink: 0;">
+                  <i class="fas fa-store"></i>
                 </div>
                 <div>
-                  <div style="font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                  <div style="font-weight: 900; font-size: 1.12rem; display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
                     <span id="dashAgentName">ۋاكالەتچى</span>
-                    <span id="dashAgentBadge" style="background: #10b981; color: #ffffff; font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700;">★ تەستىقلانغان سودىگەر</span>
+                    <span id="dashAgentBadge" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-size: 0.72rem; padding: 2px 9px; border-radius: 9999px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check-circle"></i> تەستىقلانغان سودىگەر
+                    </span>
                   </div>
-                  <div style="font-size: 0.78rem; color: #bfdbfe;" id="dashAgentCode">
-                    كود: AGT-xxx
+                  <div style="font-size: 0.8rem; color: #bfdbfe; display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; margin-top: 3px;" id="dashAgentCodeWrap">
+                    <span>كودىڭىز: <strong id="dashAgentCodeVal" class="number-latin" style="color: #fde68a; font-weight: 800;">AGT-xxx</strong></span>
+                    <button type="button" id="btnCopyAgentId" title="كودنى كۆچۈرۈش" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; padding: 1px 7px; border-radius: 6px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                      <i class="fas fa-copy"></i> كۆچۈرۈش
+                    </button>
+                    <span style="color: rgba(255,255,255,0.4);">•</span>
+                    <span id="dashAgentPhoneDisplay" class="number-latin" style="direction: ltr; font-weight: 700; color: #e2e8f0;">📞 0555...</span>
                   </div>
                 </div>
               </div>
-              <button type="button" id="btnAgentLogout" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
-                <i class="fas fa-sign-out-alt"></i> <span>چېكىنىش</span>
-              </button>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <button type="button" id="btnAgentRefreshData" title="سانلىق مەلۇماتنى يېڭىلاش" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff; padding: 0.4rem 0.65rem; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
+                  <i class="fas fa-sync-alt" id="iconAgentRefresh"></i> <span>يېڭىلاش</span>
+                </button>
+                <button type="button" id="btnAgentLogout" style="background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(248, 113, 113, 0.4); color: #fecaca; padding: 0.4rem 0.75rem; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <i class="fas fa-sign-out-alt"></i> <span>چېكىنىش</span>
+                </button>
+              </div>
             </div>
 
-            <!-- 📊 ستاتىستىكا كارتلىرى -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center;">
-              <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.5rem 0.25rem;">
+            <!-- 📊 ستاتىستىكا كارتلىرى (4 كۆرسەتكۈچ) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; text-align: center; margin-bottom: 0.75rem;">
+              <div style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(255, 255, 255, 0.12);">
                 <div style="font-size: 0.72rem; color: #bfdbfe;">📦 تاۋارلىرىم</div>
-                <div id="dashCountTotal" style="font-size: 1.15rem; font-weight: 900; color: #ffffff;">0</div>
+                <div id="dashCountTotal" style="font-size: 1.25rem; font-weight: 900; color: #ffffff;">0</div>
               </div>
-              <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.5rem 0.25rem;">
+              <div style="background: rgba(16, 185, 129, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(52, 211, 153, 0.25);">
                 <div style="font-size: 0.72rem; color: #a7f3d0;">✅ دۇكاندا</div>
-                <div id="dashCountApproved" style="font-size: 1.15rem; font-weight: 900; color: #34d399;">0</div>
+                <div id="dashCountApproved" style="font-size: 1.25rem; font-weight: 900; color: #34d399;">0</div>
               </div>
-              <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 0.5rem 0.25rem;">
+              <div style="background: rgba(245, 158, 11, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(251, 191, 36, 0.25);">
                 <div style="font-size: 0.72rem; color: #fde68a;">⏳ تەكشۈرۈشتە</div>
-                <div id="dashCountPending" style="font-size: 1.15rem; font-weight: 900; color: #fbbf24;">0</div>
+                <div id="dashCountPending" style="font-size: 1.25rem; font-weight: 900; color: #fbbf24;">0</div>
+              </div>
+              <div id="dashNeedsImgBox" style="background: rgba(239, 68, 68, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(248, 113, 113, 0.25);">
+                <div style="font-size: 0.72rem; color: #fecaca;">📷 سۈرەت كۈتۈۋاتىدۇ</div>
+                <div id="dashCountNeedsImg" style="font-size: 1.25rem; font-weight: 900; color: #f87171;">0</div>
               </div>
             </div>
 
-            <!-- 🏷️ رۇخسەتلىك ماركىلار ئۇچۇرى -->
-            <div style="margin-top: 0.65rem; padding-top: 0.55rem; border-top: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.78rem; color: #e0e7ff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
-              <div>🏷️ سېتىش ماركىلىرى: <strong id="dashAgentBrands">ھەممىسى</strong></div>
-              <div id="dashAgentScope" style="font-size: 0.74rem; background: rgba(0,0,0,0.2); padding: 1px 7px; border-radius: 6px;">🌙 پەقەت ئۇيغۇرچە</div>
+            <!-- 🏷️ رۇخسەتلىك ماركىلار ۋە تىل دائىرىسى -->
+            <div style="padding: 0.55rem 0.65rem; background: rgba(0, 0, 0, 0.22); border-radius: 8px; font-size: 0.78rem; color: #e0e7ff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem;">
+              <div>🏷️ سېتىش ماركىلىرى: <strong id="dashAgentBrands" style="color: #fde68a;">ھەممىسى</strong></div>
+              <div id="dashAgentScope" style="font-size: 0.74rem; background: rgba(255,255,255,0.15); padding: 1px 8px; border-radius: 6px; font-weight: 700;">🌙 پەقەت ئۇيغۇرچە</div>
+            </div>
+
+            <!-- ⚡ تېز مەشغۇلات قورالبالدىقى (Quick Actions Bar) -->
+            <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+              <button type="button" id="btnAgentQuickAddProd" style="flex: 1.2; min-width: 140px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; border-radius: 8px; padding: 0.55rem 0.85rem; font-size: 0.84rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);">
+                <i class="fas fa-plus-circle"></i> + يېڭى تاۋار سۇنۇش
+              </button>
+              <a href="https://wa.me/905551609999" target="_blank" style="flex: 1; min-width: 120px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                <i class="fab fa-whatsapp" style="color: #25d366; font-size: 0.95rem;"></i> WhatsApp ياردەمچى
+              </a>
+              <button type="button" id="btnAgentQuickViewContract" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fde68a; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                <i class="fas fa-file-contract"></i> كېلىشىمنامەم
+              </button>
             </div>
           </div>
 
@@ -851,23 +885,40 @@
           <div id="agentViolationAlertCard" style="display: none; border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.12);">
           </div>
 
-          <!-- مېنىڭ تاۋارلىرىم سەھىپىسى (تەھرىرلەش، باھا ۋە نام ئۆزگەرتىش) -->
+          <!-- 🧭 دەلىللەنگەن ۋاكالەتچى بۆلەك ئالماشتۇرغۇچى (Sub-Tabs for Verified Agent) -->
+          <div id="agentVerifiedViewSwitcher" style="display: none; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <button type="button" id="btnSwitchToMyProducts" style="padding: 0.65rem 1rem; border: 2px solid var(--primary-color); border-radius: 10px; background: #eff6ff; color: var(--primary-color); font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;">
+              <i class="fas fa-boxes"></i> <span>مېنىڭ تاۋارلىرىم</span> (<span id="switcherProdCount">0</span>)
+            </button>
+            <button type="button" id="btnSwitchToNewProduct" style="padding: 0.65rem 1rem; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;">
+              <i class="fas fa-plus-circle"></i> <span>يېڭى تاۋار سۇنۇش</span>
+            </button>
+          </div>
+
+          <!-- مېنىڭ تاۋارلىرىم سەھىپىسى (تەھرىرلەش، سۈزۈش ۋە كۆرۈش) -->
           <div id="agentMyProductsWrap" style="display: none; margin-bottom: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
-              <h5 style="font-weight: 800; margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; color: #1e3a8a;">
-                <i class="fas fa-boxes" style="color: #3b82f6;"></i> مېنىڭ تاۋارلىرىم:
-              </h5>
-              <button type="button" id="btnAgentAddNewProductMode" class="btn-checkout" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 700; background: #10b981; border: none; border-radius: 6px; cursor: pointer;">
-                <i class="fas fa-plus-circle"></i> + يېڭى تاۋار قوشۇش
+            <!-- سۈزگۈچ كۇنۇپكىلىرى (Filter Pills) -->
+            <div style="display: flex; gap: 0.35rem; margin-bottom: 0.65rem; overflow-x: auto; padding-bottom: 2px;" id="agentProdFilterGroup">
+              <button type="button" class="agent-filter-btn active" data-filter="all" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid var(--primary-color); background: var(--primary-color); color: #ffffff; font-size: 0.78rem; font-weight: 800; cursor: pointer; white-space: nowrap;">
+                ھەممىسى (<span id="agentFilterCountAll">0</span>)
+              </button>
+              <button type="button" class="agent-filter-btn" data-filter="approved" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #065f46; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                ✅ دۇكاندا (<span id="agentFilterCountApproved">0</span>)
+              </button>
+              <button type="button" class="agent-filter-btn" data-filter="pending" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #92400e; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                ⏳ تەكشۈرۈشتە (<span id="agentFilterCountPending">0</span>)
+              </button>
+              <button type="button" class="agent-filter-btn" data-filter="needs_image" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #be123c; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                📷 سۈرەت كۈتۈۋاتىدۇ (<span id="agentFilterCountNeedsImg">0</span>)
               </button>
             </div>
 
             <!-- تاۋارلار ئىچىدىن ئىزدەش قۇتىسى -->
-            <div style="margin-bottom: 0.6rem;">
-              <input type="text" id="agentMyProductsSearchInput" class="form-control" placeholder="🔍 مەھسۇلاتلىرىمدىن نامى بويىچە ئىزدەش..." style="padding: 0.45rem 0.75rem; font-size: 0.82rem; border-radius: 6px;">
+            <div style="margin-bottom: 0.65rem; position: relative;">
+              <input type="text" id="agentMyProductsSearchInput" class="form-control" placeholder="🔍 تاۋارلىرىمدىن نامى ياكى ماركىسى بويىچە ئىزدەش..." style="padding: 0.55rem 0.85rem; font-size: 0.85rem; border-radius: 8px; border: 1.5px solid #cbd5e1;">
             </div>
 
-            <div id="agentMyProductsList" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; background: var(--bg-surface); display: flex; flex-direction: column; gap: 0.5rem;">
+            <div id="agentMyProductsList" style="max-height: 320px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.6rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.55rem;">
               <!-- مەھسۇلاتلار ھەرىكەتچان قوشۇلىدۇ -->
             </div>
           </div>
@@ -1531,11 +1582,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260924_v41"></script>
+  <script src="js/supabase.js?v=20260924_v42"></script>
 
   <!-- كۆپ تىللىق لۇغەت، مەركىزىي ئامبار ۋە بەت لوگىكىسى -->
-  <script src="js/i18n.js?v=20260924_v41"></script>
-  <script src="js/store.js?v=20260924_v41"></script>
-  <script src="js/app.js?v=20260924_v41"></script>
+  <script src="js/i18n.js?v=20260924_v42"></script>
+  <script src="js/store.js?v=20260924_v42"></script>
+  <script src="js/app.js?v=20260924_v42"></script>
 </body>
 </html>

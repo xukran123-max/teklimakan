@@ -3315,18 +3315,30 @@ function initTeklimakanApp() {
       const quickCard = document.getElementById('agentQuickSessionCard');
       const nameEl = document.getElementById('dashAgentName');
       const codeEl = document.getElementById('dashAgentCode');
+      const codeValEl = document.getElementById('dashAgentCodeVal');
+      const phoneDispEl = document.getElementById('dashAgentPhoneDisplay');
       const brandsEl = document.getElementById('dashAgentBrands');
       const scopeEl = document.getElementById('dashAgentScope');
       const totalEl = document.getElementById('dashCountTotal');
       const appEl = document.getElementById('dashCountApproved');
       const pendEl = document.getElementById('dashCountPending');
+      const needsImgEl = document.getElementById('dashCountNeedsImg');
+      const viewSwitcher = document.getElementById('agentVerifiedViewSwitcher');
 
       if (dashHeader) dashHeader.style.display = 'block';
       if (verifyWrap) verifyWrap.style.display = 'none';
       if (quickCard) quickCard.style.display = 'none';
+      if (viewSwitcher) viewSwitcher.style.display = 'grid';
+
+      const tab1Text = document.getElementById('agentTab1Text');
+      const tab2Text = document.getElementById('agentTab2Text');
+      if (tab1Text) tab1Text.textContent = '📜 كېلىشىمنامە & مەسئۇلىيەت';
+      if (tab2Text) tab2Text.textContent = '💼 سودىگەر مەركىزى & تاۋارلار';
 
       if (nameEl) nameEl.textContent = agent.name;
       if (codeEl) codeEl.textContent = `كود: ${agent.id} • 📞 ${agent.phone || ''}`;
+      if (codeValEl) codeValEl.textContent = agent.id || '';
+      if (phoneDispEl) phoneDispEl.textContent = `📞 ${agent.phone || ''}`;
 
       const brands = agent.authorizedBrands && agent.authorizedBrands.length > 0
         ? agent.authorizedBrands.join('، ')
@@ -3342,10 +3354,24 @@ function initTeklimakanApp() {
       const products = window.appStore.getProductsByAgent(agent.id) || [];
       const approved = products.filter(p => (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى').length;
       const pending = products.filter(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ').length;
+      const needsImg = products.filter(p => (p.needsAdminImage === true || p.needsAdminImage === 'true') && p.approvalStatus !== 'رەت قىلىندى').length;
 
       if (totalEl) totalEl.textContent = products.length;
       if (appEl) appEl.textContent = approved;
       if (pendEl) pendEl.textContent = pending;
+      if (needsImgEl) needsImgEl.textContent = needsImg;
+
+      const badgeAll = document.getElementById('agentFilterCountAll');
+      const badgeApp = document.getElementById('agentFilterCountApproved');
+      const badgePend = document.getElementById('agentFilterCountPending');
+      const badgeNeeds = document.getElementById('agentFilterCountNeedsImg');
+      const switcherBadge = document.getElementById('switcherProdCount');
+
+      if (badgeAll) badgeAll.textContent = products.length;
+      if (badgeApp) badgeApp.textContent = approved;
+      if (badgePend) badgePend.textContent = pending;
+      if (badgeNeeds) badgeNeeds.textContent = needsImg;
+      if (switcherBadge) switcherBadge.textContent = products.length;
     }
 
     function checkAgentSession() {
@@ -3357,6 +3383,10 @@ function initTeklimakanApp() {
 
       if (currentVerifiedAgent) {
         updateAgentDashboard(currentVerifiedAgent);
+        renderAgentProductsList(currentVerifiedAgent.id);
+        if (typeof switchAgentPortalView === 'function') {
+          switchAgentPortalView('products');
+        }
         return;
       }
 
@@ -3494,13 +3524,18 @@ function initTeklimakanApp() {
           }
         }
 
-        formProductSubmit.style.display = 'block';
+        if (typeof switchAgentPortalView === 'function') {
+          switchAgentPortalView('products');
+        }
         renderAgentProductsList(res.agent.id);
+        updateAgentDashboard(res.agent);
         showToast(`خۇش كەپسىز، ${res.agent.name}!`, 'success');
       } else {
         currentVerifiedAgent = null;
         formProductSubmit.style.display = 'none';
         if (myProductsWrap) myProductsWrap.style.display = 'none';
+        const switcher = document.getElementById('agentVerifiedViewSwitcher');
+        if (switcher) switcher.style.display = 'none';
 
         const violCard = document.getElementById('agentViolationAlertCard');
         const dashHeader = document.getElementById('agentDashboardHeader');
@@ -3615,6 +3650,8 @@ function initTeklimakanApp() {
         try { localStorage.removeItem('teklimakan_agent_session'); } catch(e) {}
         const dashHeader = document.getElementById('agentDashboardHeader');
         if (dashHeader) dashHeader.style.display = 'none';
+        const switcher = document.getElementById('agentVerifiedViewSwitcher');
+        if (switcher) switcher.style.display = 'none';
         if (formProductSubmit) formProductSubmit.style.display = 'none';
         if (myProductsWrap) myProductsWrap.style.display = 'none';
         const verifyWrap = document.getElementById('agentVerifyWrap');
@@ -3623,6 +3660,10 @@ function initTeklimakanApp() {
         if (quickCard) quickCard.style.display = 'none';
         if (loginInput) loginInput.value = '';
         if (verifyMsg) verifyMsg.style.display = 'none';
+        const tab1Text = document.getElementById('agentTab1Text');
+        const tab2Text = document.getElementById('agentTab2Text');
+        if (tab1Text) tab1Text.textContent = '1. ۋاكالەتچى بولۇپ تىزىملىتىش';
+        if (tab2Text) tab2Text.textContent = '2. كىرىش ۋە تاۋار سۇنۇش';
         showToast('ھېساباتتىن چىقتىڭىز', 'info');
       });
     }
@@ -3657,6 +3698,49 @@ function initTeklimakanApp() {
       });
     }
 
+    // 🧭 كۆرۈنۈش ئالماشتۇرۇش: «مېنىڭ تاۋارلىرىم» ياكى «تاۋار سۇنۇش جەدۋىلى»
+    function switchAgentPortalView(view = 'products') {
+      const btnProducts = document.getElementById('btnSwitchToMyProducts');
+      const btnSubmit = document.getElementById('btnSwitchToNewProduct');
+      const switcherWrap = document.getElementById('agentVerifiedViewSwitcher');
+      const myProds = document.getElementById('agentMyProductsWrap');
+      const submitForm = document.getElementById('formAgentProductSubmit');
+
+      if (switcherWrap) switcherWrap.style.display = 'grid';
+
+      if (view === 'products') {
+        if (btnProducts) {
+          btnProducts.style.border = '2px solid var(--primary-color)';
+          btnProducts.style.background = '#eff6ff';
+          btnProducts.style.color = 'var(--primary-color)';
+          btnProducts.style.fontWeight = '800';
+        }
+        if (btnSubmit) {
+          btnSubmit.style.border = '1.5px solid #cbd5e1';
+          btnSubmit.style.background = '#ffffff';
+          btnSubmit.style.color = '#475569';
+          btnSubmit.style.fontWeight = '700';
+        }
+        if (myProds) myProds.style.display = 'block';
+        if (submitForm) submitForm.style.display = 'none';
+      } else {
+        if (btnSubmit) {
+          btnSubmit.style.border = '2px solid var(--primary-color)';
+          btnSubmit.style.background = '#eff6ff';
+          btnSubmit.style.color = 'var(--primary-color)';
+          btnSubmit.style.fontWeight = '800';
+        }
+        if (btnProducts) {
+          btnProducts.style.border = '1.5px solid #cbd5e1';
+          btnProducts.style.background = '#ffffff';
+          btnProducts.style.color = '#475569';
+          btnProducts.style.fontWeight = '700';
+        }
+        if (myProds) myProds.style.display = 'none';
+        if (submitForm) submitForm.style.display = 'block';
+      }
+    }
+
     function resetToNewProductMode() {
       if (editProdIdInput) editProdIdInput.value = '';
       if (editBanner) editBanner.style.display = 'none';
@@ -3681,8 +3765,82 @@ function initTeklimakanApp() {
       }
     }
 
-    if (btnAddNewMode) btnAddNewMode.addEventListener('click', resetToNewProductMode);
-    if (btnCancelEdit) btnCancelEdit.addEventListener('click', resetToNewProductMode);
+    // تېز ئالماشتۇرۇش كۇنۇپكىلىرى
+    const btnSwitchProducts = document.getElementById('btnSwitchToMyProducts');
+    const btnSwitchSubmit = document.getElementById('btnSwitchToNewProduct');
+    const btnQuickAdd = document.getElementById('btnAgentQuickAddProd');
+    const btnCopyCode = document.getElementById('btnCopyAgentId');
+    const btnRefresh = document.getElementById('btnAgentRefreshData');
+    const btnQuickContract = document.getElementById('btnAgentQuickViewContract');
+
+    if (btnSwitchProducts) {
+      btnSwitchProducts.addEventListener('click', () => switchAgentPortalView('products'));
+    }
+    if (btnSwitchSubmit) {
+      btnSwitchSubmit.addEventListener('click', () => {
+        resetToNewProductMode();
+        switchAgentPortalView('submit');
+      });
+    }
+    if (btnQuickAdd) {
+      btnQuickAdd.addEventListener('click', () => {
+        resetToNewProductMode();
+        switchAgentPortalView('submit');
+      });
+    }
+    if (btnAddNewMode) {
+      btnAddNewMode.addEventListener('click', () => {
+        resetToNewProductMode();
+        switchAgentPortalView('submit');
+      });
+    }
+    if (btnCancelEdit) {
+      btnCancelEdit.addEventListener('click', () => {
+        resetToNewProductMode();
+        switchAgentPortalView('products');
+      });
+    }
+
+    if (btnCopyCode) {
+      btnCopyCode.addEventListener('click', () => {
+        const codeVal = document.getElementById('dashAgentCodeVal')?.textContent || (currentVerifiedAgent ? currentVerifiedAgent.id : '');
+        if (codeVal) {
+          navigator.clipboard.writeText(codeVal);
+          showToast(`«${codeVal}» كودىڭىز كۆچۈرۈلدى!`, 'success');
+        }
+      });
+    }
+
+    if (btnRefresh) {
+      btnRefresh.addEventListener('click', async () => {
+        const icon = document.getElementById('iconAgentRefresh');
+        if (icon) icon.classList.add('fa-spin');
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.syncProductsFromCloud === 'function') {
+          try { await window.TeklimakanSupabase.syncProductsFromCloud(); } catch(e){}
+        }
+        if (currentVerifiedAgent) {
+          updateAgentDashboard(currentVerifiedAgent);
+          renderAgentProductsList(currentVerifiedAgent.id);
+        }
+        setTimeout(() => {
+          if (icon) icon.classList.remove('fa-spin');
+          showToast('سانلىق مەلۇماتلار بۇلۇتتىن يېڭىلاندى!', 'success');
+        }, 500);
+      });
+    }
+
+    if (btnQuickContract) {
+      btnQuickContract.addEventListener('click', () => {
+        const btnDownload = document.getElementById('btnDownloadContractBeforeApply');
+        if (btnDownload) {
+          btnDownload.click();
+        } else {
+          switchTab('apply');
+          const termsBox = document.getElementById('agentContractTermsBox');
+          if (termsBox) termsBox.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
 
     const myProductsSearchInput = document.getElementById('agentMyProductsSearchInput');
     if (myProductsSearchInput) {
@@ -3693,26 +3851,101 @@ function initTeklimakanApp() {
       });
     }
 
-    function renderAgentProductsList(agentId, filterQuery = '') {
+    let currentAgentProdFilter = 'all';
+
+    function renderAgentProductsList(agentId, filterQuery = '', statusFilter = currentAgentProdFilter) {
       if (!myProductsWrap || !myProductsList) return;
-      let products = window.appStore.getProductsByAgent(agentId) || [];
-      if (!products || products.length === 0) {
-        myProductsWrap.style.display = 'none';
-        return;
-      }
+      currentAgentProdFilter = statusFilter;
+      let allProducts = window.appStore.getProductsByAgent(agentId) || [];
       myProductsWrap.style.display = 'block';
 
+      // ھالەت سۈزگۈچ كۇنۇپكىلىرىنىڭ كۆرۈنۈشىنى يېڭىلاش
+      const filterBtns = document.querySelectorAll('.agent-filter-btn');
+      filterBtns.forEach(btn => {
+        if (btn.dataset.filter === currentAgentProdFilter) {
+          btn.classList.add('active');
+          btn.style.background = 'var(--primary-color)';
+          btn.style.color = '#ffffff';
+          btn.style.borderColor = 'var(--primary-color)';
+          btn.style.fontWeight = '800';
+        } else {
+          btn.classList.remove('active');
+          btn.style.background = '#ffffff';
+          btn.style.color = '#475569';
+          btn.style.borderColor = '#cbd5e1';
+          btn.style.fontWeight = '700';
+        }
+      });
+
+      // ساناقلارنى يېڭىلاش
+      const countAll = allProducts.length;
+      const countApproved = allProducts.filter(p => (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى').length;
+      const countPending = allProducts.filter(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ').length;
+      const countNeedsImg = allProducts.filter(p => (p.needsAdminImage === true || p.needsAdminImage === 'true') && p.approvalStatus !== 'رەت قىلىندى').length;
+
+      const badgeAll = document.getElementById('agentFilterCountAll');
+      const badgeApp = document.getElementById('agentFilterCountApproved');
+      const badgePend = document.getElementById('agentFilterCountPending');
+      const badgeNeeds = document.getElementById('agentFilterCountNeedsImg');
+      const switcherBadge = document.getElementById('switcherProdCount');
+
+      if (badgeAll) badgeAll.textContent = countAll;
+      if (badgeApp) badgeApp.textContent = countApproved;
+      if (badgePend) badgePend.textContent = countPending;
+      if (badgeNeeds) badgeNeeds.textContent = countNeedsImg;
+      if (switcherBadge) switcherBadge.textContent = countAll;
+
+      // سۈزۈش (ھالەت بويىچە)
+      let products = [...allProducts];
+      if (currentAgentProdFilter === 'approved') {
+        products = products.filter(p => (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى');
+      } else if (currentAgentProdFilter === 'pending') {
+        products = products.filter(p => p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ');
+      } else if (currentAgentProdFilter === 'needs_image') {
+        products = products.filter(p => (p.needsAdminImage === true || p.needsAdminImage === 'true') && p.approvalStatus !== 'رەت قىلىندى');
+      }
+
+      // ئىزدەش قىممىتى بويىچە
       if (filterQuery) {
+        const q = filterQuery.toLowerCase();
         products = products.filter(p => 
-          (p.name && p.name.toLowerCase().includes(filterQuery)) || 
-          (p.category && p.category.toLowerCase().includes(filterQuery))
+          (p.name && p.name.toLowerCase().includes(q)) || 
+          (p.category && p.category.toLowerCase().includes(q)) ||
+          (p.brand && p.brand.toLowerCase().includes(q))
         );
+      }
+
+      // تېخى بىرەر تاۋار سۇنمىغان بولسا كۆركەم قارشى ئېلىش كارتىسى
+      if (allProducts.length === 0) {
+        myProductsList.innerHTML = `
+          <div style="text-align: center; padding: 2rem 1.25rem; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 12px; margin: 0.25rem 0;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 0.75rem auto;">
+              <i class="fas fa-boxes"></i>
+            </div>
+            <h5 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 0.35rem;">سىز تېخى بىرەر مەھسۇلات سۇنمىدىڭىز</h5>
+            <p style="font-size: 0.84rem; color: #64748b; margin: 0 auto 1.25rem auto; max-width: 380px; line-height: 1.5;">
+              سۇپىمىزدا مەھسۇلاتىڭىزنى دەرھال ئېلان قىلىپ، خېرىدارلارغا سېتىشنى باشلاڭ.
+            </p>
+            <button type="button" id="btnEmptyAddProduct" class="btn-checkout" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 auto;">
+              <i class="fas fa-plus-circle"></i> + تۇنجى مەھسۇلاتنى قوشۇش
+            </button>
+          </div>
+        `;
+        const btnEmptyAdd = document.getElementById('btnEmptyAddProduct');
+        if (btnEmptyAdd) {
+          btnEmptyAdd.addEventListener('click', () => {
+            resetToNewProductMode();
+            switchAgentPortalView('submit');
+          });
+        }
+        return;
       }
 
       if (products.length === 0) {
         myProductsList.innerHTML = `
-          <div style="text-align: center; padding: 1rem; color: #94a3b8; font-size: 0.85rem;">
-            <i class="fas fa-search"></i> «${filterQuery}» غا ماس كېلىدىغان تاۋار تېپىلمىدى.
+          <div style="text-align: center; padding: 1.5rem 1rem; color: #64748b; font-size: 0.86rem; background: #ffffff; border-radius: 8px;">
+            <i class="fas fa-search" style="font-size: 1.4rem; color: #94a3b8; display: block; margin-bottom: 0.4rem;"></i>
+            ماس كېلىدىغان تاۋار تېپىلمىدى.
           </div>
         `;
         return;
@@ -3721,39 +3954,96 @@ function initTeklimakanApp() {
       myProductsList.innerHTML = products.map(p => {
         const isPending = (p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ');
         const isApproved = (p.approvalStatus === 'تەستىقلاندى');
-        const statusBadge = isApproved
-          ? '<span style="background:#ecfdf5; color:#065f46; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #a7f3d0;"><i class="fas fa-check-circle"></i> دۇكاندا سېتىلىۋاتىدۇ</span>'
-          : (isPending
-            ? '<span style="background:#fffbeb; color:#92400e; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fde68a;"><i class="fas fa-clock"></i> تەستىق كۈتۈۋاتىدۇ</span>'
-            : '<span style="background:#fef2f2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fecaca;"><i class="fas fa-times-circle"></i> رەت قىلىندى</span>');
+        const needsAdminImg = !!p.needsAdminImage || p.needsAdminImage === 'true';
+
+        let statusBadge = '';
+        if (needsAdminImg) {
+          statusBadge = '<span style="background:#fff1f2; color:#be123c; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fda4af; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-camera"></i> باشقۇرغۇچى سۈرەت تولۇقلايدۇ</span>';
+        } else if (isApproved) {
+          statusBadge = '<span style="background:#ecfdf5; color:#065f46; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #a7f3d0; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-check-circle"></i> دۇكاندا سېتىلىۋاتىدۇ</span>';
+        } else if (isPending) {
+          statusBadge = '<span style="background:#fffbeb; color:#92400e; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fde68a; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-clock"></i> تەكشۈرۈش كۈتۈۋاتىدۇ</span>';
+        } else {
+          statusBadge = '<span style="background:#fef2f2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:800; border:1px solid #fecaca; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-times-circle"></i> رەت قىلىندى</span>';
+        }
 
         const priceFormatted = window.appStore.formatPrice(p.price);
         const pUnit = p.unit || 'دانە';
+        const viewInStoreBtn = isApproved ? `
+          <button type="button" class="btn-view-live-product" data-id="${p.id}" title="دۇكاندىكى مەھسۇلاتنى كۆرۈش" style="background:#f0fdf4; color:#15803d; border:1px solid #86efac; border-radius:6px; padding:0.35rem 0.6rem; font-size:0.78rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;">
+            <i class="fas fa-external-link-alt"></i> دۇكاندا كۆرۈش
+          </button>
+        ` : '';
+
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--border-color); border-radius:8px; padding:0.6rem 0.75rem; gap:0.5rem; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:0.6rem;">
-              <img src="${p.image || 'images/default_product.jpg'}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid #e2e8f0;">
-              <div>
-                <strong style="font-size:0.88rem; display:block; color:#1e293b;">${p.name}</strong>
-                <div style="font-size:0.78rem; color:#64748b;">
-                  باھاسى: <b style="color:var(--primary-color);">${priceFormatted}${p.unit ? ' / ' + p.unit : ''}</b> | زاپاس: <b>${p.stock} ${pUnit}</b> | ${statusBadge}
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:0.7rem 0.85rem; gap:0.6rem; flex-wrap:wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:200px;">
+              <img src="${p.image || 'images/default_product.jpg'}" onerror="this.src='images/default_product.jpg'" style="width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid #cbd5e1; flex-shrink:0;">
+              <div style="min-width:0; flex:1;">
+                <div style="font-size:0.9rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${p.name}">${p.name}</div>
+                <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; font-size:0.76rem; color:#64748b; margin-top:2px;">
+                  <span>ماركا: <b>${p.brand || 'تەكلىماكان'}</b></span>
+                  <span>•</span>
+                  <span>باھاسى: <b style="color:var(--primary-color);">${priceFormatted} / ${pUnit}</b></span>
+                  <span>•</span>
+                  <span>زاپاس: <b>${p.stock}</b></span>
                 </div>
+                <div style="margin-top:4px;">${statusBadge}</div>
               </div>
             </div>
-            <div>
-              <button type="button" class="btn-edit-agent-product" data-id="${p.id}" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:6px; padding:0.35rem 0.65rem; font-size:0.8rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.3rem;">
-                <i class="fas fa-edit"></i> تەھرىرلەش / باھا ئۆزگەرتىش
+            <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
+              ${viewInStoreBtn}
+              <button type="button" class="btn-edit-agent-product" data-id="${p.id}" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:6px; padding:0.35rem 0.65rem; font-size:0.78rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;">
+                <i class="fas fa-edit"></i> تەھرىرلەش
+              </button>
+              <button type="button" class="btn-delete-agent-product" data-id="${p.id}" title="سۇنۇشنى بىكار قىلىش ياكى ئۆچۈرۈش" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; border-radius:6px; padding:0.35rem 0.55rem; font-size:0.78rem; cursor:pointer;">
+                <i class="fas fa-trash-alt"></i>
               </button>
             </div>
           </div>
         `;
       }).join('');
 
-      // تەھرىرلەش كۇنۇپكىسى چېكىلگەندە
+      // تېز ئۆچۈرۈش
+      myProductsList.querySelectorAll('.btn-delete-agent-product').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const p = allProducts.find(x => x.id === id);
+          if (!p) return;
+          if (confirm(`«${p.name}» نى راستلا ئۆچۈرەمسىز؟`)) {
+            window.appStore.deleteProduct(id);
+            if (currentVerifiedAgent) {
+              updateAgentDashboard(currentVerifiedAgent);
+              renderAgentProductsList(currentVerifiedAgent.id, myProductsSearchInput ? myProductsSearchInput.value.trim() : '');
+            }
+            showToast('مەھسۇلات ئۆچۈرۈلدى!', 'info');
+          }
+        });
+      });
+
+      // دۇكاندا كۆرۈش
+      myProductsList.querySelectorAll('.btn-view-live-product').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          if (typeof closeModal === 'function') closeModal();
+          setTimeout(() => {
+            const card = document.querySelector(`.product-card[data-id="${id}"]`);
+            if (card) {
+              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              card.style.outline = '3px solid #10b981';
+              setTimeout(() => { card.style.outline = 'none'; }, 2000);
+            } else {
+              showToast('مەھسۇلات باش بەتتىكى تىزىملىكتە كۆرسىتىلدى', 'info');
+            }
+          }, 300);
+        });
+      });
+
+      // تەھرىرلەش
       myProductsList.querySelectorAll('.btn-edit-agent-product').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
-          const p = products.find(x => x.id === id);
+          const p = allProducts.find(x => x.id === id);
           if (!p) return;
 
           if (editProdIdInput) editProdIdInput.value = p.id;
@@ -3795,11 +4085,22 @@ function initTeklimakanApp() {
           if (submitBtnText) submitBtnText.textContent = '💾 باھا ۋە ئۇچۇرنى ساقلاپ قايتا تەستىققا يوللاش';
           if (submitBtnIcon) submitBtnIcon.className = 'fas fa-save';
 
-          formProductSubmit.scrollIntoView({ behavior: 'smooth' });
-          showToast(`«${p.name}» نىڭ ئۇچۇرلىرى كىرگۈزۈلدى. باھا ياكى نامىنى ئۆزگەرتىپ يوللاڭ.`, 'info');
+          switchAgentPortalView('submit');
+          showToast(`«${p.name}» نىڭ ئۇچۇرلىرى كىرگۈزۈلدى. باھا ياكى نامىنى ئۆزگەرتىپ قايتا سۇنۇڭ.`, 'info');
         });
       });
     }
+
+    // سۈزگۈچ كۇنۇپكىلىرى چېكىلگەندە
+    document.querySelectorAll('.agent-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filterType = btn.dataset.filter || 'all';
+        if (currentVerifiedAgent) {
+          const q = myProductsSearchInput ? myProductsSearchInput.value.trim() : '';
+          renderAgentProductsList(currentVerifiedAgent.id, q, filterType);
+        }
+      });
+    });
 
     // 📜 سىيرىلما كۆزنەك نىزامنامىنى ئېچىش / يىغىش (Accordion toggle)
     const btnToggleAgentRegulations = document.getElementById('btnToggleAgentRegulations');
@@ -4165,6 +4466,10 @@ function initTeklimakanApp() {
             showToast(res.message, 'success');
             resetToNewProductMode();
             renderAgentProductsList(currentVerifiedAgent.id);
+            updateAgentDashboard(currentVerifiedAgent);
+            if (typeof switchAgentPortalView === 'function') {
+              switchAgentPortalView('products');
+            }
           }
         } else {
           alert(res.message);

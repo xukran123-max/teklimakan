@@ -189,8 +189,8 @@ const I18N_TRANSLATIONS = {
     agentNavTitle: 'ۋاكالەتچى ۋە سودىگەر مەركىزى',
     adminNavBtn: 'ئارقا سۇپا',
     adminNavTitle: 'ئارقا سۇپىغا كىرىش (پەقەت سىزگىلا كۆرۈنىدۇ)',
-    agentModalTitle: 'تەكلىماكان ۋاكالەتچى ۋە سودىگەرلەر مەركىزى',
-    agentModalSubtitle: 'سۇپىمىزغا ۋاكالەتچى بولۇپ قوشۇلۇڭ ياكى مەھسۇلاتلىرىڭىزنى تەكشۈرۈشكە يوللاڭ',
+    agentModalTitle: 'تەكلىماكان ۋاكالەتچىلەر مەركىزى',
+    agentModalSubtitle: 'ھەمكارلاشقۇچى ۋاكالەتچى ۋە سودىگەرلەرنىڭ تاۋار باشقۇرۇش ۋە ئېلان قىلىش سۇپىسى',
     agentTabApply: '1. ۋاكالەتچى بولۇپ تىزىملىتىش',
     agentTabSubmit: '2. تاۋار سۇنۇش (تەستىقلانغانلار)',
     agentFooterLink: 'ۋاكالەتچى مەركىزى'
@@ -379,8 +379,8 @@ const I18N_TRANSLATIONS = {
     agentNavTitle: 'Temsilci ve Satıcı Merkezi',
     adminNavBtn: 'Yönetim Paneli',
     adminNavTitle: 'Yönetim Paneline Giriş (Sadece Size Özel)',
-    agentModalTitle: 'Teklimakan Temsilci ve Satıcı Merkezi',
-    agentModalSubtitle: 'Platformumuza satıcı veya temsilci olarak katılın, ürünlerinizi onaya gönderin',
+    agentModalTitle: 'Teklimakan Temsilciler Merkezi',
+    agentModalSubtitle: 'Yetkili satıcı ve temsilciler için ürün yönetimi ve yayınlama merkezi',
     agentTabApply: '1. Satıcı / Temsilci Başvurusu',
     agentTabSubmit: '2. Ürün Gönderimi (Onaylı Temsilciler)',
     agentFooterLink: 'Temsilci Merkezi'
@@ -569,8 +569,8 @@ const I18N_TRANSLATIONS = {
     agentNavTitle: 'Vendor & Agent Portal',
     adminNavBtn: 'Admin Dashboard',
     adminNavTitle: 'Admin Dashboard Access (Private)',
-    agentModalTitle: 'Teklimakan Vendor & Agent Center',
-    agentModalSubtitle: 'Join as a vendor or agent, submit your products for verification',
+    agentModalTitle: 'Teklimakan Agent Center',
+    agentModalSubtitle: 'Product management and publishing center for verified vendors and agents',
     agentTabApply: '1. Vendor Registration',
     agentTabSubmit: '2. Product Submission (Verified)',
     agentFooterLink: 'Vendor Center'

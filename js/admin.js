@@ -456,8 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
     products.forEach(product => {
       const tr = document.createElement('tr');
 
+      // 🛡️ تېكىست بۇزۇلۇشنى تەكشۈرۈش ۋە كاپالەتلەندۈرۈش (Anti-Corruption Display Shield)
+      const isBad = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+      const displayUnit = (!product.unit || isBad(product.unit) || product.unit.trim().length === 0) ? 'دانە' : product.unit;
+      const displayName = isBad(product.name) ? (product.translations?.ug?.name && !isBad(product.translations.ug.name) ? product.translations.ug.name : (product.translations?.tr?.name || product.id)) : product.name;
+      const displayBrand = isBad(product.brand) ? 'تەكلىماكان كىلاسسىك' : (product.brand || 'تەكلىماكان');
+      const displayCategory = isBad(product.category) ? 'ئۇيغۇر تىبابىتى' : product.category;
+
       let stockPill = '';
-      const displayUnit = product.unit || 'دانە';
       if (product.stock <= 0) {
         stockPill = '<span class="status-pill status-out-stock">تۈگىدى (0)</span>';
       } else if (product.stock <= 8) {
@@ -525,11 +531,11 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
-            <img src="${product.image}" class="table-product-thumb" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+            <img src="${product.image}" class="table-product-thumb" alt="${displayName}" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
             <div style="min-width: 0; flex: 1;">
-              <div class="table-product-title">${product.name}</div>
+              <div class="table-product-title">${displayName}</div>
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
-                <span style="font-size: 0.78rem; color: #475569; font-weight: 700;"><i class="fas fa-award"></i> ${product.brand || 'تەكلىماكان'}</span>
+                <span style="font-size: 0.78rem; color: #475569; font-weight: 700;"><i class="fas fa-award"></i> ${displayBrand}</span>
                 ${getReputationBadgeHtml(window.appStore.getProductMerchantBadge(product))}
               </div>
               <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light); font-weight: 600;">${product.id}</div>
@@ -538,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </td>
         <td style="min-width: 130px; text-align: right;">
-          <span class="status-pill" style="background:#eff6ff; color:#1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">${product.category}</span>
+          <span class="status-pill" style="background:#eff6ff; color:#1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">${displayCategory}</span>
         </td>
         <td style="min-width: 120px; text-align: center;">
           ${langBadge}
@@ -546,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="min-width: 130px; text-align: right;">
           <div style="white-space: nowrap; font-weight: 800; font-size: 0.95rem; color: #0f172a; display: inline-flex; align-items: baseline; gap: 4px;">
             <span class="number-latin" style="color: #0284c7; font-weight: 900; font-size: 1.05rem;">${window.appStore.formatPrice(product.price)}</span>
-            ${product.unit ? `<span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">/ ${product.unit}</span>` : ''}
+            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">/ ${displayUnit}</span>
           </div>
         </td>
         <td style="min-width: 120px; text-align: center;">

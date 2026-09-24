@@ -1476,11 +1476,52 @@ class StoreManager {
       if (prods.length !== origLen) updated = true;
     }
 
-    // ھەر بىر تاۋارغا ئابونتنىڭ يېقىنقى تەھرىرىنى قايتا سىڭدۈرۈش
+    // 🛡️ تاۋارلاردىكى «???» ياكى ھەرپ كودلاش بۇزۇلۇشلىرىنى ئاپتوماتىك داۋالاش ۋە ئەسلىگە كەلتۈرۈش (Self-Healing Anti-Corruption Shield)
+    const healProductRecord = (p) => {
+      if (!p || typeof p !== 'object') return false;
+      const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+      const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
+      let healed = false;
+
+      if (isCorrupted(p.name)) {
+        p.name = initMatch ? initMatch.name : (p.translations?.ug?.name && !isCorrupted(p.translations.ug.name) ? p.translations.ug.name : (p.translations?.tr?.name || p.id));
+        healed = true;
+      }
+      if (isCorrupted(p.brand)) {
+        p.brand = initMatch ? initMatch.brand : 'تەكلىماكان كىلاسسىك';
+        healed = true;
+      }
+      if (isCorrupted(p.category)) {
+        p.category = initMatch ? initMatch.category : 'ئۇيغۇر تىبابىتى';
+        healed = true;
+      }
+      if (!p.unit || isCorrupted(p.unit) || p.unit.trim().length === 0) {
+        p.unit = initMatch?.unit || p.translations?.unit || 'دانە';
+        healed = true;
+      }
+      if (isCorrupted(p.description) && initMatch) {
+        p.description = initMatch.description;
+        healed = true;
+      }
+      if (initMatch && initMatch.translations) {
+        if (!p.translations || isCorrupted(p.translations?.ug?.name)) {
+          p.translations = JSON.parse(JSON.stringify(initMatch.translations));
+          healed = true;
+        }
+      }
+      return healed;
+    };
+
+    // ھەر بىر تاۋارغا ئابونتنىڭ يېقىنقى تەھرىرىنى قايتا سىڭدۈرۈش ۋە بۇزۇلغانلىرىنى داۋالاش
     prods = prods.map(p => {
+      const wasHealed = healProductRecord(p);
+      if (wasHealed) updated = true;
+
       if (userEdits && userEdits[p.id]) {
         updated = true;
-        return { ...p, ...userEdits[p.id], isUserEdited: true };
+        const edited = { ...p, ...userEdits[p.id], isUserEdited: true };
+        healProductRecord(edited);
+        return edited;
       }
       if (!p.unit) {
         p.unit = 'دانە';
@@ -1496,6 +1537,7 @@ class StoreManager {
     // ئابونت ساقلىغان تاۋارلار يەرلىك تىزىملىكتە بولمىسا دەرھال قوشۇش
     Object.values(userEdits).forEach(ue => {
       if (ue && ue.id && !deletedIds.includes(ue.id) && !prods.some(p => p.id === ue.id)) {
+        healProductRecord(ue);
         prods.unshift(ue);
         updated = true;
       }
@@ -1592,22 +1634,30 @@ class StoreManager {
             return;
           }
 
-          // تېخى تەھرىرلەنمىگەن بولسا، بۇلۇتتىكى مەلۇمات بىلەن يېڭىلاش
-          const rpUnit = rp.translations?.unit || localItem?.unit || 'دانە';
-          map.set(rp.id, {
+          // 🛡️ تېخى تەھرىرلەنمىگەن بولسا، بۇلۇتتىكى مەلۇمات بىلەن يېڭىلاش (بۇزۇلغان «???» خەتلەرنى قەتئىي رەت قىلىش)
+          const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+          const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
+
+          const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
+          const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
+          const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
+          const safeUnit = (!rp.translations?.unit || isCorrupted(rp.translations.unit) || rp.translations.unit.trim().length === 0) ? (localItem?.unit && !isCorrupted(localItem.unit) ? localItem.unit : initMatch?.unit || 'دانە') : rp.translations.unit;
+          const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
+
+          const safeItem = {
             id: rp.id,
-            name: rp.name,
-            brand: rp.brand,
-            category: rp.category,
+            name: safeName,
+            brand: safeBrand,
+            category: safeCat,
             price: Number(rp.price),
             oldPrice: rp.old_price ? Number(rp.old_price) : null,
             stock: rp.stock !== undefined ? Number(rp.stock) : 0,
-            unit: rpUnit,
+            unit: safeUnit,
             sales: rp.sales || 0,
             rating: Number(rp.rating || 5.0),
             ratingCount: rp.rating_count || 1,
             image: rp.image,
-            description: rp.description,
+            description: safeDesc,
             badge: rp.badge,
             featured: !!rp.featured,
             approvalStatus: rp.approval_status || 'تەستىقلاندى',
@@ -1615,8 +1665,17 @@ class StoreManager {
             merchantBadge: rp.merchant_badge || 'ئىشەنچىلىك سودىگەر',
             agentId: rp.agent_id,
             agentName: rp.agent_name,
-            translations: rp.translations || {}
-          });
+            translations: rp.translations || (initMatch ? initMatch.translations : {})
+          };
+
+          map.set(rp.id, safeItem);
+
+          // ئەگەر بۇلۇتتىكى مەلۇمات بۇزۇلۇپ كەتكەن بولسا، دەرھال ساغلام سانلىق مەلۇماتنى بۇلۇتقا قايتا يوللاپ داۋالاش
+          if (isCorrupted(rp.name) || isCorrupted(rp.category) || isCorrupted(rp.translations?.unit)) {
+            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+              window.TeklimakanSupabase.upsertProduct(safeItem);
+            }
+          }
         });
 
         const merged = Array.from(map.values());

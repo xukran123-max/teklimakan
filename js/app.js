@@ -5214,14 +5214,7 @@ function initTeklimakanApp() {
 
   // ==================== 📞 تۆۋەنكى پۇت قىسمى سىيرىلما كۆزنەكلىرى (Footer Sliding Accordions) ====================
   function initFooterAccordions() {
-    const accordions = [
-      {
-        headerId: 'footerCol3Title',
-        contentId: 'footerContactList',
-        chevronId: 'footerContactChevron',
-        hintId: 'footerContactHint'
-      }
-    ];
+    const accordions = [];
 
     function getTranslate(key, fallback) {
       if (window.appI18n && typeof window.appI18n.t === 'function') {

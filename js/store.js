@@ -4445,7 +4445,8 @@ class StoreManager {
 
   toggleWishlist(productId) {
     let list = this.getWishlist();
-    const index = list.indexOf(productId);
+    const pidStr = String(productId);
+    const index = list.findIndex(id => String(id) === pidStr);
     let added = false;
     if (index === -1) {
       list.push(productId);
@@ -4458,8 +4459,22 @@ class StoreManager {
     return added;
   }
 
+  removeFromWishlist(productId) {
+    let list = this.getWishlist();
+    const pidStr = String(productId);
+    const index = list.findIndex(id => String(id) === pidStr);
+    if (index !== -1) {
+      list.splice(index, 1);
+      localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(list));
+      this.notifyDataChange('wishlist');
+      return true;
+    }
+    return false;
+  }
+
   isInWishlist(productId) {
-    return this.getWishlist().includes(productId);
+    const pidStr = String(productId);
+    return this.getWishlist().some(id => String(id) === pidStr);
   }
 
   // ==================== زاكازلار ====================
@@ -4906,13 +4921,13 @@ class StoreManager {
     }
   }
 
-  // ==================== ÙŠØ§Ù‚ØªÛ‡Ø±ØºØ§Ù†Ù„Ø§Ø± ØªÛ•Ù¾Ø³Ù‰Ù„Ø§ØªÙ‰ (Wishlist Detailed) ====================
+  // ==================== ياقتۇرغانلار تەپسىلاتى (Wishlist Detailed) ====================
   getWishlistDetailed(lang = 'ug') {
     const ids = this.getWishlist();
     const products = this.getProducts();
     const detailed = [];
     for (let id of ids) {
-      const p = products.find(prod => prod.id === id);
+      const p = products.find(prod => String(prod.id) === String(id));
       if (p) {
         let name = p.name;
         let desc = p.description;
@@ -4922,10 +4937,12 @@ class StoreManager {
         }
         detailed.push({
           ...p,
+          product: p,
           displayName: name,
+          name: name,
           displayDesc: desc,
           priceFormatted: this.formatPrice(p.price),
-          inStock: p.stock > 0
+          inStock: (Number(p.stock) || 0) > 0
         });
       }
     }

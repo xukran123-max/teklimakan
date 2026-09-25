@@ -1112,18 +1112,19 @@ function initTeklimakanApp() {
     }
 
     drawerBody.innerHTML = items.map(item => {
-      const p = item.product;
-      const formattedPrice = store.formatPrice(p.price);
+      const p = item.product || item;
+      const formattedPrice = p.priceFormatted || store.formatPrice(p.price || 0);
       const formattedOldPrice = p.oldPrice ? store.formatPrice(p.oldPrice) : null;
-      const stockStatus = p.stock > 0
+      const stockStatus = (Number(p.stock) || 0) > 0
         ? `<span style="color: #10b981; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-check-circle"></i> ئامباردا بار</span>`
         : `<span style="color: #ef4444; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-times-circle"></i> تۈگىگەن</span>`;
+      const pName = p.displayName || p.name || 'تاۋار';
 
       return `
         <div class="cart-item" style="align-items: center; gap: 0.75rem; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color);">
-          <img src="${p.image}" alt="${p.name}" style="width: 65px; height: 65px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 3px; box-sizing: border-box; border: 1px solid var(--border-color); flex-shrink: 0;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'">
+          <img src="${p.image || ''}" alt="${pName}" style="width: 65px; height: 65px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 3px; box-sizing: border-box; border: 1px solid var(--border-color); flex-shrink: 0;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'">
           <div style="flex: 1; min-width: 0;">
-            <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
+            <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${pName}">${pName}</div>
             <div style="display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.35rem;">
               <span style="font-weight: 800; color: var(--danger-color); font-size: 1rem;">${formattedPrice}${p.unit ? `<small style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / ${p.unit}</small>` : ''}</span>
               ${formattedOldPrice ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.8rem;">${formattedOldPrice}</span>` : ''}
@@ -1131,7 +1132,7 @@ function initTeklimakanApp() {
             <div>${stockStatus}</div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0;">
-            <button type="button" class="btn-move-wish-cart" data-id="${p.id}" title="سېۋەتكە يۆتكەش" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" ${p.stock <= 0 ? 'disabled' : ''}>
+            <button type="button" class="btn-move-wish-cart" data-id="${p.id}" title="سېۋەتكە يۆتكەش" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" ${(Number(p.stock) || 0) <= 0 ? 'disabled' : ''}>
               <i class="fas fa-cart-plus"></i>
             </button>
             <button type="button" class="btn-remove-wish" data-id="${p.id}" title="ئۆچۈرۈش" style="background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">

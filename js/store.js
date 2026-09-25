@@ -2020,6 +2020,68 @@ class StoreManager {
     };
   }
 
+  // ==================== 💌 نۆل سېتىش ۋاكالەتچىلەر رېغبەتلەندۈرۈش ئۇچۇرى تەڭشىكى (Encouragement Message Template) ====================
+  getZeroSalesEncouragementTemplate() {
+    const defaultTemplate = `ھۆرمەتلىك {name}، بۇ ھەپتىلىك ھەمكارلىقىڭىزغا كۆپ تەشەككۈر! گەرچە بۇ ھەپتە تاۋارلىرىڭىزدىن زاكاز چىقمىغان بولسىمۇ، تەكلىماكان سۇپىمىزدا يېڭى پائالىيەت ۋە مەخسۇس ئېتىبار كۇپونلىرىمىز تەييارلاندى. ئىجتىمائىي تاراتقۇلاردا مەھسۇلات ئۇلانمىلىرىڭىزنى كۆپرەك ھەمبەھىرلەپ، كېلەر ھەپتىلىك ئالتۇن دەرىجىلىك يۇقىرى كىرىمگە بىرلىكتە ئېرىشەيلى! كۈچ چىقىرىڭ، بىز سىزنى باشتىن-ئاخىر قوللايمىز! 🌟 تەكلىماكان سودا تورى`;
+    return localStorage.getItem('teklimakan_zero_sales_encouragement_template') || defaultTemplate;
+  }
+
+  saveZeroSalesEncouragementTemplate(newTemplate) {
+    if (!newTemplate || typeof newTemplate !== 'string') return false;
+    localStorage.setItem('teklimakan_zero_sales_encouragement_template', newTemplate.trim());
+    return true;
+  }
+
+  resetZeroSalesEncouragementTemplate() {
+    localStorage.removeItem('teklimakan_zero_sales_encouragement_template');
+    return this.getZeroSalesEncouragementTemplate();
+  }
+
+  getCustomAgentEncouragement(agentId) {
+    try {
+      const customs = JSON.parse(localStorage.getItem('teklimakan_custom_agent_encouragements') || '{}');
+      return customs[agentId] || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  saveCustomAgentEncouragement(agentId, messageText) {
+    try {
+      const customs = JSON.parse(localStorage.getItem('teklimakan_custom_agent_encouragements') || '{}');
+      if (messageText && messageText.trim()) {
+        customs[agentId] = messageText.trim();
+      } else {
+        delete customs[agentId];
+      }
+      localStorage.setItem('teklimakan_custom_agent_encouragements', JSON.stringify(customs));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  generateEncouragementMessageForAgent(agent, overrideTemplate = null) {
+    // 1. ئالدى بىلەن مەزكۇر ۋاكالەتچى ئۈچۈن ئايرىم تەھرىرلەنگەن ئۇچۇر بارمۇ تەكشۈرۈش
+    const customMsg = this.getCustomAgentEncouragement(agent.id);
+    if (customMsg && !overrideTemplate) {
+      return customMsg;
+    }
+
+    // 2. ئورتاق قېلىپتىن ئورۇن بەلگىلەرنى ئالماشتۇرۇپ ھاسىللاش
+    const template = overrideTemplate || this.getZeroSalesEncouragementTemplate();
+    const brandsText = (agent.authorizedBrands && agent.authorizedBrands.length > 0)
+      ? agent.authorizedBrands.join('، ')
+      : 'مەھسۇلاتلىرىڭىز';
+
+    return template
+      .replace(/\{name\}|\{ئىسىم\}/gi, agent.name || 'ۋاكالەتچى')
+      .replace(/\{city\}|\{شەھەر\}/gi, agent.city || 'ئىستانبۇل')
+      .replace(/\{phone\}|\{تېلېفون\}/gi, agent.phone || '')
+      .replace(/\{brands\}|\{ماركا\}/gi, brandsText)
+      .replace(/\{store\}|\{سۇپا\}/gi, 'تەكلىماكان سودا تورى');
+  }
+
   // ==================== 📊 ھەر ھەپتىلىك ۋاكالەتچىلەر خۇلاسىسى ۋە رېغبەتلەندۈرۈش سىستېمىسى (Weekly Agent Summary & Encouragement) ====================
   getWeeklyAgentPerformanceSummary(customDateRange = null) {
     const agents = this.getAgents('name');
@@ -2188,7 +2250,7 @@ class StoreManager {
         });
       } else {
         // B. ھېچقانداق مەھسۇلات ساتالمىغانلار -> دوكلاتتىن چىقىرىۋېتىلىدۇ، ئۇلارغا رېغبەتلەندۈرۈش ئۇچۇرى تەييارلىنىدۇ!
-        const encouragementMessage = `ھۆرمەتلىك ${agent.name}، بۇ ھەپتىلىك ھەمكارلىقىڭىزغا كۆپ تەشەككۈر! گەرچە بۇ ھەپتە تاۋارلىرىڭىزدىن زاكاز چىقمىغان بولسىمۇ، تەكلىماكان سۇپىمىزدا يېڭى پائالىيەت ۋە مەخسۇس ئېتىبار كۇپونلىرىمىز تەييارلاندى. ئىجتىمائىي تاراتقۇلاردا مەھسۇلات ئۇلانمىلىرىڭىزنى كۆپرەك ھەمبەھىرلەپ، كېلەر ھەپتىلىك ئالتۇن دەرىجىلىك يۇقىرى كىرىمگە بىرلىكتە ئېرىشەيلى! كۈچ چىقىرىڭ، بىز سىزنى باشتىن-ئاخىر قوللايمىز! 🌟 تەكلىماكان سودا تورى`;
+        const encouragementMessage = this.generateEncouragementMessageForAgent(agent);
 
         zeroSalesAgents.push({
           id: agent.id,

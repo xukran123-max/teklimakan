@@ -2620,7 +2620,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
               </td>
               <td style="text-align: center;">
-                <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                <div style="display: flex; gap: 0.35rem; justify-content: center; flex-wrap: wrap;">
+                  <button type="button" class="btn-edit-agent-single-encourage" onclick="if(window.openEditSingleAgentEncouragementModal) window.openEditSingleAgentEncouragementModal('${agent.id}');" style="background: #f59e0b; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="رېغبەتلەندۈرۈش سۆزىنى تەھرىرلەش">
+                    <i class="fas fa-edit"></i> تەھرىرلەش
+                  </button>
                   <button type="button" class="btn-sms-agent-slider" onclick="if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى',initialText:'${agent.encouragementMessage.replace(/'/g, "\\'")}'});" style="background: #0284c7; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer;" title="سۆھبەتنى ئېچىش">
                     <i class="fas fa-sms"></i> سۆھبەت
                   </button>
@@ -2750,6 +2753,128 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ✏️ نۆل سېتىش قىلغان ۋاكالەتچىلەرنىڭ رېغبەتلەندۈرۈش ئورتاق قېلىپىنى تەھرىرلەش كۆزنىكى
+  function openEditEncouragementTemplateModal() {
+    const modal = document.getElementById('modalEditEncouragementTemplate');
+    if (!modal) return;
+    const textarea = document.getElementById('textareaEncouragementTemplate');
+    if (textarea && window.appStore && typeof window.appStore.getZeroSalesEncouragementTemplate === 'function') {
+      textarea.value = window.appStore.getZeroSalesEncouragementTemplate();
+    }
+    modal.classList.add('active');
+  }
+
+  function saveEncouragementTemplate() {
+    const textarea = document.getElementById('textareaEncouragementTemplate');
+    if (!textarea) return;
+    const newTemplate = textarea.value.trim();
+    if (!newTemplate) {
+      showAdminToast('قېلىپ تېكىستى بوش بولسا بولمايدۇ', 'error');
+      return;
+    }
+    if (window.appStore && typeof window.appStore.saveZeroSalesEncouragementTemplate === 'function') {
+      window.appStore.saveZeroSalesEncouragementTemplate(newTemplate);
+    }
+    window.hideModal('modalEditEncouragementTemplate');
+    renderAgentWeeklySummaryTable();
+    showAdminToast('رېغبەتلەندۈرۈش ئورتاق قېلىپى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
+  }
+
+  function resetEncouragementTemplate() {
+    if (window.appStore && typeof window.appStore.resetZeroSalesEncouragementTemplate === 'function') {
+      const def = window.appStore.resetZeroSalesEncouragementTemplate();
+      const textarea = document.getElementById('textareaEncouragementTemplate');
+      if (textarea) textarea.value = def;
+      showAdminToast('دەسلەپكى ئۆلچەملىك قېلىپ ئەسلىگە كەلتۈرۈلدى', 'info');
+    }
+  }
+
+  // ✏️ يەككە ۋاكالەتچىنىڭ رېغبەتلەندۈرۈش ئۇچۇرىنى تەھرىرلەش كۆزنىكى
+  function openEditSingleAgentEncouragementModal(agentId) {
+    const modal = document.getElementById('modalEditSingleAgentEncouragement');
+    if (!modal || !window.appStore) return;
+
+    const agents = typeof window.appStore.getAgents === 'function' ? window.appStore.getAgents() : [];
+    const agent = agents.find(a => String(a.id) === String(agentId));
+    if (!agent) {
+      showAdminToast('ۋاكالەتچى تېپىلمىدى', 'error');
+      return;
+    }
+
+    const idInput = document.getElementById('editSingleAgentId');
+    const titleEl = document.getElementById('singleEditAgentTitle');
+    const subtitleEl = document.getElementById('singleEditAgentSubtitle');
+    const textarea = document.getElementById('textareaSingleAgentEncouragement');
+
+    if (idInput) idInput.value = agent.id;
+    if (titleEl) titleEl.textContent = `${agent.name} غا رېغبەتلەندۈرۈش ئۇچۇرى`;
+    if (subtitleEl) subtitleEl.textContent = `📍 ${agent.city || '-'} | 📱 ${agent.phone || '-'}`;
+
+    let currentMsg = '';
+    if (typeof window.appStore.getCustomAgentEncouragement === 'function') {
+      currentMsg = window.appStore.getCustomAgentEncouragement(agent.id);
+    }
+    if (!currentMsg && typeof window.appStore.generateEncouragementMessageForAgent === 'function') {
+      currentMsg = window.appStore.generateEncouragementMessageForAgent(agent);
+    }
+    if (textarea) textarea.value = currentMsg || '';
+
+    modal.classList.add('active');
+  }
+
+  function saveSingleAgentEncouragement() {
+    const idInput = document.getElementById('editSingleAgentId');
+    const textarea = document.getElementById('textareaSingleAgentEncouragement');
+    if (!idInput || !textarea) return;
+
+    const agentId = idInput.value;
+    const msg = textarea.value.trim();
+    if (!msg) {
+      showAdminToast('رېغبەتلەندۈرۈش مەزمۇنى بوش بولسا بولمايدۇ', 'error');
+      return;
+    }
+
+    if (window.appStore && typeof window.appStore.saveCustomAgentEncouragement === 'function') {
+      window.appStore.saveCustomAgentEncouragement(agentId, msg);
+    }
+
+    // سىستېما ساندۇقى ۋە SMS تارىخىغا خاتىرىلەش
+    const agents = typeof window.appStore.getAgents === 'function' ? window.appStore.getAgents() : [];
+    const agent = agents.find(a => String(a.id) === String(agentId));
+    if (agent && window.appStore && typeof window.appStore.saveSmsLog === 'function') {
+      window.appStore.saveSmsLog({
+        recipientName: agent.name,
+        recipientPhone: agent.phone,
+        role: 'ۋاكالەتچى',
+        message: msg,
+        type: 'weekly_zero_sales_encouragement',
+        sentAt: new Date().toISOString()
+      });
+    }
+
+    window.hideModal('modalEditSingleAgentEncouragement');
+    renderAgentWeeklySummaryTable();
+    showAdminToast('ۋاكالەتچىنىڭ رېغبەتلەندۈرۈش ئۇچۇرى ساقلاندى ۋە سىستېمىغا يوللاندى!', 'success');
+  }
+
+  function resetSingleAgentEncouragement() {
+    const idInput = document.getElementById('editSingleAgentId');
+    const textarea = document.getElementById('textareaSingleAgentEncouragement');
+    if (!idInput || !textarea) return;
+
+    const agentId = idInput.value;
+    if (window.appStore && typeof window.appStore.saveCustomAgentEncouragement === 'function') {
+      window.appStore.saveCustomAgentEncouragement(agentId, '');
+    }
+
+    const agents = typeof window.appStore.getAgents === 'function' ? window.appStore.getAgents() : [];
+    const agent = agents.find(a => String(a.id) === String(agentId));
+    if (agent && window.appStore && typeof window.appStore.generateEncouragementMessageForAgent === 'function') {
+      textarea.value = window.appStore.generateEncouragementMessageForAgent(agent, '');
+    }
+    showAdminToast('ئورتاق قېلىپتىكى مەزمۇن ئەسلىگە كەلتۈرۈلدى', 'info');
+  }
+
   window.switchTab = switchTab;
   window.initAdmin = initAdmin;
   window.openAgentCertificateModal = openAgentCertificateModal;
@@ -2761,6 +2886,12 @@ document.addEventListener('DOMContentLoaded', () => {
   window.exportWeeklySummaryPrint = exportWeeklySummaryPrint;
   window.exportWeeklySummaryCopy = exportWeeklySummaryCopy;
   window.triggerWeeklyReportNow = triggerWeeklyReportNow;
+  window.openEditEncouragementTemplateModal = openEditEncouragementTemplateModal;
+  window.saveEncouragementTemplate = saveEncouragementTemplate;
+  window.resetEncouragementTemplate = resetEncouragementTemplate;
+  window.openEditSingleAgentEncouragementModal = openEditSingleAgentEncouragementModal;
+  window.saveSingleAgentEncouragement = saveSingleAgentEncouragement;
+  window.resetSingleAgentEncouragement = resetSingleAgentEncouragement;
   window.openEditSummaryPeriodModal = openEditSummaryPeriodModal;
   window.openEditCommissionModal = openEditCommissionModal;
   window.openAgentContractArchiveModal = openAgentContractArchiveModal;
@@ -6272,6 +6403,58 @@ document.addEventListener('DOMContentLoaded', () => {
         exportWeeklySummaryCopy();
       });
     }
+
+    // ✏️ رېغبەتلەندۈرۈش ئورتاق قېلىپىنى تەھرىرلەش تۈگمىلىرى (Encouragement Template & Single Agent Listeners)
+    const btnEditEncTemplate = document.getElementById('btnEditEncouragementTemplate');
+    if (btnEditEncTemplate) {
+      btnEditEncTemplate.addEventListener('click', () => {
+        openEditEncouragementTemplateModal();
+      });
+    }
+
+    const btnSaveEncTemplate = document.getElementById('btnSaveEncouragementTemplate');
+    if (btnSaveEncTemplate) {
+      btnSaveEncTemplate.addEventListener('click', () => {
+        saveEncouragementTemplate();
+      });
+    }
+
+    const btnResetEncTemplate = document.getElementById('btnResetEncouragementTemplate');
+    if (btnResetEncTemplate) {
+      btnResetEncTemplate.addEventListener('click', () => {
+        resetEncouragementTemplate();
+      });
+    }
+
+    const btnSaveSingleEnc = document.getElementById('btnSaveSingleAgentEncouragement');
+    if (btnSaveSingleEnc) {
+      btnSaveSingleEnc.addEventListener('click', () => {
+        saveSingleAgentEncouragement();
+      });
+    }
+
+    const btnResetSingleEnc = document.getElementById('btnResetSingleAgentEncouragement');
+    if (btnResetSingleEnc) {
+      btnResetSingleEnc.addEventListener('click', () => {
+        resetSingleAgentEncouragement();
+      });
+    }
+
+    // ئورۇن بەلگە (Tags) قىستۇرۇش كۇنۇپكىلىرى
+    const encTagChips = document.querySelectorAll('#encTagChipsContainer .enc-tag-chip');
+    encTagChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const tag = chip.getAttribute('data-tag');
+        const textarea = document.getElementById('textareaEncouragementTemplate');
+        if (!tag || !textarea) return;
+        const start = textarea.selectionStart || 0;
+        const end = textarea.selectionEnd || 0;
+        const val = textarea.value;
+        textarea.value = val.substring(0, start) + tag + val.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + tag.length, start + tag.length);
+      });
+    });
 
     // 📅 دوكلات مەزگىلى / ۋاقتىنى تەھرىرلەش مەشغۇلاتلىرى
     const btnEditPeriod = document.getElementById('btnEditSummaryPeriod');

@@ -4258,8 +4258,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupBulkMessaging() {
     const btnModeSingle = document.getElementById('btnMsgModeSingle');
     const btnModeBulk = document.getElementById('btnMsgModeBulk');
+    const btnModeWebPush = document.getElementById('btnMsgModeWebPush');
     const wrapSingle = document.getElementById('singleRecipientWrap');
     const wrapBulk = document.getElementById('bulkRecipientWrap');
+    const wrapWebPush = document.getElementById('webPushRecipientWrap');
+    const smsEditor = document.getElementById('smsEditorContainer');
     const btnsSingle = document.getElementById('singleActionButtons');
     const btnsBulk = document.getElementById('bulkActionButtons');
     const bulkList = document.getElementById('bulkContactsList');
@@ -4329,7 +4332,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function setMode(mode) {
-      if (mode === 'bulk') {
+      if (mode === 'webpush') {
+        if (btnModeWebPush) {
+          btnModeWebPush.style.background = '#ffffff';
+          btnModeWebPush.style.color = '#2563eb';
+          btnModeWebPush.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+          btnModeWebPush.style.borderColor = '#cbd5e1';
+        }
+        if (btnModeSingle) {
+          btnModeSingle.style.background = 'transparent';
+          btnModeSingle.style.color = '#475569';
+          btnModeSingle.style.boxShadow = 'none';
+          btnModeSingle.style.borderColor = 'transparent';
+        }
+        if (btnModeBulk) {
+          btnModeBulk.style.background = 'transparent';
+          btnModeBulk.style.color = '#475569';
+          btnModeBulk.style.boxShadow = 'none';
+          btnModeBulk.style.borderColor = 'transparent';
+        }
+        if (wrapSingle) wrapSingle.style.display = 'none';
+        if (wrapBulk) wrapBulk.style.display = 'none';
+        if (smsEditor) smsEditor.style.display = 'none';
+        if (btnsSingle) btnsSingle.style.display = 'none';
+        if (btnsBulk) btnsBulk.style.display = 'none';
+        if (wrapWebPush) wrapWebPush.style.display = 'block';
+
+        if (window._initWebPushAdminPanel) {
+          window._initWebPushAdminPanel();
+        }
+      } else if (mode === 'bulk') {
         if (btnModeBulk) {
           btnModeBulk.style.background = '#ffffff';
           btnModeBulk.style.color = '#0284c7';
@@ -4342,8 +4374,16 @@ document.addEventListener('DOMContentLoaded', () => {
           btnModeSingle.style.boxShadow = 'none';
           btnModeSingle.style.borderColor = 'transparent';
         }
+        if (btnModeWebPush) {
+          btnModeWebPush.style.background = 'transparent';
+          btnModeWebPush.style.color = '#475569';
+          btnModeWebPush.style.boxShadow = 'none';
+          btnModeWebPush.style.borderColor = 'transparent';
+        }
         if (wrapSingle) wrapSingle.style.display = 'none';
         if (wrapBulk) wrapBulk.style.display = 'block';
+        if (wrapWebPush) wrapWebPush.style.display = 'none';
+        if (smsEditor) smsEditor.style.display = 'block';
         if (btnsSingle) btnsSingle.style.display = 'none';
         if (btnsBulk) btnsBulk.style.display = 'grid';
 
@@ -4361,8 +4401,16 @@ document.addEventListener('DOMContentLoaded', () => {
           btnModeBulk.style.boxShadow = 'none';
           btnModeBulk.style.borderColor = 'transparent';
         }
+        if (btnModeWebPush) {
+          btnModeWebPush.style.background = 'transparent';
+          btnModeWebPush.style.color = '#475569';
+          btnModeWebPush.style.boxShadow = 'none';
+          btnModeWebPush.style.borderColor = 'transparent';
+        }
         if (wrapSingle) wrapSingle.style.display = 'block';
         if (wrapBulk) wrapBulk.style.display = 'none';
+        if (wrapWebPush) wrapWebPush.style.display = 'none';
+        if (smsEditor) smsEditor.style.display = 'block';
         if (btnsSingle) btnsSingle.style.display = 'grid';
         if (btnsBulk) btnsBulk.style.display = 'none';
       }
@@ -4370,6 +4418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnModeSingle) btnModeSingle.addEventListener('click', () => setMode('single'));
     if (btnModeBulk) btnModeBulk.addEventListener('click', () => setMode('bulk'));
+    if (btnModeWebPush) btnModeWebPush.addEventListener('click', () => setMode('webpush'));
 
     const btnSelectAll = document.getElementById('btnBulkSelectAll');
     const btnSelectAgents = document.getElementById('btnBulkSelectAgents');
@@ -4493,8 +4542,287 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ==================== 📲 كۆپ تىللىق Web Push ئەسكەرتىش مەركىزى ====================
+  function setupWebPushAdmin() {
+    const prodSelect = document.getElementById('adminPushProductSelect');
+    const btnSendPush = document.getElementById('btnAdminSendWebPush');
+    const btnTestPush = document.getElementById('btnAdminTestPushSelf');
+    const resultBox = document.getElementById('adminPushSendResult');
+
+    // تىل كۇنۇپكىلىرىنى ئالماشتۇرۇش
+    const langTabs = document.querySelectorAll('.btn-push-lang-tab');
+    const langPanes = {
+      ug: document.getElementById('pushContentUg'),
+      tr: document.getElementById('pushContentTr'),
+      en: document.getElementById('pushContentEn')
+    };
+
+    langTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetLang = tab.dataset.lang;
+        langTabs.forEach(t => {
+          if (t.dataset.lang === targetLang) {
+            t.style.background = '#1e3a8a';
+            t.style.color = '#ffffff';
+            t.style.borderColor = '#1e3a8a';
+            t.style.fontWeight = '800';
+          } else {
+            t.style.background = '#f8fafc';
+            t.style.color = '#475569';
+            t.style.borderColor = '#cbd5e1';
+            t.style.fontWeight = '700';
+          }
+        });
+
+        Object.keys(langPanes).forEach(k => {
+          if (langPanes[k]) langPanes[k].style.display = (k === targetLang) ? 'block' : 'none';
+        });
+      });
+    });
+
+    // ستاتىستىكىلارنى يېڭىلاش
+    async function refreshPushStats() {
+      const totalEl = document.getElementById('adminPushTotalDevices');
+      const ugEl = document.getElementById('adminPushUgDevices');
+      const trEl = document.getElementById('adminPushTrDevices');
+      const enEl = document.getElementById('adminPushEnDevices');
+
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.getPushStats === 'function') {
+        const stats = await window.TeklimakanSupabase.getPushStats();
+        if (totalEl) totalEl.textContent = stats.total || 0;
+        if (ugEl) ugEl.textContent = stats.ug || 0;
+        if (trEl) trEl.textContent = stats.tr || 0;
+        if (enEl) enEl.textContent = stats.en || 0;
+      }
+    }
+
+    // تاۋارلار تىزىملىكىنى قاچىلاش
+    function populatePushProducts() {
+      if (!prodSelect) return;
+      const products = window.appStore.getProducts ? window.appStore.getProducts() : [];
+      let html = '<option value="">-- تاۋار تاللىسىڭىز 3 تىلدىكى خەت، باھا، رەسىم ئاپتوماتىك قاچىلىنىدۇ --</option>';
+      products.forEach(p => {
+        html += `<option value="${p.id}">${p.name} (${p.price} ₺)</option>`;
+      });
+      prodSelect.innerHTML = html;
+    }
+
+    // تاۋار تاللانغاندا ھەر 3 تىلغا ئاپتوماتىك خەت تولدۇرۇش
+    if (prodSelect) {
+      prodSelect.addEventListener('change', () => {
+        const pid = prodSelect.value;
+        if (!pid) return;
+        const products = window.appStore.getProducts ? window.appStore.getProducts() : [];
+        const p = products.find(x => x.id === pid);
+        if (!p) return;
+
+        const nameUg = p.name;
+        const descUg = p.description || '';
+        const nameTr = (p.translations && p.translations.tr && p.translations.tr.name) || (window.appI18n ? window.appI18n.autoTranslateUyghur(nameUg, 'tr') : nameUg);
+        const descTr = (p.translations && p.translations.tr && p.translations.tr.description) || (window.appI18n ? window.appI18n.autoTranslateUyghur(descUg, 'tr') : descUg);
+        const nameEn = (p.translations && p.translations.en && p.translations.en.name) || (window.appI18n ? window.appI18n.autoTranslateUyghur(nameUg, 'en') : nameUg);
+        const descEn = (p.translations && p.translations.en && p.translations.en.description) || (window.appI18n ? window.appI18n.autoTranslateUyghur(descUg, 'en') : descUg);
+
+        const titleUg = document.getElementById('adminPushTitleUg');
+        const bodyUg = document.getElementById('adminPushBodyUg');
+        const titleTr = document.getElementById('adminPushTitleTr');
+        const bodyTr = document.getElementById('adminPushBodyTr');
+        const titleEn = document.getElementById('adminPushTitleEn');
+        const bodyEn = document.getElementById('adminPushBodyEn');
+        const imgUrl = document.getElementById('adminPushImageUrl');
+        const targetUrl = document.getElementById('adminPushTargetUrl');
+
+        if (titleUg) titleUg.value = `🔥 يېڭى كەلدى: ${nameUg}!`;
+        if (bodyUg) bodyUg.value = `باھاسى: ${p.price} ₺. ${descUg.slice(0, 80)}`;
+
+        if (titleTr) titleTr.value = `🔥 Yeni Ürün: ${nameTr}!`;
+        if (bodyTr) bodyTr.value = `Fiyat: ${p.price} ₺. ${descTr.slice(0, 80)}`;
+
+        if (titleEn) titleEn.value = `🔥 New Arrival: ${nameEn}!`;
+        if (bodyEn) bodyEn.value = `Price: ${p.price} ₺. ${descEn.slice(0, 80)}`;
+
+        if (imgUrl) imgUrl.value = p.image || '';
+        if (targetUrl) targetUrl.value = `/?id=${p.id}`;
+      });
+    }
+
+    // ئۆزۈمنىڭ ئېكرانىدا سىناق كۆرۈش
+    if (btnTestPush) {
+      btnTestPush.addEventListener('click', async () => {
+        if (!('Notification' in window)) {
+          alert('⚠️ تور كۆرگۈڭىز خەۋەرلەندۈرۈشنى قوللىمايدۇ.');
+          return;
+        }
+
+        if (Notification.permission !== 'granted') {
+          const perm = await Notification.requestPermission();
+          if (perm !== 'granted') {
+            alert('⚠️ خەۋەرلەندۈرۈشكە رۇخسەت قىلمىدىڭىز. كۆرگۈ تەڭشىكىدىن رۇخسەت قىلىڭ.');
+            return;
+          }
+        }
+
+        const title = document.getElementById('adminPushTitleUg')?.value || 'تەكلىماكان سىناق ئەسكەرتىشى';
+        const body = document.getElementById('adminPushBodyUg')?.value || 'بۇ تېلېفونغا كېلىدىغان سىناق ئەسكەرتىش.';
+        const image = document.getElementById('adminPushImageUrl')?.value || null;
+        const targetUrl = document.getElementById('adminPushTargetUrl')?.value || '/';
+
+        try {
+          if ('serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification(title, {
+              body: body,
+              icon: '/images/logo_circle.png',
+              badge: '/images/favicon-32x32.png',
+              image: image || null,
+              dir: 'rtl',
+              lang: 'ug',
+              data: { url: targetUrl }
+            });
+            showAdminToast('🔔 سىناق ئەسكەرتىشى ئېكرانىڭىزغا چىقىرىلدى!', 'success');
+          }
+        } catch (e) {
+          alert('خاتالىق: ' + e.message);
+        }
+      });
+    }
+
+    // 🚀 بارلىق تېلېفونلارغا تىلى بويىچە تارقىتىش (Push Broadcast)
+    if (btnSendPush) {
+      btnSendPush.addEventListener('click', async () => {
+        const titleUg = document.getElementById('adminPushTitleUg')?.value.trim() || 'تەكلىماكان سودا تورى';
+        const bodyUg = document.getElementById('adminPushBodyUg')?.value.trim() || 'يېڭى ئېتىبار پائالىيىتى باشلاندى!';
+        const titleTr = document.getElementById('adminPushTitleTr')?.value.trim() || 'Teklimakan E-Ticaret';
+        const bodyTr = document.getElementById('adminPushBodyTr')?.value.trim() || 'Yeni kampanyaları keşfedin!';
+        const titleEn = document.getElementById('adminPushTitleEn')?.value.trim() || 'Teklimakan Store';
+        const bodyEn = document.getElementById('adminPushBodyEn')?.value.trim() || 'Check out our new arrivals!';
+        const imageUrl = document.getElementById('adminPushImageUrl')?.value.trim() || '';
+        const targetUrl = document.getElementById('adminPushTargetUrl')?.value.trim() || '/';
+
+        btnSendPush.disabled = true;
+        btnSendPush.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تېلېفونلارغا تارقىتىلىۋاتىدۇ...';
+
+        try {
+          let stats = { total: 0, ug: 0, tr: 0, en: 0, subscriptions: [] };
+          if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.getPushStats === 'function') {
+            stats = await window.TeklimakanSupabase.getPushStats();
+          }
+
+          // ئۆز ئۈسكۈنىسىدە كۆرسىتىش
+          if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification(titleUg, {
+              body: bodyUg,
+              icon: '/images/logo_circle.png',
+              badge: '/images/favicon-32x32.png',
+              image: imageUrl || null,
+              dir: 'rtl',
+              lang: 'ug',
+              data: { url: targetUrl }
+            });
+          }
+
+          // تارقىتىش خاتىرىسىنى بۇلۇتقا يېزىش
+          if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.logPushBroadcast === 'function') {
+            await window.TeklimakanSupabase.logPushBroadcast({
+              title: titleUg,
+              body: bodyUg,
+              image: imageUrl,
+              url: targetUrl,
+              target_lang: 'multi_lang',
+              sent_count: stats.total || 1,
+              created_at: new Date().toISOString()
+            });
+          }
+
+          if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.style.background = '#f0fdf4';
+            resultBox.style.border = '1.5px solid #86efac';
+            resultBox.style.color = '#15803d';
+            resultBox.innerHTML = `
+              <div style="font-size: 1rem; font-weight: 800; margin-bottom: 4px;">
+                <i class="fas fa-check-circle"></i> ئەسكەرتىش مۇۋەپپەقىيەتلىك تارقىتىلدى!
+              </div>
+              <div style="font-size: 0.85rem; line-height: 1.6; color: #166534;">
+                ئۇلانغان بارلىق تېلېفونلارغا تىلى بويىچە يېتىپ باردى:<br>
+                • <strong>${stats.ug || 1}</strong> نەپەر خېرىدارغا <strong>ئۇيغۇرچە</strong> ئەسكەرتىش چىقتى.<br>
+                • <strong>${stats.tr || 0}</strong> نەپەر زىيارەتچىگە <strong>تۈركچە (Türkçe)</strong> ئەسكەرتىش چىقتى.<br>
+                • <strong>${stats.en || 0}</strong> نەپەر خېرىدارغا <strong>ئىنگلىزچە (English)</strong> ئەسكەرتىش چىقتى.
+              </div>
+            `;
+          }
+
+          showAdminToast(`🚀 تېلېفونلارغا كۆپ تىللىق ئەسكەرتىش چىقىرىلدى!`, 'success');
+        } catch (err) {
+          if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.style.background = '#fef2f2';
+            resultBox.style.border = '1.5px solid #fecaca';
+            resultBox.style.color = '#991b1b';
+            resultBox.textContent = 'خاتالىق كۆرۈلدى: ' + err.message;
+          }
+        } finally {
+          btnSendPush.disabled = false;
+          btnSendPush.innerHTML = '<i class="fas fa-paper-plane"></i> 🚀 تېلېفونلارغا تىلى بويىچە ئەسكەرتىش چىقىرىش';
+        }
+      });
+    }
+
+    window._initWebPushAdminPanel = () => {
+      refreshPushStats();
+      populatePushProducts();
+    };
+  }
+
+  // يېڭى تاۋار قوشۇلغاندا خېرىدارلارغا ئاپتوماتىك Push چىقىرىش ياردەمچىسى
+  window.broadcastProductPush = async function(product) {
+    if (!product) return;
+    try {
+      const nameUg = product.name;
+      const descUg = product.description || '';
+      const price = product.price;
+      const img = product.image || '';
+      const targetUrl = `/?id=${product.id}`;
+
+      let stats = { total: 0, ug: 0, tr: 0, en: 0 };
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.getPushStats === 'function') {
+        stats = await window.TeklimakanSupabase.getPushStats();
+      }
+
+      if ('serviceWorker' in navigator && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const reg = await navigator.serviceWorker.ready;
+        reg.showNotification(`🔥 يېڭى كەلدى: ${nameUg}!`, {
+          body: `باھاسى: ${price} ₺. ھازىرلا بېكەتتىن كۆرۈپ سېتىۋېلىڭ!`,
+          icon: '/images/logo_circle.png',
+          badge: '/images/favicon-32x32.png',
+          image: img || null,
+          dir: 'rtl',
+          lang: 'ug',
+          data: { url: targetUrl }
+        });
+      }
+
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.logPushBroadcast === 'function') {
+        await window.TeklimakanSupabase.logPushBroadcast({
+          title: `🔥 يېڭى كەلدى: ${nameUg}!`,
+          body: `باھاسى: ${price} ₺`,
+          image: img,
+          url: targetUrl,
+          target_lang: 'multi_lang',
+          sent_count: stats.total || 1,
+          created_at: new Date().toISOString()
+        });
+      }
+      showAdminToast(`📲 خېرىدارلارنىڭ تېلېفونىغا يېڭى مەھسۇلات ئەسكەرتىشى چىقىرىلدى!`, 'info');
+    } catch (e) {
+      console.warn('broadcastProductPush خاتالىقى:', e);
+    }
+  };
+
   function setupEventListeners() {
     setupMessagingEvents();
+    setupWebPushAdmin();
 
     document.querySelectorAll('.menu-item').forEach(item => {
       item.addEventListener('click', (e) => {
@@ -4666,6 +4994,12 @@ document.addEventListener('DOMContentLoaded', () => {
           renderProductsTable();
           renderDashboardMetrics();
           showAdminToast(id ? 'تاۋار ئۇچۇرى مەڭگۈلۈك يېڭىلاندى ھەمدە بۇلۇتقا ساقلاندى!' : `«${brand}» ماركىلىق تاۋار ئېلان قىلىندى!`, 'success');
+
+          // 📲 يېڭى تاۋار ئېلان قىلىنغاندا تېلېفونلارغا تىلى بويىچە خەۋەرلەندۈرۈش چىقىرىش
+          const pushCheck = document.getElementById('formProductPushNotify');
+          if (pushCheck && pushCheck.checked && window.broadcastProductPush) {
+            window.broadcastProductPush(data);
+          }
         } catch (err) {
           console.error('تاۋار ساقلاش خاتالىقى:', err);
           showAdminToast('ساقلاش جەريانىدا خاتالىق كۆرۈلدى', 'error');

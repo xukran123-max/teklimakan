@@ -990,6 +990,11 @@ class I18nManager {
         window.appStore.setCurrency(targetCurrency);
       }
 
+      // 🧠 2-3 قېتىملىق تىل زىيارەت خاتىرىسىگە ئاپتوماتىك قوشۇش
+      if (window.TeklimakanPush && typeof window.TeklimakanPush.recordLanguageVisit === 'function') {
+        window.TeklimakanPush.recordLanguageVisit(lang);
+      }
+
       this.applyDirectionAndTypography();
       window.dispatchEvent(new CustomEvent('teklimakan_lang_changed', { detail: { lang, currency: targetCurrency } }));
     }

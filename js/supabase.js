@@ -237,5 +237,81 @@ window.TeklimakanSupabase = {
       console.warn('Supabase agent exception:', e);
       return false;
     }
+  },
+
+  // 📲 تېلېفون Web Push مۇشتەرىلىكىنى ساقلاش ۋە يېڭىلاش
+  async savePushSubscription(subData) {
+    // يەرلىك كۆرگۈچكە قوشۇمچە تۇراقلىق ساقلاپ قويۇش
+    try {
+      localStorage.setItem('teklimakan_local_push_sub', JSON.stringify(subData));
+    } catch (e) {}
+
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const { data, error } = await sb.from('push_subscriptions').upsert(subData, { onConflict: 'endpoint' });
+      if (error) {
+        console.warn('Supabase push_subscriptions ساقلاشتا خاتالىق:', error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Supabase push_subscriptions ئۇلىنىش خاتالىقى:', e);
+      return false;
+    }
+  },
+
+  // 📊 ئەسكەرتىش مۇشتەرىلىرى تىزىملىكى ۋە ستاتىستىكىسىنى ئوقۇش
+  async getPushStats() {
+    const sb = getSupabase();
+    let localSub = null;
+    try {
+      localSub = JSON.parse(localStorage.getItem('teklimakan_local_push_sub') || 'null');
+    } catch (e) {}
+
+    if (!sb) {
+      return {
+        total: localSub ? 1 : 0,
+        ug: localSub && localSub.preferred_lang === 'ug' ? 1 : 0,
+        tr: localSub && localSub.preferred_lang === 'tr' ? 1 : 0,
+        en: localSub && localSub.preferred_lang === 'en' ? 1 : 0,
+        subscriptions: localSub ? [localSub] : []
+      };
+    }
+
+    try {
+      const { data, error } = await sb.from('push_subscriptions').select('*');
+      if (error || !data) {
+        return {
+          total: localSub ? 1 : 0,
+          ug: localSub && localSub.preferred_lang === 'ug' ? 1 : 0,
+          tr: localSub && localSub.preferred_lang === 'tr' ? 1 : 0,
+          en: localSub && localSub.preferred_lang === 'en' ? 1 : 0,
+          subscriptions: localSub ? [localSub] : []
+        };
+      }
+
+      const total = data.length;
+      const ug = data.filter(d => d.preferred_lang === 'ug' || !d.preferred_lang).length;
+      const tr = data.filter(d => d.preferred_lang === 'tr').length;
+      const en = data.filter(d => d.preferred_lang === 'en').length;
+
+      return { total, ug, tr, en, subscriptions: data };
+    } catch (e) {
+      return { total: 0, ug: 0, tr: 0, en: 0, subscriptions: [] };
+    }
+  },
+
+  // 📝 ئەۋەتىلگەن Push ئۇچۇرلىرىنى بۇلۇتقا خاتىرىلەش
+  async logPushBroadcast(broadcastData) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      await sb.from('push_broadcast_logs').insert([broadcastData]);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 };
+

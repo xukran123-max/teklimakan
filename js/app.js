@@ -5450,6 +5450,9 @@ function initTeklimakanApp() {
 
     // 💬 ئالىي باشقۇرغۇچى بىلەن توردا بىۋاسىتە پاراڭلىشىش قوزغىتىش
     initCustomerLiveChat();
+
+    // 📱 يانفون قايتىش كۇنۇپكىسى (Android Back ◄) بېسىلغاندا بىر قەدەم چېكىندۈرۈش ۋە خېرىدارنى دۇكاندا تۇتۇپ قېلىش
+    initMobileNavigationHistoryShield();
   }
 
   // ==================== 💬 ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش مەركىزى (Customer Live Chat) ====================
@@ -6169,6 +6172,378 @@ ${text}
         const msg = chip.dataset.msg || chip.textContent;
         handleQuickAction(action, msg);
       });
+    });
+  }
+
+  // ==================== 📱 يانفون قايتىش كۇنۇپكىسى (Android Back ◄) ۋە خېرىدارنى تۇتۇپ قېلىش قوغدىغۇچىسى ====================
+  function initMobileNavigationHistoryShield() {
+    let allowNativeExit = false;
+
+    // 1. دەسلەپكى تارىخ ھالىتىنى قوغداش كاپالىتىگە كىرگۈزۈش (Ensure history buffer exists)
+    try {
+      if (!window.history.state || window.history.state.teklimakanShield !== 'active') {
+        window.history.replaceState({ teklimakanShield: 'root' }, '');
+        window.history.pushState({ teklimakanShield: 'active' }, '');
+      }
+    } catch (e) {
+      console.warn('History state init error:', e);
+    }
+
+    // 2. تەكشۈرۈش: ھازىر ئېكراندا ئېچىقلىق كۆزنەك (Modal / Drawer / Chat) بارمۇ يوق
+    function getOpenModalsList() {
+      const list = [];
+
+      // A. خېرىدارنى تۇتۇپ قېلىش كۆزنىكى
+      const exitModal = document.getElementById('teklimakanExitRetentionModal');
+      if (exitModal && exitModal.classList.contains('active')) {
+        list.push({
+          type: 'exit_retention',
+          close: () => {
+            exitModal.classList.remove('active');
+            exitModal.style.display = 'none';
+            document.body.style.overflow = '';
+          }
+        });
+      }
+
+      // B. ھەرىكەت ئىجازەت كۆزنىكى (Action Permission Modal)
+      const actionPermModal = document.getElementById('teklimakanActionPermissionModal');
+      if (actionPermModal && actionPermModal.parentElement) {
+        list.push({
+          type: 'action_permission',
+          close: () => {
+            actionPermModal.remove();
+          }
+        });
+      }
+
+      // C. كۇپون مۇۋەپپەقىيەت كۆزنىكى (Coupon Success Modal)
+      const couponModal = document.getElementById('teklimakanCouponSuccessModal');
+      if (couponModal && couponModal.parentElement) {
+        list.push({
+          type: 'coupon_success',
+          close: () => {
+            couponModal.remove();
+          }
+        });
+      }
+
+      // D. ئالىي باشقۇرغۇچى تور پاراڭ كۆزنىكى (Live Chat Box)
+      const chatBox = document.getElementById('adminLiveChatBox');
+      if (chatBox && window.getComputedStyle(chatBox).display !== 'none') {
+        list.push({
+          type: 'live_chat',
+          close: () => {
+            chatBox.style.display = 'none';
+          }
+        });
+      }
+
+      // E. سېۋەت ۋە ياقتۇرغانلار تارتمىسى (.cart-overlay.active)
+      const activeOverlays = document.querySelectorAll('.cart-overlay.active');
+      activeOverlays.forEach(overlay => {
+        list.push({
+          type: 'drawer',
+          close: () => {
+            overlay.classList.remove('active');
+            document.body.classList.remove('cart-drawer-open');
+            document.body.style.overflow = '';
+          }
+        });
+      });
+
+      // F. بارلىق ئۆلچەملىك يۈرۈشلۈك كۆزنەكلەر (.modal-backdrop.active)
+      const activeModals = document.querySelectorAll('.modal-backdrop.active');
+      activeModals.forEach(modal => {
+        if (modal.id === 'teklimakanExitRetentionModal') return;
+        list.push({
+          type: 'modal',
+          close: () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            // ئەگەر تاۋار تەپسىلاتى كۆزنىكى بولسا، URL دىكى پارامېتىرنى سۈرتمەي تازىلاش
+            if (modal.id === 'quickViewModal') {
+              if (window.history && window.history.replaceState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('product')) {
+                  url.searchParams.delete('product');
+                  window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : '') + url.hash);
+                }
+              }
+            }
+          }
+        });
+      });
+
+      return list;
+    }
+
+    // 3. تور بېكەتتىن چىقىپ كېتىشنىڭ ئالدىنى ئېلىش ۋە تۇتۇپ قېلىش كۆزنىكى قۇرۇش (Exit-Intent Retention Modal)
+    function createRetentionModalIfNotExists() {
+      let modal = document.getElementById('teklimakanExitRetentionModal');
+      if (modal) return modal;
+
+      modal = document.createElement('div');
+      modal.id = 'teklimakanExitRetentionModal';
+      modal.className = 'modal-backdrop';
+      modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1000000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
+        direction: rtl;
+        font-family: inherit;
+      `;
+
+      modal.innerHTML = `
+        <div class="retention-modal-card" style="
+          background: #ffffff;
+          border-radius: 24px;
+          max-width: 440px;
+          width: 100%;
+          overflow: hidden;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          animation: modalPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          text-align: center;
+        ">
+          <!-- باشنامە ۋە بېزەك -->
+          <div style="background: linear-gradient(135deg, #1e3a8a, #0f172a); padding: 24px 20px 20px; color: #ffffff; position: relative;">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; color: #ffffff; box-shadow: 0 8px 20px rgba(217, 119, 6, 0.4); margin-bottom: 12px; border: 3px solid rgba(255,255,255,0.3);">
+              🎁
+            </div>
+            <h3 style="margin: 0 0 6px; font-size: 1.3rem; font-weight: 900; color: #ffffff; line-height: 1.4;">
+              بىر دەم كۈتۈپ تۇرۇڭ!
+            </h3>
+            <p style="margin: 0; font-size: 0.88rem; color: #fef08a; font-weight: 700;">
+              تەكلىماكان سودا تورىدىن ئايرىلماقچىمۇ؟
+            </p>
+          </div>
+
+          <!-- مەزمۇن قىسمى -->
+          <div style="padding: 20px 22px;">
+            <p style="margin: 0 0 16px; font-size: 0.95rem; color: #334155; line-height: 1.7; font-weight: 600;">
+              ھۆرمەتلىك خېرىدارىمىز، سىز ئۈچۈن مەخسۇس تەييارلانغان <b style="color: #dc2626;">50 ₺ لىق نەق پۇل تېجەش كۇپونى</b> نى قوبۇل قىلىپ، مال سېتىۋېلىشنى داۋاملاشتۇرۇڭ!
+            </p>
+
+            <!-- كۇپون كارتىسى -->
+            <div style="
+              background: #fffbeb;
+              border: 2px dashed #f59e0b;
+              border-radius: 16px;
+              padding: 14px 16px;
+              margin-bottom: 20px;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+            ">
+              <div style="text-align: right;">
+                <div style="font-size: 0.78rem; font-weight: 800; color: #b45309; margin-bottom: 2px;">ئېتىبار كودى (50 ₺ تېجەش):</div>
+                <div style="font-size: 1.25rem; font-weight: 900; color: #1e3a8a; letter-spacing: 1px; font-family: monospace;">TEKLIMAKAN50</div>
+              </div>
+              <button type="button" id="btnCopyRetentionCoupon" style="
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: #ffffff;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 14px;
+                font-weight: 800;
+                font-size: 0.85rem;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+                transition: transform 0.15s ease, background 0.2s ease;
+                white-space: nowrap;
+              ">
+                <i class="far fa-copy"></i> كۆچۈرۈش
+              </button>
+            </div>
+
+            <!-- پايدىلىق ئەۋزەللىكلەر تىزىملىكى -->
+            <div style="text-align: right; background: #f8fafc; border-radius: 12px; padding: 12px 14px; margin-bottom: 22px; font-size: 0.84rem; color: #475569; line-height: 1.8;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <i class="fas fa-check-circle" style="color: #16a34a;"></i>
+                <span>كاپالەتلىك ئەسلى شىپالىق ئۇيغۇر تىبابەت مەھسۇلاتلىرى</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <i class="fas fa-shipping-fast" style="color: #2563eb;"></i>
+                <span>تېز سۈرئەتتە ئىشىك ئالدىغىچە بىخەتەر يەتكۈزۈش</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-shield-alt" style="color: #ea580c;"></i>
+                <span>رازى بولمىسىڭىز مالنى قايتۇرۇپ ئالماشتۇرۇش كاپالىتى</span>
+              </div>
+            </div>
+
+            <!-- ھەرىكەت كۇنۇپكىلىرى -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button type="button" id="btnStayAndShop" style="
+                background: linear-gradient(135deg, #16a34a, #15803d);
+                color: #ffffff;
+                border: none;
+                border-radius: 14px;
+                padding: 13px 20px;
+                font-size: 1.02rem;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: transform 0.15s ease;
+              ">
+                <i class="fas fa-shopping-bag"></i> مال سېتىۋېلىشنى داۋاملاشتۇرۇش
+              </button>
+
+              <button type="button" id="btnConfirmExitSite" style="
+                background: transparent;
+                color: #94a3b8;
+                border: none;
+                padding: 10px;
+                font-size: 0.88rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: color 0.2s ease;
+              ">
+                تور بېكەتتىن چىقىش
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // كۇپون كۆچۈرۈش كۇنۇپكىسى
+      const btnCopy = modal.querySelector('#btnCopyRetentionCoupon');
+      if (btnCopy) {
+        btnCopy.addEventListener('click', () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('TEKLIMAKAN50').then(() => {
+              btnCopy.innerHTML = '<i class="fas fa-check"></i> كۆچۈرۈلدى!';
+              btnCopy.style.background = '#16a34a';
+              localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
+              setTimeout(() => {
+                btnCopy.innerHTML = '<i class="far fa-copy"></i> كۆچۈرۈش';
+                btnCopy.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+              }, 2500);
+            }).catch(() => {
+              localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
+              btnCopy.innerHTML = '<i class="fas fa-check"></i> ساقلاندى!';
+            });
+          } else {
+            localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
+            btnCopy.innerHTML = '<i class="fas fa-check"></i> ساقلاندى!';
+          }
+        });
+      }
+
+      // مال سېتىۋېلىشنى داۋاملاشتۇرۇش
+      const btnStay = modal.querySelector('#btnStayAndShop');
+      if (btnStay) {
+        btnStay.addEventListener('click', () => {
+          localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+          modal.style.opacity = '0';
+          modal.style.visibility = 'hidden';
+          document.body.style.overflow = '';
+
+          if (typeof showToast === 'function') {
+            showToast('50 ₺ ئېتىبار كۇپونى TEKLIMAKAN50 قوشۇلدى! رەھمەت.', 'success');
+          }
+
+          const catalog = document.getElementById('catalogSection') || document.getElementById('productsGrid');
+          if (catalog) {
+            catalog.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      }
+
+      // تور بېكەتتىن ھەقىقىي چىقىش
+      const btnExit = modal.querySelector('#btnConfirmExitSite');
+      if (btnExit) {
+        btnExit.addEventListener('click', () => {
+          allowNativeExit = true;
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+          modal.style.opacity = '0';
+          modal.style.visibility = 'hidden';
+          document.body.style.overflow = '';
+          window.history.back();
+        });
+      }
+
+      return modal;
+    }
+
+    // 4. خېرىدارنى قايىل قىلىش كۆزنىكىنى ئېچىش
+    function showExitRetentionModal() {
+      const modal = createRetentionModalIfNotExists();
+      modal.style.display = 'flex';
+      modal.offsetHeight; // force reflow
+      modal.classList.add('active');
+      modal.style.opacity = '1';
+      modal.style.visibility = 'visible';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // 5. يانفوننىڭ قايتىش كۇنۇپكىسى (Android Back ◄ ياكى Browser Back) بېسىلغاندا بىر قەدەم چېكىندۈرۈش
+    window.addEventListener('popstate', (e) => {
+      // ئەگەر ئىشلەتكۈچى "تور بېكەتتىن چىقىش" نى بېسىپ بولغان بولسا، تەبىئىي چىقىشقا يول قويۇش
+      if (allowNativeExit) {
+        return;
+      }
+
+      // ئاكتىپ كۆزنەك / تارتما / پاراڭنى تەكشۈرۈش
+      const openModals = getOpenModalsList();
+
+      if (openModals.length > 0) {
+        // پەقەت ئەڭ ئۈستىدىكى بىر كۆزنەكنى تاقاپ، بىر قەدەم ئارقىغا چېكىندۈرۈش
+        const topModal = openModals[openModals.length - 1];
+        try {
+          topModal.close();
+        } catch (err) {
+          console.warn('Error closing top modal on back press:', err);
+        }
+
+        // يەنە بىر قەدەم ئارقىغا قايتىش كاپالىتىنى تولۇقلاپ قويۇش
+        try {
+          window.history.pushState({ teklimakanShield: 'active' }, '');
+        } catch (err) {}
+        return;
+      }
+
+      // ئەگەر ھېچقانداق كۆزنەك ئوچۇق بولمىسا (ئاساسىي دۇكان بەتتە تۇرغان بولسا):
+      const exitModal = document.getElementById('teklimakanExitRetentionModal');
+      const isExitModalVisible = exitModal && exitModal.classList.contains('active');
+
+      if (isExitModalVisible) {
+        // ئەگەر تۇتۇپ قېلىش كۆزنىكى ئاللىقاچان كۆرۈنۈپ تۇرغان بولسىمۇ خېرىدار يەنە قايتىشنى باسسا، چىقىپ كېتىشكە يول قويۇش
+        allowNativeExit = true;
+        exitModal.classList.remove('active');
+        exitModal.style.display = 'none';
+        exitModal.style.opacity = '0';
+        exitModal.style.visibility = 'hidden';
+        document.body.style.overflow = '';
+        window.history.back();
+      } else {
+        // تۇنجى قېتىم چىقماقچى بولغاندا: چىقىشنى توسۇپ، ئېتىبار كۇپونلۇق تۇتۇپ قېلىش كۆزنىكىنى كۆرسىتىش!
+        try {
+          window.history.pushState({ teklimakanShield: 'retention' }, '');
+        } catch (err) {}
+        showExitRetentionModal();
+      }
     });
   }
 

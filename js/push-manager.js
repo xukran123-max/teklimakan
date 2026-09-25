@@ -283,10 +283,63 @@ class PushNotificationManager {
     this.requestAndSubscribe('order');
   }
 
+  showSystemGuideOverlay() {
+    this.hideSystemGuideOverlay();
+    const lang = this.getCurrentLang();
+    const isRtl = lang === 'ug';
+    const text = lang === 'tr'
+      ? '👆 Lütfen yukarıdaki kutudan [İzin ver] seçeneğine dokunun'
+      : (lang === 'en' ? '👆 Please tap [Allow / İzin ver] in the prompt above' : '👆 ئۈستىدىكى تېلېفون كۆزنىكىدىن [İzin ver / رۇخسەت] نى بېسىڭ');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'teklimakanGuideOverlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 16px;
+      left: 14px;
+      right: 14px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 14px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+      border: 2px solid #93c5fd;
+      z-index: 10000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      direction: ${isRtl ? 'rtl' : 'ltr'};
+      animation: pulseGuide 0.8s infinite alternate ease-in-out;
+    `;
+    overlay.innerHTML = `
+      <style>
+        @keyframes pulseGuide {
+          from { transform: translateY(0); }
+          to { transform: translateY(-4px); }
+        }
+      </style>
+      <span style="font-size: 1.4rem;">☝️</span>
+      <span>${text}</span>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  hideSystemGuideOverlay() {
+    const el = document.getElementById('teklimakanGuideOverlay');
+    if (el) el.remove();
+  }
+
   // 🚀 ئەسكەرتىشكە قوشۇلۇش ۋە كۇپون تارقىتىش
   async requestAndSubscribe(source = 'coupon') {
+    this.showSystemGuideOverlay();
     try {
       const permission = await Notification.requestPermission();
+      this.hideSystemGuideOverlay();
       if (permission !== 'granted') return false;
 
       if (!this.swRegistration) {
@@ -311,6 +364,7 @@ class PushNotificationManager {
       this.showWelcomeNotification(source);
       return true;
     } catch (err) {
+      this.hideSystemGuideOverlay();
       console.warn('Push مۇشتەرى قىلىشتا خاتالىق:', err);
       return false;
     }

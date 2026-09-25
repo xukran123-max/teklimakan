@@ -1004,6 +1004,10 @@
                   <i class="fas fa-chart-pie"></i>
                   <span>📊 ئايلىق خۇلاسە ۋە كومىسسىيە</span>
                 </button>
+                <button type="button" class="btn-add-primary" id="btnOpenWeeklySummaryExportModal" onclick="(window.openAgentWeeklySummaryModal || function(){ var m=document.getElementById('agentWeeklySummaryModal'); if(m){ m.classList.add('active'); m.style.display='flex'; } })();" style="background: linear-gradient(135deg, #d97706, #b45309); border-color: #d97706; cursor: pointer; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);" title="ھەر يەكشەنبە ئەتىگەن سائەت 08:00 دە ئاپتوماتىك قوزغىلىدىغان ھەپتىلىك كىرىم ۋە رېغبەتلەندۈرۈش دوكلاتى">
+                  <i class="fas fa-calendar-check"></i>
+                  <span>📅 ھەپتىلىك خۇلاسە (يەكشەنبە 08:00)</span>
+                </button>
                 <button type="button" class="btn-add-primary" id="btnOpenManageReputationsModal" onclick="(window.openManageReputationsModal || function(){ var m=document.getElementById('manageReputationsModal'); if(m){ m.classList.add('active'); m.style.display='flex'; } })();" style="background: #059669; border-color: #059669; cursor: pointer;">
                   <i class="fas fa-certificate"></i>
                   <span>ئىناۋەت بەلگىلىرىنى باشقۇرۇش</span>
@@ -2441,6 +2445,174 @@
           <i class="fas fa-copy"></i> كۆچۈرۈۋېلىش
         </button>
         <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.65rem 1rem; font-weight: 700;">
+          تاقاش
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📅 ۋاكالەتچىلەر ھەپتىلىك سېتىش، كىرىم ۋە رېغبەتلەندۈرۈش دوكلاتى (Weekly Agent Summary & Encouragement Modal) -->
+  <div class="modal-backdrop" id="agentWeeklySummaryModal" style="z-index: 100020;">
+    <div class="modal-content" style="max-width: 980px; width: 96%; max-height: 90vh; display: flex; flex-direction: column; border-radius: 22px; padding: 1.6rem; background: #ffffff; box-shadow: 0 25px 60px rgba(0,0,0,0.35); overflow: hidden;">
+      <style>
+        #modalWeeklySummaryActiveTable th, #modalWeeklySummaryActiveTable td,
+        #modalWeeklyZeroSalesTable th, #modalWeeklyZeroSalesTable td {
+          padding: 0.65rem 0.75rem !important;
+          font-size: 0.82rem !important;
+          vertical-align: middle !important;
+        }
+        #modalWeeklySummaryActiveTable thead th,
+        #modalWeeklyZeroSalesTable thead th {
+          font-weight: 800 !important;
+          color: #1e293b !important;
+          background: #f1f5f9 !important;
+          position: sticky;
+          top: 0;
+          z-index: 2;
+        }
+      </style>
+
+      <!-- Modal Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.75rem; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #b45309); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 900; color: #0f172a;">ۋاكالەتچىلەر ھەپتىلىك سېتىش، كومىسسىيە ۋە رېغبەتلەندۈرۈش دوكلاتى</h4>
+            <span style="font-size: 0.8rem; color: #64748b;" id="weeklySummaryPeriodSubtitle">
+              ⏰ قەرەلى: ھەر ھەپتىنىڭ يەكشەنبە كۈنى ئەتىگەن سائەت 08:00 دە ئاپتوماتىك ئەۋەتىلىدۇ
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-drawer btn-modal-close" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Action & Schedule Status Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.6rem; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #92400e; font-weight: 700;">
+          <i class="fas fa-clock" style="color: #d97706; font-size: 1.05rem;"></i>
+          <span>ئاپتوماتىك قوزغىلىش ۋاقتى: <b style="color: #b45309;">ھەر يەكشەنبە ئەتىگەن 08:00</b></span>
+          <span style="font-size: 0.75rem; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; padding: 1px 8px; border-radius: 9999px;">سائەت مېخانىزمى ئاكتىپ</span>
+        </div>
+        <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+          <button type="button" id="btnTriggerWeeklyReportNow" style="background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: none; border-radius: 8px; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);">
+            <i class="fas fa-paper-plane"></i> <span>🚀 ھازىرلا ھاسىللاش ۋە يوللاش</span>
+          </button>
+          <button type="button" id="btnExportWeeklySummaryCsv" style="background: #2563eb; color: #ffffff; border: none; border-radius: 8px; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fas fa-file-excel"></i> <span>📥 Excel (CSV) چۈشۈرۈش</span>
+          </button>
+          <button type="button" id="btnExportWeeklySummaryPrint" style="background: #0284c7; color: #ffffff; border: none; border-radius: 8px; padding: 0.45rem 0.8rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fas fa-print"></i> <span>🖨️ بېسىش</span>
+          </button>
+          <button type="button" id="btnExportWeeklySummaryCopy" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.45rem 0.8rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fas fa-copy"></i> <span>📋 كۆچۈرۈش</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Body Content -->
+      <div style="flex: 1; overflow-y: auto; padding-right: 4px;">
+        <!-- KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+          <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 0.8rem 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: #1e40af; margin-bottom: 0.25rem;">پائال سېتىش قىلغان ۋاكالەتچىلەر</div>
+            <div class="number-latin" id="weeklyMetricActiveAgents" style="font-size: 1.5rem; font-weight: 900; color: #1d4ed8;">0 نەپەر</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">(كىرىم خۇلاسە دوكلاتىدا بار)</div>
+          </div>
+          <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 0.8rem 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: #166534; margin-bottom: 0.25rem;">ھەپتىلىك ئومۇمىي سېتىش سوممىسى</div>
+            <div class="number-latin" id="weeklyMetricTotalSales" style="font-size: 1.5rem; font-weight: 900; color: #15803d;">₺ 0</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">(ئۆتكەن 7 كۈنلۈك ساپ سېتىش)</div>
+          </div>
+          <div style="background: #fefce8; border: 1.5px solid #fef08a; border-radius: 12px; padding: 0.8rem 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: #854d0e; margin-bottom: 0.25rem;">بېرىشكە تېگىشلىك ئومۇمىي كومىسسىيە</div>
+            <div class="number-latin" id="weeklyMetricTotalCommission" style="font-size: 1.5rem; font-weight: 900; color: #ca8a04;">₺ 0</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">(ۋاكالەتچىلەرگە چىقىم قىلىنىدۇ)</div>
+          </div>
+          <div style="background: #fdf2f8; border: 1.5px solid #fbcfe8; border-radius: 12px; padding: 0.8rem 1rem;">
+            <div style="font-size: 0.78rem; font-weight: 800; color: #9d174d; margin-bottom: 0.25rem;">رېغبەتلەندۈرۈش ئەۋەتىلگەنلەر</div>
+            <div class="number-latin" id="weeklyMetricEncouragedAgents" style="font-size: 1.5rem; font-weight: 900; color: #db2777;">0 نەپەر</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">(نۆل سېتىش، ئارقا سۇپىدىن رېغبەتلەندۈرۈلدى)</div>
+          </div>
+        </div>
+
+        <!-- 1-بۆلەك: سېتىش قىلغان ۋاكالەتچىلەرنىڭ كىرىم خۇلاسىسى (ھۆججەت ۋە تېلېگرامغا يوللىنىدۇ) -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="background: #f8fafc; padding: 0.85rem 1.1rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h5 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-check-circle" style="color: #16a34a;"></i>
+                <span>پائال ساتقان ۋاكالەتچىلەرنىڭ چىقىم دوكلاتى (خۇلاسىگە كىرگۈزۈلگەنلەر)</span>
+              </h5>
+              <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                💡 تەلەپ بويىچە: بۇ ھەپتە مەھسۇلات ساتالمىغانلار مالىيە پۇل بېرىش دوكلاتىغا كىرگۈزۈلمىدى.
+              </div>
+            </div>
+            <span class="status-badge status-completed" id="weeklyActiveCountBadge">0 نەپەر</span>
+          </div>
+
+          <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+            <table class="data-table" id="modalWeeklySummaryActiveTable" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">#</th>
+                  <th>ۋاكالەتچى</th>
+                  <th>ساتقان مەھسۇلاتلىرى</th>
+                  <th>ئەڭ كۆپ ساتقىنى</th>
+                  <th style="text-align: left;">ھەپتىلىك سېتىش (₺)</th>
+                  <th style="text-align: center;">كومىسيون</th>
+                  <th style="text-align: left;">بېرىشكە تېگىشلىك پۇل (₺)</th>
+                </tr>
+              </thead>
+              <tbody id="weeklySummaryActiveTbody">
+                <tr><td colspan="7" style="text-align: center; padding: 1.5rem; color: #94a3b8;">يۈكلىنىۋاتىدۇ...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2-بۆلەك: نۆل سېتىش چىققان ۋاكالەتچىلەر ۋە ئەۋەتىلگەن رېغبەتلەندۈرۈش ئۇچۇرى (ئارقا سۇپىدىن يوللاندى) -->
+        <div style="background: #ffffff; border: 1.5px solid #fecaca; border-radius: 14px; overflow: hidden; margin-bottom: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="background: #fff5f5; padding: 0.85rem 1.1rem; border-bottom: 1px solid #fecaca; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h5 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-heart" style="color: #e11d48;"></i>
+                <span>ھېچقانداق مەھسۇلات ساتالمىغانلار ۋە ئەۋەتىلگەن رېغبەتلەندۈرۈش ئۇچۇرى</span>
+              </h5>
+              <div style="font-size: 0.76rem; color: #7f1d1d; margin-top: 2px;">
+                💡 تەلەپ بويىچە: بۇ ۋاكالەتچىلەر دوكلاتتىن چىقىرىۋېتىلگەن بولۇپ، ئارقا سۇپىدىن دەرھال ئىلھاملاندۇرۇش ئۇچۇرى تارقىتىلدى.
+              </div>
+            </div>
+            <span style="font-size: 0.75rem; background: #fee2e2; color: #b91c1c; font-weight: 800; padding: 2px 8px; border-radius: 9999px;" id="weeklyZeroCountBadge">0 نەپەر</span>
+          </div>
+
+          <div class="table-responsive" style="max-height: 240px; overflow-y: auto;">
+            <table class="data-table" id="modalWeeklyZeroSalesTable" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">#</th>
+                  <th>ۋاكالەتچى</th>
+                  <th>سېتىش ھالىتى</th>
+                  <th>ئارقا سۇپىدىن ئەۋەتىلگەن رېغبەتلەندۈرۈش ئۇچۇرى</th>
+                  <th style="text-align: center;">يوللىنىش ھالىتى</th>
+                  <th style="text-align: center;">مەشغۇلات</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyZeroSalesTbody">
+                <tr><td colspan="6" style="text-align: center; padding: 1.5rem; color: #94a3b8;">يۈكلىنىۋاتىدۇ...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid #e2e8f0; padding-top: 0.85rem; margin-top: 0.85rem; flex-shrink: 0;">
+        <div style="font-size: 0.8rem; color: #64748b;" id="weeklySummaryGeneratedFooter">
+          تەييارلانغان ۋاقىت: -
+        </div>
+        <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.55rem 1.4rem; font-weight: 700; border-radius: 8px;">
           تاقاش
         </button>
       </div>

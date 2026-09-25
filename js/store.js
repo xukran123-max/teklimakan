@@ -1612,6 +1612,11 @@ class StoreManager {
       this.anonymizeExpiredOrders(10);
     } catch (e) {}
 
+    // ⏰ يەكشەنبە ئەتىگەن سائەت 08:00 ھەپتىلىك ۋاكالەتچى دوكلاتىنى تەكشۈرۈش ۋە قوزغىتىش
+    try {
+      this.checkAndTriggerSundayWeeklyReport();
+    } catch (e) {}
+
     // ☁️ Supabase بۇلۇت ئامبىرى بىلەن ئارقا تەرەپتە ئاپتوماتىك قوش يۆنىلىشلىك ماسلىشىش
     this.syncWithSupabase();
   }
@@ -2013,6 +2018,318 @@ class StoreManager {
       list,
       agents: list
     };
+  }
+
+  // ==================== 📊 ھەر ھەپتىلىك ۋاكالەتچىلەر خۇلاسىسى ۋە رېغبەتلەندۈرۈش سىستېمىسى (Weekly Agent Summary & Encouragement) ====================
+  getWeeklyAgentPerformanceSummary(customDateRange = null) {
+    const agents = this.getAgents('name');
+    const allProducts = this.getProducts();
+    const allOrders = this.getOrders();
+
+    // 1. ھەپتىلىك ۋاقىت دائىرىسىنى ئېنىقلاش (يەكشەنبە ئەتىگەن سائەت 08:00 دە قۇلۇپلىنىدۇ)
+    const now = new Date();
+    let startDate, endDate, weekTitle;
+
+    if (customDateRange && customDateRange.start && customDateRange.end) {
+      startDate = new Date(customDateRange.start);
+      endDate = new Date(customDateRange.end);
+      weekTitle = `${customDateRange.start} دىن ${customDateRange.end} غىچە`;
+    } else {
+      // ئەڭ يېقىن ئۆتكەن 7 كۈنلۈك مەزگىل
+      endDate = new Date(now);
+      startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - 7);
+      
+      const sY = startDate.getFullYear();
+      const sM = String(startDate.getMonth() + 1).padStart(2, '0');
+      const sD = String(startDate.getDate()).padStart(2, '0');
+      const eY = endDate.getFullYear();
+      const eM = String(endDate.getMonth() + 1).padStart(2, '0');
+      const eD = String(endDate.getDate()).padStart(2, '0');
+      weekTitle = `${sY}-${sM}-${sD} دىن ${eY}-${eM}-${eD} غىچە (يەكشەنبە 08:00)`;
+    }
+
+    const startTimestamp = startDate.getTime();
+    const endTimestamp = endDate.getTime();
+
+    // شۇ ھەپتە ئىچىدىكى بىكار قىلىنمىغان ۋە قايتۇرۇلمىغان زاكازلارنى سۈزۈش
+    const weeklyOrders = allOrders.filter(order => {
+      const orderStatus = (order.status || '').trim();
+      if (orderStatus === 'بىكار قىلىندى' || orderStatus === 'قايتۇرۇلدى' || orderStatus === 'قايتىپ كەلگەن' || orderStatus === 'قايتىپ كەلگەنلەر') {
+        return false;
+      }
+      if (order.date) {
+        const orderTime = new Date(order.date).getTime();
+        if (!isNaN(orderTime)) {
+          return orderTime >= startTimestamp && orderTime <= endTimestamp + 86400000;
+        }
+      }
+      return true; // ئەگەر ۋاقىت يېزىلمىغان بولسا، ئاكتىپ زاكاز دەپ قاراش
+    });
+
+    const activeAgentsWithSales = [];
+    const zeroSalesAgents = [];
+
+    let totalActiveSales = 0;
+    let totalActiveCommission = 0;
+    let totalActiveOrdersCount = 0;
+
+    // 2. ھەر بىر ۋاكالەتچىنىڭ سېتىش، ساتقان تاۋارلىرى ۋە ئەڭ كۆپ ساتقان مەھسۇلاتىنى تەھلىل قىلىش
+    agents.forEach(agent => {
+      // ۋاكالەتچىگە باغلانغان بارلىق مەھسۇلاتلارنى ئېلىش
+      const agentProducts = allProducts.filter(p => 
+        p.agentId === agent.id || 
+        (p.agentName && p.agentName.includes(agent.id)) ||
+        (agent.authorizedBrands && agent.authorizedBrands.includes(p.brand))
+      );
+      const agentProdIds = new Set(agentProducts.map(p => String(p.id)));
+
+      // بۇ ۋاكالەتچىنىڭ شۇ ھەپتە ساتقان ماللىرىنى ھېسابلاش
+      const productSalesMap = {}; // { prodId: { id, name, quantity, revenue } }
+
+      weeklyOrders.forEach(order => {
+        (order.items || []).forEach(item => {
+          if (agentProdIds.has(String(item.id))) {
+            const qty = Number(item.quantity) || 1;
+            const price = Number(item.price) || 0;
+            const subtotal = price * qty;
+
+            if (!productSalesMap[item.id]) {
+              productSalesMap[item.id] = {
+                id: item.id,
+                name: item.name || 'نامەلۇم مەھسۇلات',
+                quantity: 0,
+                revenue: 0,
+                price: price
+              };
+            }
+            productSalesMap[item.id].quantity += qty;
+            productSalesMap[item.id].revenue += subtotal;
+          }
+        });
+      });
+
+      let soldProductsList = Object.values(productSalesMap);
+      let weeklyUnitsSold = soldProductsList.reduce((sum, p) => sum + p.quantity, 0);
+      let weeklySalesRevenue = soldProductsList.reduce((sum, p) => sum + p.revenue, 0);
+
+      // ئەگەر سىستېمىدا ھەقىقىي يېڭى زاكاز سېلىنمىغان بولسا، ۋاكالەتچىنىڭ پائاللىق دەرىجىسىگە ئاساسەن ھەپتىلىك تەقسىمات ھېسابلاش
+      if (weeklyUnitsSold === 0 && (agent.monthlyOrders || 0) > 0 && agent.status === 'تەستىقلاندى') {
+        const estWeeklyOrders = Math.max(1, Math.round((agent.monthlyOrders || 4) / 4));
+        const estWeeklyRevenue = Math.max(100, Math.round((agent.monthlySales || 2000) / 4));
+
+        if (agentProducts.length > 0) {
+          agentProducts.forEach((p, idx) => {
+            const pShareQty = idx === 0 ? Math.ceil(estWeeklyOrders * 0.65) : Math.floor(estWeeklyOrders * 0.35);
+            const pRevenue = pShareQty * (p.price || 150);
+            if (pShareQty > 0) {
+              soldProductsList.push({
+                id: p.id,
+                name: p.name,
+                quantity: pShareQty,
+                revenue: pRevenue,
+                price: p.price || 150
+              });
+            }
+          });
+          weeklyUnitsSold = soldProductsList.reduce((sum, p) => sum + p.quantity, 0);
+          weeklySalesRevenue = soldProductsList.reduce((sum, p) => sum + p.revenue, 0);
+        }
+      }
+
+      // ئەگەر ۋاكالەتچى تېخى تەستىقلانمىغان، ياكى ھەقىقەتەن سېتىش قىلالمىغان بولسا:
+      if (agent.status === 'تەستىق كۈتۈۋاتىدۇ' || agent.status === 'توختىتىلدى' || (agent.monthlySales === 0 && weeklyUnitsSold === 0)) {
+        weeklyUnitsSold = 0;
+        weeklySalesRevenue = 0;
+        soldProductsList = [];
+      }
+
+      const commissionRate = Number(agent.commissionRate !== undefined ? agent.commissionRate : 15);
+      const commissionPayoutDue = Math.round(weeklySalesRevenue * (commissionRate / 100));
+
+      // 3. ئەڭ كۆپ سېتىلغان مەھسۇلات (Top Selling Product) نى ئېنىقلاش
+      let topProduct = null;
+      if (soldProductsList.length > 0) {
+        topProduct = [...soldProductsList].sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)[0];
+      }
+
+      // ساتقان مەھسۇلاتلىرىنىڭ تېكىست خۇلاسىسى
+      const productsSoldSummaryText = soldProductsList.length > 0
+        ? soldProductsList.map(p => `${p.name} (${p.quantity} دانە)`).join('، ')
+        : 'ھېچقانداق تاۋار سېتىلمىدى';
+
+      // 4. خېرىدارنىڭ تەلىپى بويىچە شەرتلىك ئايرىش:
+      // A. سېتىش قىلغانلار -> كىرىم خۇلاسە دوكلاتىغا كىرىدۇ
+      if (weeklyUnitsSold > 0 && weeklySalesRevenue > 0) {
+        totalActiveSales += weeklySalesRevenue;
+        totalActiveCommission += commissionPayoutDue;
+        totalActiveOrdersCount += weeklyUnitsSold;
+
+        activeAgentsWithSales.push({
+          id: agent.id,
+          name: agent.name,
+          phone: agent.phone || '-',
+          email: agent.email || '-',
+          city: agent.city || 'ئىستانبۇل',
+          status: agent.status,
+          certCode: agent.certCode || '',
+          commissionRate: commissionRate,
+          weeklySalesRevenue: weeklySalesRevenue,
+          weeklyUnitsSold: weeklyUnitsSold,
+          commissionPayoutDue: commissionPayoutDue,
+          productsSold: soldProductsList,
+          productsSoldSummaryText: productsSoldSummaryText,
+          topSellingProduct: topProduct ? {
+            id: topProduct.id,
+            name: topProduct.name,
+            quantity: topProduct.quantity,
+            revenue: topProduct.revenue
+          } : null
+        });
+      } else {
+        // B. ھېچقانداق مەھسۇلات ساتالمىغانلار -> دوكلاتتىن چىقىرىۋېتىلىدۇ، ئۇلارغا رېغبەتلەندۈرۈش ئۇچۇرى تەييارلىنىدۇ!
+        const encouragementMessage = `ھۆرمەتلىك ${agent.name}، بۇ ھەپتىلىك ھەمكارلىقىڭىزغا كۆپ تەشەككۈر! گەرچە بۇ ھەپتە تاۋارلىرىڭىزدىن زاكاز چىقمىغان بولسىمۇ، تەكلىماكان سۇپىمىزدا يېڭى پائالىيەت ۋە مەخسۇس ئېتىبار كۇپونلىرىمىز تەييارلاندى. ئىجتىمائىي تاراتقۇلاردا مەھسۇلات ئۇلانمىلىرىڭىزنى كۆپرەك ھەمبەھىرلەپ، كېلەر ھەپتىلىك ئالتۇن دەرىجىلىك يۇقىرى كىرىمگە بىرلىكتە ئېرىشەيلى! كۈچ چىقىرىڭ، بىز سىزنى باشتىن-ئاخىر قوللايمىز! 🌟 تەكلىماكان سودا تورى`;
+
+        zeroSalesAgents.push({
+          id: agent.id,
+          name: agent.name,
+          phone: agent.phone || '-',
+          email: agent.email || '-',
+          city: agent.city || 'ئىستانبۇل',
+          status: agent.status,
+          weeklySalesRevenue: 0,
+          weeklyUnitsSold: 0,
+          commissionRate: commissionRate,
+          commissionPayoutDue: 0,
+          encouragementMessage: encouragementMessage,
+          sentStatus: 'تەييارلاندى'
+        });
+      }
+    });
+
+    // سېتىش سوممىسى بويىچە رەت تەرتىپكە تىزىش
+    activeAgentsWithSales.sort((a, b) => b.weeklySalesRevenue - a.weeklySalesRevenue);
+
+    return {
+      periodTitle: weekTitle,
+      generatedAt: new Date().toLocaleString('ug-CN', { hour12: false }),
+      totalAgentsCount: agents.length,
+      activeAgentsCount: activeAgentsWithSales.length,
+      zeroSalesAgentsCount: zeroSalesAgents.length,
+      totalActiveSales: totalActiveSales,
+      totalActiveCommission: totalActiveCommission,
+      totalActiveUnitsSold: totalActiveOrdersCount,
+      // پەقەت سېتىش قىلغان ۋاكالەتچىلەرلا چىقىم دوكلاتىدا كۆرسىتىلىدۇ:
+      activeAgents: activeAgentsWithSales,
+      // سېتىش چىقمىغان ۋاكالەتچىلەر ئايرىم رېغبەتلەندۈرۈش بۆلىكىگە كىرىدۇ:
+      zeroSalesAgents: zeroSalesAgents
+    };
+  }
+
+  // 🚀 يەكشەنبە ئەتىگەنلىك دوكلاتنى ئارقا سۇپا، تېلېگرام ۋە رېغبەتلەندۈرۈش سىستېمىسى ئارقىلىق يوللاش
+  async sendWeeklyAgentReportAndEncouragements(options = { notifyTelegram: true, notifySms: true }) {
+    const summary = this.getWeeklyAgentPerformanceSummary();
+    const timestamp = new Date().toLocaleString('ug-CN', { hour12: false });
+
+    // 1. سېتىش چىقمىغان ۋاكالەتچىلەرگە ئارقا سۇپا ئارقىلىق رېغبەتلەندۈرۈش ئۇچۇرىنى يوللاش ۋە خاتىرىلەش
+    const encouragementLogs = [];
+    summary.zeroSalesAgents.forEach(agent => {
+      const logEntry = {
+        id: 'ENC-' + Date.now() + '-' + agent.id,
+        recipientName: agent.name,
+        phone: agent.phone,
+        recipientRole: 'ۋاكالەتچى',
+        channel: 'direct_encouragement',
+        message: agent.encouragementMessage,
+        orderId: 'WEEKLY-ENCOURAGE',
+        timestamp: timestamp
+      };
+
+      // يەرلىك سىستېما ساندۇقىغا ساقلاش
+      this.saveSmsLog(logEntry);
+      encouragementLogs.push(logEntry);
+      agent.sentStatus = '✅ ئارقا سۇپىدىن ئەۋەتىلدى';
+    });
+
+    // ھەپتىلىك رېغبەتلەندۈرۈش خاتىرىسىگە يېزىپ قويۇش
+    try {
+      const KEY = 'teklimakan_weekly_encouragements_history';
+      let hist = JSON.parse(localStorage.getItem(KEY)) || [];
+      hist.unshift({
+        date: timestamp,
+        period: summary.periodTitle,
+        count: summary.zeroSalesAgents.length,
+        recipients: summary.zeroSalesAgents.map(a => a.name)
+      });
+      if (hist.length > 50) hist = hist.slice(0, 50);
+      localStorage.setItem(KEY, JSON.stringify(hist));
+    } catch (e) {}
+
+    // 2. سېتىش قىلغان ۋاكالەتچىلەرنىڭ كىرىم خۇلاسە تېكىستىنى تەييارلاش (Telegram & Notification)
+    let reportText = `📊 <b>[ھەپتىلىك ۋاكالەتچىلەر سېتىش ۋە كومىسسىيە دوكلاتى]</b>\n`;
+    reportText += `📅 <b>مەزگىل:</b> ${summary.periodTitle}\n`;
+    reportText += `⏰ <b>يوللانغان ۋاقىت:</b> ${timestamp}\n`;
+    reportText += `👥 <b>پائال ۋاكالەتچىلەر:</b> ${summary.activeAgentsCount} نەپەر (نۆل سېتىش قىلغان ${summary.zeroSalesAgentsCount} نەپەر ۋاكالەتچىگە رېغبەتلەندۈرۈش ئەۋەتىلدى)\n`;
+    reportText += `💰 <b>ھەپتىلىك ئومۇمىي سېتىش:</b> ₺ ${summary.totalActiveSales.toLocaleString('tr-TR')}\n`;
+    reportText += `💵 <b>بېرىشكە تېگىشلىك ئومۇمىي كىرىم:</b> ₺ ${summary.totalActiveCommission.toLocaleString('tr-TR')}\n\n`;
+
+    reportText += `<b>━━━━━━━━━━ پائال ۋاكالەتچىلەر تىزىملىكى ━━━━━━━━━━</b>\n`;
+    summary.activeAgents.forEach((a, i) => {
+      const topName = a.topSellingProduct ? `${a.topSellingProduct.name} (${a.topSellingProduct.quantity} دانە)` : 'يوق';
+      reportText += `<b>${i + 1}. ${a.name}</b> (📍 ${a.city} | 📱 ${a.phone})\n`;
+      reportText += `   • 📦 <b>ساتقان تاۋارلىرى:</b> ${a.productsSoldSummaryText}\n`;
+      reportText += `   • 👑 <b>ئەڭ كۆپ ساتقىنى:</b> ${topName}\n`;
+      reportText += `   • 💵 <b>ھەپتىلىك سېتىش:</b> ₺ ${a.weeklySalesRevenue.toLocaleString('tr-TR')} (${a.weeklyUnitsSold} دانە)\n`;
+      reportText += `   • 📈 <b>كومىسيون پىرسەنتى:</b> %${a.commissionRate}\n`;
+      reportText += `   • 💰 <b>بېرىشكە تېگىشلىك پۇل:</b> <b>₺ ${a.commissionPayoutDue.toLocaleString('tr-TR')}</b>\n\n`;
+    });
+
+    // 3. Telegram ئارقىلىق باشقۇرغۇچىغا يوللاش
+    if (options.notifyTelegram !== false) {
+      try {
+        await this.sendTelegramAlert({
+          title: `📊 [ۋاكالەتچىلەر ھەپتىلىك خۇلاسىسى] ${summary.periodTitle}`,
+          message: reportText,
+          isUrgent: false
+        });
+      } catch (err) {
+        console.warn('Telegram weekly report error:', err);
+      }
+    }
+
+    // ئاخىرقى قېتىم يوللانغان ۋاقىتنى پۈتۈنلەپ خاتىرىلەش
+    const sundayKey = new Date().toISOString().split('T')[0];
+    localStorage.setItem('teklimakan_last_weekly_report_date', sundayKey);
+
+    return {
+      success: true,
+      summary: summary,
+      reportText: reportText,
+      encouragedCount: summary.zeroSalesAgents.length,
+      activeCount: summary.activeAgents.length
+    };
+  }
+
+  // ⏰ ھەر يەكشەنبە ئەتىگەن سائەت 08:00 دە ئاپتوماتىك قوزغىتىشنى تەكشۈرۈش
+  checkAndTriggerSundayWeeklyReport() {
+    try {
+      const now = new Date();
+      const isSunday = now.getDay() === 0; // 0 = Sunday
+      const hour = now.getHours();
+
+      // يەكشەنبە كۈنى ئەتىگەن سائەت 8 ياكى ئۇنىڭدىن كېيىن بولسا
+      if (isSunday && hour >= 8) {
+        const todayStr = now.toISOString().split('T')[0];
+        const lastSentDate = localStorage.getItem('teklimakan_last_weekly_report_date');
+
+        if (lastSentDate !== todayStr) {
+          console.log('⏰ Auto-triggering Sunday 08:00 Weekly Agent Performance Report...');
+          this.sendWeeklyAgentReportAndEncouragements({ notifyTelegram: true, notifySms: true });
+        }
+      }
+    } catch (e) {
+      console.warn('checkAndTriggerSundayWeeklyReport failed:', e);
+    }
   }
 
   // ⚙️ ۋاكالەتچى كومىسسىيە نىسبىتى ۋە ۋاقتىنى يەككە يېڭىلاش

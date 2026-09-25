@@ -2486,11 +2486,281 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ==================== 📅 ھەر يەكشەنبە ئەتىگەن سائەت 08:00 ھەپتىلىك ۋاكالەتچى خۇلاسىسى ۋە رېغبەتلەندۈرۈش ====================
+  function openAgentWeeklySummaryModal() {
+    const modal = document.getElementById('agentWeeklySummaryModal');
+    if (!modal) return;
+    renderAgentWeeklySummaryTable();
+    modal.classList.add('active');
+  }
+
+  function renderAgentWeeklySummaryTable() {
+    if (!window.appStore || typeof window.appStore.getWeeklyAgentPerformanceSummary !== 'function') return;
+
+    const summary = window.appStore.getWeeklyAgentPerformanceSummary();
+
+    // 1. باشنامە ۋە سۈرئەت تاختىسىنى يېڭىلاش
+    const subtitleEl = document.getElementById('weeklySummaryPeriodSubtitle');
+    if (subtitleEl) {
+      subtitleEl.innerHTML = `⏰ <b>دوكلات مەزگىلى:</b> ${summary.periodTitle} | <b>ھاسىللانغان ۋاقىت:</b> ${summary.generatedAt}`;
+    }
+
+    const footerEl = document.getElementById('weeklySummaryGeneratedFooter');
+    if (footerEl) {
+      footerEl.textContent = `تەييارلانغان ۋاقىت: ${summary.generatedAt} (تەكلىماكان سىستېما ساندۇقى)`;
+    }
+
+    // 2. كۆرسەتكۈچ كارتىلىرى
+    const elActive = document.getElementById('weeklyMetricActiveAgents');
+    const elSales = document.getElementById('weeklyMetricTotalSales');
+    const elComm = document.getElementById('weeklyMetricTotalCommission');
+    const elZero = document.getElementById('weeklyMetricEncouragedAgents');
+    const badgeActive = document.getElementById('weeklyActiveCountBadge');
+    const badgeZero = document.getElementById('weeklyZeroCountBadge');
+
+    if (elActive) elActive.textContent = `${summary.activeAgentsCount} نەپەر`;
+    if (elSales) elSales.textContent = `₺ ${summary.totalActiveSales.toLocaleString('tr-TR')}`;
+    if (elComm) elComm.textContent = `₺ ${summary.totalActiveCommission.toLocaleString('tr-TR')}`;
+    if (elZero) elZero.textContent = `${summary.zeroSalesAgentsCount} نەپەر`;
+    if (badgeActive) badgeActive.textContent = `${summary.activeAgentsCount} نەپەر پائال`;
+    if (badgeZero) badgeZero.textContent = `${summary.zeroSalesAgentsCount} نەپەر رېغبەتلەندۈرۈلدى`;
+
+    // 3. 1-جەدۋەل: پائال سېتىش قىلغان ۋاكالەتچىلەرنىڭ كىرىم خۇلاسىسى (ھۆججەت ۋە تېلېگرامغا يوللىنىدۇ)
+    const activeTbody = document.getElementById('weeklySummaryActiveTbody');
+    if (activeTbody) {
+      if (summary.activeAgents.length === 0) {
+        activeTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">بۇ ھەپتە تېخى سېتىش قىلغان ۋاكالەتچى يوق</td></tr>`;
+      } else {
+        activeTbody.innerHTML = summary.activeAgents.map((agent, idx) => {
+          const firstChar = agent.name ? agent.name.charAt(0) : 'ۋ';
+          const topProductDisplay = agent.topSellingProduct 
+            ? `<div style="font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 0.35rem;">
+                 <span>👑</span> <span>${escapeHtml(agent.topSellingProduct.name)}</span>
+                 <span style="font-size: 0.72rem; background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 9999px;">${agent.topSellingProduct.quantity} دانە</span>
+               </div>`
+            : '<span style="color: #94a3b8;">-</span>';
+
+          return `
+            <tr>
+              <td style="text-align: center; font-weight: 800; color: #64748b;">${idx + 1}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.95rem; flex-shrink: 0;">
+                    ${firstChar}
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem;">${escapeHtml(agent.name)}</div>
+                    <div style="font-size: 0.73rem; color: #64748b;">📍 ${escapeHtml(agent.city)} | 📱 <span class="number-latin">${escapeHtml(agent.phone)}</span></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div style="font-size: 0.8rem; color: #334155; line-height: 1.5; max-width: 260px;" title="${escapeHtml(agent.productsSoldSummaryText)}">
+                  ${escapeHtml(agent.productsSoldSummaryText)}
+                </div>
+              </td>
+              <td>
+                ${topProductDisplay}
+              </td>
+              <td style="text-align: left;">
+                <span class="number-latin" style="font-weight: 800; color: #0f172a; font-size: 0.9rem;">₺ ${agent.weeklySalesRevenue.toLocaleString('tr-TR')}</span>
+                <div style="font-size: 0.7rem; color: #64748b;">(${agent.weeklyUnitsSold} دانە تاۋار)</div>
+              </td>
+              <td style="text-align: center;">
+                <span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 800; font-size: 0.78rem; padding: 2px 8px; border-radius: 9999px;">
+                  %${agent.commissionRate}
+                </span>
+              </td>
+              <td style="text-align: left;">
+                <span class="number-latin" style="font-weight: 900; color: #16a34a; font-size: 0.98rem;">₺ ${agent.commissionPayoutDue.toLocaleString('tr-TR')}</span>
+                <div style="font-size: 0.68rem; color: #15803d; font-weight: 700;">بېرىشكە تەييار</div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 4. 2-جەدۋەل: ھېچقانداق تاۋار ساتالمىغانلار ۋە ئەۋەتىلگەن رېغبەتلەندۈرۈش ئۇچۇرى (دوكلاتتىن چىقىرىۋېتىلگەنلەر)
+    const zeroTbody = document.getElementById('weeklyZeroSalesTbody');
+    if (zeroTbody) {
+      if (summary.zeroSalesAgents.length === 0) {
+        zeroTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 1.5rem; color: #16a34a; font-weight: 700;">بارلىق ۋاكالەتچىلەر ئۆتكەن ھەپتە سېتىش قىلدى، نۆل سېتىش ۋاكالەتچىسى يوق! 🎉</td></tr>`;
+      } else {
+        zeroTbody.innerHTML = summary.zeroSalesAgents.map((agent, idx) => {
+          const firstChar = agent.name ? agent.name.charAt(0) : 'ۋ';
+          return `
+            <tr>
+              <td style="text-align: center; font-weight: 800; color: #94a3b8;">${idx + 1}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.55rem;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0;">
+                    ${firstChar}
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.85rem;">${escapeHtml(agent.name)}</div>
+                    <div style="font-size: 0.72rem; color: #64748b;">📍 ${escapeHtml(agent.city)} | 📱 <span class="number-latin">${escapeHtml(agent.phone)}</span></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span style="background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                  0 زاكاز / ₺ 0
+                </span>
+              </td>
+              <td>
+                <div style="background: #fffbeb; border: 1px dashed #fcd34d; border-radius: 8px; padding: 0.45rem 0.65rem; font-size: 0.76rem; color: #78350f; line-height: 1.5; max-width: 380px;">
+                  <i class="fas fa-quote-right" style="color: #f59e0b; margin-left: 4px;"></i>
+                  ${escapeHtml(agent.encouragementMessage)}
+                </div>
+              </td>
+              <td style="text-align: center;">
+                <span class="status-badge status-completed" style="font-size: 0.72rem; padding: 2px 7px;">
+                  <i class="fas fa-check-circle"></i> ئارقا سۇپىدىن يوللاندى
+                </span>
+              </td>
+              <td style="text-align: center;">
+                <div style="display: flex; gap: 0.35rem; justify-content: center;">
+                  <button type="button" class="btn-sms-agent-slider" onclick="if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى',initialText:'${agent.encouragementMessage.replace(/'/g, "\\'")}'});" style="background: #0284c7; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer;" title="سۆھبەتنى ئېچىش">
+                    <i class="fas fa-sms"></i> سۆھبەت
+                  </button>
+                  <a href="https://wa.me/${agent.phone ? agent.phone.replace(/[^0-9]/g, '') : ''}?text=${encodeURIComponent(agent.encouragementMessage)}" target="_blank" style="background: #16a34a; color: white; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="WhatsApp تا ئەۋەتىش">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  // 📥 فورمات 1: ھەپتىلىك پائال سېتىش خۇلاسىسىنى Excel (CSV) ھۆججىتى قىلىپ چۈشۈرۈش (UTF-8 BOM بىلەن)
+  function exportWeeklySummaryCsv() {
+    if (!window.appStore || typeof window.appStore.getWeeklyAgentPerformanceSummary !== 'function') return;
+    const summary = window.appStore.getWeeklyAgentPerformanceSummary();
+    const activeAgents = summary.activeAgents || [];
+
+    const headers = [
+      'دوكلات مەزگىلى',
+      'ۋاكالەتچى ID',
+      'ئىسىم',
+      'شەھەر',
+      'تېلېفون',
+      'ئېلخەت',
+      'ساتقان مەھسۇلاتلىرى',
+      'ئەڭ كۆپ ساتقان مەھسۇلات',
+      'ھەپتىلىك سېتىش (TL)',
+      'سېتىلغان تاۋار سانى',
+      'كومىسيون نىسبىتى (%)',
+      'بېرىشكە تېگىشلىك پۇل (TL)',
+      'ھالىتى'
+    ];
+
+    // پەقەت سېتىش قىلغان ۋاكالەتچىلەرلا چىقىم ھۆججىتىگە چۈشۈرۈلىدۇ (نۆل سېتىشلار چىقىرىۋېتىلگەن)!
+    const rows = activeAgents.map(a => {
+      const topName = a.topSellingProduct ? `${a.topSellingProduct.name} (${a.topSellingProduct.quantity} دانە)` : 'يوق';
+      return [
+        `"${(summary.periodTitle || '').replace(/"/g, '""')}"`,
+        `"${a.id}"`,
+        `"${a.name.replace(/"/g, '""')}"`,
+        `"${(a.city || '').replace(/"/g, '""')}"`,
+        `"${(a.phone || '').replace(/"/g, '""')}"`,
+        `"${(a.email || '').replace(/"/g, '""')}"`,
+        `"${(a.productsSoldSummaryText || '').replace(/"/g, '""')}"`,
+        `"${topName.replace(/"/g, '""')}"`,
+        a.weeklySalesRevenue,
+        a.weeklyUnitsSold,
+        a.commissionRate,
+        a.commissionPayoutDue,
+        `"بېرىشكە تەييار"`
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const safeTitle = (summary.periodTitle || 'weekly_summary').replace(/[\\/:*?"<>| ]/g, '_');
+    link.setAttribute('download', `agent_weekly_summary_${safeTitle}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showAdminToast('✅ ھەپتىلىك پائال سېتىش خۇلاسىسى CSV (Excel) ھۆججىتى چۈشۈرۈلدى!', 'success');
+  }
+
+  // 🖨️ فورمات 2: PDF / بېسىپ چىقىرىش
+  function exportWeeklySummaryPrint() {
+    window.print();
+  }
+
+  // 📋 فورمات 3: تېكىست نۇسخىسىنى كۆچۈرۈۋېلىش
+  function exportWeeklySummaryCopy() {
+    if (!window.appStore || typeof window.appStore.getWeeklyAgentPerformanceSummary !== 'function') return;
+    const summary = window.appStore.getWeeklyAgentPerformanceSummary();
+
+    let text = `============================================================\n`;
+    text += `تەكلىماكان سۈپەت - ۋاكالەتچىلەر ھەپتىلىك سېتىش، كىرىم ۋە رېغبەتلەندۈرۈش دوكلاتى\n`;
+    text += `دوكلات مەزگىلى: ${summary.periodTitle}\n`;
+    text += `تەييارلانغان ۋاقىت: ${summary.generatedAt}\n`;
+    text += `پائال ۋاكالەتچىلەر: ${summary.activeAgentsCount} نەپەر | ئومۇمىي ھەپتىلىك سېتىش: ₺ ${summary.totalActiveSales.toLocaleString('tr-TR')} | بېرىلىدىغان كىرىم: ₺ ${summary.totalActiveCommission.toLocaleString('tr-TR')}\n`;
+    text += `(نۆل سېتىش قىلغان ${summary.zeroSalesAgentsCount} نەپەر ۋاكالەتچىگە ئارقا سۇپىدىن رېغبەتلەندۈرۈش ئۇچۇرى ئەۋەتىلدى)\n`;
+    text += `============================================================\n\n`;
+
+    text += `[ پائال ۋاكالەتچىلەر چىقىم خۇلاسىسى ]\n`;
+    summary.activeAgents.forEach((a, i) => {
+      const topName = a.topSellingProduct ? `${a.topSellingProduct.name} (${a.topSellingProduct.quantity} دانە)` : 'يوق';
+      text += `${i + 1}. ${a.name} (${a.city}) [${a.phone}]\n`;
+      text += `   • ساتقان مەھسۇلاتلىرى: ${a.productsSoldSummaryText}\n`;
+      text += `   • ئەڭ كۆپ ساتقان مەھسۇلات: ${topName}\n`;
+      text += `   • ھەپتىلىك سېتىش: ₺ ${a.weeklySalesRevenue.toLocaleString('tr-TR')} (${a.weeklyUnitsSold} دانە)\n`;
+      text += `   • كومىسيون نىسبىتى: %${a.commissionRate} | بېرىشكە تېگىشلىك پۇل: ₺ ${a.commissionPayoutDue.toLocaleString('tr-TR')}\n\n`;
+    });
+
+    navigator.clipboard.writeText(text).then(() => {
+      showAdminToast('ھەپتىلىك خۇلاسە تېكىست نۇسخىسى كۆچۈرۈۋېلىندى!', 'success');
+    }).catch(() => {
+      showAdminToast('تېكىستنى كۆچۈرۈشتە خاتالىق كۆرۈلدى', 'error');
+    });
+  }
+
+  // 🚀 ھازىرلا بېسىپ يوللاش (Manual Trigger & Dispatch)
+  async function triggerWeeklyReportNow() {
+    const btn = document.getElementById('btnTriggerWeeklyReportNow');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>يوللىنىۋاتىدۇ...</span>';
+    }
+
+    try {
+      const res = await window.appStore.sendWeeklyAgentReportAndEncouragements({ notifyTelegram: true, notifySms: true });
+      renderAgentWeeklySummaryTable();
+      showAdminToast(`✅ ھەپتىلىك دوكلات تەييارلاندى! ${res.activeCount} نەپەر پائال سېتىش خۇلاسىسى Telegram غا يوللاندى، ${res.encouragedCount} نەپەر نۆل سېتىش ۋاكالەتچىسىگە رېغبەتلەندۈرۈش ئەۋەتىلدى.`, 'success');
+    } catch (err) {
+      console.error('Trigger weekly report error:', err);
+      showAdminToast('ھەپتىلىك دوكلات يوللاشتا خاتالىق كۆرۈلدى.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>🚀 ھازىرلا ھاسىللاش ۋە يوللاش</span>';
+      }
+    }
+  }
+
   window.switchTab = switchTab;
   window.initAdmin = initAdmin;
   window.openAgentCertificateModal = openAgentCertificateModal;
   window.openAgentMonthlySummaryModal = openAgentMonthlySummaryModal;
   window.renderAgentMonthlySummaryTable = renderAgentMonthlySummaryTable;
+  window.openAgentWeeklySummaryModal = openAgentWeeklySummaryModal;
+  window.renderAgentWeeklySummaryTable = renderAgentWeeklySummaryTable;
+  window.exportWeeklySummaryCsv = exportWeeklySummaryCsv;
+  window.exportWeeklySummaryPrint = exportWeeklySummaryPrint;
+  window.exportWeeklySummaryCopy = exportWeeklySummaryCopy;
+  window.triggerWeeklyReportNow = triggerWeeklyReportNow;
   window.openEditSummaryPeriodModal = openEditSummaryPeriodModal;
   window.openEditCommissionModal = openEditCommissionModal;
   window.openAgentContractArchiveModal = openAgentContractArchiveModal;
@@ -5964,6 +6234,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExportCopy) {
       btnExportCopy.addEventListener('click', () => {
         exportMonthlySummaryCopy();
+      });
+    }
+
+    // 📅 ھەپتىلىك خۇلاسە ۋە رېغبەتلەندۈرۈش كۇنۇپكىلىرى (Weekly Report & Encouragement Listeners)
+    const btnOpenWeekly = document.getElementById('btnOpenWeeklySummaryExportModal');
+    if (btnOpenWeekly) {
+      btnOpenWeekly.addEventListener('click', () => {
+        openAgentWeeklySummaryModal();
+      });
+    }
+
+    const btnTriggerWeeklyNow = document.getElementById('btnTriggerWeeklyReportNow');
+    if (btnTriggerWeeklyNow) {
+      btnTriggerWeeklyNow.addEventListener('click', () => {
+        triggerWeeklyReportNow();
+      });
+    }
+
+    const btnExportWeeklyCsv = document.getElementById('btnExportWeeklySummaryCsv');
+    if (btnExportWeeklyCsv) {
+      btnExportWeeklyCsv.addEventListener('click', () => {
+        exportWeeklySummaryCsv();
+      });
+    }
+
+    const btnExportWeeklyPrint = document.getElementById('btnExportWeeklySummaryPrint');
+    if (btnExportWeeklyPrint) {
+      btnExportWeeklyPrint.addEventListener('click', () => {
+        exportWeeklySummaryPrint();
+      });
+    }
+
+    const btnExportWeeklyCopy = document.getElementById('btnExportWeeklySummaryCopy');
+    if (btnExportWeeklyCopy) {
+      btnExportWeeklyCopy.addEventListener('click', () => {
+        exportWeeklySummaryCopy();
       });
     }
 

@@ -1607,6 +1607,11 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.CURRENCY, 'TRY');
     }
 
+    // 🛡️ 10 كۈندىن ئاشقان تاماملانغان ياكى بىكار قىلىنغان زاكازلارنىڭ شەخسىي ئۇچۇرىنى يۇيۇش (Privacy Wipe)
+    try {
+      this.anonymizeExpiredOrders(10);
+    } catch (e) {}
+
     // ☁️ Supabase بۇلۇت ئامبىرى بىلەن ئارقا تەرەپتە ئاپتوماتىك قوش يۆنىلىشلىك ماسلىشىش
     this.syncWithSupabase();
   }
@@ -4568,10 +4573,17 @@ class StoreManager {
     const order = orders.find(o => String(o.id) === String(orderId));
     if (order) {
       order.status = newStatus;
+      if (newStatus === 'تاماملاندى' || newStatus === 'بىكار قىلىندى') {
+        if (!order.completedAt) {
+          order.completedAt = new Date().toISOString();
+        }
+      }
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
       this.notifyDataChange('orders');
       if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
-        window.TeklimakanSupabase.updateOrderStatus(order.id, newStatus);
+        window.TeklimakanSupabase.updateOrderStatus(order.id, newStatus, {
+          completedAt: order.completedAt
+        });
       }
       return true;
     }
@@ -4611,6 +4623,73 @@ class StoreManager {
       window.TeklimakanSupabase.deleteOrder(orderId);
     }
     return true;
+  }
+
+  // 🛡️ 10 كۈندىن ئاشقان تاماملانغان ياكى بىكار قىلىنغان زاكازلارنىڭ شەخسىي ئۇچۇرىنى يۇيۇش (Privacy Wipe)
+  // كىرىم سوممىسى، مال سانى ۋە زاكاز ھېساباتى 100% ساقلىنىدۇ، خېرىدارنىڭ ئىسمى، تېلېفونى، ئادرېسى ئۆچۈرۈلىدۇ
+  anonymizeExpiredOrders(daysThreshold = 10) {
+    const orders = this.getOrders();
+    const now = Date.now();
+    const maxAgeMs = daysThreshold * 24 * 60 * 60 * 1000;
+    let modified = false;
+    let count = 0;
+
+    orders.forEach(order => {
+      if (order.status !== 'تاماملاندى' && order.status !== 'بىكار قىلىندى') return;
+      const cust = (typeof order.customer === 'string') 
+        ? JSON.parse(order.customer || '{}') 
+        : (order.customer || {});
+      if (cust.isAnonymized || order.isAnonymized) return;
+
+      // پۈتكەن ياكى زاكاز ۋاقتىنى ھېسابلاش
+      let orderTime = 0;
+      if (order.completedAt) {
+        orderTime = new Date(order.completedAt).getTime();
+      } else if (order.shippedAt) {
+        orderTime = new Date(order.shippedAt).getTime();
+      } else if (order.date) {
+        orderTime = new Date(order.date.replace(/\//g, '-')).getTime();
+      } else if (order.createdAt) {
+        orderTime = new Date(order.createdAt).getTime();
+      }
+
+      if (!orderTime || isNaN(orderTime)) {
+        // ئەگەر ۋاقتى ئېنىق بولمىسا، دەسلەپكى ئۈلگە زاكازلار ياكى كونا كۈن دەپ قوبۇل قىلىش
+        orderTime = Date.now() - (11 * 24 * 60 * 60 * 1000);
+      }
+
+      if (now - orderTime >= maxAgeMs) {
+        order.isAnonymized = true;
+        order.anonymizedAt = new Date().toISOString();
+        order.customer = {
+          name: '[شەخسىي ئۇچۇر ئۆچۈرۈلدى]',
+          phone: '',
+          address: '',
+          city: '',
+          isAnonymized: true,
+          anonymizedAt: order.anonymizedAt
+        };
+        order.notes = '';
+        order.cargoTrackingNo = '';
+        if (order.tracking) {
+          order.tracking.trackingNumber = '';
+        }
+        modified = true;
+        count++;
+
+        // ☁️ بۇلۇتقىمۇ ماس قەدەمدە مەخپىيلەشتۈرۈشنى ئەۋەتىش
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.anonymizeOrder === 'function') {
+          window.TeklimakanSupabase.anonymizeOrder(order.id);
+        }
+      }
+    });
+
+    if (modified) {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      this.notifyDataChange('orders');
+    }
+
+    return count;
   }
 
   createSampleOrder() {

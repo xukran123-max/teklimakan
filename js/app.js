@@ -1277,9 +1277,12 @@ function initTeklimakanApp() {
     orders.forEach((order) => {
       const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : 1;
       const isCancelled = order.status === 'بىكار قىلىندى';
-      const phoneMasked = order.customer && order.customer.phone
-        ? order.customer.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-        : '-';
+      const isOrderAnon = !!(order.isAnonymized || (order.customer && order.customer.isAnonymized));
+      const phoneMasked = isOrderAnon
+        ? '🔒 [مەخپىيلەشتۈرۈلگەن]'
+        : (order.customer && order.customer.phone
+          ? order.customer.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+          : '-');
       const carrier = order.cargoCarrier || order.trackingCarrier;
       const trackingNo = order.cargoTrackingNo || order.trackingNumber;
       const trackingUrl = (carrier && trackingNo)
@@ -1304,6 +1307,15 @@ function initTeklimakanApp() {
               <div class="number-latin" style="font-size: 0.86rem; font-weight: 700; color: #334155; direction: ltr;">${order.date}</div>
             </div>
           </div>
+
+          ${isOrderAnon ? `
+            <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.75rem 1rem; margin-top: 0.85rem; display: flex; align-items: center; gap: 0.65rem;">
+              <i class="fas fa-user-shield" style="font-size: 1.3rem; color: #16a34a; flex-shrink: 0;"></i>
+              <div style="font-size: 0.82rem; color: #15803d; line-height: 1.45;">
+                <strong>🛡️ خېرىدار مەخپىيەتلىكى قوغدالدى:</strong> بۇ زاكاز تاماملانغاندىن كېيىن 10 كۈندىن ئاشقاچقا، بارلىق تېلېفون ۋە ئادرېس ئۇچۇرلىرى ئۆچۈرۈلگەن.
+              </div>
+            </div>
+          ` : ''}
 
           <!-- 4-Step Progress Tracker -->
           <div style="margin: 1.25rem 0;">
@@ -1363,9 +1375,9 @@ function initTeklimakanApp() {
 
           <!-- Customer & Order details -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem; font-size: 0.84rem; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem;">
-            <div><b>خېرىدار:</b> ${order.customer?.name || '-'}</div>
+            <div><b>خېرىدار:</b> ${isOrderAnon ? '<span style="color:#059669; font-weight:700;">🛡️ [مەخپىيلەشتۈرۈلگەن]</span>' : (order.customer?.name || '-')}</div>
             <div><b>تېلېفون:</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
-            <div><b>شەھەر / ئادرېس:</b> ${order.customer?.city || ''} ${order.customer?.address || ''}</div>
+            <div><b>شەھەر / ئادرېس:</b> ${isOrderAnon ? '<span style="color:#64748b;">🔒 [مەخپىيلەشتۈرۈلگەن]</span>' : ((order.customer?.city || '') + ' ' + (order.customer?.address || ''))}</div>
             <div><b>چىقىم ئۇسۇلى:</b> ${order.paymentMethod || 'بانكا يۆتكەش (Havale)'}</div>
             <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-weight: 800; font-size: 1rem; color: var(--danger-color);">
               <span>ئومۇمىي سومما:</span>

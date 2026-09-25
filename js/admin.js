@@ -1261,8 +1261,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const cust = (typeof order.customer === 'string') 
         ? (JSON.parse(order.customer || '{}')) 
         : (order.customer || {});
-      const custName = cust.name || 'خېرىدار';
-      const custPhone = cust.phone || '-';
+      const isAnonymized = !!(order.isAnonymized || cust.isAnonymized);
+      const custName = isAnonymized
+        ? `<span style="color:#059669; font-weight:800; font-size:0.86rem; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-user-shield"></i> [شەخسىي ئۇچۇر ئۆچۈرۈلگەن]</span>`
+        : (cust.name || 'خېرىدار');
+      const custPhone = isAnonymized
+        ? `<span style="color:#94a3b8; font-size:0.75rem;">🔒 10 كۈندىن ئاشقان، مەخپىيلەشتۈرۈلگەن</span>`
+        : (cust.phone || '-');
 
       const itemsList = Array.isArray(order.items) 
         ? order.items 
@@ -1312,9 +1317,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <button type="button" class="btn-action-edit btn-tracking-order" onclick="window.openOrderTrackingModal('${order.id}')" data-id="${order.id}" title="كارگو ئىز قوغلاش ئۇچۇرى كىرگۈزۈش" style="background: #0ea5e9 !important; border-color: #0ea5e9 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-truck"></i>
             </button>
-            <button type="button" class="btn-action-edit btn-sms-order" onclick="window.openDirectSmsModalForOrder('${order.id}')" data-id="${order.id}" title="خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
-              <i class="fas fa-sms"></i>
-            </button>
+            ${isAnonymized ? `
+              <button type="button" class="btn-action-edit" disabled title="شەخسىي ئۇچۇرلار 10 كۈندىن ئاشقاچقا مەخپىيەتلىك بويىچە يۇيۇلغان" style="background: #cbd5e1 !important; border-color: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user-slash"></i>
+              </button>
+            ` : `
+              <button type="button" class="btn-action-edit btn-sms-order" onclick="window.openDirectSmsModalForOrder('${order.id}')" data-id="${order.id}" title="خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fas fa-sms"></i>
+              </button>
+            `}
             <button type="button" class="btn-action-edit btn-view-invoice" onclick="window.openOrderInvoiceModal('${order.id}')" data-id="${order.id}" title="تەپسىلات تالونى" style="cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-file-invoice"></i>
             </button>
@@ -1354,6 +1365,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+
+    // 🛡️ 10 كۈندىن ئاشقان پۈتكەن زاكازلارنىڭ شەخسىي ئۇچۇرىنى يۇيۇش كۇنۇپكىسى
+    const btnPrivacy = document.getElementById('btnRunPrivacyCleanup');
+    if (btnPrivacy && !btnPrivacy.dataset.bound) {
+      btnPrivacy.dataset.bound = 'true';
+      btnPrivacy.addEventListener('click', async () => {
+        btnPrivacy.disabled = true;
+        btnPrivacy.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>تەكشۈرۈلۈۋاتىدۇ...</span>';
+        
+        let cloudCount = 0;
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.runCloudPrivacyCleanup === 'function') {
+          cloudCount = await window.TeklimakanSupabase.runCloudPrivacyCleanup(10);
+        }
+        const localCount = window.appStore ? window.appStore.anonymizeExpiredOrders(10) : 0;
+        const totalWiped = Math.max(cloudCount, localCount);
+
+        renderOrdersTable();
+        renderDashboardMetrics();
+
+        btnPrivacy.disabled = false;
+        btnPrivacy.innerHTML = '<i class="fas fa-user-shield" style="color: #db2777;"></i> <span>🛡️ 10 كۈنلۈك مەخپىيلەشتۈرۈش</span>';
+
+        if (totalWiped > 0) {
+          showAdminToast(`🛡️ ${totalWiped} تال زاكازنىڭ 10 كۈنلۈك شەخسىي ئۇچۇرلىرى پاكىز مەخپىيلەشتۈرۈلدى! (ھېسابات كىرىمى ساقلاندى)`, 'success');
+        } else {
+          showAdminToast('🛡️ بارلىق زاكازلار تەكشۈرۈلدى: 10 كۈندىن ئاشقان پۈتكەن زاكازلار ئاللىقاچان مەخپىيلەشتۈرۈلگەن.', 'info');
+        }
+      });
+    }
   }
 
   // ==================== تۈرلەر ====================
@@ -3294,6 +3334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
 
     const invoiceTotal = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total || 0);
+    const isAnonymized = !!(order.isAnonymized || cust.isAnonymized);
 
     body.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1.5rem; border-bottom:2px solid var(--admin-border); padding-bottom:0.75rem;">
@@ -3307,11 +3348,20 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <div class="order-detail-grid">
-        <div class="order-detail-card">
-          <h5><i class="fas fa-user"></i> تاپشۇرۇۋالغۇچى:</h5>
-          <p><strong>ئىسىم:</strong> ${cust.name || '-'}</p>
-          <p><strong>تېلېفون:</strong> <span class="number-latin">${cust.phone || '-'}</span></p>
-          <p><strong>ئادرېس:</strong> ${cust.city || ''} ${cust.address || ''}</p>
+        <div class="order-detail-card" style="${isAnonymized ? 'background:#f0fdf4; border:1px dashed #22c55e;' : ''}">
+          <h5><i class="fas ${isAnonymized ? 'fa-user-shield' : 'fa-user'}"></i> تاپشۇرۇۋالغۇچى:</h5>
+          ${isAnonymized ? `
+            <div style="color:#15803d; font-size:0.84rem; font-weight:800; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
+              <i class="fas fa-check-circle"></i> شەخسىي مەخپىيەتلىك بويىچە يۇيۇلغان (10 كۈندىن ئاشقان)
+            </div>
+            <p><strong>ئىسىم:</strong> <span style="color:#64748b;">[شەخسىي ئۇچۇر ئۆچۈرۈلگەن]</span></p>
+            <p><strong>تېلېفون:</strong> <span style="color:#64748b;">[مەخپىيلەشتۈرۈلگەن]</span></p>
+            <p><strong>ئادرېس:</strong> <span style="color:#64748b;">[مەخپىيلەشتۈرۈلگەن]</span></p>
+          ` : `
+            <p><strong>ئىسىم:</strong> ${cust.name || '-'}</p>
+            <p><strong>تېلېفون:</strong> <span class="number-latin">${cust.phone || '-'}</span></p>
+            <p><strong>ئادرېس:</strong> ${cust.city || ''} ${cust.address || ''}</p>
+          `}
         </div>
         <div class="order-detail-card">
           <h5><i class="fas fa-info-circle"></i> زاكاز ئۇچۇرى:</h5>

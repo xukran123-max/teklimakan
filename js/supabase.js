@@ -154,6 +154,7 @@ window.TeklimakanSupabase = {
       if (tracking.carrier) patch.tracking_carrier = tracking.carrier;
       if (tracking.number) patch.tracking_number = tracking.number;
       if (tracking.shippedAt) patch.shipped_at = tracking.shippedAt;
+      if (tracking.completedAt) patch.completed_at = tracking.completedAt;
       const { error } = await sb.from('orders').update(patch).eq('id', orderId);
       return !error;
     } catch (e) {
@@ -170,6 +171,75 @@ window.TeklimakanSupabase = {
       return !error;
     } catch (e) {
       return false;
+    }
+  },
+
+  // 🛡️ 10 كۈندىن ئاشقان پۈتكەن زاكازنىڭ شەخسىي ئۇچۇرىنى بۇلۇتتا مەخپىيلەشتۈرۈش (Privacy Wipe)
+  async anonymizeOrder(orderId) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const anonymizedCustomer = {
+        name: '[شەخسىي ئۇچۇر ئۆچۈرۈلدى]',
+        phone: '',
+        address: '',
+        city: '',
+        isAnonymized: true,
+        anonymizedAt: new Date().toISOString()
+      };
+      const { error } = await sb.from('orders').update({
+        customer: anonymizedCustomer,
+        notes: '',
+        tracking_number: null
+      }).eq('id', orderId);
+      return !error;
+    } catch (e) {
+      console.warn('Supabase anonymizeOrder error:', e);
+      return false;
+    }
+  },
+
+  // 🛡️ بارلىق 10 كۈندىن ئاشقان زاكازلارنى بۇلۇتتا تۈركۈملەپ مەخپىيلەشتۈرۈش
+  async runCloudPrivacyCleanup(daysThreshold = 10) {
+    const sb = getSupabase();
+    if (!sb) return 0;
+    try {
+      // 1. ئالدى بىلەن مەخسۇس SQL فۇنكسىيەسى (RPC) نى چاقىرىشقا سىناش
+      const { data, error } = await sb.rpc('anonymize_expired_orders', { days_threshold: daysThreshold });
+      if (!error && typeof data === 'number') {
+        return data;
+      }
+    } catch (e) {}
+
+    // 2. ئەگەر RPC تېخى بېكىتىلمىگەن بولسا، سىستېما سۈزۈپ يېڭىلاش
+    try {
+      const { data: orders, error } = await sb.from('orders')
+        .select('*')
+        .in('status', ['تاماملاندى', 'بىكار قىلىندى']);
+      if (error || !orders) return 0;
+
+      const now = Date.now();
+      const maxAgeMs = daysThreshold * 24 * 60 * 60 * 1000;
+      let count = 0;
+
+      for (const ord of orders) {
+        const cust = (typeof ord.customer === 'string') ? JSON.parse(ord.customer || '{}') : (ord.customer || {});
+        if (cust && cust.isAnonymized) continue;
+
+        let ordTime = 0;
+        if (ord.completed_at) ordTime = new Date(ord.completed_at).getTime();
+        else if (ord.shipped_at) ordTime = new Date(ord.shipped_at).getTime();
+        else if (ord.date) ordTime = new Date(ord.date.replace(/\//g, '-')).getTime();
+        else if (ord.created_at) ordTime = new Date(ord.created_at).getTime();
+
+        if (ordTime > 0 && (now - ordTime >= maxAgeMs)) {
+          await this.anonymizeOrder(ord.id);
+          count++;
+        }
+      }
+      return count;
+    } catch (e) {
+      return 0;
     }
   },
 

@@ -910,6 +910,11 @@ function initTeklimakanApp() {
           showToast(res.message, 'success');
           updateCartUI();
           openCartDrawer();
+
+          // 🛒 2-باسقۇچ: سېۋەتكە سالغاندا چۈشۈرۈم ۋە ئېتىبار ئەسكەرتىشى
+          if (window.TeklimakanPush && typeof window.TeklimakanPush.triggerContextualPrompt === 'function') {
+            setTimeout(() => window.TeklimakanPush.triggerContextualPrompt('cart'), 1500);
+          }
         } else {
           showToast(res.message, 'error');
         }
@@ -934,6 +939,11 @@ function initTeklimakanApp() {
           ? (lang === 'tr' ? 'Favorilere eklendi!' : (lang === 'en' ? 'Added to wishlist!' : 'ياقتۇرغانلارغا قوشۇلدى!'))
           : (lang === 'tr' ? 'Favorilerden çıkarıldı!' : (lang === 'en' ? 'Removed from wishlist!' : 'ياقتۇرغانلاردىن ئۆچۈرۈلدى!'));
         showToast(msg, 'info');
+
+        // 🛒 2-باسقۇچ: ياقتۇرغاندا مەھسۇلات باھا چۈشۈش ئەسكەرتىشى
+        if (added && window.TeklimakanPush && typeof window.TeklimakanPush.triggerContextualPrompt === 'function') {
+          setTimeout(() => window.TeklimakanPush.triggerContextualPrompt('wishlist'), 800);
+        }
       });
     });
   }
@@ -3298,6 +3308,20 @@ function initTeklimakanApp() {
           <i class="fab fa-whatsapp" style="font-size: 1.4rem;"></i>
           <span>${window.appI18n.t('payWhatsappBtn')}</span>
         </a>
+      ` : ''}
+
+      ${(typeof Notification !== 'undefined' && Notification.permission === 'default') ? `
+        <div id="orderSuccessPushTrackCard" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; border-radius: 14px; padding: 14px 16px; margin-bottom: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(22,163,74,0.12);">
+          <div style="font-weight: 800; color: #166534; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fas fa-truck-fast"></i> <span>${(window.appI18n && window.appI18n.getLang() === 'tr') ? 'Kargo ve Teslimat Bildirimlerini Açın' : ((window.appI18n && window.appI18n.getLang() === 'en') ? 'Enable Cargo Tracking Alerts' : 'زاكازىڭىز كارگوغا بېرىلگەندە ئەسكەرتىش كېلەمدۇ؟')}</span>
+          </div>
+          <p style="font-size: 0.84rem; color: #475569; margin: 0 0 10px 0; line-height: 1.45;">
+            ${(window.appI18n && window.appI18n.getLang() === 'tr') ? 'Siparişiniz yola çıktığında ve teslim edildiğinde telefonunuza anında bildirim gelsin.' : ((window.appI18n && window.appI18n.getLang() === 'en') ? 'Get real-time updates directly on your phone when your package ships.' : 'مال يولغا چىققاندا ياكى كېچىككەندە تېلېفونىڭىزدا بىۋاسىتە ئۇقتۇرۇش چىقىدۇ.')}
+          </p>
+          <button type="button" onclick="if(window.TeklimakanPush) window.TeklimakanPush.triggerOrderTrackingPrompt(); document.getElementById('orderSuccessPushTrackCard')?.remove();" style="background: #16a34a; color: #ffffff; border: none; border-radius: 10px; padding: 9px 22px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(22,163,74,0.3); display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fas fa-bell"></i> <span>${(window.appI18n && window.appI18n.getLang() === 'tr') ? '📦 Bildirimi Aç' : ((window.appI18n && window.appI18n.getLang() === 'en') ? '📦 Enable Alerts' : '📦 يەتكۈزۈش ئەسكەرتىشىنى قوزغىتىش')}</span>
+          </button>
+        </div>
       ` : ''}
 
       <div style="display: flex; gap: 0.6rem;">

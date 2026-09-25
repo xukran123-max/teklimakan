@@ -47,6 +47,17 @@ const INITIAL_COUPONS = [
     description: 'باھار پەسلى ₺50 نەق پۇل ئېتىبار كارتىسى'
   },
   {
+    code: 'TEKLIMAKAN50',
+    type: 'fixed',
+    value: 50,
+    minSpend: 250,
+    expireDate: '2028-12-31',
+    usageLimit: 10000,
+    usedCount: 0,
+    isActive: true,
+    description: 'تېلېفون ئەسكەرتىشىنى قوزغاتقان خېرىدارلارغا ₺50 سوۋغات كۇپونى'
+  },
+  {
     code: 'NEWUSER',
     type: 'percentage',
     value: 15,

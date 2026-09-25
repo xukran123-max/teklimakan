@@ -5843,19 +5843,42 @@ function initTeklimakanApp() {
         chatBox.style.display = 'none';
         startPolling(8000);
       } else {
-        chatBox.style.display = 'flex';
-        autoFillCustomerInputs();
-        const badge = document.getElementById('chatUnreadBadge');
-        if (badge) {
-          badge.textContent = '0';
-          badge.style.display = 'none';
+        const doOpenChat = () => {
+          chatBox.style.display = 'flex';
+          autoFillCustomerInputs();
+          const badge = document.getElementById('chatUnreadBadge');
+          if (badge) {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+          }
+          renderChatMessages();
+          if (msgInput) setTimeout(() => msgInput.focus(), 150);
+          checkTelegramReplies();
+          startPolling(3500);
+        };
+
+        if (window.TeklimakanPush && typeof window.TeklimakanPush.requirePermissionBeforeAction === 'function') {
+          window.TeklimakanPush.requirePermissionBeforeAction(doOpenChat, 'chat');
+        } else {
+          doOpenChat();
         }
-        renderChatMessages();
-        if (msgInput) setTimeout(() => msgInput.focus(), 150);
-        checkTelegramReplies();
-        startPolling(3500);
       }
     });
+
+    // 📲 پەقەت خەۋەرلەندۈرۈشنى رەت قىلغان ياكى تېخى قوشۇلمىغانلار WhatsApp نى چەككەندە ئەسكەرتىش چىقىرىش
+    document.addEventListener('click', (e) => {
+      const waLink = e.target.closest('a[href*="wa.me"], .chat-wa-direct');
+      if (waLink) {
+        if (typeof Notification !== 'undefined' && Notification.permission !== 'granted' && window.TeklimakanPush && typeof window.TeklimakanPush.requirePermissionBeforeAction === 'function') {
+          e.preventDefault();
+          const href = waLink.href;
+          const target = waLink.getAttribute('target') || '_blank';
+          window.TeklimakanPush.requirePermissionBeforeAction(() => {
+            window.open(href, target);
+          }, 'whatsapp');
+        }
+      }
+    }, true);
 
     if (btnClose) {
       btnClose.addEventListener('click', () => {

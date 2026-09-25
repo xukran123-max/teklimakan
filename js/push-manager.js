@@ -470,6 +470,204 @@ class PushNotificationManager {
     } catch (e) {}
   }
 
+  // ==================== 🛡️ پەقەت رەت قىلغان ياكى رۇخسەت قىلمىغانلار ئۈچۈن مەخسۇس ئېچىش كۆزنىكى ====================
+  /**
+   * باشقۇرغۇچى سۆھبىتى ياكى WhatsApp كۇنۇپكىسى بېسىلغاندا خەۋەرلەندۈرۈش ھالىتىنى تەكشۈرۈش.
+   * ئەگەر Notification.permission === 'granted' بولسا ھېچقانداق كۆزنەك چىقارماي دەرھال داۋاملاشتۇرىدۇ!
+   * پەقەت رەت قىلغان (denied) ياكى تېخى رۇخسەت بەرمىگەن (default) خېرىدارلارغىلا چىقىدۇ.
+   */
+  requirePermissionBeforeAction(actionCallback, context = 'chat') {
+    if (typeof Notification === 'undefined' || Notification.permission === 'granted') {
+      if (typeof actionCallback === 'function') actionCallback();
+      return;
+    }
+
+    this.showPermissionRequiredModal(Notification.permission, actionCallback, context);
+  }
+
+  showPermissionRequiredModal(permissionState, actionCallback, context = 'chat') {
+    if (document.getElementById('teklimakanActionPermissionModal')) return;
+
+    const lang = this.getCurrentLang();
+    const isRtl = lang === 'ug';
+    const isDenied = permissionState === 'denied';
+
+    const contentMap = {
+      ug: {
+        chat: {
+          badge: isDenied ? '🔒 كۆرگۈچ ئەسكەرتىشى تاقالغان' : '💬 مەخسۇس ئەسكەرتىش',
+          title: isDenied ? 'باشقۇرغۇچى جاۋابىنى قولدىن بەرمەسلىك ئۈچۈن' : 'باشقۇرغۇچى جاۋابىنى قوبۇل قىلىش ئۈچۈن قوزغىتىڭ',
+          desc: isDenied
+            ? 'سىز ئىلگىرى ئەسكەرتىشنى رەت قىلغان بولغاچقا، باشقۇرغۇچى جاۋاب قايتۇرغاندا تور بەتتىن چىقىپ كەتسىڭىز جاۋاب يەتمەي قالىدۇ. ئەسكەرتىشنى قوزغىتىپ بېرىڭ:'
+            : 'باشقۇرغۇچى بىلەن سۆزلەشكەندە، تور بەتتىن چىقىپ كەتسىڭىزمۇ قايتۇرۇلغان جاۋاب تېلېفونىڭىزغا كېلىپ تۇرىدۇ. ئەسكەرتىشكە قوشۇلۇپ پاراڭنى باشلاڭ.',
+          step1: '1. تور ئادرېسى قۇتىسىنىڭ سول تەرىپىدىكى قۇلۇپ (🔒) ياكى تەڭشەك بەلگىسىنى بېسىڭ.',
+          step2: '2. «Bildirimler (ئەسكەرتىشلەر)» تۈرىنى تېپىپ «İzin ver (رۇخسەت)» گە ئۆزگەرتىڭ.',
+          btnAllow: '🔔 ئەسكەرتىشنى قوزغىتىش ۋە سۆھبەتنى ئېچىش',
+          btnFixed: '✅ تەڭشىدىم، سۆھبەتنى ئېچىش',
+          btnSkip: 'ئەسكەرتىشسىز داۋاملاشتۇرۇش'
+        },
+        whatsapp: {
+          badge: isDenied ? '🔒 كۆرگۈچ ئەسكەرتىشى تاقالغان' : '📲 WhatsApp تىن بۇرۇن ئەسكەرتىش',
+          title: isDenied ? 'سۇپا خەۋەرلىرى ئۈزۈلۈپ قالماسلىقى ئۈچۈن' : 'سۇپا ئەسكەرتىشىنى تېلېفونىڭىزدا ئېچىۋېلىڭ',
+          desc: isDenied
+            ? 'WhatsApp ئارقىلىق ئالاقىلەشكەندىن باشقا، تەكلىماكان سۇپىسىنىڭ كېلىشىملىك كارگو ئىز قوغلاش ۋە ئېتىبار خەۋەرلىرى تېلېفونىڭىزغا قەرەللىك كېلىپ تۇرىدۇ.'
+            : 'تەكلىماكان سۇپىسىدىكى زاكاز، كېلىشىملىك كارگو ئەھۋالى ۋە باھا چۈشۈش خەۋەرلىرىنى قولدىن بەرمەسلىك ئۈچۈن خەۋەرلەندۈرۈشنى ئېچىۋېلىڭ.',
+          step1: '1. ئادرېس قۇتىسى يېنىدىكى قۇلۇپ (🔒) بەلگىسىنى بېسىڭ.',
+          step2: '2. «Bildirimler (ئەسكەرتىشلەر)» نى «İzin ver (رۇخسەت)» كە ئۆزگەرتىڭ.',
+          btnAllow: '🔔 ئەسكەرتىشنى قوزغىتىش ۋە WhatsApp نى ئېچىش',
+          btnFixed: '✅ تەڭشىدىم، WhatsApp نى ئېچىش',
+          btnSkip: 'ئەسكەرتىشسىز داۋاملاشتۇرۇش'
+        }
+      },
+      tr: {
+        chat: {
+          badge: isDenied ? '🔒 Bildirimler Kapalı' : '💬 Özel Bildirim',
+          title: isDenied ? 'Müşteri Temsilcisi Yanıtını Kaçırmamak İçin' : 'Yetkili Yanıtlarını Alabilmek İçin Bildirimleri Açın',
+          desc: isDenied
+            ? 'Bildirim izni kapalı olduğu için sayfadan ayrıldığınızda yetkili yanıtını kaçırabilirsiniz. Bildirimi açarak kesintisiz destek alabilirsiniz:'
+            : 'Yetkilimiz mesajınızı yanıtladığında sayfada olmasanız bile anında haberdar olmak için lütfen bildirimlere izin verin.',
+          step1: '1. Adres çubuğundaki kilit (🔒) simgesine dokunun.',
+          step2: '2. "Bildirimler" ayarını "İzin Ver" olarak değiştirin.',
+          btnAllow: '🔔 Bildirimleri Aç ve Sohbete Başla',
+          btnFixed: '✅ İzin Verdim, Sohbete Başla',
+          btnSkip: 'Bildirimsiz Devam Et'
+        },
+        whatsapp: {
+          badge: isDenied ? '🔒 Bildirimler Kapalı' : '📲 WhatsApp Öncesi Bildirim',
+          title: isDenied ? 'Kargo ve Sipariş Güncellemeleri İçin' : 'Sipariş ve İndirim Bildirimlerini Açın',
+          desc: isDenied
+            ? 'WhatsApp iletişiminin yanında, platformumuzun anlaşmalı kargo takip bildirimlerini alabilmek için tarayıcı bildirimlerini açabilirsiniz:'
+            : 'Kargo durumu ve size özel indirimlerden anında haberdar olmak için bildirimleri aktif edin.',
+          step1: '1. Adres çubuğundaki kilit (🔒) simgesine dokunun.',
+          step2: '2. "Bildirimler" seçeneğini "İzin Ver" yapın.',
+          btnAllow: '🔔 Bildirimleri Aç ve WhatsApp\'a Git',
+          btnFixed: '✅ İzin Verdim, WhatsApp\'a Git',
+          btnSkip: 'Bildirimsiz Devam Et'
+        }
+      },
+      en: {
+        chat: {
+          badge: isDenied ? '🔒 Notifications Blocked' : '💬 Support Alert',
+          title: isDenied ? 'Never Miss Support Replies' : 'Enable Notifications to Receive Replies',
+          desc: isDenied
+            ? 'Notifications were previously blocked. To get replies when you leave the browser, please re-enable notifications:'
+            : 'Allow notifications so you will get instant alerts whenever our support agent replies to you.',
+          step1: '1. Tap the lock (🔒) icon in the address bar.',
+          step2: '2. Change "Notifications" to "Allow".',
+          btnAllow: '🔔 Enable Notifications & Start Chat',
+          btnFixed: '✅ Done, Start Chat',
+          btnSkip: 'Continue Without Alerts'
+        },
+        whatsapp: {
+          badge: isDenied ? '🔒 Notifications Blocked' : '📲 Enable Push Alerts',
+          title: isDenied ? 'Enable Alerts for Order Updates' : 'Turn On Notifications Before WhatsApp',
+          desc: isDenied
+            ? 'To receive shipping status and price drops directly on your device, enable notifications in your browser:'
+            : 'Get real-time cargo tracking and exclusive discounts on your phone.',
+          step1: '1. Tap the lock (🔒) icon in the address bar.',
+          step2: '2. Set "Notifications" to "Allow".',
+          btnAllow: '🔔 Enable & Open WhatsApp',
+          btnFixed: '✅ Done, Open WhatsApp',
+          btnSkip: 'Continue Without Alerts'
+        }
+      }
+    };
+
+    const c = (contentMap[lang] || contentMap['ug'])[context] || (contentMap['ug'])[context];
+
+    const modal = document.createElement('div');
+    modal.id = 'teklimakanActionPermissionModal';
+    modal.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 10000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      direction: ${isRtl ? 'rtl' : 'ltr'};
+      font-family: inherit;
+      animation: modalFadeIn 0.25s ease-out;
+    `;
+
+    modal.innerHTML = `
+      <style>
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.96); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      </style>
+      <div style="background: #ffffff; border-radius: 22px; max-width: 440px; width: 100%; padding: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.35); border: 2px solid ${isDenied ? '#f59e0b' : '#3b82f6'}; position: relative;">
+        <button type="button" id="btnActionPermClose" style="position: absolute; top: 16px; ${isRtl ? 'left: 16px;' : 'right: 16px;'} background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #64748b; cursor: pointer;">✕</button>
+
+        <div style="margin-bottom: 14px;">
+          <span style="display: inline-block; background: ${isDenied ? '#fef3c7' : '#dbeafe'}; color: ${isDenied ? '#92400e' : '#1e40af'}; font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 9999px;">
+            ${c.badge}
+          </span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+          <div style="width: 52px; height: 52px; border-radius: 16px; background: ${isDenied ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)'}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; box-shadow: 0 6px 20px ${isDenied ? 'rgba(217,119,6,0.3)' : 'rgba(37,99,235,0.3)'};">
+            ${isDenied ? '🔒' : (context === 'whatsapp' ? '💬' : '🔔')}
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; line-height: 1.35;">
+              ${c.title}
+            </h3>
+          </div>
+        </div>
+
+        <p style="margin: 0 0 16px 0; font-size: 0.9rem; color: #475569; line-height: 1.6;">
+          ${c.desc}
+        </p>
+
+        ${isDenied ? `
+          <div style="background: #fffbeb; border: 1.5px dashed #f59e0b; border-radius: 14px; padding: 14px; margin-bottom: 18px; font-size: 0.86rem; color: #78350f; line-height: 1.65; font-weight: 600;">
+            <div style="margin-bottom: 6px;">${c.step1}</div>
+            <div>${c.step2}</div>
+          </div>
+        ` : ''}
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btnActionPermPrimary" style="width: 100%; padding: 13px; background: ${isDenied ? 'linear-gradient(135deg, #d97706, #b45309)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)'}; color: #ffffff; border: none; border-radius: 12px; font-weight: 800; font-size: 0.96rem; cursor: pointer; box-shadow: 0 4px 14px ${isDenied ? 'rgba(180,83,9,0.3)' : 'rgba(37,99,235,0.35)'}; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            ${isDenied ? c.btnFixed : c.btnAllow}
+          </button>
+          <button type="button" id="btnActionPermSkip" style="width: 100%; padding: 9px; background: transparent; border: none; color: #94a3b8; font-weight: 700; font-size: 0.84rem; cursor: pointer; text-decoration: underline;">
+            ${c.btnSkip}
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const closeAndProceed = () => {
+      modal.remove();
+      if (typeof actionCallback === 'function') actionCallback();
+    };
+
+    document.getElementById('btnActionPermClose').addEventListener('click', closeAndProceed);
+    document.getElementById('btnActionPermSkip').addEventListener('click', closeAndProceed);
+
+    document.getElementById('btnActionPermPrimary').addEventListener('click', async () => {
+      if (isDenied) {
+        // If denied, they followed the lock icon step in address bar
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          await this.requestAndSubscribe('chat');
+        }
+        closeAndProceed();
+      } else {
+        // If default, prompt native dialog
+        modal.remove();
+        await this.requestAndSubscribe('chat');
+        if (typeof actionCallback === 'function') actionCallback();
+      }
+    });
+  }
+
   urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');

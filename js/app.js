@@ -1743,6 +1743,7 @@ function initTeklimakanApp() {
         <div class="quick-view-media" style="position: relative;">
           <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           <div class="image-shield-overlay"></div>
+          <div class="image-protection-watermark"><i class="fas fa-shield-alt"></i> Teklimakan.com</div>
         </div>
         <div class="quick-view-details">
           <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.55rem; flex-wrap: wrap;">
@@ -4850,12 +4851,12 @@ function initTeklimakanApp() {
             const approxKb = Math.round((finalImageSrc.length * 3 / 4) / 1024);
             sizeBadge.textContent = `${approxKb} KB`;
           }
-          if (wmBadge) wmBadge.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ★ «تەكلىماكان كاپالىتى» تامغىسى بېسىلدى</span>';
+          if (wmBadge) wmBadge.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ✓ «🛡️ Teklimakan.com» قوغداش تەڭشەلدى</span>';
 
           if (secStatus) {
-            secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت تەييارلاندى ۋە سۇپا تامغىسى بېسىلدى</span>';
+            secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت تەييارلاندى ۋە «🛡️ Teklimakan.com» قوغداش تەڭشەلدى</span>';
           }
-          showToast('✅ سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى ۋە تامغا بېسىلدى!', 'success');
+          showToast('✅ سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى ۋە «🛡️ Teklimakan.com» قوغداش تەڭشەلدى!', 'success');
         };
         img.src = rawBase64;
       };

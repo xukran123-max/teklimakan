@@ -3411,7 +3411,7 @@ class StoreManager {
 
   <div class="rule-section">
     <h3>3. مەھسۇلات سۈرىتى 5 دەخلىسىز قائىدىسى</h3>
-    <p>سۈرەتتە يات ئېلان بولماسلىق؛ ئادەم، مودېل، تەن، قول، بارماق رەسىمى كىرگۈزمەسلىك (پەقەت تاۋارنىڭ ساپ ئۆزى بولۇش)؛ ئېنىقلىقى كەم دېگەندە 800×800 پىكسېل ۋە 1:1 كۋادرات بولۇش؛ JPG, PNG, WEBP فورماتى ۋە 2MB تىن ئاشماسلىق؛ ھەمدە سۇپىنىڭ «تەكلىماكان كاپالىتى» ئالتۇن تامغىسى بېسىلىشى شەرت قىلىنىدۇ.</p>
+    <p>سۈرەتتە يات ئېلان بولماسلىق؛ ئادەم، مودېل، تەن، قول، بارماق رەسىمى كىرگۈزمەسلىك (پەقەت تاۋارنىڭ ساپ ئۆزى بولۇش)؛ ئېنىقلىقى كەم دېگەندە 800×800 پىكسېل ۋە 1:1 كۋادرات بولۇش؛ JPG, PNG, WEBP فورماتى ۋە 2MB تىن ئاشماسلىق؛ ھەمدە سۇپىنىڭ «🛡️ Teklimakan.com» رەسمىي قوغداش بەلگىسى بېرىلىشى شەرت قىلىنىدۇ.</p>
   </div>
 
   <div class="liability-box">
@@ -4197,7 +4197,7 @@ class StoreManager {
     return false;
   }
 
-  // 5-قائىدە: تاۋار رەسىمىگە رەسمىي «تەكلىماكان كاپالىتى ★ Teklimakan Quality» ئالتۇن تامغىسىنى بېسىش ۋە ئەلالاشتۇرۇش
+  // 5-قائىدە: تاۋار رەسىمىنى يۇقىرى سۈپەتتە ئەلالاشتۇرۇش ۋە پىرىسلاش
   applyTeklimakanWatermark(imgElementOrSrc) {
     return new Promise((resolve, reject) => {
       const render = (img) => {
@@ -4208,10 +4208,10 @@ class StoreManager {
           let origW = img.naturalWidth || img.width || 800;
           let origH = img.naturalHeight || img.height || 800;
 
-          // كۆچمە تور ۋە بۇلۇت دەل ۋاقتىدا قوبۇل قىلىش ئۈچۈن 720px ئەتراپىدا ئەلالاشتۇرۇش (سىغىمى 35KB ئەتراپىدا)
+          // سۈرەتنى ئەلا سۈپەتتە ئەلالاشتۇرۇش (ئەڭ چوڭ كەڭلىك / ئېگىزلىك: 800px)
           let targetW = origW;
           let targetH = origH;
-          const maxDim = 720;
+          const maxDim = 800;
           if (targetW > maxDim || targetH > maxDim) {
             const downScale = Math.min(maxDim / targetW, maxDim / targetH);
             targetW = Math.round(targetW * downScale);
@@ -4221,87 +4221,23 @@ class StoreManager {
           canvas.width = targetW;
           canvas.height = targetH;
 
-          // سۈرەتنى تولۇق كەتكۈزۈپ سىزىش
+          // سۈرەتنى تولۇق سۈزۈك سىزىش
           ctx.drawImage(img, 0, 0, targetW, targetH);
 
-          // 🌟 رەسمىي ئالتۇن سۇ بەلگىسى (Official Teklimakan Guarantee Gold Seal Badge)
-          const badgeW = Math.max(200, Math.round(targetW * 0.28));
-          const badgeH = Math.max(45, Math.round(badgeW * 0.24));
-          const pad = Math.max(14, Math.round(targetW * 0.025));
-          const x = targetW - badgeW - pad;
-          const y = targetH - badgeH - pad;
-          const radius = 10;
-
-          ctx.save();
-          // يۇمشاق كۆلەڭگە
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-          ctx.shadowBlur = 14;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 4;
-
-          // ئارقا تەگلىك: ھەشەمەتلىك قارا-ئالتۇن گۈزەل تەدرىجىي رەڭ
-          const bgGrad = ctx.createLinearGradient(x, y, x + badgeW, y + badgeH);
-          bgGrad.addColorStop(0, 'rgba(15, 23, 42, 0.88)');
-          bgGrad.addColorStop(1, 'rgba(30, 41, 59, 0.94)');
-          ctx.fillStyle = bgGrad;
-
-          ctx.beginPath();
-          ctx.moveTo(x + radius, y);
-          ctx.lineTo(x + badgeW - radius, y);
-          ctx.quadraticCurveTo(x + badgeW, y, x + badgeW, y + radius);
-          ctx.lineTo(x + badgeW, y + badgeH - radius);
-          ctx.quadraticCurveTo(x + badgeW, y + badgeH, x + badgeW - radius, y + badgeH);
-          ctx.lineTo(x + radius, y + badgeH);
-          ctx.quadraticCurveTo(x, y + badgeH, x, y + badgeH - radius);
-          ctx.lineTo(x, y + radius);
-          ctx.quadraticCurveTo(x, y, x + radius, y);
-          ctx.closePath();
-          ctx.fill();
-
-          // گىردى ئالتۇن چەمبىرەك
-          ctx.shadowColor = 'transparent';
-          ctx.lineWidth = Math.max(1.5, Math.round(targetW * 0.002));
-          ctx.strokeStyle = '#f59e0b';
-          ctx.stroke();
-
-          // ئالتۇن يۇلتۇز / بەلگە
-          const iconX = x + pad * 0.9;
-          const iconY = y + badgeH / 2;
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = `bold ${Math.round(badgeH * 0.44)}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('★', iconX, iconY);
-
-          // ئۇيغۇرچە بەلگە: «تەكلىماكان كاپالىتى»
-          const textX = x + pad * 1.8;
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `bold ${Math.round(badgeH * 0.32)}px "UKIJ Tuz Tom", "Microsoft Uighur", sans-serif`;
-          ctx.textAlign = 'left';
-          ctx.textBaseline = 'top';
-          ctx.fillText('تەكلىماكان كاپالىتى', textX, y + badgeH * 0.16);
-
-          // ئىنگلىزچە يېزىق: «Teklimakan Guarantee»
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = `700 ${Math.round(badgeH * 0.22)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-          ctx.fillText('Teklimakan Quality', textX, y + badgeH * 0.58);
-
-          ctx.restore();
-
-          // سۈرەتنى كۆچمە تور ۋە بۇلۇتقا يۈكلەشكە ماس كىچىك JPEG ھالىتىدە چىقىرىش
-          let watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
-          if (watermarkedDataUrl.length > 50 * 1024 * 4 / 3) {
-            watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+          // سۈرەتنى كۆچمە تور ۋە بۇلۇتقا يۈكلەشكە ماس يۇقىرى سۈپەتلىك JPEG ھالىتىدە چىقىرىش
+          let cleanDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          if (cleanDataUrl.length > 300 * 1024 * 4 / 3) {
+            cleanDataUrl = canvas.toDataURL('image/jpeg', 0.75);
           }
           resolve({
-            dataUrl: watermarkedDataUrl,
+            dataUrl: cleanDataUrl,
             width: targetW,
             height: targetH,
             origWidth: origW,
             origHeight: origH
           });
         } catch (err) {
-          console.error('Watermark error:', err);
+          console.error('Image optimization error:', err);
           resolve({
             dataUrl: typeof imgElementOrSrc === 'string' ? imgElementOrSrc : (img.src || ''),
             width: img.naturalWidth || 800,

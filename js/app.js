@@ -157,6 +157,7 @@ function initTeklimakanApp() {
   // ==================== تىل ۋە تېكىستلەر ====================
   function updateStaticTranslations() {
     const i18n = window.appI18n;
+    const lang = (i18n && i18n.getLang()) || 'ug';
     // بەت ماۋزۇسى پەقەت دۇكان نامى بولىدۇ، تىل ئالماشقاندا ئاپتوماتىك ئۆزگىرىدۇ
     document.title = i18n.t('storeName');
 
@@ -164,7 +165,7 @@ function initTeklimakanApp() {
     if (annEl) annEl.textContent = i18n.t('announcement');
 
     // ئۈستۈنكى ھەرىكەتچان ئايلانما خەت (Marquee Ticker)
-    renderMarqueeTicker(i18n ? i18n.getLang() : 'ug');
+    renderMarqueeTicker(lang);
 
     // ئۈستۈنكى تاياقچە ئۇچۇرلىرى
     const topWhatsapp = document.getElementById('topWhatsappSpan');
@@ -366,8 +367,33 @@ function initTeklimakanApp() {
 
     const pCard = document.getElementById('payMethodCardSpan');
     if (pCard) pCard.textContent = i18n.t('payCard');
+    const cDisabled = document.getElementById('cardDisabledBadge');
+    if (cDisabled) {
+      cDisabled.innerHTML = `<i class="fas fa-lock"></i> ${i18n.t('cardDisabledBadge') || (lang === 'tr' ? 'Çok Yakında (Geçici Olarak Kapalı)' : (lang === 'en' ? 'Coming Soon (Inactive)' : 'پات ئارىدا (ھازىرچە پاسسىپ)'))}`;
+    }
+
     const pHavale = document.getElementById('payMethodHavaleSpan');
     if (pHavale) pHavale.textContent = i18n.t('payHavale');
+
+    const bOffTitle = document.getElementById('bankOfficialTitle');
+    if (bOffTitle) bOffTitle.textContent = i18n.t('bankOfficialTitle') || (lang === 'tr' ? 'Resmi Banka Alıcı Hesabı:' : (lang === 'en' ? 'Official Receiving Bank Account:' : 'رەسمىي بانكا قوبۇللاش ھېساباتى:'));
+    const bNameL = document.getElementById('bankNameLabel');
+    if (bNameL) bNameL.textContent = i18n.t('bankNameLabel') || (lang === 'tr' ? 'Banka Adı:' : (lang === 'en' ? 'Bank Name:' : 'بانكا نامى:'));
+    const bOwnerL = document.getElementById('bankOwnerLabel');
+    if (bOwnerL) bOwnerL.textContent = i18n.t('bankOwnerLabel') || (lang === 'tr' ? 'Hesap Sahibi:' : (lang === 'en' ? 'Account Holder:' : 'ھېسابات ئىگىسى:'));
+    const bCopyBtn = document.getElementById('btnCopyIbanText');
+    if (bCopyBtn) bCopyBtn.textContent = i18n.t('bankCopyBtn') || (lang === 'tr' ? 'Kopyala' : (lang === 'en' ? 'Copy' : 'كۆچۈرۈش'));
+    const bNotice = document.getElementById('bankNotice');
+    if (bNotice) {
+      if (lang === 'tr') {
+        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Not:</strong> Para gönderirken açıklama (açıklama) kısmına <strong>kuruyemiş</strong> yazınız.';
+      } else if (lang === 'en') {
+        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Notice:</strong> Please write <strong>kuruyemiş</strong> in the transfer description field.';
+      } else {
+        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>ئەسكەرتىش:</strong> پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا <strong>kuruyemiş</strong> دەپ يېزىپ قويۇڭ.';
+      }
+    }
+
     const pWhatsapp = document.getElementById('payMethodWhatsappSpan');
     if (pWhatsapp) pWhatsapp.textContent = i18n.t('payWhatsapp');
     const pNotice = document.getElementById('whatsappPayNoticeText');
@@ -446,9 +472,88 @@ function initTeklimakanApp() {
 
     const flAbout = document.getElementById('fLinkAbout');
     if (flAbout) {
-      const aboutSpan = flAbout.querySelector('span');
+      const aboutSpan = document.getElementById('fLinkAboutSpan') || flAbout.querySelector('span');
       if (aboutSpan) aboutSpan.textContent = i18n.t('fLinkAbout');
       else flAbout.textContent = i18n.t('fLinkAbout');
+    }
+    const flAboutSub = document.getElementById('fLinkAboutSub');
+    if (flAboutSub) flAboutSub.textContent = i18n.t('fLinkAboutSub') || (lang === 'tr' ? 'Platform hakkında ve bilgiler' : (lang === 'en' ? 'Platform introduction & info' : 'سۇپا تونۇشتۇرۇشى ۋە ئۇچۇرلىرى'));
+
+    const fAgentPortalSpan = document.getElementById('fLinkAgentPortalSpan');
+    if (fAgentPortalSpan) fAgentPortalSpan.textContent = i18n.t('agentFooterLink') || i18n.t('topAgent');
+    const fAgentPortalSub = document.getElementById('fLinkAgentPortalSub');
+    if (fAgentPortalSub) fAgentPortalSub.textContent = i18n.t('fLinkAgentPortalSub') || (lang === 'tr' ? 'İş birliği ve temsilcilik' : (lang === 'en' ? 'Partnership & Agent portal' : 'ھەمكارلىق ۋە ۋاكالەتچىلىك'));
+
+    const flTrackOrderSpan = document.getElementById('fLinkTrackOrderSpan');
+    if (flTrackOrderSpan) flTrackOrderSpan.textContent = i18n.t('fLinkTrackOrder') || (lang === 'tr' ? 'Kargo Durumu Sorgula' : (lang === 'en' ? 'Track Order & Cargo' : 'كارگو ئەھۋالىنى تەكشۈرۈش'));
+    const flTrackOrderSub = document.getElementById('fLinkTrackOrderSub');
+    if (flTrackOrderSub) flTrackOrderSub.textContent = i18n.t('fLinkTrackOrderSub') || (lang === 'tr' ? 'Sipariş ve kargo takibi' : (lang === 'en' ? 'Order status & parcel tracking' : 'زاكاز ۋە يەتكۈزۈش سۈرۈشتۈرۈش'));
+
+    // 📦 زاكاز ۋە كارگو كۆزنىكىنى (Order Tracker Modal) تىل بويىچە يېڭىلاش
+    const otModalTitle = document.getElementById('orderTrackModalTitleSpan');
+    if (otModalTitle) otModalTitle.textContent = i18n.t('orderTrackModalTitle') || (lang === 'tr' ? 'Siparişlerim ve Kargo Takibi' : (lang === 'en' ? 'My Orders & Cargo Tracking' : 'مېنىڭ زاكازلىرىم ۋە كارگو سۈرۈشتۈرۈش'));
+    const otNotice = document.getElementById('orderTrackNoticeText');
+    if (otNotice) {
+      if (lang === 'tr') {
+        otNotice.innerHTML = '<b>Kalıcı Arşiv Güvencesi:</b> Tüm siparişleriniz sistem bulut arşivinde güvenle saklanır. Yıllar sonra bile girseniz telefon numaranızla siparişlerinize kolayca ulaşabilirsiniz.';
+      } else if (lang === 'en') {
+        otNotice.innerHTML = '<b>Permanent Cloud Archive:</b> All your orders are securely stored in the cloud. Even years later, you can easily query your orders using your phone number.';
+      } else {
+        otNotice.innerHTML = '<b>مەڭگۈلۈك ئارخىپ كاپالىتى:</b> بارلىق زاكازلىرىڭىز سىستېما بۇلۇت ئامبىرىدا ساقلىنىدۇ. بىر نەچچە يىلدىن كېيىن كىرسىڭىزمۇ، تېلېفون نومۇرىڭىزنى كىرگۈزۈپ بارلىق زاكازلىرىڭىزنى ئاسانلا تاپالايسىز.';
+      }
+    }
+    const otInputLabel = document.getElementById('orderTrackInputLabel');
+    if (otInputLabel) otInputLabel.textContent = i18n.t('orderTrackInputLabel') || (lang === 'tr' ? 'Telefon Numaranız veya Sipariş Kodunuz' : (lang === 'en' ? 'Phone Number or Order Code' : 'تېلېفون نومۇرىڭىز ياكى زاكاز نومۇرىڭىز'));
+    const otInput = document.getElementById('orderTrackQueryInput');
+    if (otInput) otInput.placeholder = i18n.t('orderTrackQueryPlaceholder') || (lang === 'tr' ? 'Örn: 0555... veya 10001' : (lang === 'en' ? 'e.g. 0555... or 10001' : 'مەسىلەن: 05551234567 ياكى 10001'));
+    const otBtnText = document.getElementById('btnDoTrackOrderText');
+    if (otBtnText) otBtnText.textContent = i18n.t('orderTrackSearchBtn') || (lang === 'tr' ? 'Sorgula' : (lang === 'en' ? 'Search' : 'كۆرۈش'));
+    const otEmptyHint = document.getElementById('orderTrackEmptyHint');
+    if (otEmptyHint) otEmptyHint.textContent = i18n.t('orderTrackEmptyHint') || (lang === 'tr' ? 'Sipariş verirken girdiğiniz telefon numarası veya sipariş kodu ile geçmiş siparişlerinizi, ödeme durumunu ve kargo takip kodunu anında görebilirsiniz.' : (lang === 'en' ? 'Track your past orders, payment status, and cargo tracking numbers instantly using your registered phone number or order ID.' : 'زاكازدا كىرگۈزگەن تېلېفون نومۇرىڭىز (ياكى زاكاز نومۇرىڭىز) ئارقىلىق ئىلگىرى بەرگەن بارلىق زاكازلىرىڭىزنىڭ تەپسىلاتى، پۇل چىقىمى ۋە پوچتا ئىز قوغلاش نومۇرىنى نەق مەيداندا كۆرەلەيسىز.'));
+
+    // ❤️ ياقتۇرغانلار تارتمىسى (Wishlist Drawer)
+    const wishTitle = document.getElementById('wishlistDrawerTitle');
+    if (wishTitle) wishTitle.textContent = i18n.t('wishlistTitle') || (lang === 'tr' ? 'Favorilerim' : (lang === 'en' ? 'My Wishlist' : 'ياقتۇرغانلىرىم'));
+    const bMoveWish = document.getElementById('btnMoveAllWishlistSpan');
+    if (bMoveWish) bMoveWish.textContent = i18n.t('btnMoveAllWishlist') || (lang === 'tr' ? 'Tümünü Sepete Ekle' : (lang === 'en' ? 'Move All to Cart' : 'ھەممىنى سېۋەتكە يۆتكەش'));
+    const bClearWish = document.getElementById('btnClearWishlistSpan');
+    if (bClearWish) bClearWish.textContent = i18n.t('btnClearWishlist') || (lang === 'tr' ? 'Listeyi Temizle' : (lang === 'en' ? 'Clear List' : 'تىزىملىكنى تازىلاش'));
+
+    // 💬 نەق مەيدان پاراڭ كۆزنىكى (Admin Live Chat)
+    const chatHName = document.getElementById('chatHeaderName');
+    if (chatHName) chatHName.textContent = i18n.t('chatHeaderName') || (lang === 'tr' ? 'Yönetici ile Canlı Destek' : (lang === 'en' ? 'Live Support' : 'ئالىي باشقۇرغۇچى بىلەن ئالاقە'));
+    const chatHStatus = document.getElementById('chatHeaderStatus');
+    if (chatHStatus) chatHStatus.textContent = i18n.t('chatHeaderStatus') || (lang === 'tr' ? '🟢 Çevrimiçi • Size yardıma hazır' : (lang === 'en' ? '🟢 Online • Ready to help' : '🟢 ھازىر توردا • سىزگە ياردەم بېرىشكە تەييار'));
+    const chatClrSpan = document.getElementById('chatClearBtnSpan');
+    if (chatClrSpan) chatClrSpan.textContent = i18n.t('chatClearBtn') || (lang === 'tr' ? 'Temizle' : (lang === 'en' ? 'Clear' : 'تازىلاش'));
+    const chatNoticeSpan = document.getElementById('chatPersistentNoticeSpan');
+    if (chatNoticeSpan) chatNoticeSpan.textContent = i18n.t('chatNotice') || (lang === 'tr' ? 'Sohbet geçmişiniz siz temizleyene kadar güvenle cihazınızda saklanır.' : (lang === 'en' ? 'Your chat history is saved securely until you clear it.' : 'پاراڭ خاتىرىسى سىز ئۆزىڭىز «تازىلاش»نى باقمىغۇچە، بىر نەچچە يىلدىن كېيىن كىرسىڭىزمۇ مەڭگۈ ساقلىنىدۇ.'));
+    const chatUrgent = document.getElementById('chatUrgentSpan');
+    if (chatUrgent) chatUrgent.textContent = i18n.t('chatUrgentLabel') || (lang === 'tr' ? 'Acil durumlarda:' : (lang === 'en' ? 'For urgent matters:' : 'جىددىي ئۇچۇرلاردا:'));
+    const chatWaSpan = document.getElementById('chatWaDirectSpan');
+    if (chatWaSpan) chatWaSpan.textContent = i18n.t('chatWaDirect') || (lang === 'tr' ? 'WhatsApp ile doğrudan yazın' : (lang === 'en' ? 'Chat directly via WhatsApp' : 'WhatsApp ئارقىلىق بىۋاسىتە يېزىڭ'));
+
+    const cMsgInp = document.getElementById('chatMessageInput');
+    if (cMsgInp) cMsgInp.placeholder = i18n.t('chatPlaceholder') || (lang === 'tr' ? 'Mesajınızı yazın...' : (lang === 'en' ? 'Type your message...' : 'سۇئالىڭىزنى ياكى ئېھتىياجىڭىزنى يېزىڭ...'));
+    const cCustName = document.getElementById('chatCustomerName');
+    if (cCustName) cCustName.placeholder = i18n.t('chatNamePlaceholder') || (lang === 'tr' ? 'İsminiz (isteğe bağlı)' : (lang === 'en' ? 'Your Name (optional)' : 'ئىسمىڭىز (تاللاشچان)'));
+    const cCustPhone = document.getElementById('chatCustomerPhone');
+    if (cCustPhone) cCustPhone.placeholder = i18n.t('chatPhonePlaceholder') || (lang === 'tr' ? 'Telefon Numaranız' : (lang === 'en' ? 'Your Phone Number' : 'تېلېفون نومۇرىڭىز'));
+
+    const chipTrack = document.getElementById('chatChipTrack');
+    if (chipTrack) {
+      chipTrack.textContent = i18n.t('chatChipTrack') || (lang === 'tr' ? '📦 Kargo Sorgula' : (lang === 'en' ? '📦 Track Order' : '📦 زاكاز سۈرۈشتۈرۈش'));
+      chipTrack.dataset.msg = lang === 'tr' ? 'Sipariş durumumu sorgulamak istiyorum.' : (lang === 'en' ? 'I would like to check my order status.' : 'زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.');
+    }
+    const chipBank = document.getElementById('chatChipBank');
+    if (chipBank) {
+      chipBank.textContent = i18n.t('chatChipBank') || (lang === 'tr' ? '💳 Banka Bilgisi' : (lang === 'en' ? '💳 Bank Info' : '💳 بانكا ئۇچۇرى'));
+      chipBank.dataset.msg = lang === 'tr' ? 'Ödeme yapmak için banka IBAN bilgisi alabilir miyim?' : (lang === 'en' ? 'Can I have the bank IBAN information for payment?' : 'پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.');
+    }
+    const chipCargo = document.getElementById('chatChipCargo');
+    if (chipCargo) {
+      chipCargo.textContent = i18n.t('chatChipCargo') || (lang === 'tr' ? '🚚 Kargo Durumu' : (lang === 'en' ? '🚚 Cargo Status' : '🚚 كارگو ئەھۋالى'));
+      chipCargo.dataset.msg = lang === 'tr' ? 'Ürün ne zaman kargoya verilir, kargo takip numarası nedir?' : (lang === 'en' ? 'When will my order be shipped, and what is the cargo code?' : 'مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟');
     }
 
     // Instagram ئۇلانمىلىرىنى تىل بويىچە يېڭىلاش (ئۇيغۇرچە: teklimakancom, تۈركچە/ئىنگلىزچە: teklimakan.online)
@@ -1269,23 +1374,29 @@ function initTeklimakanApp() {
   async function doTrackOrder(query) {
     const resultsWrap = document.getElementById('orderTrackResultsWrap');
     if (!resultsWrap) return;
+    const i18n = window.appI18n;
+    const lang = (i18n && i18n.getLang()) || 'ug';
 
     if (!query || query.trim().length === 0) {
+      const emptyMsg = i18n.t('orderTrackNoQuery') || (lang === 'tr' ? 'Lütfen sipariş numaranızı veya telefon numaranızı girin!' : (lang === 'en' ? 'Please enter your order number or phone number!' : 'زاكاز نومۇرىڭىزنى ياكى تېلېفون نومۇرىڭىزنى كىرگۈزۈڭ!'));
       resultsWrap.innerHTML = `
         <div style="text-align: center; color: #ef4444; padding: 1.5rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; margin-top: 1rem;">
           <i class="fas fa-exclamation-circle" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></i>
-          <div>زاكاز نومۇرىڭىزنى ياكى تېلېفون نومۇرىڭىزنى كىرگۈزۈڭ!</div>
+          <div>${emptyMsg}</div>
         </div>
       `;
       return;
     }
 
     const cleanQ = query.trim();
+    const searchMsg = i18n.t('orderTrackSearching') || (lang === 'tr' ? 'Bulut arşivinden siparişleriniz sorgulanıyor...' : (lang === 'en' ? 'Querying orders from cloud archive...' : 'بۇلۇت ۋە ئارخىپتىن زاكازلار تەكشۈرۈلمەكتە...'));
+    const searchSub = i18n.t('orderTrackSearchingSub') || (lang === 'tr' ? 'Tüm geçmiş sipariş kayıtları yükleniyor' : (lang === 'en' ? 'Loading historical order records' : 'بارلىق تارىخىي ئۇچۇرلار يۈكلىنىۋاتىدۇ'));
+
     resultsWrap.innerHTML = `
       <div style="text-align: center; padding: 2.5rem 1rem; color: #0284c7;">
         <i class="fas fa-spinner fa-spin" style="font-size: 2.2rem; margin-bottom: 0.75rem;"></i>
-        <div style="font-weight: 700; font-size: 0.95rem;">بۇلۇت ۋە ئارخىپتىن زاكازلار تەكشۈرۈلمەكتە...</div>
-        <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">بارلىق تارىخىي ئۇچۇرلار يۈكلىنىۋاتىدۇ</div>
+        <div style="font-weight: 700; font-size: 0.95rem;">${searchMsg}</div>
+        <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">${searchSub}</div>
       </div>
     `;
 
@@ -1298,13 +1409,26 @@ function initTeklimakanApp() {
     }
 
     if (!orders || orders.length === 0) {
+      const notFoundTitle = i18n.t('orderTrackNotFound') || (lang === 'tr' ? 'Herhangi Bir Sipariş Bulunamadı' : (lang === 'en' ? 'No Orders Found' : 'ھېچقانداق زاكاز تېپىلمىدى'));
+      const notFoundDesc = lang === 'tr'
+        ? `"${cleanQ}" için sistemde sipariş kaydı bulunamadı. Lütfen girdiğiniz numarayı kontrol edin veya WhatsApp üzerinden yöneticimiz ile iletişime geçin.`
+        : (lang === 'en'
+          ? `No order records found for "${cleanQ}". Please verify your input or contact our support team via WhatsApp.`
+          : `«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ئۇچۇرى بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.`);
+      const waBtnText = lang === 'tr' ? 'WhatsApp ile Danışın' : (lang === 'en' ? 'Inquire via WhatsApp' : 'WhatsApp ئارقىلىق سۈرۈشتۈرۈش');
+      const waMsg = lang === 'tr'
+        ? `Merhaba Teklimakan yetkilisi, ${cleanQ} numarasıyla sipariş sorgulamasında destek alabilir miyim?`
+        : (lang === 'en'
+          ? `Hello Teklimakan support, I need assistance querying order ${cleanQ}.`
+          : `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن ${cleanQ} نومۇر بويىچە زاكاز تېپىشتا ياردەم سورىماقچىتىم.`);
+
       resultsWrap.innerHTML = `
         <div style="text-align: center; color: #991b1b; padding: 2rem 1.25rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px; margin-top: 1rem;">
           <i class="fas fa-search" style="font-size: 2.5rem; color: #f43f5e; margin-bottom: 0.75rem;"></i>
-          <h4 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem;">ھېچقانداق زاكاز تېپىلمىدى</h4>
-          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0 0 1rem 0;">«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ئۇچۇرى بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.</p>
-          <a href="https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن ${cleanQ} نومۇر بويىچە زاكاز تېپىشتا ياردەم سورىماقچىتىم.`)}" target="_blank" class="btn-checkout" style="width: auto; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; font-size: 0.88rem; text-decoration: none; border-radius: 10px; background: #25D366;">
-            <i class="fab fa-whatsapp"></i> WhatsApp ئارقىلىق سۈرۈشتۈرۈش
+          <h4 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem;">${notFoundTitle}</h4>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0 0 1rem 0;">${notFoundDesc}</p>
+          <a href="https://wa.me/905551609999?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn-checkout" style="width: auto; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; font-size: 0.88rem; text-decoration: none; border-radius: 10px; background: #25D366;">
+            <i class="fab fa-whatsapp"></i> ${waBtnText}
           </a>
         </div>
       `;
@@ -1324,24 +1448,58 @@ function initTeklimakanApp() {
       'بىكار قىلىندى': 0
     };
 
+    const countText = lang === 'tr' ? `Toplam <b>${orders.length}</b> adet sipariş bulundu` : (lang === 'en' ? `Found <b>${orders.length}</b> orders` : `جەمئىي <b>${orders.length}</b> تال زاكاز تېپىلدى`);
+    const cloudBadge = lang === 'tr' ? 'Kalıcı Bulut Kaydı' : (lang === 'en' ? 'Permanent Cloud Record' : 'مەڭگۈ بۇلۇتتا ساقلانغان');
+
     let html = `
       <div style="margin-top: 1rem; margin-bottom: 0.85rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
         <div style="font-weight: 800; color: #166534; font-size: 0.95rem;">
-          <i class="fas fa-check-circle" style="color: #22c55e;"></i> جەمئىي <b>${orders.length}</b> تال زاكاز تېپىلدى
+          <i class="fas fa-check-circle" style="color: #22c55e;"></i> ${countText}
         </div>
         <span style="font-size: 0.78rem; color: #15803d; background: #dcfce7; padding: 3px 10px; border-radius: 9999px; font-weight: 700;">
-          <i class="fas fa-cloud-check"></i> مەڭگۈ بۇلۇتتا ساقلانغان
+          <i class="fas fa-cloud-check"></i> ${cloudBadge}
         </span>
       </div>
       <div style="display: flex; flex-direction: column; gap: 1.25rem;">
     `;
+
+    const lblOrderId = lang === 'tr' ? 'Sipariş No:' : (lang === 'en' ? 'Order ID:' : 'زاكاز نومۇرى:');
+    const lblOrderDate = lang === 'tr' ? 'Sipariş Tarihi:' : (lang === 'en' ? 'Order Date:' : 'زاكاز ۋاقتى:');
+    const lblCopy = lang === 'tr' ? 'Kopyala' : (lang === 'en' ? 'Copy' : 'كۆچۈرۈش');
+    const toastCopied = lang === 'tr' ? 'Sipariş kodu kopyalandı!' : (lang === 'en' ? 'Order code copied!' : 'زاكاز كودى كۆچۈرۈلدى!');
+    const anonNotice = lang === 'tr'
+      ? '<strong>🛡️ Gizlilik Koruması:</strong> Sipariş tesliminden 10 gün sonra telefon ve adres bilgileri güvenle gizlenmiştir.'
+      : (lang === 'en'
+        ? '<strong>🛡️ Privacy Protected:</strong> Customer phone and address are anonymized 10 days after delivery.'
+        : '<strong>🛡️ خېرىدار مەخپىيەتلىكى قوغدالدى:</strong> بۇ زاكاز تاماملانغاندىن كېيىن 10 كۈندىن ئاشقاچقا، بارلىق تېلېفون ۋە ئادرېس ئۇچۇرلىرى ئۆچۈرۈلگەن.');
+
+    const stepsTitles = {
+      ug: ['تاپشۇرۇۋېلىندى', 'تەستىقلاندى', 'كارگودا يوللاندى', 'تاپشۇرۇپ ئېلىندى'],
+      tr: ['Alındı', 'Onaylandı', 'Kargoya Verildi', 'Teslim Edildi'],
+      en: ['Received', 'Confirmed', 'Shipped', 'Delivered']
+    };
+    const curSteps = stepsTitles[lang] || stepsTitles.ug;
+
+    const lblCancelled = lang === 'tr' ? 'Bu sipariş iptal edilmiştir' : (lang === 'en' ? 'This order was cancelled' : 'بۇ زاكاز بىكار قىلىنغان');
+    const lblCarrier = lang === 'tr' ? 'Kargo Firması' : (lang === 'en' ? 'Carrier' : 'پوچتا شىركىتى');
+    const lblTrackNo = lang === 'tr' ? 'Takip Kodu:' : (lang === 'en' ? 'Tracking Code:' : 'ئىز قوغلاش كودى:');
+    const lblCarrierBtn = lang === 'tr' ? 'Kargo Sitesinden Takip Et' : (lang === 'en' ? 'Track on Carrier Website' : 'پوچتا تورىدىن كۆرۈش');
+    const lblPendingCargo = lang === 'tr' ? 'Kargo firması ve takip kodu kısa sürede eklenecektir.' : (lang === 'en' ? 'Carrier and tracking code will be updated shortly.' : 'پوچتا شىركىتى ۋە ئىز قوغلاش نومۇرى تېز ئارىدا تولۇقلىنىدۇ.');
+
+    const lblCust = lang === 'tr' ? 'Müşteri:' : (lang === 'en' ? 'Customer:' : 'خېرىدار:');
+    const lblPhone = lang === 'tr' ? 'Telefon:' : (lang === 'en' ? 'Phone:' : 'تېلېفون:');
+    const lblAddr = lang === 'tr' ? 'Şehir / Adres:' : (lang === 'en' ? 'City / Address:' : 'شەھەر / ئادرېس:');
+    const lblPayMethod = lang === 'tr' ? 'Ödeme Yöntemi:' : (lang === 'en' ? 'Payment Method:' : 'چىقىم ئۇسۇلى:');
+    const lblTotal = lang === 'tr' ? 'Toplam Tutar:' : (lang === 'en' ? 'Total Amount:' : 'ئومۇمىي سومما:');
+    const lblItems = lang === 'tr' ? 'Satın Alınan Ürünler:' : (lang === 'en' ? 'Purchased Items:' : 'سېتىۋالغان ماللار:');
+    const lblWaInq = lang === 'tr' ? 'Bu sipariş hakkında WhatsApp üzerinden danışın' : (lang === 'en' ? 'Inquire about this order via WhatsApp' : 'بۇ زاكاز ھەققىدە باشقۇرغۇچىغا WhatsApp تا يېزىش');
 
     orders.forEach((order) => {
       const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : 1;
       const isCancelled = order.status === 'بىكار قىلىندى';
       const isOrderAnon = !!(order.isAnonymized || (order.customer && order.customer.isAnonymized));
       const phoneMasked = isOrderAnon
-        ? '🔒 [مەخپىيلەشتۈرۈلگەن]'
+        ? (lang === 'tr' ? '🔒 [Gizlendi]' : (lang === 'en' ? '🔒 [Hidden]' : '🔒 [مەخپىيلەشتۈرۈلگەن]'))
         : (order.customer && order.customer.phone
           ? order.customer.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
           : '-');
@@ -1356,16 +1514,16 @@ function initTeklimakanApp() {
           <!-- Header -->
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9;">
             <div>
-              <div style="font-size: 0.78rem; color: #64748b;">زاكاز نومۇرى:</div>
+              <div style="font-size: 0.78rem; color: #64748b;">${lblOrderId}</div>
               <div class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #0284c7; direction: ltr;">
                 #${order.id}
-                <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('${order.id}').then(() => showToast('زاكاز كودى كۆچۈرۈلدى!', 'success'))" style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; margin-inline-start: 4px;" title="كۆچۈرۈش">
+                <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('${order.id}').then(() => showToast('${toastCopied}', 'success'))" style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; font-weight: 700; cursor: pointer; margin-inline-start: 4px;" title="${lblCopy}">
                   <i class="far fa-copy"></i>
                 </button>
               </div>
             </div>
             <div style="text-align: right;">
-              <div style="font-size: 0.78rem; color: #64748b;">زاكاز ۋاقتى:</div>
+              <div style="font-size: 0.78rem; color: #64748b;">${lblOrderDate}</div>
               <div class="number-latin" style="font-size: 0.86rem; font-weight: 700; color: #334155; direction: ltr;">${order.date}</div>
             </div>
           </div>
@@ -1374,7 +1532,7 @@ function initTeklimakanApp() {
             <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.75rem 1rem; margin-top: 0.85rem; display: flex; align-items: center; gap: 0.65rem;">
               <i class="fas fa-user-shield" style="font-size: 1.3rem; color: #16a34a; flex-shrink: 0;"></i>
               <div style="font-size: 0.82rem; color: #15803d; line-height: 1.45;">
-                <strong>🛡️ خېرىدار مەخپىيەتلىكى قوغدالدى:</strong> بۇ زاكاز تاماملانغاندىن كېيىن 10 كۈندىن ئاشقاچقا، بارلىق تېلېفون ۋە ئادرېس ئۇچۇرلىرى ئۆچۈرۈلگەن.
+                ${anonNotice}
               </div>
             </div>
           ` : ''}
@@ -1383,10 +1541,10 @@ function initTeklimakanApp() {
           <div style="margin: 1.25rem 0;">
             <div class="track-timeline" style="display: flex; justify-content: space-between; position: relative; gap: 0.5rem;">
               ${[
-                { step: 1, title: 'تاپشۇرۇۋېلىندى', icon: 'fa-clipboard-check' },
-                { step: 2, title: 'تەستىقلاندى', icon: 'fa-box-open' },
-                { step: 3, title: 'كارگودا يوللاندى', icon: 'fa-truck-fast' },
-                { step: 4, title: 'تاپشۇرۇپ ئېلىندى', icon: 'fa-house-circle-check' }
+                { step: 1, title: curSteps[0], icon: 'fa-clipboard-check' },
+                { step: 2, title: curSteps[1], icon: 'fa-box-open' },
+                { step: 3, title: curSteps[2], icon: 'fa-truck-fast' },
+                { step: 4, title: curSteps[3], icon: 'fa-house-circle-check' }
               ].map(s => {
                 const isActive = !isCancelled && currentStep >= s.step;
                 const isCurrent = !isCancelled && currentStep === s.step;
@@ -1404,7 +1562,7 @@ function initTeklimakanApp() {
             </div>
             ${isCancelled ? `
               <div style="margin-top: 0.85rem; padding: 0.5rem; background: #fee2e2; border-radius: 8px; text-align: center; color: #ef4444; font-weight: 700; font-size: 0.85rem;">
-                <i class="fas fa-ban"></i> بۇ زاكاز بىكار قىلىنغان
+                <i class="fas fa-ban"></i> ${lblCancelled}
               </div>
             ` : ''}
           </div>
@@ -1414,42 +1572,42 @@ function initTeklimakanApp() {
             <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
               <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
                 <div>
-                  <span style="background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-shipping-fast"></i> پوچتا شىركىتى</span>
+                  <span style="background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800;"><i class="fas fa-shipping-fast"></i> ${lblCarrier}</span>
                   <span style="font-weight: 800; font-size: 0.95rem; margin-right: 0.4rem; color: #0369a1;">${carrier}</span>
                 </div>
                 <div style="font-size: 0.82rem; color: #0284c7; font-weight: 700;">
-                  ئىز قوغلاش كودى: <strong class="number-latin" style="direction: ltr; font-size: 0.95rem; letter-spacing: 0.5px;">${trackingNo}</strong>
+                  ${lblTrackNo} <strong class="number-latin" style="direction: ltr; font-size: 0.95rem; letter-spacing: 0.5px;">${trackingNo}</strong>
                 </div>
               </div>
               ${trackingUrl ? `
                 <div style="margin-top: 0.65rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
                   <a href="${trackingUrl}" target="_blank" class="btn-checkout" style="width: auto; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 800; text-decoration: none; border-radius: 8px; background: #0284c7; display: inline-flex; align-items: center; gap: 0.4rem;">
-                    <i class="fas fa-external-link-alt"></i> پوچتا تورىدىن كۆرۈش
+                    <i class="fas fa-external-link-alt"></i> ${lblCarrierBtn}
                   </a>
                 </div>
               ` : ''}
             </div>
           ` : (currentStep >= 3 ? `
             <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.85rem; color: #64748b; text-align: center;">
-              <i class="fas fa-info-circle"></i> پوچتا شىركىتى ۋە ئىز قوغلاش نومۇرى تېز ئارىدا تولۇقلىنىدۇ.
+              <i class="fas fa-info-circle"></i> ${lblPendingCargo}
             </div>
           ` : '')}
 
           <!-- Customer & Order details -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem; font-size: 0.84rem; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-bottom: 1rem;">
-            <div><b>خېرىدار:</b> ${isOrderAnon ? '<span style="color:#059669; font-weight:700;">🛡️ [مەخپىيلەشتۈرۈلگەن]</span>' : (order.customer?.name || '-')}</div>
-            <div><b>تېلېفون:</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
-            <div><b>شەھەر / ئادرېس:</b> ${isOrderAnon ? '<span style="color:#64748b;">🔒 [مەخپىيلەشتۈرۈلگەن]</span>' : ((order.customer?.city || '') + ' ' + (order.customer?.address || ''))}</div>
-            <div><b>چىقىم ئۇسۇلى:</b> ${order.paymentMethod || 'بانكا يۆتكەش (Havale)'}</div>
+            <div><b>${lblCust}</b> ${isOrderAnon ? '<span style="color:#059669; font-weight:700;">🛡️ [Gizlendi]</span>' : (order.customer?.name || '-')}</div>
+            <div><b>${lblPhone}</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
+            <div><b>${lblAddr}</b> ${isOrderAnon ? '<span style="color:#64748b;">🔒 [Gizlendi]</span>' : ((order.customer?.city || '') + ' ' + (order.customer?.address || ''))}</div>
+            <div><b>${lblPayMethod}</b> ${order.paymentMethod || 'Havale / EFT'}</div>
             <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-weight: 800; font-size: 1rem; color: var(--danger-color);">
-              <span>ئومۇمىي سومما:</span>
+              <span>${lblTotal}</span>
               <span>${order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total)}</span>
             </div>
           </div>
 
           <!-- Purchased items -->
           <div style="margin-bottom: 1rem;">
-            <div style="font-weight: 800; font-size: 0.86rem; margin-bottom: 0.45rem; color: #475569;">سېتىۋالغان ماللار:</div>
+            <div style="font-weight: 800; font-size: 0.86rem; margin-bottom: 0.45rem; color: #475569;">${lblItems}</div>
             <div style="display: flex; flex-direction: column; gap: 0.4rem;">
               ${(order.items || []).map(it => `
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; padding: 0.4rem 0.6rem; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 8px;">
@@ -1465,8 +1623,8 @@ function initTeklimakanApp() {
 
           <!-- WhatsApp Support Link -->
           <div style="text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 0.75rem;">
-            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن #${order.id} نومۇرلۇق زاكاز توغرىسىدا سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
-              <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> بۇ زاكاز ھەققىدە باشقۇرغۇچىغا WhatsApp تا يېزىش
+            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`Salam Teklimakan, #${order.id} ...`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
+              <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> ${lblWaInq}
             </a>
           </div>
         </div>
@@ -6410,11 +6568,23 @@ ${text}
 
     // 3. تور بېكەتتىن چىقىپ كېتىشنىڭ ئالدىنى ئېلىش ۋە تۇتۇپ قېلىش كۆزنىكى قۇرۇش (Exit-Intent Retention Modal)
     function createRetentionModalIfNotExists() {
+      const i18n = window.appI18n;
+      const lang = (i18n && i18n.getLang()) || 'ug';
+      const isRtl = i18n ? i18n.isRTL() : (lang === 'ug');
+
       let modal = document.getElementById('teklimakanExitRetentionModal');
-      if (modal) return modal;
+      if (modal) {
+        if (modal.dataset.lang !== lang) {
+          modal.remove();
+          modal = null;
+        } else {
+          return modal;
+        }
+      }
 
       modal = document.createElement('div');
       modal.id = 'teklimakanExitRetentionModal';
+      modal.dataset.lang = lang;
       modal.className = 'modal-backdrop';
       modal.style.cssText = `
         position: fixed;
@@ -6430,9 +6600,60 @@ ${text}
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
-        direction: rtl;
+        direction: ${isRtl ? 'rtl' : 'ltr'};
         font-family: inherit;
       `;
+
+      const tData = {
+        ug: {
+          title: 'بىر دەم كۈتۈپ تۇرۇڭ!',
+          sub: 'تەكلىماكان سودا تورىدىن ئايرىلماقچىمۇ؟',
+          body: 'ھۆرمەتلىك خېرىدارىمىز، سىز ئۈچۈن مەخسۇس تەييارلانغان <b style="color: #dc2626;">50 ₺ لىق نەق پۇل تېجەش كۇپونى</b> نى قوبۇل قىلىپ، مال سېتىۋېلىشنى داۋاملاشتۇرۇڭ!',
+          codeLabel: 'ئېتىبار كودى (50 ₺ تېجەش):',
+          copy: 'كۆچۈرۈش',
+          copied: 'كۆچۈرۈلدى!',
+          saved: 'ساقلاندى!',
+          b1: 'كاپالەتلىك ئەسلى شىپالىق ئۇيغۇر تىبابەت مەھسۇلاتلىرى',
+          b2: 'تېز سۈرئەتتە ئىشىك ئالدىغىچە بىخەتەر يەتكۈزۈش',
+          b3: 'رازى بولمىسىڭىز مالنى قايتۇرۇپ ئالماشتۇرۇش كاپالىتى',
+          stay: 'مال سېتىۋېلىشنى داۋاملاشتۇرۇش',
+          exit: 'تور بېكەتتىن چىقىش',
+          toast: '🎉 50 ₺ لىق ئېتىبار كۇپونى سېۋىتىڭىزگە ئاپتوماتىك قوشۇلدى!'
+        },
+        tr: {
+          title: 'Bir Dakika Bekleyin!',
+          sub: "Teklimakan Pazaryeri'nden ayrılıyor musunuz?",
+          body: 'Değerli müşterimiz, sizin için hazırladığımız özel <b style="color: #dc2626;">50 ₺ indirim kuponunu</b> kullanarak alışverişinize devam edin!',
+          codeLabel: 'İndirim Kodu (50 ₺ İndirim):',
+          copy: 'Kopyala',
+          copied: 'Kopyalandı!',
+          saved: 'Kaydedildi!',
+          b1: 'Garantili orijinal şifalı doğal Uygur tıbbı ürünleri',
+          b2: 'Hızlı ve kapınıza kadar güvenli teslimat',
+          b3: 'Memnuniyet ve kolay iade / değişim garantisi',
+          stay: 'Alışverişe Devam Et',
+          exit: 'Siteden Ayrıl',
+          toast: '🎉 50 ₺ indirim kuponu sepetinize otomatik olarak tanımlandı!'
+        },
+        en: {
+          title: 'Wait a moment!',
+          sub: 'Leaving Teklimakan E-Commerce?',
+          body: 'Dear customer, continue shopping with our exclusive <b style="color: #dc2626;">50 ₺ discount coupon</b> prepared just for you!',
+          codeLabel: 'Discount Code (Save 50 ₺):',
+          copy: 'Copy',
+          copied: 'Copied!',
+          saved: 'Saved!',
+          b1: 'Guaranteed authentic Uyghur wellness & herbal products',
+          b2: 'Fast and safe door-to-door delivery',
+          b3: '100% Satisfaction & easy returns guarantee',
+          stay: 'Continue Shopping',
+          exit: 'Exit Website',
+          toast: '🎉 50 ₺ coupon discount has been applied to your cart!'
+        }
+      };
+
+      const cText = tData[lang] || tData.ug;
+      const alignStyle = isRtl ? 'right' : 'left';
 
       modal.innerHTML = `
         <div class="retention-modal-card" style="
@@ -6452,17 +6673,17 @@ ${text}
               🎁
             </div>
             <h3 style="margin: 0 0 6px; font-size: 1.3rem; font-weight: 900; color: #ffffff; line-height: 1.4;">
-              بىر دەم كۈتۈپ تۇرۇڭ!
+              ${cText.title}
             </h3>
             <p style="margin: 0; font-size: 0.88rem; color: #fef08a; font-weight: 700;">
-              تەكلىماكان سودا تورىدىن ئايرىلماقچىمۇ؟
+              ${cText.sub}
             </p>
           </div>
 
           <!-- مەزمۇن قىسمى -->
           <div style="padding: 20px 22px;">
             <p style="margin: 0 0 16px; font-size: 0.95rem; color: #334155; line-height: 1.7; font-weight: 600;">
-              ھۆرمەتلىك خېرىدارىمىز، سىز ئۈچۈن مەخسۇس تەييارلانغان <b style="color: #dc2626;">50 ₺ لىق نەق پۇل تېجەش كۇپونى</b> نى قوبۇل قىلىپ، مال سېتىۋېلىشنى داۋاملاشتۇرۇڭ!
+              ${cText.body}
             </p>
 
             <!-- كۇپون كارتىسى -->
@@ -6477,8 +6698,8 @@ ${text}
               justify-content: space-between;
               gap: 12px;
             ">
-              <div style="text-align: right;">
-                <div style="font-size: 0.78rem; font-weight: 800; color: #b45309; margin-bottom: 2px;">ئېتىبار كودى (50 ₺ تېجەش):</div>
+              <div style="text-align: ${alignStyle};">
+                <div style="font-size: 0.78rem; font-weight: 800; color: #b45309; margin-bottom: 2px;">${cText.codeLabel}</div>
                 <div style="font-size: 1.25rem; font-weight: 900; color: #1e3a8a; letter-spacing: 1px; font-family: monospace;">TEKLIMAKAN50</div>
               </div>
               <button type="button" id="btnCopyRetentionCoupon" style="
@@ -6494,23 +6715,23 @@ ${text}
                 transition: transform 0.15s ease, background 0.2s ease;
                 white-space: nowrap;
               ">
-                <i class="far fa-copy"></i> كۆچۈرۈش
+                <i class="far fa-copy"></i> ${cText.copy}
               </button>
             </div>
 
             <!-- پايدىلىق ئەۋزەللىكلەر تىزىملىكى -->
-            <div style="text-align: right; background: #f8fafc; border-radius: 12px; padding: 12px 14px; margin-bottom: 22px; font-size: 0.84rem; color: #475569; line-height: 1.8;">
+            <div style="text-align: ${alignStyle}; background: #f8fafc; border-radius: 12px; padding: 12px 14px; margin-bottom: 22px; font-size: 0.84rem; color: #475569; line-height: 1.8;">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <i class="fas fa-check-circle" style="color: #16a34a;"></i>
-                <span>كاپالەتلىك ئەسلى شىپالىق ئۇيغۇر تىبابەت مەھسۇلاتلىرى</span>
+                <span>${cText.b1}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <i class="fas fa-shipping-fast" style="color: #2563eb;"></i>
-                <span>تېز سۈرئەتتە ئىشىك ئالدىغىچە بىخەتەر يەتكۈزۈش</span>
+                <span>${cText.b2}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-shield-alt" style="color: #ea580c;"></i>
-                <span>رازى بولمىسىڭىز مالنى قايتۇرۇپ ئالماشتۇرۇش كاپالىتى</span>
+                <span>${cText.b3}</span>
               </div>
             </div>
 
@@ -6532,7 +6753,7 @@ ${text}
                 gap: 8px;
                 transition: transform 0.15s ease;
               ">
-                <i class="fas fa-shopping-bag"></i> مال سېتىۋېلىشنى داۋاملاشتۇرۇش
+                <i class="fas fa-shopping-bag"></i> ${cText.stay}
               </button>
 
               <button type="button" id="btnConfirmExitSite" style="
@@ -6545,7 +6766,7 @@ ${text}
                 cursor: pointer;
                 transition: color 0.2s ease;
               ">
-                تور بېكەتتىن چىقىش
+                ${cText.exit}
               </button>
             </div>
           </div>
@@ -6560,20 +6781,20 @@ ${text}
         btnCopy.addEventListener('click', () => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText('TEKLIMAKAN50').then(() => {
-              btnCopy.innerHTML = '<i class="fas fa-check"></i> كۆچۈرۈلدى!';
+              btnCopy.innerHTML = `<i class="fas fa-check"></i> ${cText.copied}`;
               btnCopy.style.background = '#16a34a';
               localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
               setTimeout(() => {
-                btnCopy.innerHTML = '<i class="far fa-copy"></i> كۆچۈرۈش';
+                btnCopy.innerHTML = `<i class="far fa-copy"></i> ${cText.copy}`;
                 btnCopy.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
               }, 2500);
             }).catch(() => {
               localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
-              btnCopy.innerHTML = '<i class="fas fa-check"></i> ساقلاندى!';
+              btnCopy.innerHTML = `<i class="fas fa-check"></i> ${cText.saved}`;
             });
           } else {
             localStorage.setItem('teklimakan_applied_coupon', 'TEKLIMAKAN50');
-            btnCopy.innerHTML = '<i class="fas fa-check"></i> ساقلاندى!';
+            btnCopy.innerHTML = `<i class="fas fa-check"></i> ${cText.saved}`;
           }
         });
       }
@@ -6590,7 +6811,7 @@ ${text}
           document.body.style.overflow = '';
 
           if (typeof showToast === 'function') {
-            showToast('50 ₺ ئېتىبار كۇپونى TEKLIMAKAN50 قوشۇلدى! رەھمەت.', 'success');
+            showToast(cText.toast, 'success');
           }
 
           const catalog = document.getElementById('catalogSection') || document.getElementById('productsGrid');

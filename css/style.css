@@ -3385,6 +3385,10 @@ html[dir="ltr"] .footer-contact-btn-item:hover {
   transition: all 0.25s ease;
 }
 
+html[dir="ltr"] .footer-contact-arrow {
+  transform: rotate(180deg);
+}
+
 .footer-contact-btn-item:hover .footer-contact-arrow {
   color: #38bdf8;
   opacity: 1;

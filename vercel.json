@@ -11,7 +11,22 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot).*"
+          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/product-share"
+    },
+    {
+      "source": "/index.html",
+      "has": [
+        {
+          "type": "query",
+          "key": "id"
+        },
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot).*"
         }
       ],
       "destination": "/api/product-share"

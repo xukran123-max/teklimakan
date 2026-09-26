@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const m = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
     if (!m) return;
     m.classList.add('active');
+    m.style.removeProperty('display');
+    m.style.removeProperty('visibility');
+    m.style.removeProperty('opacity');
+    m.style.removeProperty('pointer-events');
+    m.style.removeProperty('z-index');
     m.style.setProperty('display', 'flex', 'important');
     m.style.setProperty('opacity', '1', 'important');
     m.style.setProperty('visibility', 'visible', 'important');
@@ -29,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     m.style.setProperty('z-index', '100000', 'important');
     const content = m.querySelector('.modal-content');
     if (content) {
+      content.style.removeProperty('display');
+      content.style.removeProperty('visibility');
+      content.style.removeProperty('opacity');
+      content.style.removeProperty('transform');
       content.style.setProperty('display', 'block', 'important');
       content.style.setProperty('opacity', '1', 'important');
       content.style.setProperty('visibility', 'visible', 'important');
@@ -40,9 +49,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const m = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
     if (!m) return;
     m.classList.remove('active');
+    m.style.removeProperty('display');
+    m.style.removeProperty('visibility');
+    m.style.removeProperty('opacity');
+    m.style.removeProperty('pointer-events');
+    m.style.removeProperty('z-index');
     m.style.setProperty('display', 'none', 'important');
     m.style.setProperty('visibility', 'hidden', 'important');
+    m.style.setProperty('opacity', '0', 'important');
     m.style.setProperty('pointer-events', 'none', 'important');
+  };
+
+  window.deleteProductDirect = function(id) {
+    if (!id) return;
+    if (confirm('راستلا بۇ تاۋارنى ئۆچۈرەمسىز؟')) {
+      window.appStore.deleteProduct(id);
+      renderProductsTable();
+      renderDashboardMetrics();
+      showAdminToast('تاۋار ئۆچۈرۈلدى!', 'info');
+    }
   };
 
   setupAuthEvents();
@@ -1191,10 +1216,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="min-width: 120px; text-align: center;">
           <div style="display: flex; gap: 0.4rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             ${quickApprovalAction}
-            <button class="btn-action-edit" data-id="${product.id}" title="تەھرىرلەش">
+            <button type="button" class="btn-action-edit" data-id="${product.id}" onclick="window.openProductModal('${product.id}')" title="تەھرىرلەش">
               <i class="fas fa-edit"></i>
             </button>
-            <button class="btn-action-delete" data-id="${product.id}" title="ئۆچۈرۈش">
+            <button type="button" class="btn-action-delete" data-id="${product.id}" onclick="window.deleteProductDirect('${product.id}')" title="ئۆچۈرۈش">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -1204,50 +1229,66 @@ document.addEventListener('DOMContentLoaded', () => {
       tbody.appendChild(tr);
     });
 
-    // تېز تەستىقلاش ۋە رەت قىلىش كۇنۇپكىلىرى
-    tbody.querySelectorAll('.btn-approve-prod').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const res = window.appStore.approveProduct(id);
-        if (res.success) {
-          showAdminToast(res.message, 'success');
-          renderProductsTable();
-          renderDashboardMetrics();
-        } else {
-          showAdminToast(res.message, 'error');
+    // ⚡ مەشغۇلات كۇنۇپكىلىرى ئىنكاسىنى چاقماقتەك تېزلىتىش (Single Event Delegation)
+    if (!tbody._delegationInit) {
+      tbody._delegationInit = true;
+      tbody.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.btn-action-edit');
+        if (editBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const pid = editBtn.dataset.id;
+          if (pid) openProductModal(pid);
+          return;
         }
-      });
-    });
 
-    tbody.querySelectorAll('.btn-reject-prod').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const reason = prompt('رەت قىلىش سەۋەبىنى يېزىڭ (مەسىلەن: باھاسى نامۇۋاپىق، سۈپەت تەلەپكە يەتمىدى):', 'تەلەپكە ئۇيغۇن كەلمىدى');
-        if (reason !== null) {
-          const res = window.appStore.rejectProduct(id, reason);
-          if (res.success) {
-            showAdminToast(res.message, 'warning');
-            renderProductsTable();
-            renderDashboardMetrics();
+        const deleteBtn = e.target.closest('.btn-action-delete');
+        if (deleteBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const pid = deleteBtn.dataset.id;
+          if (pid) window.deleteProductDirect(pid);
+          return;
+        }
+
+        const approveBtn = e.target.closest('.btn-approve-prod');
+        if (approveBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const pid = approveBtn.dataset.id;
+          if (pid) {
+            const res = window.appStore.approveProduct(pid);
+            if (res && res.success) {
+              showAdminToast(res.message, 'success');
+              renderProductsTable();
+              renderDashboardMetrics();
+            } else {
+              showAdminToast(res ? res.message : 'تەستىقلاشتا خاتالىق كۆرۈلدى', 'error');
+            }
           }
+          return;
+        }
+
+        const rejectBtn = e.target.closest('.btn-reject-prod');
+        if (rejectBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const pid = rejectBtn.dataset.id;
+          if (pid) {
+            const reason = prompt('رەت قىلىش سەۋەبىنى يېزىڭ (مەسىلەن: باھاسى نامۇۋاپىق، سۈپەت تەلەپكە يەتمىدى):', 'تەلەپكە ئۇيغۇن كەلمىدى');
+            if (reason !== null) {
+              const res = window.appStore.rejectProduct(pid, reason);
+              if (res && res.success) {
+                showAdminToast(res.message, 'warning');
+                renderProductsTable();
+                renderDashboardMetrics();
+              }
+            }
+          }
+          return;
         }
       });
-    });
-
-    tbody.querySelectorAll('.btn-action-edit').forEach(btn => {
-      btn.addEventListener('click', () => openProductModal(btn.dataset.id));
-    });
-
-    tbody.querySelectorAll('.btn-action-delete').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (confirm('راستلا بۇ تاۋارنى ئۆچۈرەمسىز؟')) {
-          window.appStore.deleteProduct(btn.dataset.id);
-          renderProductsTable();
-          renderDashboardMetrics();
-          showAdminToast('تاۋار ئۆچۈرۈلدى!', 'info');
-        }
-      });
-    });
+    }
   }
 
   // ==================== زاكازلار جەدۋىلى ====================
@@ -3663,10 +3704,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const enName = (product.translations?.en?.name) || '';
       const enDesc = (product.translations?.en?.description) || '';
 
-      if (nameTrEl) { nameTrEl.value = trName || window.appI18n.autoTranslateUyghur(product.name, 'tr'); nameTrEl.dataset.manuallyEdited = "false"; nameTrEl.dataset.sourceChanged = "false"; }
-      if (nameEnEl) { nameEnEl.value = enName || window.appI18n.autoTranslateUyghur(product.name, 'en'); nameEnEl.dataset.manuallyEdited = "false"; nameEnEl.dataset.sourceChanged = "false"; }
-      if (descTrEl) { descTrEl.value = trDesc || window.appI18n.autoTranslateUyghur(product.description || '', 'tr'); descTrEl.dataset.manuallyEdited = "false"; descTrEl.dataset.sourceChanged = "false"; }
-      if (descEnEl) { descEnEl.value = enDesc || window.appI18n.autoTranslateUyghur(product.description || '', 'en'); descEnEl.dataset.manuallyEdited = "false"; descEnEl.dataset.sourceChanged = "false"; }
+      const safeTranslate = (txt, lang) => {
+        if (!txt) return '';
+        try {
+          if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+            return window.appI18n.autoTranslateUyghur(txt, lang);
+          }
+        } catch(e) {}
+        return txt;
+      };
+
+      if (nameTrEl) { nameTrEl.value = trName || safeTranslate(product.name, 'tr'); nameTrEl.dataset.manuallyEdited = "false"; nameTrEl.dataset.sourceChanged = "false"; }
+      if (nameEnEl) { nameEnEl.value = enName || safeTranslate(product.name, 'en'); nameEnEl.dataset.manuallyEdited = "false"; nameEnEl.dataset.sourceChanged = "false"; }
+      if (descTrEl) { descTrEl.value = trDesc || safeTranslate(product.description || '', 'tr'); descTrEl.dataset.manuallyEdited = "false"; descTrEl.dataset.sourceChanged = "false"; }
+      if (descEnEl) { descEnEl.value = enDesc || safeTranslate(product.description || '', 'en'); descEnEl.dataset.manuallyEdited = "false"; descEnEl.dataset.sourceChanged = "false"; }
     } else {
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
       document.getElementById('formProductId').value = '';
@@ -3697,7 +3748,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fileInput) fileInput.value = '';
     }
 
-    modal.classList.add('active');
+    window.showModal(modal);
   }
   window.openProductModal = openProductModal;
 
@@ -5676,7 +5727,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
 
-          document.getElementById('productFormModal').classList.remove('active');
+          window.hideModal('productFormModal');
           renderProductsTable();
           renderDashboardMetrics();
           if (saveRes.cloudSynced) {
@@ -7371,33 +7422,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // 📜 ۋاكالەتچىلىك كېلىشىمنامە ئارخىپ كۆزنىكى مەشغۇلاتلىرى
     setupContractArchiveModalEvents();
 
-    window.addEventListener('uyghur_store_sync', () => {
-      renderDashboardMetrics();
-      renderRecentOrders();
+    window.addEventListener('uyghur_store_sync', (e) => {
+      const type = e && e.detail ? e.detail.type : null;
       const pModal = document.getElementById('productFormModal');
-      if (!pModal || !pModal.classList.contains('active')) {
-        renderProductsTable();
+      const isProductModalOpen = pModal && (pModal.classList.contains('active') || pModal.style.display === 'flex');
+
+      if (!type || type === 'products' || type === 'all') {
+        if (!isProductModalOpen) {
+          renderProductsTable();
+        }
+        renderDashboardMetrics();
       }
-      renderOrdersTable();
-      renderCustomersTable();
-      renderCouponsTable();
-      renderAgentsView();
+      if (!type || type === 'orders' || type === 'all') {
+        renderRecentOrders();
+        renderOrdersTable();
+        renderDashboardMetrics();
+      }
+      if (!type || type === 'agents' || type === 'all') {
+        renderAgentsView();
+        renderDashboardMetrics();
+      }
+      if (!type || type === 'customers' || type === 'all') {
+        renderCustomersTable();
+      }
+      if (!type || type === 'coupons' || type === 'all') {
+        renderCouponsTable();
+      }
     });
     window.addEventListener('teklimakan_cloud_sync_error', () => {
       showAdminToast('بۇلۇتقا ساقلاش مەغلۇپ بولدى؛ باشقا ئۈسكۈنىلەرگە ماسلاشمىدى. تور ۋە Supabase تەڭشىكىنى تەكشۈرۈڭ.', 'error');
     });
 
-    // 🔄 ئارقا سۇپىدا بۇلۇتتىن دەل ۋاقتىدا تەكشۈرۈش (ھەر 20 سېكۇنتتا يېڭى ئىلتىماس كەلگەن-كەلمىگەنلىكىنى تەكشۈرىدۇ)
-    setInterval(async () => {
-      if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
-        const prevPendingCount = (window.appStore.getAgents ? window.appStore.getAgents() : []).filter(a => a.status === 'تەستىق كۈتۈۋاتىدۇ').length;
-        await window.appStore.syncWithSupabase();
-        const newPendingCount = (window.appStore.getAgents ? window.appStore.getAgents() : []).filter(a => a.status === 'تەستىق كۈتۈۋاتىدۇ').length;
-        if (newPendingCount > prevPendingCount) {
-          showAdminToast(`🔔 يېڭى سودىگەر ئىلتىماسى كېلىپ چۈشتى! (${newPendingCount} ئىلتىماس تەستىق كۈتۈۋاتىدۇ)`, 'info');
+    // 🔄 ئارقا سۇپىدا يېڭى سودىگەر ئىلتىماسلىرىنى دەل ۋاقتىدا قەرەللىك تەكشۈرۈش (ھەر 30 سېكۇنتتا)
+    setInterval(() => {
+      if (window.appStore && typeof window.appStore.getAgents === 'function') {
+        const pendingCount = window.appStore.getAgents().filter(a => a.status === 'تەستىق كۈتۈۋاتىدۇ').length;
+        const menuBadge = document.getElementById('menuPendingBadge');
+        if (menuBadge) {
+          if (pendingCount > 0) {
+            menuBadge.textContent = pendingCount;
+            menuBadge.style.display = 'inline-block';
+          } else {
+            menuBadge.style.display = 'none';
+          }
         }
       }
-    }, 20000);
+    }, 30000);
   }
 
   // ==================== 🚚 زاكاز ئىز قوغلاش كۆزنىكى ۋە فورمىسى ====================

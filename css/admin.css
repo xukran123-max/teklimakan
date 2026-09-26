@@ -34,6 +34,7 @@ i[class*="fa-"], span[class*="fa-"],
 
 button i, .btn-action-edit i, .btn-action-delete i, .action-btn i {
   font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
+  pointer-events: none !important;
 }
 
 :root {

@@ -16,9 +16,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- ئۇيغۇرچە فونىت ۋە ئارقا بەت كۆرۈنۈش ئۇسلۇبى -->
-  <link rel="stylesheet" href="css/fonts.css?v=20260926_v79">
-  <link rel="stylesheet" href="css/style.css?v=20260926_v79">
-  <link rel="stylesheet" href="css/admin.css?v=20260926_v79">
+  <link rel="stylesheet" href="css/fonts.css?v=20260926_v80">
+  <link rel="stylesheet" href="css/style.css?v=20260926_v80">
+  <link rel="stylesheet" href="css/admin.css?v=20260926_v80">
 </head>
 <body>
 
@@ -3728,11 +3728,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260926_v79"></script>
-  <script src="js/i18n.js?v=20260926_v79"></script>
-  <script src="js/store.js?v=20260926_v79"></script>
-  <script src="js/push-manager.js?v=20260926_v79"></script>
-  <script src="js/admin.js?v=20260926_v79"></script>
+  <script src="js/supabase.js?v=20260926_v80"></script>
+  <script src="js/i18n.js?v=20260926_v80"></script>
+  <script src="js/store.js?v=20260926_v80"></script>
+  <script src="js/push-manager.js?v=20260926_v80"></script>
+  <script src="js/admin.js?v=20260926_v80"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>
@@ -3857,6 +3857,39 @@
 
       // 4. ھەممە كۆزنەك ۋە كۇنۇپكىلارنى نازارەت قىلىش (Global Click Delegation)
       document.addEventListener('click', function(e) {
+        // تاۋار تەھرىرلەش كۇنۇپكىسى چېكىلگەندە
+        var editProdBtn = e.target.closest('.btn-action-edit');
+        if (editProdBtn && editProdBtn.dataset.id) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof window.openProductModal === 'function') {
+            window.openProductModal(editProdBtn.dataset.id);
+          }
+          return;
+        }
+
+        // تاۋار ئۆچۈرۈش كۇنۇپكىسى چېكىلگەندە
+        var delProdBtn = e.target.closest('.btn-action-delete');
+        if (delProdBtn && delProdBtn.dataset.id) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof window.deleteProductDirect === 'function') {
+            window.deleteProductDirect(delProdBtn.dataset.id);
+          }
+          return;
+        }
+
+        // يېڭى تاۋار قوشۇش كۇنۇپكىسى چېكىلگەندە
+        var addProdBtn = e.target.closest('#openAddProductBtn, #dashQuickAddProduct');
+        if (addProdBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof window.openProductModal === 'function') {
+            window.openProductModal(null);
+          }
+          return;
+        }
+
         // كىنىشكا كۇنۇپكىسى چېكىلگەندە
         var certBtn = e.target.closest('.btn-open-agent-cert, .btn-agent-cert');
         if (certBtn) {

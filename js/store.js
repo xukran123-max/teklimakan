@@ -1734,7 +1734,7 @@ class StoreManager {
       }
     });
 
-    // 📲 كۆچمە تېلېفونلاردا دەل ۋاقتىدا يېڭىلىنىش كاپالىتى (Mobile Heartbeat - ھەر 5 سېكۇنتتا يېڭىلايدۇ)
+    // 📲 كۆچمە تېلېفونلاردا دەل ۋاقتىدا يېڭىلىنىش كاپالىتى (Mobile Heartbeat - ھەر 30 سېكۇنتتا قەرەللىك ماسلىشىدۇ)
     setInterval(() => {
       if (document.visibilityState !== 'hidden') {
         this.syncWithSupabase();
@@ -1744,7 +1744,7 @@ class StoreManager {
           }
         }
       }
-    }, 5000);
+    }, 30000);
 
     // 🔄 باشقا بەتلەرنىڭ يېڭىلىنىش پۇلسىنى كۆرۈش
     window.addEventListener('storage', (e) => {
@@ -1846,6 +1846,8 @@ class StoreManager {
 
   async syncWithSupabase() {
     if (!window.TeklimakanSupabase) return;
+    if (this._isSyncingSupabase) return;
+    this._isSyncingSupabase = true;
     try {
       // 1. مەھسۇلاتلارنى بۇلۇتتىن يېڭىلاش
       const remoteProducts = await window.TeklimakanSupabase.fetchProducts();
@@ -1964,8 +1966,12 @@ class StoreManager {
         }
 
         const merged = Array.from(map.values());
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
-        this.notifyDataChange('products');
+        const mergedStr = JSON.stringify(merged);
+        const currentProductsStr = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        if (mergedStr !== currentProductsStr) {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
+          this.notifyDataChange('products');
+        }
       } else if (Array.isArray(remoteProducts) && remoteProducts.length === 0) {
         // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا قاچىلاش
         const currentProds = this.getProducts();
@@ -2001,8 +2007,13 @@ class StoreManager {
             shippedAt: ro.shipped_at
           });
         });
-        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(Array.from(oMap.values())));
-        this.notifyDataChange('orders');
+        const mergedOrders = Array.from(oMap.values());
+        const ordersStr = JSON.stringify(mergedOrders);
+        const currentOrdersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        if (ordersStr !== currentOrdersStr) {
+          localStorage.setItem(STORAGE_KEYS.ORDERS, ordersStr);
+          this.notifyDataChange('orders');
+        }
       }
 
       // 3. ۋاكالەتچىلەرنى بۇلۇتتىن يېڭىلاش
@@ -2069,8 +2080,13 @@ class StoreManager {
             } : null)
           });
         });
-        localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(Array.from(aMap.values())));
-        this.notifyDataChange('agents');
+        const mergedAgents = Array.from(aMap.values());
+        const agentsStr = JSON.stringify(mergedAgents);
+        const currentAgentsStr = localStorage.getItem(STORAGE_KEYS.AGENTS);
+        if (agentsStr !== currentAgentsStr) {
+          localStorage.setItem(STORAGE_KEYS.AGENTS, agentsStr);
+          this.notifyDataChange('agents');
+        }
       } else if (Array.isArray(remoteAgents) && remoteAgents.length === 0) {
         // ئەگەر بۇلۇتتا ۋاكالەتچى بولمىسا، يەرلىكتىكى بار ۋاكالەتچىلەرنى بۇلۇتقا زاپاس يوللاش
         const localAgents = this.getAgents('none');
@@ -2080,6 +2096,8 @@ class StoreManager {
       }
     } catch (e) {
       console.warn('Supabase ماسلىشىش خاتالىقى:', e);
+    } finally {
+      this._isSyncingSupabase = false;
     }
   }
 

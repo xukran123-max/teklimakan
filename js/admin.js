@@ -2378,6 +2378,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (totalOrdersEl) totalOrdersEl.textContent = `${summary.totalOrders} دانە`;
     if (totalCommissionEl) totalCommissionEl.textContent = `\u20BA${summary.totalCommission.toLocaleString('tr-TR')}`;
 
+    const statusBadge = document.getElementById('monthlyAutoClearStatusBadge');
+    if (statusBadge && window.appStore && typeof window.appStore.getReportAutoClearStatus === 'function') {
+      const st = window.appStore.getReportAutoClearStatus().monthly;
+      statusBadge.textContent = st.statusText;
+      if (st.isCleared) {
+        statusBadge.style.background = '#f1f5f9';
+        statusBadge.style.color = '#64748b';
+        statusBadge.style.borderColor = '#cbd5e1';
+      } else if (st.isSent) {
+        statusBadge.style.background = '#fef3c7';
+        statusBadge.style.color = '#b45309';
+        statusBadge.style.borderColor = '#fde68a';
+      } else {
+        statusBadge.style.background = '#ffffff';
+        statusBadge.style.color = '#0284c7';
+        statusBadge.style.borderColor = '#bae6fd';
+      }
+    }
+
     if (tbody) {
       const agentList = summary.agents || summary.list || [];
       if (agentList.length === 0) {
@@ -2649,6 +2668,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (badgeActive) badgeActive.textContent = `${summary.activeAgentsCount} نەپەر پائال`;
     if (badgeZero) badgeZero.textContent = `${summary.zeroSalesAgentsCount} نەپەر رېغبەتلەندۈرۈلدى`;
 
+    const weeklyStatusBadge = document.getElementById('weeklyAutoClearStatusBadge');
+    if (weeklyStatusBadge && window.appStore && typeof window.appStore.getReportAutoClearStatus === 'function') {
+      const st = window.appStore.getReportAutoClearStatus().weekly;
+      weeklyStatusBadge.textContent = st.statusText;
+      if (st.isCleared) {
+        weeklyStatusBadge.style.background = '#f1f5f9';
+        weeklyStatusBadge.style.color = '#64748b';
+        weeklyStatusBadge.style.borderColor = '#cbd5e1';
+      } else if (st.isSent) {
+        weeklyStatusBadge.style.background = '#fef3c7';
+        weeklyStatusBadge.style.color = '#b45309';
+        weeklyStatusBadge.style.borderColor = '#fde68a';
+      } else {
+        weeklyStatusBadge.style.background = '#ffffff';
+        weeklyStatusBadge.style.color = '#b45309';
+        weeklyStatusBadge.style.borderColor = '#fde68a';
+      }
+    }
+
     // 3. 1-جەدۋەل: پائال سېتىش قىلغان ۋاكالەتچىلەرنىڭ كىرىم خۇلاسىسى (ھۆججەت ۋە تېلېگرامغا يوللىنىدۇ)
     const activeTbody = document.getElementById('weeklySummaryActiveTbody');
     if (activeTbody) {
@@ -2877,6 +2915,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 🧹 ھەپتىلىك سېتىش كۆرسەتكۈچلىرىنى ھازىرلا قولدا نۆللەش
+  function clearWeeklySummaryNow() {
+    if (!confirm('راستلا ھەپتىلىك پائال سېتىش خۇلاسىسىنى ھازىرلا 0 گە كىرگۈزەمسىز؟\n\n(ئەسكەرتىش: ھەپتىلىك دوكلات ئەۋەتىلىپ 1 كۈندىن كېيىنمۇ ئۆزلۈكىدىن ئاپتوماتىك نۆللىنىدۇ)')) {
+      return;
+    }
+
+    try {
+      if (window.appStore && typeof window.appStore.clearWeeklyPerformanceData === 'function') {
+        window.appStore.clearWeeklyPerformanceData(false);
+        renderAgentWeeklySummaryTable();
+        showAdminToast('🧹 ھەپتىلىك سېتىش خۇلاسىسى 0 گە كىرگۈزۈلدى ۋە يېڭى دەۋر باشلاندى!', 'success');
+      }
+    } catch (err) {
+      console.error('Clear weekly summary error:', err);
+      showAdminToast('ھەپتىلىك كۆرسەتكۈچنى نۆللەشتە خاتالىق كۆرۈلدى.', 'error');
+    }
+  }
+
+  // 🚀 ئايلىق دوكلاتنى ھازىرلا ھاسىللاش ۋە Telegram غا ئەۋەتىش
+  async function triggerMonthlyReportNow() {
+    const btn = document.getElementById('btnTriggerMonthlyReportNow');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>ئەۋەتىلىۋاتىدۇ...</span>';
+    }
+
+    try {
+      if (window.appStore && typeof window.appStore.sendMonthlyAgentReport === 'function') {
+        const res = await window.appStore.sendMonthlyAgentReport({ notifyTelegram: true, notifyEmail: true });
+        renderAgentMonthlySummaryTable();
+        showAdminToast(`✅ ئايلىق دوكلات ھاسىللاندى ۋە سىزگە (Telegram) يوللاندى! سىزنىڭ تەلىپىڭىز بويىچە، بۇ دوكلات 3 كۈندىن كېيىن (72 سائەت) ئاپتوماتىك نۆللىنىدۇ.`, 'success');
+      }
+    } catch (err) {
+      console.error('Trigger monthly report error:', err);
+      showAdminToast('ئايلىق دوكلات ئەۋەتىشتە خاتالىق كۆرۈلدى.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>🚀 ھازىرلا ھاسىللاش ۋە ماڭا ئەۋەتىش</span>';
+      }
+    }
+  }
+
+  // 🧹 ئايلىق سېتىش كۆرسەتكۈچلىرىنى ھازىرلا قولدا نۆللەش
+  function clearMonthlySummaryNow() {
+    if (!confirm('راستلا بارلىق ۋاكالەتچىلەرنىڭ ئايلىق سېتىش ۋە زاكاز كۆرسەتكۈچلىرىنى ھازىرلا 0 گە كىرگۈزەمسىز؟\n\n(ئەسكەرتىش: بۇ مەشغۇلات ئايلىق كۆرسەتكۈچنى تازىلايدۇ، ئەۋەتىلگەن دوكلات 3 كۈندىن كېيىنمۇ ئۆزلۈكىدىن ئاپتوماتىك تازىلىنىدۇ)')) {
+      return;
+    }
+
+    try {
+      if (window.appStore && typeof window.appStore.clearMonthlyPerformanceData === 'function') {
+        window.appStore.clearMonthlyPerformanceData(false);
+        renderAgentMonthlySummaryTable();
+        showAdminToast('🧹 بارلىق ۋاكالەتچىلەرنىڭ ئايلىق سېتىش ۋە زاكاز كۆرسەتكۈچلىرى 0 گە كىرگۈزۈلدى!', 'success');
+      }
+    } catch (err) {
+      console.error('Clear monthly summary error:', err);
+      showAdminToast('ئايلىق كۆرسەتكۈچنى نۆللەشتە خاتالىق كۆرۈلدى.', 'error');
+    }
+  }
+
   // ✏️ نۆل سېتىش قىلغان ۋاكالەتچىلەرنىڭ رېغبەتلەندۈرۈش ئورتاق قېلىپىنى تەھرىرلەش كۆزنىكى
   function openEditEncouragementTemplateModal() {
     const modal = document.getElementById('modalEditEncouragementTemplate');
@@ -3010,6 +3109,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.exportWeeklySummaryPrint = exportWeeklySummaryPrint;
   window.exportWeeklySummaryCopy = exportWeeklySummaryCopy;
   window.triggerWeeklyReportNow = triggerWeeklyReportNow;
+  window.clearWeeklySummaryNow = clearWeeklySummaryNow;
+  window.triggerMonthlyReportNow = triggerMonthlyReportNow;
+  window.clearMonthlySummaryNow = clearMonthlySummaryNow;
   window.openEditEncouragementTemplateModal = openEditEncouragementTemplateModal;
   window.saveEncouragementTemplate = saveEncouragementTemplate;
   window.resetEncouragementTemplate = resetEncouragementTemplate;
@@ -7009,6 +7111,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const btnClearWeeklyNow = document.getElementById('btnClearWeeklySummaryNow');
+    if (btnClearWeeklyNow) {
+      btnClearWeeklyNow.addEventListener('click', () => {
+        clearWeeklySummaryNow();
+      });
+    }
+
     const btnExportWeeklyCsv = document.getElementById('btnExportWeeklySummaryCsv');
     if (btnExportWeeklyCsv) {
       btnExportWeeklyCsv.addEventListener('click', () => {
@@ -7112,6 +7221,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('modalEditSummaryPeriod');
         if (modal) modal.classList.remove('active');
         showAdminToast(`✅ دوكلات مەزگىلى «${periodVal}» قىلىپ يېڭىلاندى!`, 'success');
+      });
+    }
+
+    // 🚀 ئايلىق دوكلاتنى ئەۋەتىش ۋە تازىلاش كۇنۇپكىلىرى (Monthly Report Actions)
+    const btnTriggerMonthlyNow = document.getElementById('btnTriggerMonthlyReportNow');
+    if (btnTriggerMonthlyNow) {
+      btnTriggerMonthlyNow.addEventListener('click', () => {
+        triggerMonthlyReportNow();
+      });
+    }
+
+    const btnClearMonthlyNow = document.getElementById('btnClearMonthlySummaryNow');
+    if (btnClearMonthlyNow) {
+      btnClearMonthlyNow.addEventListener('click', () => {
+        clearMonthlySummaryNow();
       });
     }
 

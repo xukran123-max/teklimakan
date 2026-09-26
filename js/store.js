@@ -1792,9 +1792,16 @@ class StoreManager {
       this.anonymizeExpiredOrders(10);
     } catch (e) {}
 
-    // ⏰ يەكشەنبە ئەتىگەن سائەت 08:00 ھەپتىلىك ۋاكالەتچى دوكلاتىنى تەكشۈرۈش ۋە قوزغىتىش
+    // ⏰ ھەپتىلىك ۋە ئايلىق دوكلاتلارنى دەۋرىيلىك ئاپتوماتىك يوللاش ۋە ئەۋەتىلگەندىن كېيىن ئاپتوماتىك تازىلاش (Auto-Clear)
     try {
-      this.checkAndTriggerSundayWeeklyReport();
+      this.checkAndTriggerScheduledReports();
+      this.checkAndAutoClearExpiredReports();
+      if (!window._teklimakanReportTimerInterval) {
+        window._teklimakanReportTimerInterval = setInterval(() => {
+          this.checkAndTriggerScheduledReports();
+          this.checkAndAutoClearExpiredReports();
+        }, 60 * 1000);
+      }
     } catch (e) {}
 
     // ☁️ بۇلۇتتىكى يېڭى مەزمۇنلارنى ھەر ئۈسكۈنىگە دەرھال تارقىتىش (Realtime)
@@ -2578,6 +2585,9 @@ class StoreManager {
     const startTimestamp = startDate.getTime();
     const endTimestamp = endDate.getTime();
 
+    const isWeeklyCleared = localStorage.getItem('teklimakan_weekly_report_cleared') === 'true';
+    const weeklyCutoffTime = parseInt(localStorage.getItem('teklimakan_weekly_cleared_cutoff_time') || '0', 10);
+
     // شۇ ھەپتە ئىچىدىكى بىكار قىلىنمىغان ۋە قايتۇرۇلمىغان زاكازلارنى سۈزۈش
     const weeklyOrders = allOrders.filter(order => {
       const orderStatus = (order.status || '').trim();
@@ -2587,10 +2597,13 @@ class StoreManager {
       if (order.date) {
         const orderTime = new Date(order.date).getTime();
         if (!isNaN(orderTime)) {
+          if (isWeeklyCleared && weeklyCutoffTime > 0 && orderTime <= weeklyCutoffTime) {
+            return false;
+          }
           return orderTime >= startTimestamp && orderTime <= endTimestamp + 86400000;
         }
       }
-      return true; // ئەگەر ۋاقىت يېزىلمىغان بولسا، ئاكتىپ زاكاز دەپ قاراش
+      return !isWeeklyCleared; // ئەگەر ھەپتىلىك دوكلات تازلانغان بولسا، ۋاقىتسىز كونا زاكازلارنى قوشماسلىق
     });
 
     const activeAgentsWithSales = [];
@@ -2640,7 +2653,7 @@ class StoreManager {
       let weeklySalesRevenue = soldProductsList.reduce((sum, p) => sum + p.revenue, 0);
 
       // ئەگەر سىستېمىدا ھەقىقىي يېڭى زاكاز سېلىنمىغان بولسا، ۋاكالەتچىنىڭ پائاللىق دەرىجىسىگە ئاساسەن ھەپتىلىك تەقسىمات ھېسابلاش
-      if (weeklyUnitsSold === 0 && (agent.monthlyOrders || 0) > 0 && agent.status === 'تەستىقلاندى') {
+      if (!isWeeklyCleared && weeklyUnitsSold === 0 && (agent.monthlyOrders || 0) > 0 && agent.status === 'تەستىقلاندى') {
         const estWeeklyOrders = Math.max(1, Math.round((agent.monthlyOrders || 4) / 4));
         const estWeeklyRevenue = Math.max(100, Math.round((agent.monthlySales || 2000) / 4));
 
@@ -2826,6 +2839,8 @@ class StoreManager {
     // ئاخىرقى قېتىم يوللانغان ۋاقىتنى پۈتۈنلەپ خاتىرىلەش
     const sundayKey = new Date().toISOString().split('T')[0];
     localStorage.setItem('teklimakan_last_weekly_report_date', sundayKey);
+    localStorage.setItem('teklimakan_last_weekly_report_sent_at', Date.now().toString());
+    localStorage.setItem('teklimakan_weekly_report_cleared', 'false');
 
     return {
       success: true,
@@ -2836,26 +2851,249 @@ class StoreManager {
     };
   }
 
-  // ⏰ ھەر يەكشەنبە ئەتىگەن سائەت 08:00 دە ئاپتوماتىك قوزغىتىشنى تەكشۈرۈش
-  checkAndTriggerSundayWeeklyReport() {
+  // 📊 ئايلىق سېتىش خۇلاسە دوكلاتىنى ھاسىللاش ۋە باشقۇرغۇچىغا يوللاش
+  async sendMonthlyAgentReport(options = { notifyTelegram: true, notifyEmail: true }) {
+    const summary = this.getMonthlyAgentPerformanceSummary();
+    const timestamp = new Date().toLocaleString('ug-CN', { hour12: false });
+    const now = new Date();
+
+    let reportText = `📊 <b>[ئايلىق ۋاكالەتچىلەر سېتىش ۋە كومىسسىيە خۇلاسە دوكلاتى]</b>\n`;
+    reportText += `📅 <b>دوكلات مەزگىلى:</b> ${summary.monthTitle}\n`;
+    reportText += `⏰ <b>يوللانغان ۋاقىت:</b> ${timestamp}\n`;
+    reportText += `👥 <b>ئومۇمىي ۋاكالەتچىلەر:</b> ${summary.totalAgents} نەپەر\n`;
+    reportText += `💰 <b>ئايلىق ئومۇمىي سېتىش:</b> ₺ ${summary.totalSales.toLocaleString('tr-TR')}\n`;
+    reportText += `📦 <b>ئايلىق زاكاز سانى:</b> ${summary.totalOrders} دانە\n`;
+    reportText += `💵 <b>بېرىلىدىغان ئومۇمىي كومىسسىيە:</b> <b>₺ ${summary.totalCommission.toLocaleString('tr-TR')}</b>\n\n`;
+
+    reportText += `<b>━━━━━━━━━━ ۋاكالەتچىلەر ئايلىق سېتىش تىزىملىكى ━━━━━━━━━━</b>\n`;
+    (summary.list || []).forEach((a, i) => {
+      reportText += `<b>${i + 1}. ${a.name}</b> (📍 ${a.city} | ${a.badgeLabel || 'ۋاكالەتچى'})\n`;
+      reportText += `   • 💵 <b>ئايلىق سېتىش:</b> ₺ ${a.monthlySales.toLocaleString('tr-TR')} (${a.monthlyOrders} دانە زاكاز)\n`;
+      reportText += `   • 📈 <b>كومىسسىيە پىرسەنتى:</b> %${a.commissionRate} | 💰 <b>بېرىلىدىغان پۇل:</b> <b>₺ ${a.monthlyCommission.toLocaleString('tr-TR')}</b>\n`;
+    });
+
+    reportText += `\n🧹 <i>ئەسكەرتىش: سىزنىڭ تەلىپىڭىز بويىچە، بۇ ئايلىق خۇلاسە ئەۋەتىلىپ 3 كۈندىن كېيىن (72 سائەت) سېتىش كۆرسەتكۈچلىرى ئاپتوماتىك تازىلىنىپ 0 گە كىرگۈزۈلىدۇ.</i>`;
+
+    // Telegram ئارقىلىق يوللاش
+    if (options.notifyTelegram !== false) {
+      try {
+        await this.sendTelegramAlert({
+          title: `📊 [ۋاكالەتچىلەر ئايلىق خۇلاسىسى] ${summary.monthTitle}`,
+          message: reportText,
+          isUrgent: false
+        });
+      } catch (err) {
+        console.warn('Telegram monthly report error:', err);
+      }
+    }
+
+    // سىستېما ساندۇقىغا خاتىرىلەش
+    this.saveSmsLog({
+      id: 'LOG-MONTHLY-REPORT-' + Date.now(),
+      recipientName: 'سىستېما باشقۇرغۇچى',
+      phone: 'TELEGRAM',
+      recipientRole: 'باشقۇرغۇچى',
+      channel: 'monthly_report_dispatch',
+      message: `[ئايلىق دوكلات يوللاندى] مەزگىل: ${summary.monthTitle} | ئومۇمىي سېتىش: ₺${summary.totalSales} | كومىسسىيە: ₺${summary.totalCommission}`,
+      orderId: 'MONTHLY-DISPATCH',
+      timestamp: timestamp
+    });
+
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    localStorage.setItem('teklimakan_last_monthly_report_month', monthKey);
+    localStorage.setItem('teklimakan_last_monthly_report_sent_at', Date.now().toString());
+    localStorage.setItem('teklimakan_monthly_report_cleared', 'false');
+
+    return {
+      success: true,
+      summary,
+      reportText
+    };
+  }
+
+  // 🧹 ئايلىق سېتىش كۆرسەتكۈچىنى تازىلاش (3 كۈندىن كېيىن ئاپتوماتىك ياكى قولدا)
+  clearMonthlyPerformanceData(isAuto = false) {
+    let agents = this.getAgents('none');
+    agents.forEach(a => {
+      a.monthlySales = 0;
+      a.monthlyOrders = 0;
+    });
+    this.saveAgents(agents);
+
+    localStorage.setItem('teklimakan_monthly_report_cleared', 'true');
+    localStorage.setItem('teklimakan_last_monthly_cleared_at', new Date().toISOString());
+
+    const noticeText = isAuto
+      ? 'ئايلىق دوكلات سىزگە ئەۋەتىلىپ 3 كۈن توشقانلىقى ئۈچۈن، بارلىق ۋاكالەتچىلەرنىڭ ئايلىق سېتىش ۋە زاكاز كۆرسەتكۈچلىرى ئاپتوماتىك تازلاندى ۋە 0 گە كىرگۈزۈلدى.'
+      : 'ۋاكالەتچىلەرنىڭ ئايلىق سېتىش ۋە زاكاز كۆرسەتكۈچلىرى مۇۋەپپەقىيەتلىك تازلاندى ۋە 0 قىلىندى.';
+
+    this.saveSmsLog({
+      id: 'LOG-CLEAR-MONTHLY-' + Date.now(),
+      recipientName: 'سىستېما باشقۇرغۇچى',
+      phone: 'SYSTEM',
+      recipientRole: 'باشقۇرغۇچى',
+      channel: 'system_auto_clear',
+      message: noticeText,
+      orderId: 'REPORT-AUTO-CLEAN',
+      timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
+    });
+
+    this.notifyDataChange('agents');
+    this.notifyDataChange('monthlySummary');
+    return true;
+  }
+
+  // 🧹 ھەپتىلىك سېتىش كۆرسەتكۈچىنى تازىلاش (1 كۈندىن كېيىن ئاپتوماتىك ياكى قولدا)
+  clearWeeklyPerformanceData(isAuto = false) {
+    localStorage.setItem('teklimakan_weekly_report_cleared', 'true');
+    localStorage.setItem('teklimakan_weekly_cleared_cutoff_time', Date.now().toString());
+    localStorage.setItem('teklimakan_last_weekly_cleared_at', new Date().toISOString());
+
+    const noticeText = isAuto
+      ? 'ھەپتىلىك دوكلات سىزگە ئەۋەتىلىپ 1 كۈن توشقانلىقى ئۈچۈن، ھەپتىلىك سېتىش خۇلاسىسى ئاپتوماتىك تازلاندى ۋە يېڭى ھەپتىلىك نۆل دەۋرىگە كىردى.'
+      : 'ھەپتىلىك سېتىش خۇلاسىسى مۇۋەپپەقىيەتلىك تازلاندى ۋە يېڭى دەۋرگە نۆللەندى.';
+
+    this.saveSmsLog({
+      id: 'LOG-CLEAR-WEEKLY-' + Date.now(),
+      recipientName: 'سىستېما باشقۇرغۇچى',
+      phone: 'SYSTEM',
+      recipientRole: 'باشقۇرغۇچى',
+      channel: 'system_auto_clear',
+      message: noticeText,
+      orderId: 'REPORT-AUTO-CLEAN',
+      timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
+    });
+
+    this.notifyDataChange('weeklySummary');
+    return true;
+  }
+
+  // ⏰ دوكلاتلارنىڭ تازىلىنىش قەرەلىنى تەكشۈرۈش (ھەپتىلىك 1 كۈن، ئايلىق 3 كۈن)
+  checkAndAutoClearExpiredReports() {
+    try {
+      const now = Date.now();
+
+      // 1. ھەپتىلىك خۇلاسە: ئەۋەتىلىپ 1 كۈن (24 سائەت) دىن كېيىن ئاپتوماتىك تازىلاش
+      const weeklySentAtStr = localStorage.getItem('teklimakan_last_weekly_report_sent_at');
+      const weeklyCleared = localStorage.getItem('teklimakan_weekly_report_cleared') === 'true';
+      if (weeklySentAtStr && !weeklyCleared) {
+        const weeklySentAt = parseInt(weeklySentAtStr, 10);
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        if (now - weeklySentAt >= oneDayMs) {
+          console.log('🧹 [Auto-Clear] 1 day passed since weekly report sent. Auto-clearing weekly summary...');
+          this.clearWeeklyPerformanceData(true);
+        }
+      }
+
+      // 2. ئايلىق خۇلاسە: ئەۋەتىلىپ 3 كۈن (72 سائەت) دىن كېيىن ئاپتوماتىك تازىلاش
+      const monthlySentAtStr = localStorage.getItem('teklimakan_last_monthly_report_sent_at');
+      const monthlyCleared = localStorage.getItem('teklimakan_monthly_report_cleared') === 'true';
+      if (monthlySentAtStr && !monthlyCleared) {
+        const monthlySentAt = parseInt(monthlySentAtStr, 10);
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+        if (now - monthlySentAt >= threeDaysMs) {
+          console.log('🧹 [Auto-Clear] 3 days passed since monthly report sent. Auto-clearing monthly summary...');
+          this.clearMonthlyPerformanceData(true);
+        }
+      }
+    } catch (e) {
+      console.warn('checkAndAutoClearExpiredReports failed:', e);
+    }
+  }
+
+  // ⏰ دەۋرىيلىك دوكلات قوزغىتىش (ھەر يەكشەنبە 08:00 ھەپتىلىك، ھەر ئاينىڭ 1-كۈنى 08:00 ئايلىق)
+  checkAndTriggerScheduledReports() {
     try {
       const now = new Date();
-      const isSunday = now.getDay() === 0; // 0 = Sunday
       const hour = now.getHours();
 
-      // يەكشەنبە كۈنى ئەتىگەن سائەت 8 ياكى ئۇنىڭدىن كېيىن بولسا
-      if (isSunday && hour >= 8) {
+      // A. ھەر يەكشەنبە ئەتىگەن سائەت 08:00 دە ھەپتىلىك خۇلاسە
+      if (now.getDay() === 0 && hour >= 8) {
         const todayStr = now.toISOString().split('T')[0];
         const lastSentDate = localStorage.getItem('teklimakan_last_weekly_report_date');
-
         if (lastSentDate !== todayStr) {
           console.log('⏰ Auto-triggering Sunday 08:00 Weekly Agent Performance Report...');
           this.sendWeeklyAgentReportAndEncouragements({ notifyTelegram: true, notifySms: true });
         }
       }
+
+      // B. ھەر ئاينىڭ 1-كۈنى ئەتىگەن سائەت 08:00 دە ئايلىق خۇلاسە
+      if (now.getDate() === 1 && hour >= 8) {
+        const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const lastSentMonth = localStorage.getItem('teklimakan_last_monthly_report_month');
+        if (lastSentMonth !== monthKey) {
+          console.log('⏰ Auto-triggering 1st of Month 08:00 Monthly Agent Performance Report...');
+          this.sendMonthlyAgentReport({ notifyTelegram: true, notifyEmail: true });
+        }
+      }
     } catch (e) {
-      console.warn('checkAndTriggerSundayWeeklyReport failed:', e);
+      console.warn('checkAndTriggerScheduledReports failed:', e);
     }
+  }
+
+  // سابىق ئىقتىدارغا ماسلىشىش (Backward Compatibility)
+  checkAndTriggerSundayWeeklyReport() {
+    this.checkAndTriggerScheduledReports();
+  }
+
+  // 📊 دوكلات ئەۋەتىلىش ۋە تازىلىنىش ھالىتىنى ئېلىش (UI Badge & Countdown Helper)
+  getReportAutoClearStatus() {
+    const now = Date.now();
+
+    // 1. ھەپتىلىك ھالەت
+    const weeklySentAtStr = localStorage.getItem('teklimakan_last_weekly_report_sent_at');
+    const weeklyCleared = localStorage.getItem('teklimakan_weekly_report_cleared') === 'true';
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    let weeklyStatus = {
+      isSent: !!weeklySentAtStr,
+      sentAt: weeklySentAtStr ? parseInt(weeklySentAtStr, 10) : null,
+      isCleared: weeklyCleared,
+      remainingHours: 0,
+      statusText: 'تېخى ئەۋەتىلمىدى'
+    };
+    if (weeklySentAtStr) {
+      const sentTime = parseInt(weeklySentAtStr, 10);
+      const elapsed = now - sentTime;
+      const remain = Math.max(0, oneDayMs - elapsed);
+      weeklyStatus.remainingHours = Math.ceil(remain / (60 * 60 * 1000));
+      if (weeklyCleared || remain <= 0) {
+        weeklyStatus.isCleared = true;
+        weeklyStatus.statusText = '🧹 ئەۋەتىلىپ 1 كۈن توشۇپ ئاپتوماتىك تازلاندى (نۆللەندى)';
+      } else {
+        weeklyStatus.statusText = `⏳ ئەۋەتىلدى (يەنە ${weeklyStatus.remainingHours} سائەتتىن كېيىن ئاپتوماتىك تازىلىنىدۇ)`;
+      }
+    }
+
+    // 2. ئايلىق ھالەت
+    const monthlySentAtStr = localStorage.getItem('teklimakan_last_monthly_report_sent_at');
+    const monthlyCleared = localStorage.getItem('teklimakan_monthly_report_cleared') === 'true';
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    let monthlyStatus = {
+      isSent: !!monthlySentAtStr,
+      sentAt: monthlySentAtStr ? parseInt(monthlySentAtStr, 10) : null,
+      isCleared: monthlyCleared,
+      remainingHours: 0,
+      remainingDays: 0,
+      statusText: 'تېخى ئەۋەتىلمىدى'
+    };
+    if (monthlySentAtStr) {
+      const sentTime = parseInt(monthlySentAtStr, 10);
+      const elapsed = now - sentTime;
+      const remain = Math.max(0, threeDaysMs - elapsed);
+      monthlyStatus.remainingHours = Math.ceil(remain / (60 * 60 * 1000));
+      monthlyStatus.remainingDays = Math.ceil(remain / (24 * 60 * 60 * 1000));
+      if (monthlyCleared || remain <= 0) {
+        monthlyStatus.isCleared = true;
+        monthlyStatus.statusText = '🧹 ئەۋەتىلىپ 3 كۈن توشۇپ ئاپتوماتىك تازلاندى (0 قىلىندى)';
+      } else {
+        monthlyStatus.statusText = `⏳ ئەۋەتىلدى (يەنە ${monthlyStatus.remainingDays} كۈن / ${monthlyStatus.remainingHours} سائەتتىن كېيىن ئاپتوماتىك تازىلىنىدۇ)`;
+      }
+    }
+
+    return {
+      weekly: weeklyStatus,
+      monthly: monthlyStatus
+    };
   }
 
   // ⚙️ ۋاكالەتچى كومىسسىيە نىسبىتى ۋە ۋاقتىنى يەككە يېڭىلاش

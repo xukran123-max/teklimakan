@@ -5160,7 +5160,7 @@ class StoreManager {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
   }
 
-  createOrder(customerData, paymentMethod, notes = '', couponDiscountCny = 0, lang = 'ug') {
+  createOrder(customerData, paymentMethod, notes = '', couponDiscountCny = 0, lang = 'ug', instagramGift = null) {
     const cartData = this.getCartDetailed(lang);
     if (cartData.items.length === 0) {
       return { success: false, message: 'سېۋەت بوش!' };
@@ -5186,6 +5186,27 @@ class StoreManager {
       image: item.product.image
     }));
 
+    // 🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى قوشۇلغان بولسا، زاكاز مەھسۇلاتلىرى ۋە ئەسكەرتىشكە ئاپتوماتىك قوشۇش
+    let hasInstaGift = false;
+    let instaUsername = '';
+    if (instagramGift && (instagramGift.requested || instagramGift.username)) {
+      hasInstaGift = true;
+      instaUsername = (instagramGift.username || '').trim() || (lang === 'ug' ? '@ئەگەشكۈچى' : (lang === 'tr' ? '@takipci' : '@follower'));
+      const giftLabel = (window.appI18n && typeof window.appI18n.t === 'function') 
+        ? window.appI18n.t('instaGiftItemName') 
+        : '🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى';
+      orderItems.push({
+        id: 'GIFT-INSTA',
+        name: `${giftLabel} (${instaUsername})`,
+        price: 0,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=400&q=80',
+        isGift: true
+      });
+      const giftNoteText = `🎁 ئىنىستىگېرام سوۋغىتى: ${instaUsername}`;
+      notes = notes ? `${notes} | ${giftNoteText}` : giftNoteText;
+    }
+
     const finalTotalCny = Math.max(0, cartData.totalCny - couponDiscountCny);
 
     const newOrder = {
@@ -5202,7 +5223,9 @@ class StoreManager {
       date: formattedDate,
       notes: notes,
       language: lang,
-      currency: this.currentCurrency
+      currency: this.currentCurrency,
+      hasInstagramGift: hasInstaGift,
+      instagramUser: instaUsername
     };
 
     const lowStockAlerts = [];

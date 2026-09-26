@@ -1279,6 +1279,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const carrierName = order.cargoCarrier || (order.tracking && order.tracking.carrier) || '';
       const trackingCode = order.cargoTrackingNo || (order.tracking && order.tracking.trackingNumber) || '';
 
+      const hasInstaGift = order.hasInstagramGift || (order.notes && (order.notes.includes('ئىنىستىگېرام') || order.notes.includes('Instagram')));
+      const instaUser = order.instagramUser || '';
+      const instaGiftTag = hasInstaGift ? `
+        <div style="margin-top: 5px;">
+          <span style="display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(45deg, #fdf2f8, #fce7f3); border: 1px solid #f472b6; color: #db2777; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; box-shadow: 0 1px 3px rgba(219, 39, 119, 0.15);">
+            <i class="fab fa-instagram"></i> 🎁 ھەدىيە: ${instaUser || 'ئەگەشكۈچى'}
+          </span>
+        </div>
+      ` : '';
+
       tr.innerHTML = `
         <td class="number-latin"><strong>${order.id}</strong> ${langTag}</td>
         <td>
@@ -1288,6 +1298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>
           <div style="font-size: 0.88rem; max-width: 240px; line-height: 1.4;">
             ${itemsSummary}
+            ${instaGiftTag}
           </div>
         </td>
         <td><strong style="color: var(--danger-color); font-size: 1.05rem;">${orderTotalDisplay}</strong></td>

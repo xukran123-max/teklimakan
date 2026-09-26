@@ -436,6 +436,36 @@ function initTeklimakanApp() {
       fContactInsta.textContent = instaHandle;
     }
 
+    // 🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى كۆزنىكىنى نۆۋەتتىكى تىلغا ئاساسەن يېڭىلاش
+    const igTitle = document.getElementById('instaGiftTitle');
+    if (igTitle) igTitle.textContent = i18n.t('instaGiftBoxTitle') || '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگەشتىڭىزمۇ؟';
+    const igBadge = document.getElementById('instaGiftBadgeSpan');
+    if (igBadge) igBadge.textContent = i18n.t('instaGiftBadge') || 'ھەقسىز سوۋغات';
+    const igDesc = document.getElementById('instaGiftDesc');
+    if (igDesc) igDesc.textContent = i18n.t('instaGiftDesc') || 'رەسمىي سەھىپىمىزگە ئەگىشىپ قويسىڭىز، بۇ قېتىملىق زاكازىڭىزغا ئالاھىدە سوۋغات قوشۇپ بېرىمىز!';
+    const igPageLabel = document.getElementById('instaGiftPageLabel');
+    if (igPageLabel) igPageLabel.textContent = i18n.t('instaGiftPageLabel') || 'رەسمىي سەھىپە:';
+    const igPageHandle = document.getElementById('instaGiftPageHandle');
+    if (igPageHandle) igPageHandle.textContent = instaHandle;
+    const igFollowBtn = document.getElementById('instaGiftFollowBtn');
+    if (igFollowBtn) igFollowBtn.href = instaUrl;
+    const igFollowBtnText = document.getElementById('instaGiftFollowBtnText');
+    if (igFollowBtnText) igFollowBtnText.textContent = i18n.t('instaGiftFollowBtn') || 'Instagram\'دا ئەگىشىش';
+    const igCheckLabel = document.getElementById('instaGiftCheckLabel');
+    if (igCheckLabel) igCheckLabel.textContent = i18n.t('instaGiftCheckbox') || 'مەن ئىنىستىگېرامغا ئەگەشتىم، پوسۇلكامغا ھەدىيە قوشۇلسۇن!';
+    const igUsername = document.getElementById('instaGiftUsername');
+    if (igUsername) igUsername.placeholder = i18n.t('instaGiftPlaceholder') || 'ئىنىستىگېرام نامىڭىز (مەسىلەن: @ئىسمىڭىز)';
+    const igHint = document.getElementById('instaGiftHint');
+    if (igHint) igHint.innerHTML = `<i class="fas fa-check-circle"></i> ${i18n.t('instaGiftHint') || 'دەلىللەش ئۇچۇرى: پوسۇلكىڭىز چىقىرىلغاندا ھەدىيە ئاپتوماتىك قوشۇلىدۇ.'}`;
+
+    // ئۈستۈنكى ئايلانما ئېلان (Marquee 6-ئېلان) نى يېڭىلاش
+    document.querySelectorAll('[data-marquee-text="6"]').forEach(el => {
+      el.textContent = i18n.t('instaGiftMarquee') || '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگىشىپ زاكاز بەرسىڭىز ھەقسىز سوۋغات بېرىلىدۇ!';
+    });
+    document.querySelectorAll('[data-marquee-badge="6"]').forEach(el => {
+      el.textContent = i18n.t('instaGiftBadge') || 'سوۋغات';
+    });
+
     const flMerch = document.getElementById('fLinkMerchants');
     if (flMerch) flMerch.textContent = i18n.t('fLinkMerchants');
     const fFooterMerchantSpan = document.getElementById('footerMerchantSpan');
@@ -1697,6 +1727,15 @@ function initTeklimakanApp() {
       if (submitBtnIcon) submitBtnIcon.className = 'fas fa-university';
     }
 
+    // 🎁 ئىنىستىگېرام سوۋغات ساندۇقى ئۇلانمىسىنى ئاكتىپ تىلغا ئاساسەن دەل ماسلاشتۇرۇش
+    const checkoutLang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    const checkoutInstaUrl = window.appI18n ? (window.appI18n.t('instagramUrl') || (checkoutLang === 'ug' ? 'https://www.instagram.com/teklimakancom' : 'https://www.instagram.com/teklimakan.online')) : 'https://www.instagram.com/teklimakancom';
+    const checkoutInstaHandle = window.appI18n ? (window.appI18n.t('instagramHandle') || (checkoutLang === 'ug' ? '@teklimakancom' : '@teklimakan.online')) : '@teklimakancom';
+    const igHandleEl = document.getElementById('instaGiftPageHandle');
+    if (igHandleEl) igHandleEl.textContent = checkoutInstaHandle;
+    const igBtnEl = document.getElementById('instaGiftFollowBtn');
+    if (igBtnEl) igBtnEl.href = checkoutInstaUrl;
+
     closeCartDrawer();
     modal.classList.add('active');
   }
@@ -2545,6 +2584,21 @@ function initTeklimakanApp() {
         });
       }
 
+      // 🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى تاللىغۇچىسى
+      const instaGiftCheckbox = document.getElementById('instaGiftCheckbox');
+      const instaGiftUsernameWrap = document.getElementById('instaGiftUsernameWrap');
+      const instaGiftUsername = document.getElementById('instaGiftUsername');
+      if (instaGiftCheckbox && instaGiftUsernameWrap) {
+        instaGiftCheckbox.addEventListener('change', () => {
+          if (instaGiftCheckbox.checked) {
+            instaGiftUsernameWrap.style.display = 'block';
+            if (instaGiftUsername) instaGiftUsername.focus();
+          } else {
+            instaGiftUsernameWrap.style.display = 'none';
+          }
+        });
+      }
+
       // زاكاز تاپشۇرۇش جەريانى
       checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -2612,13 +2666,26 @@ function initTeklimakanApp() {
           if (address) localStorage.setItem('teklimakan_checkout_address', address);
         } catch (e) {}
 
+        const instaChecked = !!(document.getElementById('instaGiftCheckbox')?.checked);
+        let instaUser = '';
+        if (instaChecked) {
+          instaUser = (document.getElementById('instaGiftUsername')?.value || '').trim();
+          if (!instaUser) {
+            instaUser = lang === 'ug' ? '@ئەگەشكۈچى' : (lang === 'tr' ? '@takipci' : '@follower');
+          }
+        }
+        const instagramGiftData = instaChecked ? { requested: true, username: instaUser } : null;
+
         const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
-        const res = window.appStore.createOrder({ name, phone, city, address }, payment, notes, discountVal, lang);
+        const res = window.appStore.createOrder({ name, phone, city, address }, payment, notes, discountVal, lang, instagramGiftData);
 
         if (res.success) {
           if (typeof playChime === 'function') playChime('success');
           document.getElementById('checkoutModal').classList.remove('active');
           appliedCoupon = null;
+          if (instaGiftCheckbox) instaGiftCheckbox.checked = false;
+          if (instaGiftUsernameWrap) instaGiftUsernameWrap.style.display = 'none';
+          if (instaGiftUsername) instaGiftUsername.value = '';
           updateCartUI();
           renderProducts();
 
@@ -3272,6 +3339,12 @@ function initTeklimakanApp() {
           <div><strong>${window.appI18n.t('custAddress')}:</strong> <span id="succOrderAddress">${fullAddressDisplay}</span></div>
           <div><strong>${window.appI18n.t('paymentMethod')}:</strong> <span style="color: ${isWhatsapp ? '#16a34a' : isCard ? '#4338ca' : '#059669'}; font-weight: 700;">${order.paymentMethod}</span></div>
           <div><strong>${window.appI18n.t('checkoutTotalLabel')}</strong> <strong style="color: var(--danger-color); font-size: 1.15rem;">${order.totalFormatted}</strong></div>
+          ${order.hasInstagramGift ? `
+            <div style="margin-top: 0.65rem; padding: 0.6rem 0.85rem; background: linear-gradient(45deg, #fdf2f8, #fce7f3); border: 1px dashed #f472b6; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.86rem; color: #db2777; font-weight: 700;">
+              <i class="fab fa-instagram" style="font-size: 1.25rem;"></i>
+              <span>🎁 تەبرىكلەيمىز! ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى (${escapeModalHtml(order.instagramUser || '@ئەگەشكۈچى')}) زاكاز پوسۇلكىڭىزغا ھەقسىز قوشۇلدى!</span>
+            </div>
+          ` : ''}
         </div>
 
         <!-- تەھرىرلەش ھالىتى -->

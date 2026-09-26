@@ -66,6 +66,14 @@ function initTeklimakanApp() {
     try { updateCartUI(); } catch (e) { console.error('updateCartUI error:', e); }
     try { updateWishlistUI(); } catch (e) { console.error('updateWishlistUI error:', e); }
     try { initHeroSlider(); } catch (e) { console.error('initHeroSlider error:', e); }
+
+    if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
+      window.appStore.syncWithSupabase().then(() => {
+        try { renderProducts(); } catch (e) {}
+        try { renderBrands(); } catch (e) {}
+        try { renderCategories(); } catch (e) {}
+      }).catch(err => console.warn('Supabase sync error in initStore:', err));
+    }
   }
 
   // ==================== 📅 ھاياتىي چېسلا ئۇچۇرى (Live Date Display) ====================
@@ -1001,7 +1009,7 @@ function initTeklimakanApp() {
 
       card.innerHTML = `
         <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
-          <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+          <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           <div class="image-shield-overlay"></div>
           <div class="product-badges">
             ${badgeHtml}
@@ -1716,7 +1724,7 @@ function initTeklimakanApp() {
     modalBody.innerHTML = `
       <div class="quick-view-grid">
         <div class="quick-view-media" style="position: relative;">
-          <img src="${product.image}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
+          <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           <div class="image-shield-overlay"></div>
           <div class="image-watermark-badge"><i class="fas fa-shield-alt" style="color: #60a5fa; font-size: 0.72rem;"></i> Teklimakan.com</div>
         </div>

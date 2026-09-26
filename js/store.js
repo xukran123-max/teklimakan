@@ -1593,6 +1593,15 @@ class StoreManager {
           healed = true;
         }
       }
+      if (!p.image || p.image.includes('default_product.jpg')) {
+        if (initMatch?.image && !initMatch.image.includes('default_product.jpg')) {
+          p.image = initMatch.image;
+          healed = true;
+        } else if (!p.image) {
+          p.image = 'images/default_product.jpg';
+          healed = true;
+        }
+      }
       return healed;
     };
 
@@ -1603,7 +1612,14 @@ class StoreManager {
 
       if (userEdits && userEdits[p.id]) {
         updated = true;
-        const edited = { ...p, ...userEdits[p.id], isUserEdited: true };
+        const ue = userEdits[p.id];
+        let finalImg = ue.image;
+        if (!finalImg || finalImg.includes('default_product.jpg')) {
+          if (p.image && !p.image.includes('default_product.jpg')) {
+            finalImg = p.image;
+          }
+        }
+        const edited = { ...p, ...ue, image: finalImg || p.image || 'images/default_product.jpg', isUserEdited: true };
         healProductRecord(edited);
         return edited;
       }
@@ -1766,7 +1782,9 @@ class StoreManager {
           sales: Number(row.sales || 0),
           rating: Number(row.rating || 5),
           ratingCount: Number(row.rating_count || 1),
-          image: row.image || '',
+          image: (row.image && !row.image.includes('default_product.jpg')) 
+            ? row.image 
+            : ((previousProduct?.image && !previousProduct.image.includes('default_product.jpg')) ? previousProduct.image : (row.image || 'images/default_product.jpg')),
           description: row.description || '',
           badge: row.badge || '',
           featured: !!row.featured,
@@ -1859,8 +1877,19 @@ class StoreManager {
           const cloudTime = cloudUpdated ? new Date(cloudUpdated).getTime() : 0;
           const localTime = localUpdated ? new Date(localUpdated).getTime() : 0;
 
+          const isInvalidLocalImage = !localItem?.image || localItem.image.includes('default_product.jpg');
+          const hasValidCloudImage = rp.image && !rp.image.includes('default_product.jpg');
+
           // 🛡️ ئەگەر يەرلىك نۇسخا تېخىمۇ يېڭى تەھرىرلەنگەن بولسا، يەرلىك نۇسخا كۈچكە ئىگە، ھەرگىز قاپلانمايدۇ:
           if (localItem && isLocallyEdited && localTime > cloudTime) {
+            // ئەمما ئەگەر يەرلىكتە رەسىم يوق ياكى default بولۇپ بۇلۇتتا ھەقىقىي رەسىم بار بولسا، بۇلۇتتىكى رەسىمنى يەرلىككە بېرىمىز
+            if (isInvalidLocalImage && hasValidCloudImage) {
+              localItem.image = rp.image;
+              if (userEdits[rp.id]) {
+                userEdits[rp.id].image = rp.image;
+                editsUpdated = true;
+              }
+            }
             // بۇلۇتقا يېڭى يەرلىك نۇسخىنى ماس قەدەمدە قايتا ئەۋەتىپ كاپالەتلەندۈرۈش
             if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
               window.TeklimakanSupabase.upsertProduct(localItem);
@@ -1880,6 +1909,14 @@ class StoreManager {
 
           const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
 
+          // رەسىم ئەڭ پۇختا بولغان نۇسخىدىن تاللىنىدۇ
+          let chosenImage = rp.image;
+          if (!chosenImage || chosenImage.includes('default_product.jpg')) {
+            chosenImage = (localItem?.image && !localItem.image.includes('default_product.jpg'))
+              ? localItem.image
+              : (initMatch?.image && !initMatch.image.includes('default_product.jpg') ? initMatch.image : (rp.image || localItem?.image || 'images/default_product.jpg'));
+          }
+
           const safeItem = {
             id: rp.id,
             name: safeName,
@@ -1892,7 +1929,7 @@ class StoreManager {
             sales: rp.sales || 0,
             rating: Number(rp.rating || 5.0),
             ratingCount: rp.rating_count || 1,
-            image: rp.image || localItem?.image || initMatch?.image || '',
+            image: chosenImage,
             description: safeDesc,
             badge: rp.badge || '',
             featured: !!rp.featured,
@@ -1909,7 +1946,7 @@ class StoreManager {
 
           map.set(rp.id, safeItem);
 
-          if (isCloudEdited) {
+          if (isCloudEdited || (hasValidCloudImage && isInvalidLocalImage)) {
             userEdits[rp.id] = safeItem;
             editsUpdated = true;
           }
@@ -4036,15 +4073,12 @@ class StoreManager {
           let origW = img.naturalWidth || img.width || 800;
           let origH = img.naturalHeight || img.height || 800;
 
-          // سۈپەتنى كاپالەتلەندۈرۈش ئۈچۈن كەم دېگەندە 800px، ئەڭ كۆپ بولغاندا 1400px غا تەڭشەش
+          // كۆچمە تور ۋە بۇلۇت دەل ۋاقتىدا قوبۇل قىلىش ئۈچۈن 720px ئەتراپىدا ئەلالاشتۇرۇش (سىغىمى 35KB ئەتراپىدا)
           let targetW = origW;
           let targetH = origH;
-          if (targetW < 800 || targetH < 800) {
-            const upScale = Math.max(800 / targetW, 800 / targetH);
-            targetW = Math.round(targetW * upScale);
-            targetH = Math.round(targetH * upScale);
-          } else if (targetW > 1200 || targetH > 1200) {
-            const downScale = Math.min(1200 / targetW, 1200 / targetH);
+          const maxDim = 720;
+          if (targetW > maxDim || targetH > maxDim) {
+            const downScale = Math.min(maxDim / targetW, maxDim / targetH);
             targetW = Math.round(targetW * downScale);
             targetH = Math.round(targetH * downScale);
           }
@@ -4056,9 +4090,9 @@ class StoreManager {
           ctx.drawImage(img, 0, 0, targetW, targetH);
 
           // 🌟 رەسمىي ئالتۇن سۇ بەلگىسى (Official Teklimakan Guarantee Gold Seal Badge)
-          const badgeW = Math.max(220, Math.round(targetW * 0.28));
-          const badgeH = Math.max(50, Math.round(badgeW * 0.24));
-          const pad = Math.max(16, Math.round(targetW * 0.025));
+          const badgeW = Math.max(200, Math.round(targetW * 0.28));
+          const badgeH = Math.max(45, Math.round(badgeW * 0.24));
+          const pad = Math.max(14, Math.round(targetW * 0.025));
           const x = targetW - badgeW - pad;
           const y = targetH - badgeH - pad;
           const radius = 10;
@@ -4120,7 +4154,10 @@ class StoreManager {
           ctx.restore();
 
           // سۈرەتنى كۆچمە تور ۋە بۇلۇتقا يۈكلەشكە ماس كىچىك JPEG ھالىتىدە چىقىرىش
-          const watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.76);
+          let watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          if (watermarkedDataUrl.length > 50 * 1024 * 4 / 3) {
+            watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+          }
           resolve({
             dataUrl: watermarkedDataUrl,
             width: targetW,

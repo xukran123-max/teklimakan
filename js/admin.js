@@ -191,6 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.syncAgentsFromCloud === 'function') {
       window.syncAgentsFromCloud(false);
     }
+    if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
+      window.appStore.syncWithSupabase().then(() => {
+        try { renderProductsTable(); } catch(e){}
+        try { renderDashboardMetrics(); } catch(e){}
+        try { renderOrdersTable(); } catch(e){}
+      }).catch(err => console.warn('Supabase sync error in initAdmin:', err));
+    }
     loadSettingsForm();
     populateCategoryDropdowns();
     initGlobalAdminSearch();
@@ -1150,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
-            <img src="${product.image || 'images/logo_circle.png'}" class="table-product-thumb" alt="${displayName}" onerror="this.onerror=null; this.src='images/logo_circle.png'">
+            <img src="${product.image || 'images/default_product.jpg'}" class="table-product-thumb" alt="${displayName}" onerror="this.onerror=null; this.src='images/default_product.jpg'">
             <div style="min-width: 0; flex: 1;">
               <div class="table-product-title">${displayName}</div>
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
@@ -5753,7 +5760,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tempImg = new Image();
         tempImg.onload = function() {
           const canvas = document.createElement('canvas');
-          const scale = Math.min(1, 1200 / Math.max(tempImg.naturalWidth, tempImg.naturalHeight));
+          const maxDim = 720;
+          const scale = Math.min(1, maxDim / Math.max(tempImg.naturalWidth, tempImg.naturalHeight));
           canvas.width = Math.max(1, Math.round(tempImg.naturalWidth * scale));
           canvas.height = Math.max(1, Math.round(tempImg.naturalHeight * scale));
           const context = canvas.getContext('2d');
@@ -5766,11 +5774,11 @@ document.addEventListener('DOMContentLoaded', () => {
           context.fillRect(0, 0, canvas.width, canvas.height);
           context.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
 
-          let compressedImage = canvas.toDataURL('image/jpeg', 0.82);
-          while (compressedImage.length > 500 * 1024 * 4 / 3 && canvas.width > 480 && canvas.height > 480) {
+          let compressedImage = canvas.toDataURL('image/jpeg', 0.74);
+          while (compressedImage.length > 50 * 1024 * 4 / 3 && canvas.width > 360 && canvas.height > 360) {
             const smallerCanvas = document.createElement('canvas');
-            smallerCanvas.width = Math.round(canvas.width * 0.8);
-            smallerCanvas.height = Math.round(canvas.height * 0.8);
+            smallerCanvas.width = Math.round(canvas.width * 0.85);
+            smallerCanvas.height = Math.round(canvas.height * 0.85);
             const smallerContext = smallerCanvas.getContext('2d');
             if (!smallerContext) break;
             smallerContext.fillStyle = '#ffffff';
@@ -5780,13 +5788,11 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.height = smallerCanvas.height;
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.drawImage(smallerCanvas, 0, 0);
-            compressedImage = canvas.toDataURL('image/jpeg', 0.78);
+            compressedImage = canvas.toDataURL('image/jpeg', 0.70);
           }
 
-          if (compressedImage.length > 500 * 1024 * 4 / 3) {
-            adminImageProcessing = false;
-            showAdminToast('رەسىم بەك چوڭ؛ تېخىمۇ كىچىك رەسىم تاللاڭ.', 'error');
-            return;
+          if (compressedImage.length > 60 * 1024 * 4 / 3) {
+            compressedImage = canvas.toDataURL('image/jpeg', 0.62);
           }
 
           if (productImageInput) productImageInput.value = compressedImage;
@@ -5795,14 +5801,15 @@ document.addEventListener('DOMContentLoaded', () => {
           adminImageProcessing = false;
 
           if (secStatus) {
-            secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى';
+            secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت دەل ۋاقتىدا ماسلىشىشقا تەييارلاندى';
             secStatus.style.color = '#2563eb';
           }
           if (secDetail) {
-            secDetail.textContent = `ھۆججەت: ${file.name || 'چاپلانغان رەسىم'} (${canvas.width}x${canvas.height}px) - بۇلۇتقا ئەۋەتىشكە ئەلالاشتۇرۇلدى.`;
+            const kbSize = Math.round((compressedImage.length * 3 / 4) / 1024);
+            secDetail.textContent = `ھۆججەت: ${file.name || 'تاللانغان رەسىم'} (${canvas.width}x${canvas.height}px, ${kbSize}KB) - كۆچمە تېلېفون ۋە سۇپىغا دەل ۋاقتىدا ئەۋەتىلىدۇ.`;
           }
 
-          showAdminToast('✅ رەسىم ئەلالاشتۇرۇلدى؛ مەھسۇلات بىلەن بىللە بۇلۇتقا ساقلىنىدۇ.', 'success');
+          showAdminToast('✅ رەسىم ئەلالاشتۇرۇلدى؛ دەل ۋاقتىدا بۇلۇتقا يوللىنىدۇ.', 'success');
         };
 
         tempImg.onerror = function() {

@@ -984,12 +984,29 @@ function initTeklimakanApp() {
       card.dataset.id = product.id;
 
       let stockHtml = '';
+      const rawUnit = (product.unit && product.unit !== 'custom') ? product.unit : '';
+      const cleanUnitStr = (u) => {
+        if (!u || typeof u !== 'string') return '';
+        let s = u.trim();
+        if (!s || s === '?????') return '';
+        const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+        if (midGram) return `${midGram[1]} گرام`;
+        if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+        if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+        if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+        const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+        if (trailGram) return `${trailGram[2]} گرام`;
+        return s;
+      };
+      const cleanedUnit = cleanUnitStr(rawUnit);
+      const stockUnitLabel = cleanedUnit ? (/\d/.test(cleanedUnit) ? `دانە (${cleanedUnit})` : cleanedUnit) : i18n.t('itemsUnit');
+
       if (product.stock <= 0) {
         stockHtml = `<span class="stock-status-out"><i class="fas fa-times-circle"></i> ${i18n.t('outOfStock')}</span>`;
       } else if (product.stock <= 8) {
-        stockHtml = `<span class="stock-status-low"><i class="fas fa-exclamation-circle"></i> ${i18n.t('lowStock')} ${product.stock} ${i18n.t('itemsUnit')}</span>`;
+        stockHtml = `<span class="stock-status-low"><i class="fas fa-exclamation-circle"></i> ${i18n.t('lowStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
       } else {
-        stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')} ${product.stock} ${i18n.t('itemsUnit')}</span>`;
+        stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
       }
 
       let badgeHtml = '';
@@ -1036,7 +1053,7 @@ function initTeklimakanApp() {
 
           <div class="product-stock-bar">
             ${stockHtml}
-            <span class="sales-count">${i18n.t('salesCount')} ${product.sales || 0}</span>
+            <span class="sales-count">${i18n.t('salesCount')} <bdi class="number-latin">${product.sales || 0}</bdi></span>
           </div>
 
           <div class="product-pricing">

@@ -373,30 +373,34 @@ const INITIAL_PRODUCTS = [
     id: 'PRD-103',
     brand: 'تۇرپان يېشىل',
     languageScope: 'all',
-    name: 'تۇرپان يېڭى مەھسۇلات ئەلا كۆك ئۈزۈم مېغىزى 500g',
-    category: 'ئۆسۈملۈك دورىلار',
-    price: 45,
-    oldPrice: 65,
+    name: 'تۇرپان يېشىل ئۈزۈمى 1kg',
+    category: 'قۇرۇق يەل-يېمىشلەر',
+    price: 650,
+    oldPrice: 750,
+    unit: 'كىلو',
     stock: 150,
     sales: 580,
     rating: 5.0,
     ratingCount: 215,
-    image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
-    description: 'تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى.',
+    image: 'images/products/PRD-103.jpg',
+    description: 'تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق كىشمىش ئۈزۈمى.',
     translations: {
       ug: {
-        name: 'تۇرپان يېڭى مەھسۇلات ئەلا كۆك ئۈزۈم مېغىزى 500g',
-        category: 'ئۆسۈملۈك دورىلار',
-        description: 'تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى.'
+        name: 'تۇرپان يېشىل ئۈزۈمى 1kg',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        unit: 'كىلو',
+        description: 'تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق كىشمىش ئۈزۈمى.'
       },
       tr: {
-        name: 'Turpan Yeni Mahsul Yeşil Çekirdeksiz Kuru Üzüm 500g',
-        category: 'Şifalı Bitkiler & Otlar',
+        name: 'Turpan Doğal Yeşil Çekirdeksiz Kuru Üzüm 1kg',
+        category: 'Kuru Meyve & Yemişler',
+        unit: 'Kilo',
         description: 'Turpan vadisinde rüzgar kurutma kulelerinde doğal olarak kurutulmuş tatlı yeşil çekirdeksiz üzüm.'
       },
       en: {
-        name: 'Premium Turpan Naturally Dried Green Seedless Raisins 500g',
-        category: 'Herbal Medicines',
+        name: 'Premium Turpan Naturally Dried Green Seedless Raisins 1kg',
+        category: 'Dried Fruits & Nuts',
+        unit: 'kg',
         description: 'Sun-and-wind cured green raisins from the famous Turpan Depression vineyards.'
       }
     },
@@ -713,31 +717,35 @@ const INITIAL_PRODUCTS = [
     id: 'PRD-113',
     brand: 'تۇرپان يېشىل',
     languageScope: 'all',
-    name: 'تۇرپان كىلاسسىك تەبىئىي قىزىل ئۈزۈم مېغىزى 500g',
-    category: 'ئۆسۈملۈك دورىلار',
-    price: 42,
-    oldPrice: 58,
+    name: 'تۇرپان كىشمىش قىزىل ئۈزۈم 500g',
+    category: 'قۇرۇق يەل-يېمىشلەر',
+    price: 550,
+    oldPrice: 600,
+    unit: '500g',
     stock: 160,
     sales: 610,
     rating: 4.9,
     ratingCount: 195,
-    image: 'https://images.unsplash.com/photo-1595475207225-428b62bda831?auto=format&fit=crop&w=800&q=80',
-    description: 'تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل مەھسۇلات.',
+    image: 'images/products/PRD-113.jpg',
+    description: 'تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى.',
     translations: {
       ug: {
-        name: 'تۇرپان كىلاسسىك تەبىئىي قىزىل ئۈزۈم مېغىزى 500g',
-        category: 'ئۆسۈملۈك دورىلار',
-        description: 'تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل مەھسۇلات.'
+        name: 'تۇرپان كىشمىش قىزىل ئۈزۈم 500g',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        unit: '500g',
+        description: 'تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى.'
       },
       tr: {
-        name: 'Turpan Güneşte Kurutulmuş Kırmızı Kuru Üzüm 500g',
-        category: 'Şifalı Bitkiler & Otlar',
-        description: 'Turpan güneşinde doğal yollarla kurutulmuş yüksek besin değerli leziz kırmızı üzüm.'
+        name: 'Turpan Kırmızı Kuşüzümü (Kişmiş) 500g',
+        category: 'Kuru Meyve & Yemişler',
+        unit: '500 gr',
+        description: 'Turpan güneşinde doğal yollarla kurutulmuş yüksek besin değerli leziz kırmızı kuşüzümü.'
       },
       en: {
-        name: 'Turpan Sun-Dried Sweet Crimson Red Raisins 500g',
-        category: 'Herbal Medicines',
-        description: 'Sun-ripened and naturally cured sweet crimson raisins from the fertile oasis soils.'
+        name: 'Turpan Sun-Dried Sweet Crimson Red Kishmish Raisins 500g',
+        category: 'Dried Fruits & Nuts',
+        unit: '500g',
+        description: 'Naturally sun-dried sweet ruby red raisins harvested from Turpan vineyards.'
       }
     },
     badge: 'تەۋسىيە',
@@ -2015,6 +2023,10 @@ class StoreManager {
             chosenImage = (localItem?.image && !localItem.image.includes('photo-1509358271058') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-420.jpg';
           } else if (rp.id === 'PRD-398' && (!chosenImage || chosenImage.includes('photo-1584308666744') || chosenImage.length < 500)) {
             chosenImage = (localItem?.image && !localItem.image.includes('photo-1584308666744') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-398.jpg';
+          } else if (rp.id === 'PRD-113' && (!chosenImage || chosenImage.includes('photo-1595475207225') || (localItem?.image && localItem.image.includes('PRD-103')))) {
+            chosenImage = 'images/products/PRD-113.jpg';
+          } else if (rp.id === 'PRD-103' && (!chosenImage || chosenImage.includes('photo-1563729784474'))) {
+            chosenImage = 'images/products/PRD-103.jpg';
           } else if (!chosenImage || chosenImage.includes('default_product.jpg')) {
             chosenImage = (localItem?.image && !localItem.image.includes('default_product.jpg'))
               ? localItem.image

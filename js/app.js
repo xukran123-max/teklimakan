@@ -618,8 +618,6 @@ function initTeklimakanApp() {
     if (fAgentLink) fAgentLink.textContent = i18n.t('topAgent');
     const fAgentSpan = document.getElementById('footerAgentSpan');
     if (fAgentSpan) fAgentSpan.textContent = i18n.t('topAgent');
-    const fAgentPortalSpan = document.getElementById('fLinkAgentPortalSpan');
-    if (fAgentPortalSpan) fAgentPortalSpan.textContent = i18n.t('agentFooterLink') || i18n.t('topAgent');
     const btnMerchFooter = document.getElementById('btnOpenMerchantApplyFooter');
     if (btnMerchFooter) btnMerchFooter.title = i18n.t('fLinkMerchants');
     const flAdmin = document.getElementById('fLinkAdmin');
@@ -1006,6 +1004,8 @@ function initTeklimakanApp() {
       const formattedPrice = store.formatPrice(product.price);
       const formattedOldPrice = product.oldPrice ? store.formatPrice(product.oldPrice) : null;
       const isWish = store.isInWishlist(product.id);
+      const safeRating = Number(String(product.rating || 5).replace(',', '.'));
+      const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
 
       card.innerHTML = `
         <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
@@ -1030,7 +1030,7 @@ function initTeklimakanApp() {
           
           <div class="product-rating">
             <i class="fas fa-star"></i>
-            <span>${product.rating.toFixed(1)}</span>
+            <span>${displayRating}</span>
             <span class="rating-count">(${product.ratingCount || 10} ${i18n.t('reviewsText')})</span>
           </div>
 

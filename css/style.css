@@ -335,6 +335,10 @@ html[dir="ltr"] .marquee-item {
   background: #8b5cf6;
 }
 
+.marquee-badge.badge-insta {
+  background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+}
+
 /* پۇل بىرلىكى تاللىغۇچ (Currency Selector) */
 .currency-select-dropdown {
   background: var(--bg-main);

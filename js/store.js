@@ -1425,6 +1425,76 @@ const INITIAL_CATEGORIES = [
   { id: 'كىتاپ ۋە مەدەنىيەت', name: 'كىتاپ ۋە مەدەنىيەت', icon: 'fas fa-book-open', translations: { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
 ];
 
+const DEFAULT_MARQUEE_ITEMS = [
+  {
+    id: 'm1',
+    badge: 'يەتكۈزۈش',
+    text: '🚚 تېز ھەم ئىشەنچلىك يەتكۈزۈش — 1000 لىرادىن ئاشسا يەتكۈزۈش ھەقسىز',
+    badgeStyle: 'badge-sale',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Teslimat', text: '🚚 Hızlı ve Güvenilir Teslimat — 1000 TL Üzeri Kargo Bedava!' },
+      en: { badge: 'Shipping', text: '🚚 Fast & Reliable Delivery — Free Shipping on Orders Over 1000 TL / $30!' }
+    }
+  },
+  {
+    id: 'm2',
+    badge: 'كاپالەت',
+    text: '🛡️ سۈپەت كاپالىتى',
+    badgeStyle: 'badge-featured',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Garanti', text: '🛡️ Kalite Garantisi' },
+      en: { badge: 'Guarantee', text: '🛡️ Quality Guarantee' }
+    }
+  },
+  {
+    id: 'm3',
+    badge: 'ئورالما',
+    text: '📦 ئۆلچەملىك ئوراپ قاچىلاش',
+    badgeStyle: 'badge-package',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Paketleme', text: '📦 Standart ve Özenli Paketleme' },
+      en: { badge: 'Packaging', text: '📦 Standard & Secure Packaging' }
+    }
+  },
+  {
+    id: 'm4',
+    badge: 'تەبىئىي',
+    text: '🌱 ساپ ۋە تەبىئىي مەھسۇلاتلار',
+    badgeStyle: 'badge-local',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Doğal', text: '🌱 Saf ve Doğal Ürünler' },
+      en: { badge: 'Natural', text: '🌱 Pure & Natural Products' }
+    }
+  },
+  {
+    id: 'm5',
+    badge: 'مۇلازىمەت',
+    text: '🎧 24/7 ھەر قانداق سوئالىڭىزغا دەل ۋاقتىدا جاۋاب',
+    badgeStyle: 'badge-service',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Destek', text: '🎧 7/24 Her Sorunuza Anında Cevap' },
+      en: { badge: 'Support', text: '🎧 24/7 Prompt Answers to All Questions' }
+    }
+  },
+  {
+    id: 'm6',
+    badge: 'سوۋغات',
+    text: '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگىشىپ زاكاز بەرسىڭىز ھەقسىز سوۋغات بېرىلىدۇ!',
+    badgeStyle: 'badge-insta',
+    linkType: 'instagram',
+    enabled: true,
+    translations: {
+      tr: { badge: 'Hediye', text: '🎁 Instagram sayfamızı takip edenlere siparişinde sürpriz hediye!' },
+      en: { badge: 'Gift', text: '🎁 Follow our Instagram and get a free surprise gift with your order!' }
+    }
+  }
+];
+
 const INITIAL_SETTINGS = {
   storeName: 'تەكلىماكان سودا تورى',
   storeSlogan: 'سۈپەتلىك، گۈزەل، ئىشەنچلىك ئۇيغۇرچە تور دۇكىنىڭىز',
@@ -1433,6 +1503,7 @@ const INITIAL_SETTINGS = {
   contactEmail: 'xizmet@teklimakan.com',
   instagramUrl: 'https://www.instagram.com/teklimakan.online',
   announcement: '🚚 1000 لىرادىن ئارتۇق مال سېتىۋالسىڭىز يەتكۈزۈپ بېرىش ھەقسىز! | 1000 TL Üzeri Alışverişlerde Kargo Bedava! | Free Shipping on Orders Over 1000 TL!',
+  marqueeItems: DEFAULT_MARQUEE_ITEMS,
   telegramEnabled: true,
   telegramBotToken: '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM',
   telegramChatId: '7077223578',
@@ -5495,7 +5566,11 @@ class StoreManager {
   }
 
   getSettings() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || INITIAL_SETTINGS;
+    let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || INITIAL_SETTINGS;
+    if (!settings.marqueeItems || !Array.isArray(settings.marqueeItems) || settings.marqueeItems.length === 0) {
+      settings.marqueeItems = JSON.parse(JSON.stringify(DEFAULT_MARQUEE_ITEMS));
+    }
+    return settings;
   }
 
   updateSettings(newSettings) {
@@ -5503,6 +5578,44 @@ class StoreManager {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
     this.notifyDataChange('settings');
     return true;
+  }
+
+  getMarqueeItems(lang = 'ug') {
+    const settings = this.getSettings();
+    const items = (Array.isArray(settings.marqueeItems) && settings.marqueeItems.length > 0)
+      ? settings.marqueeItems
+      : DEFAULT_MARQUEE_ITEMS;
+
+    return items
+      .filter(item => item && item.enabled !== false)
+      .map((item, idx) => {
+        let badge = item.badge || '';
+        let text = item.text || '';
+        if (lang !== 'ug' && item.translations && item.translations[lang]) {
+          if (item.translations[lang].badge) badge = item.translations[lang].badge;
+          if (item.translations[lang].text) text = item.translations[lang].text;
+        }
+        return {
+          id: item.id || `m_${idx}`,
+          badge: badge,
+          text: text,
+          badgeStyle: item.badgeStyle || 'badge-sale',
+          linkType: item.linkType || ''
+        };
+      });
+  }
+
+  updateMarqueeItems(items) {
+    if (!Array.isArray(items)) return false;
+    const settings = this.getSettings();
+    settings.marqueeItems = items;
+    this.updateSettings(settings);
+    this.notifyDataChange('marquee');
+    return true;
+  }
+
+  resetMarqueeItems() {
+    return this.updateMarqueeItems(JSON.parse(JSON.stringify(DEFAULT_MARQUEE_ITEMS)));
   }
 
   getDashboardMetrics() {

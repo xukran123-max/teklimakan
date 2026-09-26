@@ -3883,6 +3883,198 @@ document.addEventListener('DOMContentLoaded', () => {
         noticeEl.innerHTML = `🔑 <b>ئەسكەرتىش:</b> سىستېما سىزنىڭ ئۆزىڭىزنىڭ Gmail ئادرېسى ئارقىلىق بىۋاسىتە خەت ئەۋەتىدۇ. Gmail ئادرېسىڭىزنى ۋە 16 خانىلىق Google ئەپ پارولىنى كىرگۈزۈپ «🚀 سىناق ئېلخەت ئەۋەتىپ سىناش» كۇنۇپكىسىنى بېسىڭ.`;
       }
     }
+
+    renderAdminMarqueeList();
+  }
+
+  // ==================== 📢 ئايلانما ئېلان تاختىسى باشقۇرۇش (Marquee Manager) ====================
+  function renderAdminMarqueeList() {
+    const listContainer = document.getElementById('adminMarqueeItemsList');
+    if (!listContainer || !window.appStore) return;
+
+    const s = window.appStore.getSettings();
+    const items = (Array.isArray(s.marqueeItems) && s.marqueeItems.length > 0)
+      ? s.marqueeItems
+      : [
+          { id: 'm1', badge: 'يەتكۈزۈش', text: '🚚 تېز ھەم ئىشەنچلىك يەتكۈزۈش — 1000 لىرادىن ئاشسا يەتكۈزۈش ھەقسىز', badgeStyle: 'badge-sale', enabled: true },
+          { id: 'm2', badge: 'كاپالەت', text: '🛡️ سۈپەت كاپالىتى', badgeStyle: 'badge-featured', enabled: true },
+          { id: 'm3', badge: 'ئورالما', text: '📦 ئۆلچەملىك ئوراپ قاچىلاش', badgeStyle: 'badge-package', enabled: true },
+          { id: 'm4', badge: 'تەبىئىي', text: '🌱 ساپ ۋە تەبىئىي مەھسۇلاتلار', badgeStyle: 'badge-local', enabled: true },
+          { id: 'm5', badge: 'مۇلازىمەت', text: '🎧 24/7 ھەر قانداق سوئالىڭىزغا دەل ۋاقتىدا جاۋاب', badgeStyle: 'badge-service', enabled: true },
+          { id: 'm6', badge: 'سوۋغات', text: '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگىشىپ زاكاز بەرسىڭىز ھەقسىز سوۋغات بېرىلىدۇ!', badgeStyle: 'badge-insta', enabled: true }
+        ];
+
+    listContainer.innerHTML = '';
+
+    items.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'admin-marquee-card';
+      card.dataset.id = item.id || `m_${Date.now()}_${index}`;
+      card.style.cssText = 'background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; position: relative;';
+
+      const isChecked = item.enabled !== false;
+      const bStyle = item.badgeStyle || 'badge-sale';
+
+      const trBadge = item.translations?.tr?.badge || '';
+      const trText = item.translations?.tr?.text || '';
+      const enBadge = item.translations?.en?.badge || '';
+      const enText = item.translations?.en?.text || '';
+      const hasTranslations = !!(trText || enText || trBadge || enBadge);
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; border-bottom: 1px solid #edf2f7; padding-bottom: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <span class="marquee-card-seq" style="background: #e2e8f0; color: #475569; font-weight: 800; font-size: 0.78rem; padding: 2px 8px; border-radius: 6px;">#${index + 1}</span>
+            <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.88rem; font-weight: 700; color: var(--text-main);">
+              <input type="checkbox" class="marquee-input-enabled" ${isChecked ? 'checked' : ''}>
+              <span class="marquee-enabled-label" style="color: ${isChecked ? '#16a34a' : '#94a3b8'};">${isChecked ? 'ئاكتىپ (ئېكراندا كۆرۈنىدۇ)' : 'توختىتىلغان'}</span>
+            </label>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <button type="button" class="btn-marquee-move" data-dir="up" title="يۇقىرىغا يۆتكەش" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 0.82rem;">⬆️</button>
+            <button type="button" class="btn-marquee-move" data-dir="down" title="تۆۋەنگە يۆتكەش" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 0.82rem;">⬇️</button>
+            <button type="button" class="btn-marquee-toggle-i18n" title="تۈركچە ۋە ئىنگلىزچە تەرجىمىسى" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 0.82rem; color: #0284c7; font-weight: 700;">🌐 تىللار</button>
+            <button type="button" class="btn-marquee-delete" title="ئۆچۈرۈش" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 0.82rem; font-weight: 700;">🗑️</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 140px 180px 1fr; gap: 0.75rem; align-items: center;" class="marquee-fields-grid">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">بەلگە نامى (Badge):</label>
+            <input type="text" class="form-control marquee-input-badge" value="${escapeHtml(item.badge || '')}" placeholder="مەسىلەن: كاپالەت" style="font-weight: 700;">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">بەلگە رەڭگى:</label>
+            <select class="form-control marquee-input-style" style="font-weight: 600;">
+              <option value="badge-sale" ${bStyle === 'badge-sale' ? 'selected' : ''}>🔴 قىزىل (يەتكۈزۈش)</option>
+              <option value="badge-featured" ${bStyle === 'badge-featured' ? 'selected' : ''}>🟢 يېشىل (كاپالەت)</option>
+              <option value="badge-package" ${bStyle === 'badge-package' ? 'selected' : ''}>🔵 كۆك (ئورالما)</option>
+              <option value="badge-local" ${bStyle === 'badge-local' ? 'selected' : ''}>🟡 ئالتۇن سېرىق (تەبىئىي)</option>
+              <option value="badge-service" ${bStyle === 'badge-service' ? 'selected' : ''}>🟣 بىنەپشە (مۇلازىمەت)</option>
+              <option value="badge-insta" ${bStyle === 'badge-insta' ? 'selected' : ''}>🌈 Instagram (سوۋغات)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 0.25rem;">ئېلان مەزمۇنى (Text):</label>
+            <input type="text" class="form-control marquee-input-text" value="${escapeHtml(item.text || '')}" placeholder="ئېلان مەزمۇنىنى كىرگۈزۈڭ..." style="font-weight: 600;">
+          </div>
+        </div>
+
+        <!-- كۆپ تىللىق يوشۇرۇن رايون (TR / EN Translations) -->
+        <div class="marquee-i18n-panel" style="display: ${hasTranslations ? 'block' : 'none'}; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 0.75rem 0.9rem; margin-top: 0.25rem;">
+          <div style="font-size: 0.78rem; font-weight: 800; color: #0284c7; margin-bottom: 0.5rem;">
+            <i class="fas fa-globe"></i> تۈركچە ۋە ئىنگلىزچە تەرجىمىسى (ئىختىيارىي):
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;" class="marquee-i18n-grid">
+            <div style="background: #f8fafc; padding: 0.5rem; border-radius: 6px; border: 1px solid #edf2f7;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #e11d48; margin-bottom: 0.35rem;">🇹🇷 Türkçe (تۈركچە):</div>
+              <input type="text" class="form-control marquee-input-tr-badge" value="${escapeHtml(trBadge)}" placeholder="Etiket (örn: Garanti)" style="font-size: 0.8rem; margin-bottom: 0.35rem;">
+              <input type="text" class="form-control marquee-input-tr-text" value="${escapeHtml(trText)}" placeholder="Duyuru metni..." style="font-size: 0.8rem;">
+            </div>
+            <div style="background: #f8fafc; padding: 0.5rem; border-radius: 6px; border: 1px solid #edf2f7;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #2563eb; margin-bottom: 0.35rem;">🇬🇧 English (ئىنگلىزچە):</div>
+              <input type="text" class="form-control marquee-input-en-badge" value="${escapeHtml(enBadge)}" placeholder="Badge (e.g. Guarantee)" style="font-size: 0.8rem; margin-bottom: 0.35rem;">
+              <input type="text" class="form-control marquee-input-en-text" value="${escapeHtml(enText)}" placeholder="Announcement text..." style="font-size: 0.8rem;">
+            </div>
+          </div>
+        </div>
+      `;
+
+      // تەسىرلىك پائالىيەتلەر (Card events)
+      const chk = card.querySelector('.marquee-input-enabled');
+      const lbl = card.querySelector('.marquee-enabled-label');
+      chk?.addEventListener('change', () => {
+        lbl.textContent = chk.checked ? 'ئاكتىپ (ئېكراندا كۆرۈنىدۇ)' : 'توختىتىلغان';
+        lbl.style.color = chk.checked ? '#16a34a' : '#94a3b8';
+      });
+
+      const btnToggleI18n = card.querySelector('.btn-marquee-toggle-i18n');
+      const panelI18n = card.querySelector('.marquee-i18n-panel');
+      btnToggleI18n?.addEventListener('click', () => {
+        panelI18n.style.display = panelI18n.style.display === 'none' ? 'block' : 'none';
+      });
+
+      const btnDelete = card.querySelector('.btn-marquee-delete');
+      btnDelete?.addEventListener('click', () => {
+        if (listContainer.querySelectorAll('.admin-marquee-card').length <= 1) {
+          showAdminToast('ئەڭ ئاز دېگەندە بىر ئېلان بولۇشى كېرەك!', 'warning');
+          return;
+        }
+        card.remove();
+        updateMarqueeCardIndices();
+      });
+
+      card.querySelectorAll('.btn-marquee-move').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const dir = btn.dataset.dir;
+          if (dir === 'up') {
+            const prev = card.previousElementSibling;
+            if (prev) {
+              listContainer.insertBefore(card, prev);
+              updateMarqueeCardIndices();
+            }
+          } else if (dir === 'down') {
+            const next = card.nextElementSibling;
+            if (next) {
+              listContainer.insertBefore(next, card);
+              updateMarqueeCardIndices();
+            }
+          }
+        });
+      });
+
+      listContainer.appendChild(card);
+    });
+  }
+
+  function updateMarqueeCardIndices() {
+    const listContainer = document.getElementById('adminMarqueeItemsList');
+    if (!listContainer) return;
+    listContainer.querySelectorAll('.admin-marquee-card').forEach((card, idx) => {
+      const seqEl = card.querySelector('.marquee-card-seq');
+      if (seqEl) seqEl.textContent = `#${idx + 1}`;
+    });
+  }
+
+  function collectAdminMarqueeItems() {
+    const listContainer = document.getElementById('adminMarqueeItemsList');
+    if (!listContainer) return [];
+
+    const cards = listContainer.querySelectorAll('.admin-marquee-card');
+    const items = [];
+
+    cards.forEach((card, idx) => {
+      const id = card.dataset.id || `m_${idx + 1}`;
+      const enabled = card.querySelector('.marquee-input-enabled')?.checked !== false;
+      const badge = card.querySelector('.marquee-input-badge')?.value.trim() || '';
+      const text = card.querySelector('.marquee-input-text')?.value.trim() || '';
+      const badgeStyle = card.querySelector('.marquee-input-style')?.value || 'badge-sale';
+
+      const trBadge = card.querySelector('.marquee-input-tr-badge')?.value.trim() || '';
+      const trText = card.querySelector('.marquee-input-tr-text')?.value.trim() || '';
+      const enBadge = card.querySelector('.marquee-input-en-badge')?.value.trim() || '';
+      const enText = card.querySelector('.marquee-input-en-text')?.value.trim() || '';
+
+      const translations = {};
+      if (trBadge || trText) translations.tr = { badge: trBadge || badge, text: trText || text };
+      if (enBadge || enText) translations.en = { badge: enBadge || badge, text: enText || text };
+
+      const isInsta = badgeStyle === 'badge-insta' || badge.includes('Instagram') || text.includes('ئىنىستىگېرام');
+
+      if (badge || text) {
+        items.push({
+          id,
+          badge: badge || 'ئۇقتۇرۇش',
+          text: text || 'تەكلىماكان سۇپىسىغا خۇش كەپسىز!',
+          badgeStyle,
+          linkType: isInsta ? 'instagram' : '',
+          enabled,
+          translations
+        });
+      }
+    });
+
+    return items;
   }
 
   // ==================== 📱 قىسقا ئۇچۇر ۋە خەۋەرلىشىش مەركىزى (SMS & WhatsApp Module) ====================
@@ -6087,6 +6279,10 @@ document.addEventListener('DOMContentLoaded', () => {
           smtpPass: getVal('settingSmtpPass'),
           notificationEmail: getVal('settingNotificationEmail') || getVal('settingSmtpUser') || getVal('settingEmail')
         };
+        const curMarquee = collectAdminMarqueeItems();
+        if (curMarquee && curMarquee.length > 0) {
+          updated.marqueeItems = curMarquee;
+        }
         window.appStore.updateSettings(updated);
 
         const newUser = document.getElementById('settingAdminUsername') ? document.getElementById('settingAdminUsername').value.trim() : '';
@@ -6099,6 +6295,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showAdminToast('دۇكان تەڭشەكلىرى، باشقۇرغۇچى نامى، پارول ساقلاندى!', 'success');
+      });
+    }
+
+    // 📢 ئايلانما ئېلان تاختىسى كۇنۇپكىلىرىنى ئۇلاش (Marquee Manager Buttons)
+    const btnAddMarquee = document.getElementById('btnAddMarqueeItem');
+    if (btnAddMarquee) {
+      btnAddMarquee.addEventListener('click', () => {
+        const listContainer = document.getElementById('adminMarqueeItemsList');
+        if (!listContainer) return;
+        const currentItems = collectAdminMarqueeItems();
+        currentItems.push({
+          id: `m_${Date.now()}`,
+          badge: 'يېڭى ئېلان',
+          text: '📢 بۇ يەرگە ئېلان مەزمۇنىنى يېزىڭ...',
+          badgeStyle: 'badge-sale',
+          enabled: true
+        });
+        if (window.appStore) {
+          const s = window.appStore.getSettings();
+          s.marqueeItems = currentItems;
+          window.appStore.updateSettings(s);
+        }
+        renderAdminMarqueeList();
+        const cards = listContainer.querySelectorAll('.admin-marquee-card');
+        const lastCard = cards[cards.length - 1];
+        if (lastCard) {
+          lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const textInput = lastCard.querySelector('.marquee-input-text');
+          if (textInput) textInput.focus();
+        }
+      });
+    }
+
+    const btnResetMarquee = document.getElementById('btnResetMarqueeDefault');
+    if (btnResetMarquee) {
+      btnResetMarquee.addEventListener('click', () => {
+        if (confirm('ئايلانما ئېلانلارنى ئەسلىدىكى سۈكۈتتىكى ھالەتكە قايتۇرامسىز؟ بارلىق ئۆزگەرتىشلەر دەسلەپكى ھالەتكە كېلىدۇ.')) {
+          if (window.appStore && typeof window.appStore.resetMarqueeItems === 'function') {
+            window.appStore.resetMarqueeItems();
+          }
+          renderAdminMarqueeList();
+          showAdminToast('ئايلانما ئېلانلار ئەسلىدىكى سۈكۈتتىكى ھالەتكە قايتۇرۇلدى!', 'success');
+        }
+      });
+    }
+
+    const btnSaveMarquee = document.getElementById('btnSaveMarqueeItems');
+    if (btnSaveMarquee) {
+      btnSaveMarquee.addEventListener('click', () => {
+        const items = collectAdminMarqueeItems();
+        if (items.length === 0) {
+          showAdminToast('ئەڭ ئاز دېگەندە بىر مەزمۇنلۇق ئېلان كىرگۈزۈڭ!', 'warning');
+          return;
+        }
+        if (window.appStore && typeof window.appStore.updateMarqueeItems === 'function') {
+          window.appStore.updateMarqueeItems(items);
+        }
+        renderAdminMarqueeList();
+        showAdminToast('🎉 ئايلانما ئېلان تاختىسى مۇۋەپپەقىيەتلىك ساقلاندى ۋە دەرھال ئېلان قىلىندى!', 'success');
       });
     }
 

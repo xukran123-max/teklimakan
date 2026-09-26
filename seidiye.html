@@ -18,7 +18,7 @@
   
   <!-- ئۇيغۇرچە فونىت ۋە ئارقا بەت كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260924_v50">
+  <link rel="stylesheet" href="css/style.css?v=20260926_v75">
   <link rel="stylesheet" href="css/admin.css?v=20260924_v53">
 </head>
 <body>
@@ -1686,6 +1686,42 @@
                 <i class="fas fa-save"></i> تەڭشەكلەرنى ساقلاش
               </button>
             </form>
+          </div>
+
+          <!-- 📢 ئايلانما ئېلان تاختىسىنى تەھرىرلەش ۋە باشقۇرۇش (Marquee Ticker Manager) -->
+          <div class="data-table-container" style="max-width: 720px; padding: 1.75rem; margin-top: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h4 style="font-size: 1.2rem; font-weight: 800; margin: 0; color: #d97706; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fas fa-bullhorn"></i> ئايلانما ئېلان تاختىسىنى باشقۇرۇش (Marquee Ticker)
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.35rem 0 0 0; line-height: 1.6;">
+                  باش بەتنىڭ ئەڭ ئۈستىدە راۋان ئايلىنىدىغان ئېلان ۋە مۇژدىلارنى كودقا تەگمەي مۇشۇ يەردىن خالىغان ۋاقىتتا يېزىڭ، تەھرىرلەڭ ياكى ئۆچۈرۈڭ.
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" id="btnAddMarqueeItem" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #d97706; border: none; cursor: pointer;">
+                  <i class="fas fa-plus"></i> يېڭى ئېلان قوشۇش
+                </button>
+                <button type="button" id="btnResetMarqueeDefault" class="btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                  <i class="fas fa-undo"></i> ئەسلىگە قايتۇرۇش
+                </button>
+              </div>
+            </div>
+
+            <!-- ئېلانلار تىزىملىكى كونتىينېرى -->
+            <div id="adminMarqueeItemsList" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.25rem;">
+              <!-- Admin JS ئارقىلىق ھەر بىر ئېلان كارتىسى بۇ يەرگە چىقىرىلىدۇ -->
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+              <small style="color: var(--text-muted); font-size: 0.82rem;">
+                ⚡ «ئېلانلارنى ساقلاش» كۇنۇپكىسىنى باسسىڭىز، ئاساسىي بەتتە كود قايتا يۈكلەنمەيلا دەل ۋاقتىدا كۈچكە ئىگە بولىدۇ.
+              </small>
+              <button type="button" id="btnSaveMarqueeItems" class="btn-checkout" style="width: auto; padding: 0.65rem 1.75rem; font-size: 0.92rem; border-radius: 8px; background: #d97706; cursor: pointer;">
+                <i class="fas fa-save"></i> ئېلانلارنى ساقلاش
+              </button>
+            </div>
           </div>
 
           <!-- 💾 سانلىق مەلۇماتلارنى زاپاسلاش ۋە ئەسلىگە كەلتۈرۈش كارتىسى -->
@@ -3693,11 +3729,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260926_v74"></script>
-  <script src="js/i18n.js?v=20260926_v74"></script>
-  <script src="js/store.js?v=20260926_v74"></script>
-  <script src="js/push-manager.js?v=20260926_v74"></script>
-  <script src="js/admin.js?v=20260926_v74"></script>
+  <script src="js/supabase.js?v=20260926_v75"></script>
+  <script src="js/i18n.js?v=20260926_v75"></script>
+  <script src="js/store.js?v=20260926_v75"></script>
+  <script src="js/push-manager.js?v=20260926_v75"></script>
+  <script src="js/admin.js?v=20260926_v75"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

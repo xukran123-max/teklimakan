@@ -114,6 +114,46 @@ function initTeklimakanApp() {
     badge.textContent = isExpanded ? window.appI18n.t('filterMobileHide') : window.appI18n.t('filterMobileShow');
   }
 
+  // ==================== 📢 ئايلانما ئېلان تاختىسى (Marquee Ticker) ====================
+  function escapeMarqueeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function renderMarqueeTicker(lang) {
+    const container = document.querySelector('.top-marquee-content');
+    if (!container || !window.appStore) return;
+    const currentLang = lang || (window.appI18n ? window.appI18n.getLang() : (localStorage.getItem('teklimakan_language') || 'ug'));
+    const items = (typeof window.appStore.getMarqueeItems === 'function')
+      ? window.appStore.getMarqueeItems(currentLang)
+      : [];
+
+    if (!items || items.length === 0) return;
+
+    let itemsHtml = '';
+    items.forEach((it, idx) => {
+      const badgeStyle = it.badgeStyle || 'badge-sale';
+      const isInsta = badgeStyle === 'badge-insta' || it.linkType === 'instagram';
+      const customAttrs = isInsta ? 'style="cursor: pointer;" onclick="document.getElementById(\'footerBrandInstaLink\')?.click()"' : '';
+      itemsHtml += `
+        <div class="marquee-item" ${customAttrs}>
+          <span class="marquee-badge ${escapeMarqueeHtml(badgeStyle)}" data-marquee-badge="${it.id || (idx + 1)}">${escapeMarqueeHtml(it.badge)}</span>
+          <span class="marquee-text" data-marquee-text="${it.id || (idx + 1)}">${escapeMarqueeHtml(it.text)}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = `
+      <div class="marquee-group">${itemsHtml}</div>
+      <div class="marquee-group" aria-hidden="true">${itemsHtml}</div>
+    `;
+  }
+
   // ==================== تىل ۋە تېكىستلەر ====================
   function updateStaticTranslations() {
     const i18n = window.appI18n;
@@ -124,10 +164,7 @@ function initTeklimakanApp() {
     if (annEl) annEl.textContent = i18n.t('announcement');
 
     // ئۈستۈنكى ھەرىكەتچان ئايلانما خەت (Marquee Ticker)
-    for (let m = 1; m <= 5; m++) {
-      document.querySelectorAll(`[data-marquee-badge="${m}"]`).forEach(el => el.textContent = i18n.t(`marqueeBadge${m}`));
-      document.querySelectorAll(`[data-marquee-text="${m}"]`).forEach(el => el.textContent = i18n.t(`marqueeText${m}`));
-    }
+    renderMarqueeTicker(i18n ? i18n.getLang() : 'ug');
 
     // ئۈستۈنكى تاياقچە ئۇچۇرلىرى
     const topWhatsapp = document.getElementById('topWhatsappSpan');
@@ -458,13 +495,7 @@ function initTeklimakanApp() {
     const igHint = document.getElementById('instaGiftHint');
     if (igHint) igHint.innerHTML = `<i class="fas fa-check-circle"></i> ${i18n.t('instaGiftHint') || 'دەلىللەش ئۇچۇرى: پوسۇلكىڭىز چىقىرىلغاندا ھەدىيە ئاپتوماتىك قوشۇلىدۇ.'}`;
 
-    // ئۈستۈنكى ئايلانما ئېلان (Marquee 6-ئېلان) نى يېڭىلاش
-    document.querySelectorAll('[data-marquee-text="6"]').forEach(el => {
-      el.textContent = i18n.t('instaGiftMarquee') || '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگىشىپ زاكاز بەرسىڭىز ھەقسىز سوۋغات بېرىلىدۇ!';
-    });
-    document.querySelectorAll('[data-marquee-badge="6"]').forEach(el => {
-      el.textContent = i18n.t('instaGiftBadge') || 'سوۋغات';
-    });
+    // ئۈستۈنكى ئايلانما ئېلان (Marquee) پۈتۈنلەي renderMarqueeTicker ئارقىلىق يېڭىلىنىدۇ
 
     const flMerch = document.getElementById('fLinkMerchants');
     if (flMerch) flMerch.textContent = i18n.t('fLinkMerchants');
@@ -2723,6 +2754,9 @@ function initTeklimakanApp() {
     }
 
     window.addEventListener('uyghur_store_sync', event => {
+      if (event.detail?.type === 'marquee' || event.detail?.type === 'settings' || event.detail?.type === 'all') {
+        renderMarqueeTicker();
+      }
       renderBrands();
       renderCategories();
       renderProducts();
@@ -2733,6 +2767,12 @@ function initTeklimakanApp() {
           (!event.detail.productId || event.detail.productId === productId) &&
           quickViewModal.classList.contains('active')) {
         openQuickView(productId);
+      }
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'teklimakan_ecom_settings_v4') {
+        renderMarqueeTicker();
       }
     });
 

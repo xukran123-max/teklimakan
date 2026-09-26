@@ -3656,6 +3656,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const product = window.appStore.getProductById(productId);
       if (!product) return;
 
+      // 📲 تاۋار تەھرىرلىگەندە تېلېفونلارغا ئەسكەرتىش چىقىرىش تاللانمىسىنى پۈتۈنلەي تاقاش ۋە يوشۇرۇش
+      const pushWrap = document.getElementById('productPushNotifyWrapper');
+      const pushCheck = document.getElementById('formProductPushNotify');
+      if (pushWrap) pushWrap.style.display = 'none';
+      if (pushCheck) pushCheck.checked = false;
+
       titleEl.textContent = 'تاۋار ئۇچۇرىنى تەھرىرلەش';
       document.getElementById('formProductId').value = product.id;
       document.getElementById('formProductNameUg').value = product.name;
@@ -3751,6 +3757,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (descTrEl) { descTrEl.value = trDesc || safeTranslate(product.description || '', 'tr'); descTrEl.dataset.manuallyEdited = "false"; descTrEl.dataset.sourceChanged = "false"; }
       if (descEnEl) { descEnEl.value = enDesc || safeTranslate(product.description || '', 'en'); descEnEl.dataset.manuallyEdited = "false"; descEnEl.dataset.sourceChanged = "false"; }
     } else {
+      // 📲 يېڭى تاۋار قوشقاندا تېلېفونلارغا ئەسكەرتىش چىقىرىش تاللانمىسىنى كۆرسىتىش ۋە قوزغىتىش
+      const pushWrap = document.getElementById('productPushNotifyWrapper');
+      const pushCheck = document.getElementById('formProductPushNotify');
+      if (pushWrap) pushWrap.style.display = 'flex';
+      if (pushCheck) pushCheck.checked = true;
+
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
       document.getElementById('formProductId').value = '';
       if (brandInput) brandInput.value = 'تەكلىماكان كىلاسسىك';
@@ -5521,9 +5533,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // يېڭى تاۋار قوشۇلغاندا خېرىدارلارغا ئاپتوماتىك Push چىقىرىش ياردەمچىسى
-  window.broadcastProductPush = async function(product) {
-    if (!product) return;
+  // يېڭى تاۋار قوشۇلغاندا خېرىدارلارغا ئاپتوماتىك Push چىقىرىش ياردەمچىسى (پەقەت يېڭى تاۋار ئۈچۈن)
+  window.broadcastProductPush = async function(product, isNew = true) {
+    if (!product || !isNew) return;
     try {
       const nameUg = product.name;
       const descUg = product.description || '';
@@ -5768,10 +5780,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showAdminToast('تاۋار بۇ ئۈسكۈنىدە ساقلاندى، ئەمما بۇلۇتقا يوللانمىدى. تور ۋە Supabase تەڭشىكىنى تەكشۈرۈڭ.', 'error');
           }
 
-          // 📲 يېڭى تاۋار ئېلان قىلىنغاندا تېلېفونلارغا تىلى بويىچە خەۋەرلەندۈرۈش چىقىرىش
+          // 📲 پەقەت يېڭى تاۋار ئېلان قىلىنغاندىلا تېلېفونلارغا تىلى بويىچە خەۋەرلەندۈرۈش چىقىرىش (تەھرىرلىگەندە ھەرگىز چىقىرىلمايدۇ)
+          const isNewProduct = !id;
           const pushCheck = document.getElementById('formProductPushNotify');
-          if (pushCheck && pushCheck.checked && window.broadcastProductPush) {
-            window.broadcastProductPush(data);
+          if (isNewProduct && pushCheck && pushCheck.checked && window.broadcastProductPush) {
+            window.broadcastProductPush(data, true);
           }
         } catch (err) {
           console.error('تاۋار ساقلاش خاتالىقى:', err);

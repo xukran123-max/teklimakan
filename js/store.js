@@ -4557,15 +4557,22 @@ class StoreManager {
       if (raw) categories = JSON.parse(raw);
     } catch(e) {}
 
-    if (!Array.isArray(categories) || categories.length <= 1 || !categories.some(c => c.id === 'گۈلقەنتلەر')) {
+    if (!Array.isArray(categories) || categories.length <= 1) {
       categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
     }
 
-    // 🌟 كومپيۇتېر ۋە كۆچمە تېلېفوندىكى تۈرلەرنى 100% تەڭلەشتۈرۈش:
-    // بارلىق مەھسۇلاتلاردىكى تۈرلەرنى ئۆزلۈكىدىن قوشۇپ مۇكەممەللەشتۈرۈش
-    const products = this.getProducts();
     const existingIds = new Set(categories.map(c => c.id || c.name));
 
+    // 1. بارلىق ئۆلچەملىك تۈرلەردىن تېلېفوندا كەم قالغانلىرىنى ئاپتوماتىك قوشۇش
+    INITIAL_CATEGORIES.forEach(ic => {
+      if (ic.id && !existingIds.has(ic.id)) {
+        existingIds.add(ic.id);
+        categories.push(JSON.parse(JSON.stringify(ic)));
+      }
+    });
+
+    // 2. بارلىق مەھسۇلاتلاردىكى تۈرلەرنى ئۆزلۈكىدىن قوشۇپ مۇكەممەللەشتۈرۈش
+    const products = this.getProducts();
     products.forEach(p => {
       const cat = p.category ? p.category.trim() : '';
       if (cat && cat !== 'all' && !existingIds.has(cat)) {

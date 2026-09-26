@@ -1743,13 +1743,12 @@ function initTeklimakanApp() {
         <div class="quick-view-media" style="position: relative;">
           <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" class="protected-img" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           <div class="image-shield-overlay"></div>
-          <div class="image-watermark-badge"><i class="fas fa-shield-alt" style="color: #60a5fa; font-size: 0.72rem;"></i> Teklimakan.com</div>
         </div>
         <div class="quick-view-details">
-          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.55rem; flex-wrap: wrap;">
-            <span style="font-size: 0.85rem; color: var(--primary-color); font-weight: 700; background: var(--primary-light); padding: 3px 10px; border-radius: 6px;"><i class="fas fa-th-large"></i> ${window.appI18n.getCategoryName(product.category)}</span>
+          <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.55rem; flex-wrap: wrap;">
+            <span style="font-size: 0.78rem; color: var(--primary-color); font-weight: 700; background: var(--primary-light); padding: 2px 9px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-th-large" style="font-size: 0.72rem;"></i> ${window.appI18n.getCategoryName(product.category)}</span>
             <!-- 🏷️ ماركا ئۇچۇرى تەپسىلات كۆزنىكىدە كۆرۈنىدۇ -->
-            <span style="background: rgba(37, 99, 235, 0.1); color: var(--primary-color); padding: 3px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(37, 99, 235, 0.25);"><i class="fas fa-award"></i> ${window.appI18n.t('brandLabel') || 'ماركا:'} ${window.appI18n.getBrandName(product.brand) || 'تەكلىماكان'}</span>
+            <span style="background: rgba(37, 99, 235, 0.08); color: var(--primary-color); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(37, 99, 235, 0.22); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-award" style="font-size: 0.72rem;"></i> ${window.appI18n.t('brandLabel') || 'ماركا:'} ${window.appI18n.getBrandName(product.brand) || 'تەكلىماكان'}</span>
             ${getMerchantBadgeHtml(product)}
           </div>
 

@@ -17,8 +17,8 @@
   
   <!-- ئۇيغۇرچە فونىت ۋە ئارقا بەت كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260926_v80">
-  <link rel="stylesheet" href="css/style.css?v=20260926_v90">
-  <link rel="stylesheet" href="css/admin.css?v=20260926_v80">
+  <link rel="stylesheet" href="css/style.css?v=20260926_v91">
+  <link rel="stylesheet" href="css/admin.css?v=20260926_v91">
 </head>
 <body>
 
@@ -3163,6 +3163,95 @@
     </div>
   </div>
 
+  <!-- 📢 ئايلانما ئېلان تەھرىرلەش كۆزنىكى (Marquee Item Edit Modal) -->
+  <div class="modal-backdrop" id="marqueeItemModal">
+    <div class="modal-content" style="max-width: 600px; border-radius: 20px; padding: 1.6rem; background: #ffffff; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            <i class="fas fa-bullhorn"></i>
+          </div>
+          <div>
+            <h4 id="marqueeModalTitle" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">ئېلاننى تەھرىرلەش</h4>
+            <span style="font-size: 0.8rem; color: #64748b;">ئايلانما ئېلان تاختىسىنىڭ مەزمۇنى، بەلگىسى ۋە تىللارنى تەڭشەش</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-drawer btn-modal-close" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <form id="formMarqueeModal">
+        <input type="hidden" id="marqueeModalItemId">
+
+        <!-- ئالدىن كۆرۈش رايونى (Live Preview Box) -->
+        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.1rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fas fa-eye"></i> ئېكراندا چىقىش ھالىتىنى دەل ۋاقتىدا ئالدىن كۆرۈش:
+          </div>
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.6rem 0.9rem; display: flex; align-items: center; gap: 0.6rem; min-height: 42px;">
+            <span id="marqueeModalPreviewBadge" class="marquee-badge badge-sale" style="font-size: 0.78rem;">كاپالەت</span>
+            <span id="marqueeModalPreviewText" style="font-size: 0.88rem; font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🛡️ سۈپەت كاپالىتى</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+          <div>
+            <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">بەلگە خېتى (Badge) <span style="color: var(--danger-color);">*</span></label>
+            <input type="text" id="marqueeModalBadge" class="form-control" placeholder="مەسىلەن: كاپالەت" required style="font-weight: 700;">
+          </div>
+          <div>
+            <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">بەلگە رەڭ ئۇسلۇبى</label>
+            <select id="marqueeModalStyle" class="form-control" style="font-weight: 600;">
+              <option value="badge-sale">🔴 قىزىل (يەتكۈزۈش / ئېتىبار)</option>
+              <option value="badge-featured">🟢 يېشىل (كاپالەت / سۈپەت)</option>
+              <option value="badge-package">🔵 كۆك (ئورالما / ئىشەنچ)</option>
+              <option value="badge-local">🟡 ئالتۇن سېرىق (تەبىئىي)</option>
+              <option value="badge-service">🟣 بىنەپشە (مۇلازىمەت)</option>
+              <option value="badge-insta">🌈 Instagram رەڭدار (سوۋغات)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">ئېلان مەزمۇنى (ئۇيغۇرچە) <span style="color: var(--danger-color);">*</span></label>
+          <input type="text" id="marqueeModalText" class="form-control" placeholder="ئېلان مەزمۇنىنى كىرگۈزۈڭ..." required style="font-weight: 600;">
+        </div>
+
+        <!-- كۆپ تىللىق تەرجىمە (Türkçe & English) -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.82rem; font-weight: 800; color: #0284c7; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fas fa-globe"></i> تۈركچە ۋە ئىنگلىزچە تەرجىمىسى (ئىختىيارىي):
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div>
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e11d48; margin-bottom: 0.25rem;">🇹🇷 Türkçe:</label>
+              <input type="text" id="marqueeModalTrBadge" class="form-control number-latin" placeholder="Etiket (örn: Garanti)" style="font-size: 0.82rem; margin-bottom: 0.35rem;">
+              <input type="text" id="marqueeModalTrText" class="form-control number-latin" placeholder="Duyuru metni..." style="font-size: 0.82rem;">
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #2563eb; margin-bottom: 0.25rem;">🇬🇧 English:</label>
+              <input type="text" id="marqueeModalEnBadge" class="form-control number-latin" placeholder="Badge (e.g. Guarantee)" style="font-size: 0.82rem; margin-bottom: 0.35rem;">
+              <input type="text" id="marqueeModalEnText" class="form-control number-latin" placeholder="Announcement text..." style="font-size: 0.82rem;">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; background: #fff; border: 1px solid #e2e8f0; padding: 0.65rem 0.85rem; border-radius: 8px;">
+          <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.88rem; font-weight: 700; color: #0f172a; margin: 0;">
+            <input type="checkbox" id="marqueeModalEnabled" checked>
+            <span>بۇ ئېلان باش بەت ئۈستىدە ئاكتىپ كۆرۈنسۇن</span>
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.6rem 1.4rem; font-weight: 700; border-radius: 8px;">ئەمەلدىن قالدۇرۇش</button>
+          <button type="submit" class="btn-checkout" style="background: #d97706; padding: 0.6rem 1.75rem; font-weight: 700; border-radius: 8px; width: auto; cursor: pointer;">
+            <i class="fas fa-save"></i> ساقلاش
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
     <!-- 🚚 پوچتا يوللانما ئۇچۇرى كىرگۈزۈش كۆزنىكى (Order Tracking Modal) -->
   <div class="modal-backdrop" id="orderTrackingModal">
     <div class="modal-content" style="max-width: 480px; border-radius: 20px; padding: 1.6rem; background: #ffffff; box-shadow: 0 25px 50px rgba(0,0,0,0.3);">
@@ -3737,11 +3826,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260926_v90"></script>
-  <script src="js/i18n.js?v=20260926_v90"></script>
-  <script src="js/store.js?v=20260926_v90"></script>
-  <script src="js/push-manager.js?v=20260926_v90"></script>
-  <script src="js/admin.js?v=20260926_v90"></script>
+  <script src="js/supabase.js?v=20260926_v91"></script>
+  <script src="js/i18n.js?v=20260926_v91"></script>
+  <script src="js/store.js?v=20260926_v91"></script>
+  <script src="js/push-manager.js?v=20260926_v91"></script>
+  <script src="js/admin.js?v=20260926_v91"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

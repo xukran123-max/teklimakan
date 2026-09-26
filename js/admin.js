@@ -7697,8 +7697,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const canPublishMultilingual = document.getElementById('authAgentCanPublishMultilingual')?.value === 'true';
         const editViolationsCount = Number(document.getElementById('authAgentEditViolationsCount')?.value || 0);
 
+        // 🛑 تەكرار ئېلخەت ياكى تېلېفون نومۇرىنى تەكشۈرۈش
+        const existingAgent = window.appStore.findExistingAgentByContact(editEmail, editPhone, agentId);
+        if (existingAgent) {
+          const msg = `❌ بۇ ئېلخەت ياكى تېلېفون بىلەن باشقا بىر ۋاكالەتچى («${existingAgent.name}» [ID: ${existingAgent.id}]) ئاللىقاچان مەۋجۇت! تەكرار ئۇچۇر بىلەن ساقلاشقا بولمايدۇ.`;
+          showAdminToast(msg, 'error');
+          alert(msg);
+          return;
+        }
+
         // ئالىي باشقۇرغۇچى تەھرىرلىگەن بارلىق سانلىق مەلۇماتلارنى ساقلاش
-        window.appStore.saveAgent({
+        const saveRes = window.appStore.saveAgent({
           id: agentId,
           name: editName,
           phone: editPhone,
@@ -7715,6 +7724,12 @@ document.addEventListener('DOMContentLoaded', () => {
           authorizedBrands: selectedBrands,
           notes: editNotes
         });
+
+        if (saveRes && saveRes.success === false) {
+          showAdminToast(saveRes.message, 'error');
+          alert(saveRes.message);
+          return;
+        }
 
         document.getElementById('agentBrandAuthModal').classList.remove('active');
         renderAgentsView();
@@ -7765,6 +7780,15 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        // 🛑 ئوخشاش ئېلخەت ياكى تېلېفون بىلەن مەۋجۇت ۋاكالەتچى بارلىقىنى تەكشۈرۈش
+        const existingNew = window.appStore.findExistingAgentByContact(email, phone);
+        if (existingNew) {
+          const msg = `❌ بۇ ئېلخەت ياكى تېلېفون بىلەن «${existingNew.name}» (ID: ${existingNew.id}) نامىدا ۋاكالەتچى ئاللىقاچان تىزىملاتقان! ئوخشاش ئۇچۇر بىلەن ئىككىنچى ۋاكالەتچى قوشۇشقا ياكى قوبۇل قىلىشقا قەتئىي بولمايدۇ.`;
+          showAdminToast(msg, 'error');
+          alert(msg);
+          return;
+        }
+
         // تاللانغان ماركىلارنى يىغىش
         const selectedBrands = [];
         document.querySelectorAll('#newAgentBrandsCheckboxList input[type="checkbox"]:checked').forEach(cb => {
@@ -7777,7 +7801,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const city = (document.getElementById('newAgentCity')?.value || '').trim() || 'ئىستانبۇل';
         const commissionRate = parseFloat(document.getElementById('newAgentCommission')?.value) || 10;
 
-        window.appStore.saveAgent({
+        const saveRes = window.appStore.saveAgent({
           name,
           email,
           phone,
@@ -7788,6 +7812,12 @@ document.addEventListener('DOMContentLoaded', () => {
           canPublishMultilingual,
           authorizedBrands: finalBrands
         });
+
+        if (saveRes && saveRes.success === false) {
+          showAdminToast(saveRes.message, 'error');
+          alert(saveRes.message);
+          return;
+        }
 
         document.getElementById('addAgentModal').classList.remove('active');
         renderAgentsView();

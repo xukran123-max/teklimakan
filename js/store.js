@@ -3225,8 +3225,51 @@ class StoreManager {
     };
   }
 
+  // 📱 تېلېفون نومۇرىنى بىرلىككە كەلتۈرۈش (ئاخىرقى 10 خانىنى ئېلىش، 0، +90، بوشلۇقلارنى چىقىرىپ تاشلاش)
+  normalizePhoneNumber(phone) {
+    if (!phone) return '';
+    let digits = String(phone).replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    return digits.length >= 10 ? digits.slice(-10) : digits;
+  }
+
+  // 📧 ئېلخەت ئادرېسىنى بىرلىككە كەلتۈرۈش
+  normalizeEmail(email) {
+    return (email || '').trim().toLowerCase();
+  }
+
+  // 🔍 ئېلخەت ياكى تېلېفون نومۇرى ئارقىلىق مەۋجۇت ۋاكالەتچىنى ئىزدەش (تەكرار تىزىملىتىشنىڭ ئالدىنى ئېلىش)
+  findExistingAgentByContact(email, phone, excludeAgentId = null) {
+    const normPhone = this.normalizePhoneNumber(phone);
+    const normEmail = this.normalizeEmail(email);
+    const agents = this.getAgents('none');
+    return agents.find(a => {
+      if (excludeAgentId && a.id === excludeAgentId) return false;
+      const aEmail = this.normalizeEmail(a.email);
+      const aPhone = this.normalizePhoneNumber(a.phone);
+      const emailMatch = !!(normEmail && aEmail && normEmail === aEmail);
+      const phoneMatch = !!(normPhone && aPhone && normPhone === aPhone);
+      return emailMatch || phoneMatch;
+    }) || null;
+  }
+
   saveAgent(agentData) {
     let agents = this.getAgents('none');
+
+    // 🛑 ئوخشاش ئېلخەت ياكى تېلېفون بىلەن باشقا ۋاكالەتچى بار-يوقلۇقىنى تەكشۈرۈش
+    const existing = this.findExistingAgentByContact(agentData.email, agentData.phone, agentData.id || null);
+    if (existing) {
+      const isEmailDup = agentData.email && this.normalizeEmail(existing.email) === this.normalizeEmail(agentData.email);
+      const isPhoneDup = agentData.phone && this.normalizePhoneNumber(existing.phone) === this.normalizePhoneNumber(agentData.phone);
+      const dupField = (isEmailDup && isPhoneDup) ? 'ئېلخەت ۋە تېلېفون نومۇرى' : (isEmailDup ? 'ئېلخەت ئادرېسى' : 'تېلېفون نومۇرى');
+      return { 
+        success: false, 
+        error: 'DUPLICATE_CONTACT', 
+        message: `❌ بۇ ${dupField} بىلەن باشقا بىر ۋاكالەتچى («${existing.name}» [ID: ${existing.id}]) ئاللىقاچان مەۋجۇت! تەكرار ۋاكالەتچى قوشۇشقا ياكى ئۆزگەرتىشكە بولمايدۇ.` 
+      };
+    }
+
     if (agentData.id) {
       const idx = agents.findIndex(a => a.id === agentData.id);
       if (idx !== -1) {
@@ -3301,7 +3344,7 @@ class StoreManager {
       if (currentAgent) window.TeklimakanSupabase.upsertAgent(currentAgent);
     }
 
-    return true;
+    return { success: true };
   }
 
   updateAgentReputation(agentId, newReputation) {
@@ -3522,11 +3565,26 @@ class StoreManager {
       return { success: false, message: 'ئىسىم ۋە ئېلخەت ئادرېسى كىرگۈزۈش مەجبۇرىي!' };
     }
 
-    const cleanPhoneInput = phone.replace(/[^0-9]/g, '');
-    const existingIndex = agents.findIndex(a => 
-      (a.email && a.email.toLowerCase() === email) || 
-      (cleanPhoneInput && a.phone && a.phone.replace(/[^0-9]/g, '') === cleanPhoneInput)
-    );
+    // 🛑 ئوخشاش ئېلخەت ياكى تېلېفون نومۇرى بىلەن ئىككىنچى قېتىم ئىلتىماس سۇنۇش ياكى ۋاكالەتچى قوبۇل قىلىشنى چەكلەش
+    const existing = this.findExistingAgentByContact(email, phone);
+    if (existing) {
+      const isEmailDup = email && this.normalizeEmail(existing.email) === email;
+      const isPhoneDup = phone && this.normalizePhoneNumber(existing.phone) === this.normalizePhoneNumber(phone);
+      let duplicateField = '';
+      if (isEmailDup && isPhoneDup) {
+        duplicateField = `ئېلخەت ئادرېسى (${agentData.email}) ۋە تېلېفون نومۇرى (${agentData.phone})`;
+      } else if (isEmailDup) {
+        duplicateField = `ئېلخەت ئادرېسى (${agentData.email})`;
+      } else {
+        duplicateField = `تېلېفون نومۇرى (${agentData.phone})`;
+      }
+
+      return {
+        success: false,
+        isDuplicate: true,
+        message: `❌ كەچۈرۈڭ، بۇ ${duplicateField} بىلەن «${existing.name}» (ID: ${existing.id}) نامىدا ئاللىقاچان ۋاكالەتچى مەۋجۇت!\n\nسېستىمىمىزدا بىرلا ئېلخەت ياكى تېلېفون نومۇرى بىلەن ئىككىنچى بىر ئىلتىماس سۇنۇشقا ياكى قايتا ۋاكالەتچى قوبۇل قىلىشقا قەتئىي يول قويۇلمايدۇ.\n\nئەگەر ئىلگىرى تىزىملاتقان بولسىڭىز، «2. كىرىش ۋە تاۋار سۇنۇش» بۆلىكى ئارقىلىق بىۋاسىتە كىرىڭ ياكى مەخپىي نومۇرىڭىزنى (پارول) قايتا بېكىتىڭ.`
+      };
+    }
 
     const nowIso = new Date().toISOString();
     const contractNumber = 'TK-AGR-' + Math.floor(100000 + Math.random() * 900000);
@@ -3546,49 +3604,25 @@ class StoreManager {
       digitalSignatureHash: signatureHash
     };
 
-    let targetAgent;
-    let isReapply = false;
-
-    if (existingIndex !== -1) {
-      isReapply = true;
-      targetAgent = agents[existingIndex];
-      targetAgent.name = agentData.name.trim();
-      targetAgent.email = email;
-      targetAgent.phone = phone || targetAgent.phone;
-      if (agentData.password && String(agentData.password).trim()) {
-        targetAgent.password = String(agentData.password).trim();
-      }
-      if (agentData.deviceToken) {
-        if (!Array.isArray(targetAgent.trustedDevices)) targetAgent.trustedDevices = [];
-        if (!targetAgent.trustedDevices.includes(agentData.deviceToken)) targetAgent.trustedDevices.push(agentData.deviceToken);
-      }
-      targetAgent.salesMethod = agentData.salesMethod || targetAgent.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى';
-      targetAgent.proposedBrands = agentData.proposedBrands || agentData.categoryInterest || targetAgent.proposedBrands || 'بارلىق تۈرلەر';
-      targetAgent.notes = agentData.notes || targetAgent.notes || '';
-      targetAgent.status = 'تەستىق كۈتۈۋاتىدۇ'; // ئارقا سۇپىدا كۆرۈنۈشى ئۈچۈن قايتا تەستىق كۈتۈش ھالىتىگە ئۆزگەرتىش
-      targetAgent.legalAgreement = legalAgreement;
-      agents[existingIndex] = targetAgent;
-    } else {
-      const newId = 'AGT-' + Math.floor(100 + Math.random() * 900);
-      targetAgent = {
-        id: newId,
-        name: agentData.name.trim(),
-        email: email,
-        phone: phone,
-        password: (agentData.password && String(agentData.password).trim()) || '',
-        trustedDevices: agentData.deviceToken ? [agentData.deviceToken] : [],
-        salesMethod: agentData.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى',
-        status: 'تەستىق كۈتۈۋاتىدۇ',
-        canPublishMultilingual: false,
-        authorizedBrands: [],
-        proposedBrands: agentData.proposedBrands || agentData.categoryInterest || 'بارلىق تۈرلەر',
-        notes: agentData.notes || '',
-        registeredAt: nowIso.split('T')[0],
-        productsCount: 0,
-        legalAgreement: legalAgreement
-      };
-      agents.unshift(targetAgent);
-    }
+    const newId = 'AGT-' + Math.floor(100 + Math.random() * 900);
+    const targetAgent = {
+      id: newId,
+      name: agentData.name.trim(),
+      email: email,
+      phone: phone,
+      password: (agentData.password && String(agentData.password).trim()) || '',
+      trustedDevices: agentData.deviceToken ? [agentData.deviceToken] : [],
+      salesMethod: agentData.salesMethod || 'ئۆزۈمنىڭ مەھسۇلاتى',
+      status: 'تەستىق كۈتۈۋاتىدۇ',
+      canPublishMultilingual: false,
+      authorizedBrands: [],
+      proposedBrands: agentData.proposedBrands || agentData.categoryInterest || 'بارلىق تۈرلەر',
+      notes: agentData.notes || '',
+      registeredAt: nowIso.split('T')[0],
+      productsCount: 0,
+      legalAgreement: legalAgreement
+    };
+    agents.unshift(targetAgent);
 
     localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
     this.notifyDataChange('agents');
@@ -3614,9 +3648,7 @@ class StoreManager {
     }
 
     // 🤖 ئالىي باشقۇرغۇچىغا Telegram ئارقىلىق يېڭى ۋاكالەتچى ئىلتىماسى ۋە ئىمزالانغان كېلىشىم ئۇقتۇرۇشى ئەۋەتىش
-    const alertTitle = isReapply ? 
-      '👤 [ۋاكالەتچى ئىلتىماسى يېڭىلاندى] تىزىملاتقۇچى يېڭى ئىلتىماس تاپشۇردى!' : 
-      '👤 [يېڭى ۋاكالەتچى ئىلتىماسى ۋە كېلىشىمى] تور بېكەتتىن يېڭى سودىگەر ئىلتىماس قىلدى!';
+    const alertTitle = '👤 [يېڭى ۋاكالەتچى ئىلتىماسى ۋە كېلىشىمى] تور بېكەتتىن يېڭى سودىگەر ئىلتىماس قىلدى!';
 
     let alertMsg = `🆔 <b>ئىلتىماس كودى:</b> <code>${targetAgent.id}</code>\n` +
       `📜 <b>كېلىشىم نومۇرى:</b> <code>${contractNumber}</code>\n` +
@@ -3782,10 +3814,11 @@ class StoreManager {
   verifyAgentLogin(identifier, password = '', deviceToken = '') {
     if (!identifier) return { success: false, message: 'ئېلخەت ياكى تېلېفون كىرگۈزۈڭ!' };
     const term = identifier.trim().toLowerCase();
+    const normPhone = this.normalizePhoneNumber(term);
     const agents = this.getAgents('none');
     const agent = agents.find(a => 
-      (a.email && a.email.toLowerCase() === term) || 
-      (a.phone && a.phone.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '')) ||
+      (a.email && this.normalizeEmail(a.email) === term) || 
+      (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) ||
       (a.id && a.id.toLowerCase() === term)
     );
 
@@ -3953,10 +3986,11 @@ class StoreManager {
   async requestAgentPasswordReset(identifier) {
     if (!identifier) return { success: false, message: 'ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!' };
     const term = identifier.trim().toLowerCase();
+    const normPhone = this.normalizePhoneNumber(term);
     const agents = this.getAgents('none');
     const agent = agents.find(a => 
-      (a.email && a.email.toLowerCase() === term) || 
-      (a.phone && a.phone.replace(/[^0-9]/g, '') === term.replace(/[^0-9]/g, '')) ||
+      (a.email && this.normalizeEmail(a.email) === term) || 
+      (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) ||
       (a.id && a.id.toLowerCase() === term)
     );
 

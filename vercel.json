@@ -2,8 +2,19 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/api/product-share",
-      "destination": "/index.html"
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "id"
+        },
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/product-share"
     },
     {
       "source": "/seidiye",
@@ -15,11 +26,6 @@
     }
   ],
   "redirects": [
-    {
-      "source": "/api/product-share",
-      "destination": "/",
-      "permanent": false
-    },
     {
       "source": "/admin.html",
       "destination": "/",

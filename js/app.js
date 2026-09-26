@@ -1837,7 +1837,7 @@ function initTeklimakanApp() {
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
-        const itemUrl = `${baseUrl}/?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
+        const itemUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         const msg = encodeURIComponent(
           `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
           `📦 مەھسۇلات: ${product.name}\n` +
@@ -1855,7 +1855,7 @@ function initTeklimakanApp() {
       shareBtn.addEventListener('click', async () => {
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
-        const shareUrl = `${baseUrl}/?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
+        const shareUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
         const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n📝 ${product.description || ''}`;
         const fullShareMessage = `${shareDesc}\n\n🔗 كۆرۈش ئۇلانمىسى:\n${shareUrl}`;

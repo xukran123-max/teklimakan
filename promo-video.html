@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="ug" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تەكلىماكان سودا تورى — كىنو سۈزۈكلىكىدىكى كەسپىي تونۇشتۇرۇش فىلىمى</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/fonts.css">
+  <style>
+    :root {
+      --primary: #f59e0b;
+      --primary-glow: rgba(245, 158, 11, 0.45);
+      --dark-bg: #060913;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(245, 158, 11, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--dark-bg);
+      background-image: 
+        radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.08) 0%, transparent 50%);
+      color: var(--text-main);
+      font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+    }
+    .cinema-header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 2rem;
+    }
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1.5px solid var(--primary);
+      border-radius: 9999px;
+      padding: 0.4rem 1.25rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fef08a;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      margin-bottom: 1rem;
+    }
+    .cinema-title {
+      font-size: 2.6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fef08a, #f59e0b, #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.6rem;
+      filter: drop-shadow(0 6px 20px rgba(245, 158, 11, 0.3));
+    }
+    .cinema-desc {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* Video Player Container */
+    .video-viewport {
+      width: 100%;
+      max-width: 1080px;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: 24px;
+      border: 2px solid var(--card-border);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px var(--primary-glow);
+      overflow: hidden;
+      position: relative;
+    }
+    .main-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Version Selector Pills */
+    .version-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0 1.5rem;
+      width: 100%;
+      max-width: 1080px;
+    }
+    .ver-pill {
+      background: var(--card-bg);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 0.85rem 1.4rem;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(10px);
+    }
+    .ver-pill:hover {
+      border-color: var(--primary);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    .ver-pill.active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35));
+      border-color: var(--primary);
+      color: #fef08a;
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+    .ver-pill .icon {
+      font-size: 1.15rem;
+    }
+
+    /* Download Matrix Cards */
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 1080px;
+      margin-top: 1rem;
+    }
+    .download-card {
+      background: var(--card-bg);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.25s ease;
+    }
+    .download-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    .dl-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dl-card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .btn-dl {
+      background: linear-gradient(135deg, var(--primary), #d97706);
+      color: #0f172a;
+      border: none;
+      border-radius: 12px;
+      padding: 0.65rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn-dl:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .footer-note {
+      margin-top: 3rem;
+      font-size: 0.88rem;
+      color: #64748b;
+      text-align: center;
+    }
+    .footer-note a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="cinema-header">
+    <div class="badge-top">
+      <i class="fas fa-film"></i>
+      <span>تەكلىماكان كىنو سۈزۈكلىكىدىكى تەشۋىقات مەركىزى</span>
+    </div>
+    <h1 class="cinema-title">رەسمىي تونۇشتۇرۇش فىلىمى</h1>
+    <p class="cinema-desc">ئۇيغۇرچە كەسپىي فونىتلار بىلەن زىننەتلەنگەن، يۇقىرى سۈزۈكلۈكتىكى 1080p Full HD كىنو فىلىمى. تۆۋەندىكى تۈگمىلەر ئارقىلىق 4 خىل نۇسخىنى تاللاپ كۆرەلەيسىز ۋە بىۋاسىتە چۈشۈرەلەيسىز.</p>
+  </header>
+
+  <!-- Video Viewport -->
+  <div class="video-viewport">
+    <video id="promoVideoPlayer" class="main-video" controls autoplay loop playsinline>
+      <source id="videoSource" src="C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازلىق_خەتلىك.mp4" type="video/mp4">
+      تور كۆرگۈچىڭىز سىننى قوللىمايدۇ.
+    </video>
+  </div>
+
+  <!-- Version Selector Pills -->
+  <div class="version-controls">
+    <button type="button" class="ver-pill active" onclick="switchVideo('audio_text', this)">
+      <span class="icon">🔊 📝</span>
+      <span>1. ئاۋازلىق + خەتلىك (تولۇق كىنو نۇسخىسى)</span>
+    </button>
+    <button type="button" class="ver-pill" onclick="switchVideo('silent_text', this)">
+      <span class="icon">🔇 📝</span>
+      <span>2. ئاۋازسىز + خەتلىك (ئېكران / ئېلان)</span>
+    </button>
+    <button type="button" class="ver-pill" onclick="switchVideo('audio_notext', this)">
+      <span class="icon">🔊 🎬</span>
+      <span>3. ئاۋازلىق + خەتسىز (ساپ كۆرۈنۈش)</span>
+    </button>
+    <button type="button" class="ver-pill" onclick="switchVideo('silent_notext', this)">
+      <span class="icon">🔇 🎬</span>
+      <span>4. ئاۋازسىز + خەتسىز (ساپ كىنو B-Roll)</span>
+    </button>
+  </div>
+
+  <!-- Download Cards -->
+  <div class="downloads-grid">
+    <div class="download-card">
+      <div>
+        <div class="dl-card-title"><span>🔊 📝</span> ئاۋازلىق + خەتلىك</div>
+        <div class="dl-card-meta">1080p • 19.4 MB • 38 سېكۇنت</div>
+      </div>
+      <a href="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازلىق_خەتلىك.mp4" download class="btn-dl">
+        <i class="fas fa-download"></i> MP4 چۈشۈرۈش
+      </a>
+    </div>
+
+    <div class="download-card">
+      <div>
+        <div class="dl-card-title"><span>🔇 📝</span> ئاۋازسىز + خەتلىك</div>
+        <div class="dl-card-meta">1080p • 17.8 MB • 38 سېكۇنت</div>
+      </div>
+      <a href="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازسىز_خەتلىك.mp4" download class="btn-dl">
+        <i class="fas fa-download"></i> MP4 چۈشۈرۈش
+      </a>
+    </div>
+
+    <div class="download-card">
+      <div>
+        <div class="dl-card-title"><span>🔊 🎬</span> ئاۋازلىق + خەتسىز</div>
+        <div class="dl-card-meta">1080p • 16.9 MB • 38 سېكۇنت</div>
+      </div>
+      <a href="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازلىق_خەتسىز.mp4" download class="btn-dl">
+        <i class="fas fa-download"></i> MP4 چۈشۈرۈش
+      </a>
+    </div>
+
+    <div class="download-card">
+      <div>
+        <div class="dl-card-title"><span>🔇 🎬</span> ئاۋازسىز + خەتسىز</div>
+        <div class="dl-card-meta">1080p • 15.2 MB • 38 سېكۇنت</div>
+      </div>
+      <a href="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازسىز_خەتسىز.mp4" download class="btn-dl">
+        <i class="fas fa-download"></i> MP4 چۈشۈرۈش
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <p>فىلىم ھۆججەتلىرى ئىش ئۈستىلىدىكى <a href="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان">C:\Users\ThinkPad\Desktop\تەكلىماكان</a> قىسقۇچىغا تولۇق كۆچۈرۈپ ساقلاندى.</p>
+    <p style="margin-top: 0.5rem;"><a href="index.html">← تەكلىماكان باش بېتىگە قايتىش</a></p>
+  </div>
+
+  <script>
+    const videoSources = {
+      'audio_text': 'file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازلىق_خەتلىك.mp4',
+      'silent_text': 'file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازسىز_خەتلىك.mp4',
+      'audio_notext': 'file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازلىق_خەتسىز.mp4',
+      'silent_notext': 'file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/تەكلىماكان_تونۇشتۇرۇش_فىلىمى_ئاۋازسىز_خەتسىز.mp4'
+    };
+
+    function switchVideo(type, btnEl) {
+      document.querySelectorAll('.ver-pill').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      const player = document.getElementById('promoVideoPlayer');
+      const srcEl = document.getElementById('videoSource');
+      if (player && videoSources[type]) {
+        player.pause();
+        srcEl.src = videoSources[type];
+        player.load();
+        player.play().catch(() => {});
+      }
+    }
+  </script>
+</body>
+</html>

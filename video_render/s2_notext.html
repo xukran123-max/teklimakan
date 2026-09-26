@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ug">
+<head>
+  <meta charset="utf-8">
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700;800;900&family=Scheherazade+New:wght@600;700&display=swap');
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; width: 1920px; height: 1080px; overflow: hidden;
+    background: radial-gradient(circle at center, #111a33 0%, #060913 100%);
+    font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Microsoft Uighur', serif;
+    direction: rtl; color: #ffffff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .bg-overlay {
+    position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
+    background-image: radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+                      radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .gold-title {
+    font-size: 88px; font-weight: 900; color: #fbbf24;
+    text-shadow: 0 0 45px rgba(251, 191, 36, 0.65), 0 6px 20px rgba(0,0,0,0.9);
+    margin: 0 0 15px 0; text-align: center; line-height: 1.3;
+  }
+  .cyan-title {
+    font-size: 82px; font-weight: 900; color: #38bdf8;
+    text-shadow: 0 0 45px rgba(56, 189, 248, 0.65), 0 6px 20px rgba(0,0,0,0.9);
+    margin: 0 0 15px 0; text-align: center; line-height: 1.3;
+  }
+  .subtitle {
+    font-size: 38px; color: #e2e8f0; font-weight: 600;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.9); margin: 0 0 25px 0; text-align: center;
+  }
+  .badge-pill {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: rgba(245, 158, 11, 0.18); border: 2px solid #f59e0b;
+    border-radius: 9999px; padding: 12px 35px; color: #fef08a; font-size: 26px; font-weight: 700;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+  }
+  .cards-row {
+    display: flex; gap: 40px; align-items: center; justify-content: center;
+    margin-top: 30px;
+  }
+  .product-card {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 2px solid rgba(245, 158, 11, 0.4); border-radius: 28px;
+    padding: 24px; display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(245, 158, 11, 0.15);
+    width: 420px;
+  }
+  .product-img {
+    width: 320px; height: 260px; object-fit: cover; border-radius: 18px;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .product-tag {
+    margin-top: 18px; font-size: 28px; font-weight: 800; color: #fef08a;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-overlay"></div>
+    <div class="cards-row" style="margin-top: 0;">
+    <div class="product-card" style="width: 480px; padding: 30px;">
+      <img src="file:///C:/Users/ThinkPad/Desktop/web/teklimakan/images/products/PRD-122.jpg" class="product-img" style="width: 400px; height: 360px;">
+    </div>
+    <div class="product-card" style="width: 480px; padding: 30px; border-color: #38bdf8;">
+      <img src="file:///C:/Users/ThinkPad/Desktop/تەكلىماكان/پىننەگۈلقەنت/Pinne_Gulkenti_Tall_Jar_Transparent.png" class="product-img" style="width: 400px; height: 360px; object-fit: contain;">
+    </div>
+    <div class="product-card" style="width: 480px; padding: 30px;">
+      <img src="file:///C:/Users/ThinkPad/Desktop/web/teklimakan/images/products/PRD-103.jpg" class="product-img" style="width: 400px; height: 360px;">
+    </div>
+  </div>
+</body>
+</html>

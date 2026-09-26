@@ -5833,8 +5833,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleAdminProductFile(file) {
       if (!file) return;
 
-      // ھۆججەت تىپىنى تەكشۈرۈش
-      if (!file.type.startsWith('image/')) {
+      // ھۆججەت تىپىنى تەكشۈرۈش (ھەم MIME تىپى، ھەم ھۆججەت كېڭەيتىلمىسى ئارقىلىق پۇختا تەكشۈرۈش)
+      const fileName = file.name || '';
+      const isImg = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|jfif|heic|bmp)$/i.test(fileName);
+      if (!isImg) {
         alert('⚠️ پەقەت رەسىم ھۆججىتى (JPG, PNG, WebP) تاللاشقا بولىدۇ!');
         if (productFileInput) productFileInput.value = '';
         if (productCameraInput) productCameraInput.value = '';
@@ -5855,11 +5857,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tempImg = new Image();
         tempImg.onload = function() {
+          const maxDim = 800;
+          let w = tempImg.naturalWidth || tempImg.width || 800;
+          let h = tempImg.naturalHeight || tempImg.height || 800;
+          const scale = Math.min(1, maxDim / Math.max(w, h));
+          const targetW = Math.max(1, Math.round(w * scale));
+          const targetH = Math.max(1, Math.round(h * scale));
+
           const canvas = document.createElement('canvas');
-          const maxDim = 720;
-          const scale = Math.min(1, maxDim / Math.max(tempImg.naturalWidth, tempImg.naturalHeight));
-          canvas.width = Math.max(1, Math.round(tempImg.naturalWidth * scale));
-          canvas.height = Math.max(1, Math.round(tempImg.naturalHeight * scale));
+          canvas.width = targetW;
+          canvas.height = targetH;
           const context = canvas.getContext('2d');
           if (!context) {
             adminImageProcessing = false;
@@ -5867,29 +5874,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
           context.fillStyle = '#ffffff';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+          context.fillRect(0, 0, targetW, targetH);
+          context.drawImage(tempImg, 0, 0, targetW, targetH);
 
-          let compressedImage = canvas.toDataURL('image/jpeg', 0.74);
-          while (compressedImage.length > 50 * 1024 * 4 / 3 && canvas.width > 360 && canvas.height > 360) {
-            const smallerCanvas = document.createElement('canvas');
-            smallerCanvas.width = Math.round(canvas.width * 0.85);
-            smallerCanvas.height = Math.round(canvas.height * 0.85);
-            const smallerContext = smallerCanvas.getContext('2d');
-            if (!smallerContext) break;
-            smallerContext.fillStyle = '#ffffff';
-            smallerContext.fillRect(0, 0, smallerCanvas.width, smallerCanvas.height);
-            smallerContext.drawImage(canvas, 0, 0, smallerCanvas.width, smallerCanvas.height);
-            canvas.width = smallerCanvas.width;
-            canvas.height = smallerCanvas.height;
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(smallerCanvas, 0, 0);
-            compressedImage = canvas.toDataURL('image/jpeg', 0.70);
-          }
-
-          if (compressedImage.length > 60 * 1024 * 4 / 3) {
-            compressedImage = canvas.toDataURL('image/jpeg', 0.62);
-          }
+          let compressedImage = canvas.toDataURL('image/jpeg', 0.82);
 
           if (productImageInput) productImageInput.value = compressedImage;
           if (previewImg) previewImg.src = compressedImage;
@@ -5897,15 +5885,15 @@ document.addEventListener('DOMContentLoaded', () => {
           adminImageProcessing = false;
 
           if (secStatus) {
-            secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت دەل ۋاقتىدا ماسلىشىشقا تەييارلاندى';
+            secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> سۈرەت تەييارلاندى (ساقلاشقا تەييار)';
             secStatus.style.color = '#2563eb';
           }
           if (secDetail) {
             const kbSize = Math.round((compressedImage.length * 3 / 4) / 1024);
-            secDetail.textContent = `ھۆججەت: ${file.name || 'تاللانغان رەسىم'} (${canvas.width}x${canvas.height}px, ${kbSize}KB) - كۆچمە تېلېفون ۋە سۇپىغا دەل ۋاقتىدا ئەۋەتىلىدۇ.`;
+            secDetail.textContent = `ھۆججەت: ${file.name || 'تاللانغان رەسىم'} (${targetW}x${targetH}px, ${kbSize}KB) - ساقلىغاندىن كېيىن سۇپىغا دەل ۋاقتىدا چىقىدۇ.`;
           }
 
-          showAdminToast('✅ رەسىم ئەلالاشتۇرۇلدى؛ دەل ۋاقتىدا بۇلۇتقا يوللىنىدۇ.', 'success');
+          showAdminToast('✅ رەسىم ئەلالاشتۇرۇلدى؛ «ساقلاش» كۇنۇپكىسىنى بېسىڭ.', 'success');
         };
 
         tempImg.onerror = function() {
@@ -5922,6 +5910,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (productFileInput) {
+      productFileInput.addEventListener('click', (e) => { e.target.value = ''; });
       productFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         handleAdminProductFile(file);
@@ -5929,6 +5918,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (productCameraInput) {
+      productCameraInput.addEventListener('click', (e) => { e.target.value = ''; });
       productCameraInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         handleAdminProductFile(file);

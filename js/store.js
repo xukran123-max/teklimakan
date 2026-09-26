@@ -1409,6 +1409,86 @@ const INITIAL_PRODUCTS = [
     badge: 'ئالىي كۈچ',
     featured: true,
     approvalStatus: 'تەستىقلانغان'
+  },
+  {
+    id: 'PRD-420',
+    brand: 'Teklimakan Online',
+    languageScope: 'all',
+    name: 'قارا مور',
+    category: 'بارلىق مەھسۇلاتلار',
+    price: 1500,
+    oldPrice: 2000,
+    unit: 'كىلو',
+    stock: 20,
+    sales: 15,
+    rating: 5.0,
+    ratingCount: 12,
+    image: 'images/products/PRD-420.jpg',
+    description: 'تەبىئىي، ساپ ئەلا سۈپەتلىك تاللانغان قارا مور. تەن ساغلاملىقى ۋە تەم تەڭشەشكە تەبىئىي بايلىق.',
+    translations: {
+      ug: {
+        name: 'قارا مور',
+        category: 'بارلىق مەھسۇلاتلار',
+        unit: 'كىلو',
+        description: 'تەبىئىي، ساپ ئەلا سۈپەتلىك تاللانغان قارا مور. تەن ساغلاملىقى ۋە تەم تەڭشەشكە تەبىئىي بايلىق.'
+      },
+      tr: {
+        name: 'Siyah Ağaç Mantarı (Kara Mor)',
+        category: 'Tüm Ürünler',
+        unit: 'Kilo',
+        description: 'Doğal, seçilmiş yüksek kaliteli siyah ağaç kulak mantarı.'
+      },
+      en: {
+        name: 'Black Fungus (Wood Ear Mushroom)',
+        category: 'All Products',
+        unit: 'kg',
+        description: 'Natural premium selected dried black wood ear fungus.'
+      }
+    },
+    badge: 'ئەڭ يېڭى',
+    featured: true,
+    approvalStatus: 'تەستىقلاندى',
+    merchantBadge: 'ئىشەنچىلىك سودىگەر'
+  },
+  {
+    id: 'PRD-398',
+    brand: 'Teklimakan Online',
+    languageScope: 'all',
+    name: 'مادداتۇلھايات',
+    category: 'ئۇيغۇر تىبابىتى',
+    price: 555,
+    oldPrice: 700,
+    unit: 'گىرا100م',
+    stock: 50,
+    sales: 38,
+    rating: 5.0,
+    ratingCount: 24,
+    image: 'images/products/PRD-398.jpg',
+    description: 'ئۇيغۇر تىبابىتىنىڭ ئەنئەنىۋى شىپالىق ماجۇنى، ساپ تەبىئىي ئۆسۈملۈك ۋە ھەسەل تەركىبلىك مادداتۇلھايات مەلھىمى.',
+    translations: {
+      ug: {
+        name: 'مادداتۇلھايات',
+        category: 'ئۇيغۇر تىبابىتى',
+        unit: 'گىرا100م',
+        description: 'ئۇيغۇر تىبابىتىنىڭ ئەنئەنىۋى شىپالىق ماجۇنى، ساپ تەبىئىي ئۆسۈملۈك ۋە ھەسەل تەركىبلىك مادداتۇلھايات مەلھىمى.'
+      },
+      tr: {
+        name: 'Maddatülhayat Macunu',
+        category: 'Uygur Tıbbı',
+        unit: '100 gr',
+        description: 'Geleneksel Uygur tıbbı şifalı bitkisel macun, doğal bitkiler ve bal özlü.'
+      },
+      en: {
+        name: 'Maddatulhayat Herbal Tonic Paste',
+        category: 'Uyghur Medicine',
+        unit: '100g',
+        description: 'Traditional Uyghur herbal tonic electuary paste formulated with natural herbs and honey.'
+      }
+    },
+    badge: 'ئەڭ ياخشى تاللانما',
+    featured: true,
+    approvalStatus: 'تەستىقلاندى',
+    merchantBadge: 'ئىشەنچىلىك سودىگەر'
   }
 ];
 
@@ -1930,10 +2010,18 @@ class StoreManager {
 
           // رەسىم ئەڭ پۇختا بولغان نۇسخىدىن تاللىنىدۇ
           let chosenImage = rp.image;
-          if (!chosenImage || chosenImage.includes('default_product.jpg')) {
+          // ئەگەر رەسىم ئەسلىدىكى كونا Unsplash ياكى خاتا سۈرەت بولسا، مەخسۇس ھۆججەت ياكى يەرلىك سۈرەتكە يېڭىلاش
+          if (rp.id === 'PRD-420' && (!chosenImage || chosenImage.includes('photo-1509358271058') || chosenImage.length < 500)) {
+            chosenImage = (localItem?.image && !localItem.image.includes('photo-1509358271058') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-420.jpg';
+          } else if (rp.id === 'PRD-398' && (!chosenImage || chosenImage.includes('photo-1584308666744') || chosenImage.length < 500)) {
+            chosenImage = (localItem?.image && !localItem.image.includes('photo-1584308666744') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-398.jpg';
+          } else if (!chosenImage || chosenImage.includes('default_product.jpg')) {
             chosenImage = (localItem?.image && !localItem.image.includes('default_product.jpg'))
               ? localItem.image
               : (initMatch?.image && !initMatch.image.includes('default_product.jpg') ? initMatch.image : (rp.image || localItem?.image || 'images/default_product.jpg'));
+          } else if (localItem?.image && !localItem.image.includes('default_product.jpg') && (localItem.image.startsWith('data:image/') || localItem.image.includes('images/products/')) && typeof rp.image === 'string' && rp.image.includes('unsplash.com')) {
+            // ئەگەر يەرلىكتە مەخسۇس يۈكلەنگەن ياكى تەييارلانغان رەسىم بولۇپ بۇلۇتتا پەقەت كونا unsplash تۇرسا، يەرلىك نۇسخىنى ساقلاپ قېلىش
+            chosenImage = localItem.image;
           }
 
           const safeItem = {

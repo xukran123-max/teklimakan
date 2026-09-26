@@ -145,8 +145,7 @@ window.TeklimakanSupabase = {
         merchant_badge: product.merchantBadge || 'ئىشەنچىلىك سودىگەر',
         agent_id: product.agentId || null,
         agent_name: product.agentName || null,
-        translations: translations,
-        updated_at: nowIso
+        translations: translations
       };
       const { error } = await sb.from('products').upsert(row, { onConflict: 'id' });
       if (error) {

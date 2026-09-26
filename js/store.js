@@ -1706,8 +1706,8 @@ class StoreManager {
           agentName: row.agent_name || null,
           translations: row.translations || {},
           createdAt: row.created_at || new Date().toISOString(),
-          updatedAt: row.updated_at || new Date().toISOString(),
-          isUserEdited: !!row.translations?.isUserEdited
+          updatedAt: (row.translations && row.translations.updatedAt) || row.updated_at || row.created_at || new Date().toISOString(),
+          isUserEdited: !!(row.translations?.isUserEdited || row.is_user_edited)
         };
         product.translations = this.prepareProductTranslations(product, previousProduct);
         if (index === -1) products.unshift(product);

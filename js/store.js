@@ -1736,7 +1736,7 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
     }
     const storedAgents = localStorage.getItem(STORAGE_KEYS.AGENTS);
-    if (!storedAgents || storedAgents.includes('(')) {
+    if (!storedAgents) {
       localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(INITIAL_AGENTS));
     }
     const storedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
@@ -1973,14 +1973,10 @@ class StoreManager {
         const localProds = this.getProducts();
         const userEdits = this.getUserEdits();
         const deletedIds = this.getDeletedProductIds();
+        const localMap = new Map();
+        localProds.forEach(p => localMap.set(p.id, p));
         const map = new Map();
-
-        // 1) ئالدى بىلەن يەرلىكتىكى بارلىق تاۋارلارنى قاچىلاش
-        localProds.forEach(p => {
-          if (!deletedIds.includes(p.id)) {
-            map.set(p.id, p);
-          }
-        });
+        const rpIds = new Set();
 
         // 2) بۇلۇتتىن كەلگەن تاۋارلارنى بىرلەشتۈرۈش
         let editsUpdated = false;
@@ -1991,8 +1987,9 @@ class StoreManager {
             }
             return;
           }
+          rpIds.add(rp.id);
 
-          const localItem = map.get(rp.id);
+          const localItem = localMap.get(rp.id);
           const isLocallyEdited = !!(localItem?.isUserEdited || userEdits[rp.id]);
           const isCloudEdited = !!(rp.translations && rp.translations.isUserEdited);
 
@@ -2117,6 +2114,13 @@ class StoreManager {
           } catch(e) {}
         }
 
+        // پەقەت تېخى بۇلۇتقا يۈكلەنمىگەن يەرلىك كۈتۈۋاتقان يېڭى تاۋارلارلا ساقلىنىدۇ
+        localProds.forEach(p => {
+          if (!rpIds.has(p.id) && !deletedIds.includes(p.id) && p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ') {
+            map.set(p.id, p);
+          }
+        });
+
         const merged = Array.from(map.values());
         const mergedStr = JSON.stringify(merged);
         const currentProductsStr = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
@@ -2175,12 +2179,9 @@ class StoreManager {
       const deletedAgentIds = this.getDeletedAgentIds();
       if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
         const localAgents = this.getAgents('none');
+        const localMap = new Map();
+        localAgents.forEach(a => localMap.set(a.id, a));
         const aMap = new Map();
-        localAgents.forEach(a => {
-          if (!deletedAgentIds.includes(a.id)) {
-            aMap.set(a.id, a);
-          }
-        });
         remoteAgents.forEach(ra => {
           if (deletedAgentIds.includes(ra.id)) {
             if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteAgent === 'function') {
@@ -2209,7 +2210,7 @@ class StoreManager {
             });
           }
 
-          const existingLocal = aMap.get(ra.id) || {};
+          const existingLocal = localMap.get(ra.id) || {};
           aMap.set(ra.id, {
             ...existingLocal,
             id: ra.id,
@@ -3262,9 +3263,10 @@ class StoreManager {
     this.markAgentDeleted(agentId);
     this.notifyDataChange('agents');
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteAgent === 'function') {
-      this.trackCloudWrite(window.TeklimakanSupabase.deleteAgent(agentId), 'agent deletion');
+      const p = window.TeklimakanSupabase.deleteAgent(agentId);
+      this.trackCloudWrite(p, 'agent deletion');
       try {
-        await window.TeklimakanSupabase.deleteAgent(agentId);
+        await p;
       } catch (e) {
         console.warn('Cloud agent deletion error:', e);
       }
@@ -4743,9 +4745,10 @@ class StoreManager {
     this.markProductDeleted(id);
     this.notifyDataChange('products');
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteProduct === 'function') {
-      this.trackCloudWrite(window.TeklimakanSupabase.deleteProduct(id), 'product deletion');
+      const p = window.TeklimakanSupabase.deleteProduct(id);
+      this.trackCloudWrite(p, 'product deletion');
       try {
-        await window.TeklimakanSupabase.deleteProduct(id);
+        await p;
       } catch (e) {
         console.warn('Cloud product deletion error:', e);
       }

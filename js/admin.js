@@ -84,15 +84,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  let _isDeletingAgent = false;
   window.deleteAgent = async function(agentId) {
-    if (!agentId) return;
-    if (confirm('مەزكۇر ۋاكالەتچىنى تىزىملىكتىن ئۆچۈرەمسىز؟')) {
-      await window.appStore.deleteAgent(agentId);
-      renderAgentsView();
-      renderAgentsSlider();
+    if (!agentId || _isDeletingAgent) return;
+    if (!confirm('مەزكۇر ۋاكالەتچىنى تىزىملىكتىن پۈتۈنلەي ئۆچۈرەمسىز؟')) return;
+    _isDeletingAgent = true;
+    try {
+      if (window.appStore && typeof window.appStore.deleteAgent === 'function') {
+        await window.appStore.deleteAgent(agentId);
+      }
+      if (typeof renderAgentsView === 'function') renderAgentsView();
+      if (typeof renderAgentsSlider === 'function') renderAgentsSlider();
+      if (typeof renderDashboardMetrics === 'function') renderDashboardMetrics();
       showAdminToast('ۋاكالەتچى تىزىملىكتىن چىقىرىۋېتىلدى!', 'info');
+    } catch (e) {
+      console.error('deleteAgent error:', e);
+    } finally {
+      _isDeletingAgent = false;
     }
   };
+
+  // ۋاكالەتچى ئۆچۈرۈش كۇنۇپكىسىنىڭ ھەرۋاقىت ئۈنۈملۈك بېسىلىشى ئۈچۈن كاپالەت
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-delete-agent');
+    if (btn && btn.dataset && btn.dataset.id) {
+      e.stopPropagation();
+      e.preventDefault();
+      window.deleteAgent(btn.dataset.id);
+    }
+  });
 
   setupAuthEvents();
   setupEventListeners();

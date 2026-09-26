@@ -74,13 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
     m.style.setProperty('pointer-events', 'none', 'important');
   };
 
-  window.deleteProductDirect = function(id) {
+  window.deleteProductDirect = async function(id) {
     if (!id) return;
     if (confirm('راستلا بۇ تاۋارنى ئۆچۈرەمسىز؟')) {
-      window.appStore.deleteProduct(id);
+      await window.appStore.deleteProduct(id);
       renderProductsTable();
       renderDashboardMetrics();
       showAdminToast('تاۋار ئۆچۈرۈلدى!', 'info');
+    }
+  };
+
+  window.deleteAgent = async function(agentId) {
+    if (!agentId) return;
+    if (confirm('مەزكۇر ۋاكالەتچىنى تىزىملىكتىن ئۆچۈرەمسىز؟')) {
+      await window.appStore.deleteAgent(agentId);
+      renderAgentsView();
+      renderAgentsSlider();
+      showAdminToast('ۋاكالەتچى تىزىملىكتىن چىقىرىۋېتىلدى!', 'info');
     }
   };
 
@@ -2117,16 +2127,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // جەدۋەلدىكى ماركا تەستىقلاش كۇنۇپكىسى
     tbody.querySelectorAll('.btn-auth-agent').forEach(btn => {
       btn.addEventListener('click', () => openAgentBrandAuthModal(btn.dataset.id));
-    });
-    // ئۆچۈرۈش
-    tbody.querySelectorAll('.btn-delete-agent').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (confirm('مەزكۇر ۋاكالەتچىنى تىزىملىكتىن ئۆچۈرەمسىز؟')) {
-          window.appStore.deleteAgent(btn.dataset.id);
-          renderAgentsView();
-          showAdminToast('ۋاكالەتچى تىزىملىكتىن چىقىرىۋېتىلدى!', 'info');
-        }
-      });
     });
   }
 

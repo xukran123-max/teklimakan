@@ -391,6 +391,24 @@ window.TeklimakanSupabase = {
     }
   },
 
+  // ۋاكالەتچىنى بۇلۇتتىن ئۆچۈرۈش (Supabase agents جەدۋىلىدىن پۈتۈنلەي ئۆچۈرۈش)
+  async deleteAgent(agentId) {
+    if (!agentId) return false;
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const { error } = await sb.from('agents').delete().eq('id', agentId);
+      if (error) {
+        console.warn('Supabase deleteAgent error:', error.message);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Supabase agent deletion failed:', e);
+      return false;
+    }
+  },
+
   // 📲 تېلېفون Web Push مۇشتەرىلىكىنى ساقلاش ۋە يېڭىلاش
   async savePushSubscription(subData) {
     // يەرلىك كۆرگۈچكە قوشۇمچە تۇراقلىق ساقلاپ قويۇش

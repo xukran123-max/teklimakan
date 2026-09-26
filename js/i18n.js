@@ -1117,15 +1117,26 @@ const UYGHUR_WORD_GLOSSARY = [
 const UNIT_LOCALIZATIONS = {
   'دانە': { ug: 'دانە', tr: 'adet', en: 'pcs' },
   'كىلو': { ug: 'كىلو', tr: 'kg', en: 'kg' },
+  '1 كىلو': { ug: '1 كىلو', tr: '1 kg', en: '1 kg' },
   'كىلوگرام': { ug: 'كىلوگرام', tr: 'kg', en: 'kg' },
+  '100 گرام': { ug: '100 گرام', tr: '100 g', en: '100 g' },
+  '250 گرام': { ug: '250 گرام', tr: '250 g', en: '250 g' },
+  '500 گرام': { ug: '500 گرام', tr: '500 g', en: '500 g' },
   'گىرام': { ug: 'گىرام', tr: 'g', en: 'g' },
+  'گرام': { ug: 'گرام', tr: 'g', en: 'g' },
   'قاپ': { ug: 'قاپ', tr: 'kutu', en: 'box' },
+  'قۇتا': { ug: 'قۇتا', tr: 'kutu', en: 'box' },
   'بوتۇلكا': { ug: 'بوتۇلكا', tr: 'şişe', en: 'bottle' },
   'جۈپ': { ug: 'جۈپ', tr: 'çift', en: 'pair' },
   'يۈرۈش': { ug: 'يۈرۈش', tr: 'set', en: 'set' },
   'يۈرۈشلۈك': { ug: 'يۈرۈشلۈك', tr: 'set', en: 'set' },
   'مېتىر': { ug: 'مېتىر', tr: 'metre', en: 'meter' },
   'لىتىر': { ug: 'لىتىر', tr: 'litre', en: 'liter' },
+  'لېتىر': { ug: 'لېتىر', tr: 'litre', en: 'liter' },
+  '100ml': { ug: '100 مىللىلېتىر', tr: '100 ml', en: '100 ml' },
+  '250ml': { ug: '250 مىللىلېتىر', tr: '250 ml', en: '250 ml' },
+  '500ml': { ug: '500 مىللىلېتىر', tr: '500 ml', en: '500 ml' },
+  'مىللىلېتىر': { ug: 'مىللىلېتىر', tr: 'ml', en: 'ml' },
   'بولاق': { ug: 'بولاق', tr: 'paket', en: 'pack' },
   'تال': { ug: 'تال', tr: 'adet', en: 'pcs' },
   'پارچە': { ug: 'پارچە', tr: 'parça', en: 'piece' },
@@ -1268,7 +1279,12 @@ class I18nManager {
     if (lang === 'ug') return unit;
     const clean = String(unit).trim().toLowerCase();
     for (const [k, v] of Object.entries(UNIT_LOCALIZATIONS || {})) {
-      if (clean === k.toLowerCase() || clean === k || clean.includes(k) || k.includes(clean)) {
+      if (clean === k.toLowerCase() || clean === k) {
+        return v[lang] || unit;
+      }
+    }
+    for (const [k, v] of Object.entries(UNIT_LOCALIZATIONS || {})) {
+      if (clean.includes(k.toLowerCase())) {
         return v[lang] || unit;
       }
     }

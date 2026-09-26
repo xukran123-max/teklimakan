@@ -1040,7 +1040,7 @@ function initTeklimakanApp() {
           </div>
 
           <div class="product-pricing">
-            <span class="current-price">${formattedPrice}${product.unit ? `<small class="unit-text" style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / ${product.unit}</small>` : ''}</span>
+            <span class="current-price">${formattedPrice}${product.unit ? `<small class="unit-text" style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / <bdi>${product.unit}</bdi></small>` : ''}</span>
             ${formattedOldPrice ? `<span class="original-price">${formattedOldPrice}</span>` : ''}
           </div>
 
@@ -1175,7 +1175,7 @@ function initTeklimakanApp() {
         <div class="cart-item-info">
           <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fas fa-award"></i> ${i18n.getBrandName(item.product.brand) || 'تەكلىماكان'}</div>
           <h4 class="cart-item-title">${item.product.name}</h4>
-          <div class="cart-item-price">${item.itemTotalFormatted}${item.product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-right:4px;"> (${item.quantity} ${item.product.unit})</span>` : ''}</div>
+          <div class="cart-item-price">${item.itemTotalFormatted}${item.product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-right:4px;"> (${item.quantity} <bdi>${item.product.unit}</bdi>)</span>` : ''}</div>
           <div class="cart-item-controls">
             <div class="qty-control-wrap">
               <button class="qty-btn btn-qty-minus" data-id="${item.product.id}">-</button>
@@ -1300,7 +1300,7 @@ function initTeklimakanApp() {
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${pName}">${pName}</div>
             <div style="display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.35rem;">
-              <span style="font-weight: 800; color: var(--danger-color); font-size: 1rem;">${formattedPrice}${p.unit ? `<small style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / ${p.unit}</small>` : ''}</span>
+              <span style="font-weight: 800; color: var(--danger-color); font-size: 1rem;">${formattedPrice}${p.unit ? `<small style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / <bdi>${p.unit}</bdi></small>` : ''}</span>
               ${formattedOldPrice ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.8rem;">${formattedOldPrice}</span>` : ''}
             </div>
             <div>${stockStatus}</div>
@@ -1739,7 +1739,7 @@ function initTeklimakanApp() {
           <h3 style="font-size: 1.25rem; font-weight: 800; line-height: 1.4; margin-bottom: 0.75rem;">${product.name}</h3>
           
           <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-            <span style="font-size: 1.65rem; font-weight: 900; color: var(--danger-color);">${formattedPrice}${product.unit ? `<small style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-right: 6px;"> / ${product.unit}</small>` : ''}</span>
+            <span style="font-size: 1.65rem; font-weight: 900; color: var(--danger-color);">${formattedPrice}${product.unit ? `<small style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-right: 6px;"> / <bdi>${product.unit}</bdi></small>` : ''}</span>
             ${formattedOldPrice ? `<span style="font-size: 1rem; color: var(--text-light); text-decoration: line-through;">${formattedOldPrice}</span>` : ''}
           </div>
 
@@ -1748,7 +1748,7 @@ function initTeklimakanApp() {
           </div>
 
           <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: ${product.stock > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
-            ${window.appI18n.t('filterStockTitle')}: ${product.stock} ${product.unit || window.appI18n.t('itemsUnit')}
+            ${window.appI18n.t('filterStockTitle')}: <span class="number-latin">${product.stock}</span> <bdi>${product.unit || window.appI18n.t('itemsUnit')}</bdi>
           </div>
 
           <div class="quick-view-actions">
@@ -4582,7 +4582,7 @@ function initTeklimakanApp() {
                 <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; font-size:0.76rem; color:#64748b; margin-top:2px;">
                   <span>ماركا: <b>${p.brand || 'تەكلىماكان'}</b></span>
                   <span>•</span>
-                  <span>باھاسى: <b style="color:var(--primary-color);">${priceFormatted} / ${pUnit}</b></span>
+                  <span>باھاسى: <b style="color:var(--primary-color);">${priceFormatted} / <bdi>${pUnit}</bdi></b></span>
                   <span>•</span>
                   <span>زاپاس: <b>${p.stock}</b></span>
                 </div>
@@ -4932,7 +4932,8 @@ function initTeklimakanApp() {
         const oldPriceVal = document.getElementById('agentProdOldPrice').value;
         const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
         const stock = parseInt(document.getElementById('agentProdStock').value, 10);
-        const unit = (document.getElementById('agentProdUnit')?.value.trim()) || 'دانە';
+        const rawUnit = (document.getElementById('agentProdUnit')?.value.trim()) || 'دانە';
+        const unit = (typeof window.normalizeProductUnit === 'function') ? window.normalizeProductUnit(rawUnit) : rawUnit;
         const image = (document.getElementById('agentProdImage')?.value || '').trim();
         const desc = document.getElementById('agentProdDesc').value.trim();
         const editId = editProdIdInput ? editProdIdInput.value.trim() : '';

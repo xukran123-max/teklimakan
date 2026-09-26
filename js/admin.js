@@ -17,6 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let agentFilterCity = 'all';
   let agentFilterTier = 'all';
   let currentViewingCertAgent = null;
+  function cleanUnit(u) {
+    if (!u) return 'دانە';
+    let s = String(u).trim();
+    if (!s || s === '?????' || s === '?????') return 'دانە';
+    const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+    if (midGram) return `${midGram[1]} گرام`;
+    if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+    if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+    if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+    const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+    if (trailGram) return `${trailGram[2]} گرام`;
+    return s;
+  }
+  window.cleanProductUnit = cleanUnit;
 
   window.showModal = function(modalId) {
     const m = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
@@ -1098,18 +1112,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 🛡️ تېكىست بۇزۇلۇشنى تەكشۈرۈش ۋە كاپالەتلەندۈرۈش (Anti-Corruption Display Shield)
       const isBad = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
-      const displayUnit = (!product.unit || isBad(product.unit) || product.unit.trim().length === 0) ? 'دانە' : product.unit;
+      const cleanUnit = (u) => {
+        if (!u || isBad(u)) return 'دانە';
+        let s = String(u).trim();
+        if (!s || s === '?????') return 'دانە';
+        const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+        if (midGram) return `${midGram[1]} گرام`;
+        if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+        if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+        if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+        const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+        if (trailGram) return `${trailGram[2]} گرام`;
+        return s;
+      };
+
+      const rawUnit = (!product.unit || isBad(product.unit) || product.unit.trim().length === 0) ? 'دانە' : product.unit;
+      const displayUnit = cleanUnit(rawUnit);
       const displayName = isBad(product.name) ? (product.translations?.ug?.name && !isBad(product.translations.ug.name) ? product.translations.ug.name : (product.translations?.tr?.name || product.id)) : product.name;
       const displayBrand = isBad(product.brand) ? 'تەكلىماكان كىلاسسىك' : (product.brand || 'تەكلىماكان');
       const displayCategory = isBad(product.category) ? 'ئۇيغۇر تىبابىتى' : product.category;
 
       let stockPill = '';
+      const unitHasDigits = /\d/.test(displayUnit);
+      const stockUnitLabel = unitHasDigits ? `دانە (${displayUnit})` : displayUnit;
+
       if (product.stock <= 0) {
         stockPill = '<span class="status-pill status-out-stock">تۈگىدى (0)</span>';
       } else if (product.stock <= 8) {
-        stockPill = `<span class="status-pill status-low-stock">ئاز قالدى (${product.stock} ${displayUnit})</span>`;
+        stockPill = `<span class="status-pill status-low-stock">ئاز قالدى (<span class="number-latin">${product.stock}</span> <bdi>${stockUnitLabel}</bdi>)</span>`;
       } else {
-        stockPill = `<span class="status-pill status-in-stock">${product.stock} ${displayUnit}</span>`;
+        stockPill = `<span class="status-pill status-in-stock"><span class="number-latin">${product.stock}</span> <bdi>${stockUnitLabel}</bdi></span>`;
       }
 
       // تىل قاپلاش بەلگىسى
@@ -1204,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="min-width: 130px; text-align: right;">
           <div style="white-space: nowrap; font-weight: 800; font-size: 0.95rem; color: #0f172a; display: inline-flex; align-items: baseline; gap: 4px;">
             <span class="number-latin" style="color: #0284c7; font-weight: 900; font-size: 1.05rem;">${window.appStore.formatPrice(product.price)}</span>
-            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">/ ${displayUnit}</span>
+            <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">/ <bdi>${displayUnit}</bdi></span>
           </div>
         </td>
         <td style="min-width: 120px; text-align: center;">
@@ -5659,7 +5691,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const oldPriceVal = document.getElementById('formProductOldPrice').value;
           const oldPrice = oldPriceVal ? parseFloat(oldPriceVal) : null;
           const stock = parseInt(document.getElementById('formProductStock').value, 10);
-          const unit = (document.getElementById('formProductUnit')?.value.trim()) || 'دانە';
+          const unit = cleanUnit((document.getElementById('formProductUnit')?.value.trim()) || 'دانە');
           let image = document.getElementById('formProductImage').value.trim();
           const badge = document.getElementById('formProductBadge').value;
           const descUg = document.getElementById('formProductDescUg').value.trim();

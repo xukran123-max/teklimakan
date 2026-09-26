@@ -1901,15 +1901,32 @@ class StoreManager {
 
           // 🛡️ ئەگەر بۇلۇتتىكى نۇسخا يېڭى تەھرىرلەنگەن بولسا (تېلېفوندىن ياكى باشقا ئۈسكۈنىدىن)، بۇلۇتتىكى يېڭى مەزمۇن قوبۇل قىلىنىدۇ:
           const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+          const normalizeUnit = (u) => {
+            if (!u || typeof u !== 'string') return 'دانە';
+            let s = u.trim();
+            if (!s || isCorrupted(s)) return 'دانە';
+            const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+            if (midGram) return `${midGram[1]} گرام`;
+            if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+            if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+            if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+            const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+            if (trailGram) return `${trailGram[2]} گرام`;
+            return s;
+          };
+          window.normalizeProductUnit = normalizeUnit;
           const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
 
           const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
           const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
           const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
-          const safeUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
+          const rawUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
+          const safeUnit = normalizeUnit(rawUnit);
           const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
 
           const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
+          safeTranslations.unit = safeUnit;
+          if (safeTranslations.ug) safeTranslations.ug.unit = safeUnit;
 
           // رەسىم ئەڭ پۇختا بولغان نۇسخىدىن تاللىنىدۇ
           let chosenImage = rp.image;

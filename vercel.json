@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/api/product-share",
+      "destination": "/index.html"
+    },
+    {
       "source": "/seidiye",
       "destination": "/seidiye.html"
     },
@@ -11,6 +15,11 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/api/product-share",
+      "destination": "/",
+      "permanent": false
+    },
     {
       "source": "/admin.html",
       "destination": "/",

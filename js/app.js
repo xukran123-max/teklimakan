@@ -1835,8 +1835,9 @@ function initTeklimakanApp() {
       instantWaBtn.addEventListener('click', () => {
         const phone = '905551609999';
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
-        const lang = window.appI18n.getLang();
-        const itemUrl = `${window.location.origin}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(product.updatedAt || '')}`;
+        const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
+        const itemUrl = `${baseUrl}/?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         const msg = encodeURIComponent(
           `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
           `📦 مەھسۇلات: ${product.name}\n` +
@@ -1852,8 +1853,9 @@ function initTeklimakanApp() {
     const shareBtn = document.getElementById('modalShareProductBtn');
     if (shareBtn) {
       shareBtn.addEventListener('click', async () => {
-        const lang = window.appI18n.getLang();
-        const shareUrl = `${window.location.origin}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(product.updatedAt || '')}`;
+        const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
+        const shareUrl = `${baseUrl}/?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
         const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n📝 ${product.description || ''}`;
         const fullShareMessage = `${shareDesc}\n\n🔗 كۆرۈش ئۇلانمىسى:\n${shareUrl}`;

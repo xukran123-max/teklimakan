@@ -1420,6 +1420,8 @@ const INITIAL_CATEGORIES = [
   { id: 'تەبىئىي ياغلار', name: 'تەبىئىي ياغلار', icon: 'fas fa-tint', translations: { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' } },
   { id: 'گۈزەللىك ۋە ساغلاملىق', name: 'گۈزەللىك ۋە ساغلاملىق', icon: 'fas fa-heartbeat', translations: { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' } },
   { id: 'گۈلقەنتلەر', name: 'گۈلقەنتلەر', icon: 'fas fa-seedling', translations: { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' } },
+  { id: 'قۇرۇق يەل-يېمىشلەر', name: 'قۇرۇق يەل-يېمىشلەر', icon: 'fas fa-apple-alt', translations: { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' } },
+  { id: 'مەدەنىيەت بۇيۇملىرى', name: 'مەدەنىيەت بۇيۇملىرى', icon: 'fas fa-landmark', translations: { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' } },
   { id: 'كىتاپ ۋە مەدەنىيەت', name: 'كىتاپ ۋە مەدەنىيەت', icon: 'fas fa-book-open', translations: { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
 ];
 
@@ -1582,9 +1584,11 @@ class StoreManager {
     } else {
       try {
         const curSet = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {};
-        curSet.telegramBotToken = INITIAL_SETTINGS.telegramBotToken;
-        curSet.telegramChatId = INITIAL_SETTINGS.telegramChatId;
-        curSet.telegramEnabled = curSet.telegramEnabled !== false;
+        curSet.telegramBotToken = curSet.telegramBotToken || INITIAL_SETTINGS.telegramBotToken;
+        curSet.telegramChatId = curSet.telegramChatId || INITIAL_SETTINGS.telegramChatId;
+        if (curSet.telegramEnabled === undefined) {
+          curSet.telegramEnabled = INITIAL_SETTINGS.telegramEnabled !== false;
+        }
         if (curSet.emailNotificationEnabled === undefined) {
           curSet.emailNotificationEnabled = true;
         }
@@ -1617,8 +1621,138 @@ class StoreManager {
       this.checkAndTriggerSundayWeeklyReport();
     } catch (e) {}
 
-    // ☁️ Supabase بۇلۇت ئامبىرى بىلەن ئارقا تەرەپتە ئاپتوماتىك قوش يۆنىلىشلىك ماسلىشىش
+    // ☁️ بۇلۇتتىكى يېڭى مەزمۇنلارنى ھەر ئۈسكۈنىگە دەرھال تارقىتىش (Realtime)
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.subscribeToChanges === 'function') {
+      window.TeklimakanSupabase.subscribeToChanges(change => this.applyCloudChange(change));
+    }
+
+    // ☁️ Supabase بۇلۇت ئامبىرى بىلەن دەسلەپكى ۋە دەل ۋاقتىدا ماسلاشتۇرۇش
     this.syncWithSupabase();
+    window.addEventListener('online', () => {
+      this.syncWithSupabase();
+      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
+    });
+    window.addEventListener('focus', () => {
+      this.syncWithSupabase();
+      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
+    });
+    window.addEventListener('pageshow', () => {
+      this.syncWithSupabase();
+      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.syncWithSupabase();
+        if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
+      }
+    });
+
+    // 📲 كۆچمە تېلېفونلاردا دەل ۋاقتىدا يېڭىلىنىش كاپالىتى (Mobile Heartbeat - ھەر 5 سېكۇنتتا يېڭىلايدۇ)
+    setInterval(() => {
+      if (document.visibilityState !== 'hidden') {
+        this.syncWithSupabase();
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.isRealtimeConnected === 'function') {
+          if (!window.TeklimakanSupabase.isRealtimeConnected()) {
+            window.TeklimakanSupabase.reconnectRealtime?.();
+          }
+        }
+      }
+    }, 5000);
+
+    // 🔄 باشقا بەتلەرنىڭ يېڭىلىنىش پۇلسىنى كۆرۈش
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'teklimakan_store_sync_pulse' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          window.dispatchEvent(new CustomEvent('uyghur_store_sync', { detail: parsed }));
+        } catch(err) {}
+      }
+    });
+  }
+
+  applyCloudChange(change) {
+    const { table, eventType, new: newRow, old: oldRow } = change;
+    const row = eventType === 'DELETE' ? oldRow : newRow;
+    if (!row || !row.id) return;
+
+    if (table === 'products') {
+      const products = this.getProducts();
+      const index = products.findIndex(product => product.id === row.id);
+      if (eventType === 'DELETE') {
+        if (index !== -1) products.splice(index, 1);
+        this.markProductDeleted(row.id);
+      } else {
+        const previousProduct = index === -1 ? null : products[index];
+        const product = {
+          id: row.id,
+          name: row.name,
+          brand: row.brand || '',
+          category: row.category || '',
+          price: Number(row.price),
+          oldPrice: row.old_price ? Number(row.old_price) : null,
+          stock: Number(row.stock || 0),
+          unit: row.translations?.unit || 'دانە',
+          sales: Number(row.sales || 0),
+          rating: Number(row.rating || 5),
+          ratingCount: Number(row.rating_count || 1),
+          image: row.image || '',
+          description: row.description || '',
+          badge: row.badge || '',
+          featured: !!row.featured,
+          approvalStatus: row.approval_status || 'تەستىقلاندى',
+          languageScope: row.language_scope || 'all',
+          merchantBadge: row.merchant_badge || 'ئىشەنچىلىك سودىگەر',
+          agentId: row.agent_id || null,
+          agentName: row.agent_name || null,
+          translations: row.translations || {},
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+          isUserEdited: !!row.translations?.isUserEdited
+        };
+        product.translations = this.prepareProductTranslations(product, previousProduct);
+        if (index === -1) products.unshift(product);
+        else products[index] = product;
+        const deletedIds = this.getDeletedProductIds().filter(id => id !== row.id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_PRODUCTS, JSON.stringify(deletedIds));
+        if (product.isUserEdited) this.saveUserEdit(product);
+      }
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      this.notifyDataChange('products', { productId: row.id, eventType });
+      return;
+    }
+
+    if (table === 'orders') {
+      const orders = this.getOrders();
+      const index = orders.findIndex(order => String(order.id) === String(row.id));
+      if (eventType === 'DELETE') {
+        if (index !== -1) orders.splice(index, 1);
+      } else {
+        const order = {
+          id: row.id,
+          customer: row.customer,
+          items: row.items,
+          subtotalCny: Number(row.subtotal_cny || 0),
+          discountCny: Number(row.discount_cny || 0),
+          deliveryFeeCny: Number(row.delivery_fee_cny || 0),
+          totalCny: Number(row.total_cny || 0),
+          totalFormatted: row.total_formatted || '',
+          paymentMethod: row.payment_method || '',
+          status: row.status || 'ساقلاۋاتىدۇ',
+          date: row.date || '',
+          notes: row.notes || '',
+          language: row.language || 'ug',
+          currency: row.currency || 'TRY',
+          cargoCarrier: row.tracking_carrier || '',
+          cargoTrackingNo: row.tracking_number || '',
+          shippedAt: row.shipped_at || null,
+          completedAt: row.completed_at || null
+        };
+        if (index === -1) orders.unshift(order);
+        else orders[index] = order;
+      }
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      this.notifyDataChange('orders');
+    }
   }
 
   async syncWithSupabase() {
@@ -1640,30 +1774,40 @@ class StoreManager {
         });
 
         // 2) بۇلۇتتىن كەلگەن تاۋارلارنى بىرلەشتۈرۈش
+        let editsUpdated = false;
         remoteProducts.forEach(rp => {
           if (deletedIds.includes(rp.id)) return;
 
           const localItem = map.get(rp.id);
-          const isLocallyEdited = localItem?.isUserEdited || !!userEdits[rp.id];
+          const isLocallyEdited = !!(localItem?.isUserEdited || userEdits[rp.id]);
+          const isCloudEdited = !!(rp.translations && rp.translations.isUserEdited);
 
-          // 🛡️ ئەگەر باشقۇرغۇچى بۇ تاۋارنى ئاللىقاچان تەھرىرلىگەن بولسا، يەرلىك نۇسخا ھەرگىز قاپلانمايدۇ!
-          if (localItem && isLocallyEdited) {
-            // بۇلۇتقا قايتا كاپالەت شەكلىدە يوللاپ قويۇش
+          const cloudUpdated = rp.updated_at || (rp.translations && rp.translations.updatedAt) || rp.created_at || '';
+          const localUpdated = localItem?.updatedAt || (userEdits[rp.id]?.updatedAt) || '';
+
+          const cloudTime = cloudUpdated ? new Date(cloudUpdated).getTime() : 0;
+          const localTime = localUpdated ? new Date(localUpdated).getTime() : 0;
+
+          // 🛡️ ئەگەر يەرلىك نۇسخا تېخىمۇ يېڭى تەھرىرلەنگەن بولسا، يەرلىك نۇسخا كۈچكە ئىگە، ھەرگىز قاپلانمايدۇ:
+          if (localItem && isLocallyEdited && localTime > cloudTime) {
+            // بۇلۇتقا يېڭى يەرلىك نۇسخىنى ماس قەدەمدە قايتا ئەۋەتىپ كاپالەتلەندۈرۈش
             if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
               window.TeklimakanSupabase.upsertProduct(localItem);
             }
             return;
           }
 
-          // 🛡️ تېخى تەھرىرلەنمىگەن بولسا، بۇلۇتتىكى مەلۇمات بىلەن يېڭىلاش (بۇزۇلغان «???» خەتلەرنى قەتئىي رەت قىلىش)
+          // 🛡️ ئەگەر بۇلۇتتىكى نۇسخا يېڭى تەھرىرلەنگەن بولسا (تېلېفوندىن ياكى باشقا ئۈسكۈنىدىن)، بۇلۇتتىكى يېڭى مەزمۇن قوبۇل قىلىنىدۇ:
           const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
           const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
 
           const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
           const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
           const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
-          const safeUnit = (!rp.translations?.unit || isCorrupted(rp.translations.unit) || rp.translations.unit.trim().length === 0) ? (localItem?.unit && !isCorrupted(localItem.unit) ? localItem.unit : initMatch?.unit || 'دانە') : rp.translations.unit;
+          const safeUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
           const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
+
+          const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
 
           const safeItem = {
             id: rp.id,
@@ -1677,27 +1821,39 @@ class StoreManager {
             sales: rp.sales || 0,
             rating: Number(rp.rating || 5.0),
             ratingCount: rp.rating_count || 1,
-            image: rp.image,
+            image: rp.image || localItem?.image || initMatch?.image || '',
             description: safeDesc,
-            badge: rp.badge,
+            badge: rp.badge || '',
             featured: !!rp.featured,
             approvalStatus: rp.approval_status || 'تەستىقلاندى',
             languageScope: rp.language_scope || 'all',
             merchantBadge: rp.merchant_badge || 'ئىشەنچىلىك سودىگەر',
-            agentId: rp.agent_id,
-            agentName: rp.agent_name,
-            translations: rp.translations || (initMatch ? initMatch.translations : {})
+            agentId: rp.agent_id || null,
+            agentName: rp.agent_name || null,
+            translations: safeTranslations,
+            isUserEdited: isCloudEdited || isLocallyEdited,
+            updatedAt: cloudUpdated || localUpdated || new Date().toISOString()
           };
+          safeItem.translations = this.prepareProductTranslations(safeItem, localItem);
 
           map.set(rp.id, safeItem);
 
-          // ئەگەر بۇلۇتتىكى مەلۇمات بۇزۇلۇپ كەتكەن بولسا، دەرھال ساغلام سانلىق مەلۇماتنى بۇلۇتقا قايتا يوللاپ داۋالاش
-          if (isCorrupted(rp.name) || isCorrupted(rp.category) || isCorrupted(rp.translations?.unit)) {
-            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
-              window.TeklimakanSupabase.upsertProduct(safeItem);
-            }
+          if (isCloudEdited) {
+            userEdits[rp.id] = safeItem;
+            editsUpdated = true;
+          }
+
+          // ئەگەر بۇلۇتتىكى مەلۇمات خەت كودلىنىشى جەھەتتە بۇزۇلۇپ قالغان بولسا، دەرھال ساغلام سانلىق مەلۇماتنى بۇلۇتقا قايتا داۋالاپ يوللاش
+          if ((isCorrupted(rp.name) || isCorrupted(rp.category)) && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+            window.TeklimakanSupabase.upsertProduct(safeItem);
           }
         });
+
+        if (editsUpdated) {
+          try {
+            localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(userEdits));
+          } catch(e) {}
+        }
 
         const merged = Array.from(map.values());
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
@@ -1817,6 +1973,16 @@ class StoreManager {
     } catch (e) {
       console.warn('Supabase ماسلىشىش خاتالىقى:', e);
     }
+  }
+
+  trackCloudWrite(write, operation) {
+    Promise.resolve(write).then(saved => {
+      if (saved) return;
+      throw new Error('Supabase rejected the write.');
+    }).catch(error => {
+      console.error(`Cloud ${operation} failed:`, error);
+      window.dispatchEvent(new CustomEvent('teklimakan_cloud_sync_error', { detail: { operation } }));
+    });
   }
 
   // ==================== پۇل بىرلىكى (Currency) ====================
@@ -3661,21 +3827,41 @@ class StoreManager {
   }
 
   getLocalizedProduct(p, lang = 'ug') {
-    let name = p.name;
-    let description = p.description;
-    let category = p.category;
+    if (!p) return null;
+    let name = p.name || '';
+    let description = p.description || '';
+    let category = p.category || '';
+    let unit = p.unit || 'دانە';
+    let badge = p.badge || '';
 
     if (p.translations && p.translations[lang]) {
-      if (p.translations[lang].name) name = p.translations[lang].name;
-      if (p.translations[lang].description) description = p.translations[lang].description;
-      if (p.translations[lang].category) category = p.translations[lang].category;
+      const trObj = p.translations[lang];
+      if (trObj.name) name = trObj.name;
+      if (trObj.description) description = trObj.description;
+      if (trObj.category) category = trObj.category;
+      if (trObj.unit) unit = trObj.unit;
+      if (trObj.badge) badge = trObj.badge;
     }
 
     // تۈركچە ياكى ئىنگلىزچە سەھىپىدە ئەگەر تەرجىمە كەم قالغان بولسا دەل جايىدا ئاپتوماتىك تەرجىمە قىلىش
-    if (lang !== 'ug' && window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
-      name = window.appI18n.autoTranslateUyghur(name, lang);
-      category = window.appI18n.getCategoryName(category);
-      if (description) description = window.appI18n.autoTranslateUyghur(description, lang);
+    if (lang !== 'ug' && window.appI18n) {
+      if (typeof window.appI18n.autoTranslateUyghur === 'function') {
+        if (/[\u0600-\u06FF]/.test(name) || !name) {
+          name = window.appI18n.autoTranslateUyghur(p.name || name, lang);
+        }
+        if (/[\u0600-\u06FF]/.test(description) || !description) {
+          description = window.appI18n.autoTranslateUyghur(p.description || description, lang);
+        }
+      }
+      if (typeof window.appI18n.getCategoryName === 'function') {
+        category = window.appI18n.getCategoryName(category, lang);
+      }
+      if (typeof window.appI18n.getUnitName === 'function') {
+        unit = window.appI18n.getUnitName(unit || p.unit || 'دانە', lang);
+      }
+      if (typeof window.appI18n.getBadgeName === 'function' && badge) {
+        badge = window.appI18n.getBadgeName(badge, lang);
+      }
     }
 
     return {
@@ -3683,6 +3869,8 @@ class StoreManager {
       name,
       description,
       category,
+      unit,
+      badge,
       brand: p.brand || 'تەكلىماكان سۈپەت',
       originalProduct: p
     };
@@ -3784,8 +3972,8 @@ class StoreManager {
             const upScale = Math.max(800 / targetW, 800 / targetH);
             targetW = Math.round(targetW * upScale);
             targetH = Math.round(targetH * upScale);
-          } else if (targetW > 1400 || targetH > 1400) {
-            const downScale = Math.min(1400 / targetW, 1400 / targetH);
+          } else if (targetW > 1200 || targetH > 1200) {
+            const downScale = Math.min(1200 / targetW, 1200 / targetH);
             targetW = Math.round(targetW * downScale);
             targetH = Math.round(targetH * downScale);
           }
@@ -3860,8 +4048,8 @@ class StoreManager {
 
           ctx.restore();
 
-          // سۈرەتنى ئەلالاشتۇرۇلغان JPEG ھالىتىدە چىقىرىش (سۈپىتى 0.92)
-          const watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          // سۈرەتنى كۆچمە تور ۋە بۇلۇتقا يۈكلەشكە ماس كىچىك JPEG ھالىتىدە چىقىرىش
+          const watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.76);
           resolve({
             dataUrl: watermarkedDataUrl,
             width: targetW,
@@ -4024,6 +4212,56 @@ class StoreManager {
     };
   }
 
+  prepareProductTranslations(product, previousProduct = null) {
+    const translations = { ...(previousProduct?.translations || {}), ...(product.translations || {}) };
+    const translate = (text, lang) => {
+      if (!text) return '';
+      if (lang === 'ug') return text;
+      if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+        return window.appI18n.autoTranslateUyghur(text, lang);
+      }
+      return text;
+    };
+
+    ['ug', 'tr', 'en'].forEach(lang => {
+      const incoming = product.translations?.[lang] || {};
+      const previous = previousProduct?.translations?.[lang] || {};
+      const localized = { ...previous, ...incoming };
+      ['name', 'description', 'category'].forEach(field => {
+        const sourceValue = product[field] || '';
+        const incomingValue = incoming[field] || '';
+        const previousValue = previous[field] || '';
+        const sourceChanged = !!previousProduct && sourceValue !== (previousProduct[field] || '');
+        const hasUyghurChar = /[\u0600-\u06FF]/.test(incomingValue || '');
+
+        if (lang === 'ug') {
+          localized[field] = sourceValue;
+        } else if (sourceChanged || !incomingValue || hasUyghurChar) {
+          localized[field] = translate(sourceValue, lang);
+        } else {
+          localized[field] = incomingValue || previousValue || translate(sourceValue, lang);
+        }
+      });
+
+      // Unit ۋە Badge نى تىللار بويىچە ماسلاشتۇرۇش
+      if (lang === 'ug') {
+        localized.unit = product.unit || 'دانە';
+        localized.badge = product.badge || '';
+      } else {
+        localized.unit = (window.appI18n && typeof window.appI18n.getUnitName === 'function')
+          ? window.appI18n.getUnitName(product.unit || 'دانە', lang)
+          : (product.unit || 'دانە');
+        localized.badge = (window.appI18n && typeof window.appI18n.getBadgeName === 'function' && product.badge)
+          ? window.appI18n.getBadgeName(product.badge, lang)
+          : (product.badge || '');
+      }
+
+      translations[lang] = localized;
+    });
+
+    return translations;
+  }
+
   saveProduct(productData) {
     // 🚫 پەقەت ۋاكالەتچى يوللىغان تاۋارلاردىلا ئادەم سۈرىتى بار-يوقلۇقىنى تەكشۈرۈش (باشقۇرغۇچىغا ھېچقانداق چەكلىمە يوق)
     if (productData.isAgentSubmitted && !productData.isAdmin) {
@@ -4050,14 +4288,16 @@ class StoreManager {
     if (productData.id) {
       const index = products.findIndex(p => p.id === productData.id);
       const targetUnit = productData.unit || (index !== -1 ? products[index].unit : 'دانە');
+      const previousProduct = index !== -1 ? products[index] : null;
       const updatedProduct = { 
-        ...(index !== -1 ? products[index] : {}), 
+        ...(previousProduct || {}), 
         ...productData,
         unit: targetUnit,
         isUserEdited: true,
         updatedAt: nowIso,
         approvalStatus: productData.approvalStatus || (index !== -1 ? products[index].approvalStatus : 'تەستىقلاندى')
       };
+      updatedProduct.translations = this.prepareProductTranslations(updatedProduct, previousProduct);
       if (index !== -1) {
         products[index] = updatedProduct;
       } else {
@@ -4082,6 +4322,7 @@ class StoreManager {
         isUserEdited: true,
         ...productData
       };
+      newProduct.translations = this.prepareProductTranslations(newProduct);
       products.unshift(newProduct);
       savedProduct = newProduct;
     }
@@ -4092,11 +4333,11 @@ class StoreManager {
     // 2) مەڭگۈلۈك ئابونت تەھرىر ئامبىرىغا يېزىش (ھېچقانداق بۇلۇت ئۇچۇرى بۇنى قاپلىۋېتەلمەيدۇ)
     this.saveUserEdit(savedProduct);
 
-    this.notifyDataChange('products');
+    this.notifyDataChange('products', { productId: savedProduct.id });
 
     // 3) ☁️ Supabase بۇلۇتقا ماس قەدەمدە قايتا ئەۋەتىش
     if (window.TeklimakanSupabase && savedProduct) {
-      window.TeklimakanSupabase.upsertProduct(savedProduct);
+      this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(savedProduct), 'product save');
     }
 
     return { 
@@ -4122,7 +4363,7 @@ class StoreManager {
     if (!product || !product.id) return;
     try {
       const edits = this.getUserEdits();
-      edits[product.id] = { ...product, isUserEdited: true, updatedAt: new Date().toISOString() };
+      edits[product.id] = { ...product, isUserEdited: true, updatedAt: product.updatedAt || new Date().toISOString() };
       localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(edits));
     } catch(e) {}
   }
@@ -4156,14 +4397,18 @@ class StoreManager {
   // تاۋارنى بۇلۇت ۋە يەرلىككە بىرلا ۋاقىتتا پۇختا كاپالەتلىك ساقلاش (Async)
   async saveProductAsync(productData) {
     const res = this.saveProduct(productData);
+    let cloudSynced = false;
     if (res.success && res.product && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
       try {
-        await window.TeklimakanSupabase.upsertProduct(res.product);
+        cloudSynced = await window.TeklimakanSupabase.upsertProduct(res.product);
+        if (!cloudSynced) {
+          console.error('Product was saved on this device but not synchronized to Supabase.');
+        }
       } catch (e) {
         console.warn('Supabase async upsert خاتالىقى:', e);
       }
     }
-    return res;
+    return { ...res, cloudSynced };
   }
 
   // ==================== تاۋارلارنى تەستىقلاش مەشغۇلاتلىرى ====================
@@ -4175,8 +4420,12 @@ class StoreManager {
     const products = this.getProducts();
     const product = products.find(p => p.id === id);
     if (product) {
+      if (product.needsAdminImage || typeof product.image !== 'string' || !product.image || product.image.includes('default_product.jpg')) {
+        return { success: false, message: 'بۇ تاۋاردا ھەقىقىي رەسىم يوق. ئالدى بىلەن «تەھرىرلەش» ئارقىلىق رەسىم يۈكلەڭ، ئاندىن تەستىقلاڭ.' };
+      }
       product.approvalStatus = 'تەستىقلاندى';
       product.approvedAt = new Date().toISOString();
+      product.updatedAt = product.approvedAt;
       product.isUserEdited = true;
       if (product.needsAdminImage) {
         product.needsAdminImage = false;
@@ -4185,7 +4434,7 @@ class StoreManager {
       this.saveUserEdit(product);
       this.notifyDataChange('products');
       if (window.TeklimakanSupabase) {
-        window.TeklimakanSupabase.upsertProduct(product);
+        this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(product), 'product approval');
       }
       return { success: true, message: `«${product.name}» مەھسۇلاتى مۇۋەپپەقىيەتلىك تەستىقلاندى ۋە دۇكانغا چىقىرىلدى!` };
     }
@@ -4198,12 +4447,13 @@ class StoreManager {
     if (product) {
       product.approvalStatus = 'رەت قىلىندى';
       product.rejectReason = reason;
+      product.updatedAt = new Date().toISOString();
       product.isUserEdited = true;
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
       this.saveUserEdit(product);
       this.notifyDataChange('products');
       if (window.TeklimakanSupabase) {
-        window.TeklimakanSupabase.upsertProduct(product);
+        this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(product), 'product rejection');
       }
       return { success: true, message: `«${product.name}» مەھسۇلاتى ئېلان قىلىنىشتىن رەت قىلىندى.` };
     }
@@ -4228,7 +4478,7 @@ class StoreManager {
     this.markProductDeleted(id);
     this.notifyDataChange('products');
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteProduct === 'function') {
-      window.TeklimakanSupabase.deleteProduct(id);
+      this.trackCloudWrite(window.TeklimakanSupabase.deleteProduct(id), 'product deletion');
     }
     return true;
   }
@@ -4244,7 +4494,7 @@ class StoreManager {
       this.saveUserEdit(product);
       this.notifyDataChange('products');
       if (window.TeklimakanSupabase) {
-        window.TeklimakanSupabase.upsertProduct(product);
+        this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(product), 'stock update');
       }
       return true;
     }
@@ -4256,8 +4506,14 @@ class StoreManager {
     const product = products.find(p => p.id === id);
     if (product) {
       product.featured = !product.featured;
+      product.isUserEdited = true;
+      product.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      this.saveUserEdit(product);
       this.notifyDataChange('products');
+      if (window.TeklimakanSupabase) {
+        this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(product), 'featured status update');
+      }
       return product.featured;
     }
     return false;
@@ -4278,12 +4534,18 @@ class StoreManager {
       if (clone.translations.en) clone.translations.en.name += ' (Copy)';
     }
     clone.createdAt = new Date().toISOString();
+    clone.updatedAt = clone.createdAt;
     clone.sales = 0;
     clone.approvalStatus = 'تەستىقلاندى';
+    clone.isUserEdited = true;
 
     products.unshift(clone);
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    this.saveUserEdit(clone);
     this.notifyDataChange('products');
+    if (window.TeklimakanSupabase) {
+      this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(clone), 'product duplication');
+    }
     return clone;
   }
 
@@ -4297,15 +4559,37 @@ class StoreManager {
 
     if (!Array.isArray(categories) || categories.length <= 1 || !categories.some(c => c.id === 'گۈلقەنتلەر')) {
       categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
-      try {
-        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
-      } catch(e) {}
     }
+
+    // 🌟 كومپيۇتېر ۋە كۆچمە تېلېفوندىكى تۈرلەرنى 100% تەڭلەشتۈرۈش:
+    // بارلىق مەھسۇلاتلاردىكى تۈرلەرنى ئۆزلۈكىدىن قوشۇپ مۇكەممەللەشتۈرۈش
+    const products = this.getProducts();
+    const existingIds = new Set(categories.map(c => c.id || c.name));
+
+    products.forEach(p => {
+      const cat = p.category ? p.category.trim() : '';
+      if (cat && cat !== 'all' && !existingIds.has(cat)) {
+        existingIds.add(cat);
+        const trName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'tr') : cat;
+        const enName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'en') : cat;
+        categories.push({
+          id: cat,
+          name: cat,
+          icon: 'fas fa-tag',
+          status: 'active',
+          translations: { ug: cat, tr: trName, en: enName }
+        });
+      }
+    });
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    } catch(e) {}
 
     return categories.map(c => {
       let displayName = (c.translations && c.translations[lang])
         ? c.translations[lang]
-        : (window.appI18n && typeof window.appI18n.getCategoryName === 'function' ? window.appI18n.getCategoryName(c.name) : c.name);
+        : (window.appI18n && typeof window.appI18n.getCategoryName === 'function' ? window.appI18n.getCategoryName(c.name, lang) : c.name);
       return { status: 'active', ...c, displayName };
     });
   }
@@ -4494,6 +4778,14 @@ class StoreManager {
 
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     this.notifyDataChange('orders');
+    const savedOrder = orders.find(order => order.id === orderId);
+    if (savedOrder && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
+      this.trackCloudWrite(window.TeklimakanSupabase.updateOrderStatus(orderId, savedOrder.status, {
+        carrier,
+        number: trackingNo,
+        shippedAt: savedOrder.shippedAt
+      }), 'order tracking update');
+    }
     return { success: true, order: ord, message: 'كارگو ئۇچۇرى ساقلاندى!' };
   }
 
@@ -4912,6 +5204,12 @@ class StoreManager {
       if (prod) {
         prod.stock -= item.quantity;
         prod.sales = (prod.sales || 0) + item.quantity;
+        prod.isUserEdited = true;
+        prod.updatedAt = new Date().toISOString();
+        this.saveUserEdit(prod);
+        if (window.TeklimakanSupabase) {
+          this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(prod), 'order inventory update');
+        }
         if (prod.stock <= 3) {
           lowStockAlerts.push(`• <b>${prod.name}</b>: قالدۇق زاپىسى پەقەت <b>${prod.stock}</b> دانە قالدى!`);
         }
@@ -4937,7 +5235,7 @@ class StoreManager {
 
     // ☁️ Supabase بۇلۇت ئامبىرىغا زاكازنى يۈكلەش
     if (window.TeklimakanSupabase && newOrder) {
-      window.TeklimakanSupabase.insertOrder(newOrder);
+      this.trackCloudWrite(window.TeklimakanSupabase.insertOrder(newOrder), 'new order');
     }
 
     // 📱 خېرىدارنىڭ نومۇرى ۋە زاكاز كودىنى ساقلاپ قويۇش (بىر يىلدىن كېيىن كىرسىمۇ ئاسان تېپىش ئۈچۈن)
@@ -4975,9 +5273,9 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
       this.notifyDataChange('orders');
       if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
-        window.TeklimakanSupabase.updateOrderStatus(order.id, newStatus, {
+        this.trackCloudWrite(window.TeklimakanSupabase.updateOrderStatus(order.id, newStatus, {
           completedAt: order.completedAt
-        });
+        }), 'order status update');
       }
       return true;
     }
@@ -5003,7 +5301,7 @@ class StoreManager {
       if (updatedCustomer.address) localStorage.setItem('teklimakan_checkout_address', updatedCustomer.address.trim());
     } catch (e) {}
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderCustomer === 'function') {
-      window.TeklimakanSupabase.updateOrderCustomer(order.id, order.customer);
+      this.trackCloudWrite(window.TeklimakanSupabase.updateOrderCustomer(order.id, order.customer), 'order customer update');
     }
     return { success: true, order: order, message: 'ئۇچۇرلىرىڭىز مۇۋەپپەقىيەتلىك يېڭىلاندى!' };
   }
@@ -5014,7 +5312,7 @@ class StoreManager {
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     this.notifyDataChange('orders');
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteOrder === 'function') {
-      window.TeklimakanSupabase.deleteOrder(orderId);
+      this.trackCloudWrite(window.TeklimakanSupabase.deleteOrder(orderId), 'order deletion');
     }
     return true;
   }
@@ -5392,8 +5690,28 @@ class StoreManager {
     return false;
   }
 
-  notifyDataChange(type) {
-    window.dispatchEvent(new CustomEvent('uyghur_store_sync', { detail: { type } }));
+  notifyDataChange(type, detail = {}) {
+    window.dispatchEvent(new CustomEvent('uyghur_store_sync', { detail: { type, ...detail } }));
+
+    // 📡 كۆپ بەت ياكى تېلېفون كۆزنەكلىرى ئارىسىدا ئۆزلۈكىدىن تارقىتىش (BroadcastChannel)
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        if (!this._syncBroadcast) {
+          this._syncBroadcast = new BroadcastChannel('teklimakan_store_sync_channel');
+          this._syncBroadcast.onmessage = (event) => {
+            if (event.data && event.data.type) {
+              window.dispatchEvent(new CustomEvent('uyghur_store_sync', { detail: event.data }));
+            }
+          };
+        }
+        this._syncBroadcast.postMessage({ type, ...detail });
+      }
+    } catch(e) {}
+
+    // 🔄 ئۈسكۈنىنىڭ ساقلىغۇچ ئالماشتۇرۇش سىگنالى (Cross-tab localStorage pulse)
+    try {
+      localStorage.setItem('teklimakan_store_sync_pulse', JSON.stringify({ type, ...detail, time: Date.now() }));
+    } catch(e) {}
   }
 }
 

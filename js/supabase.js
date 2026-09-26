@@ -12,6 +12,7 @@ const SUPABASE_CONFIG = {
 
 // Supabase خېرىدارىنى قۇرۇش
 let _supabaseClient = null;
+let _realtimeChannel = null;
 function getSupabase() {
   if (!_supabaseClient && window.supabase && typeof window.supabase.createClient === 'function') {
     try {
@@ -26,6 +27,70 @@ function getSupabase() {
 window.TeklimakanSupabase = {
   config: SUPABASE_CONFIG,
   getClient: getSupabase,
+
+  _realtimeHandler: null,
+  _reconnectTimer: null,
+  _isConnected: false,
+
+  isRealtimeConnected() {
+    return this._isConnected;
+  },
+
+  reconnectRealtime() {
+    if (!this._realtimeHandler) return false;
+    const sb = getSupabase();
+    if (!sb) return false;
+    if (_realtimeChannel) {
+      try { sb.removeChannel(_realtimeChannel); } catch (e) {}
+      _realtimeChannel = null;
+    }
+    this._isConnected = false;
+    return this.subscribeToChanges(this._realtimeHandler, true);
+  },
+
+  subscribeToChanges(handler, forceRebind = false) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    if (handler) this._realtimeHandler = handler;
+    if (!this._realtimeHandler) return false;
+
+    if (_realtimeChannel && !forceRebind) return true;
+
+    if (_realtimeChannel) {
+      try { sb.removeChannel(_realtimeChannel); } catch (e) {}
+      _realtimeChannel = null;
+    }
+
+    const channelName = 'teklimakan-store-changes-' + Math.floor(Math.random() * 10000);
+    _realtimeChannel = sb.channel(channelName)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
+        if (typeof this._realtimeHandler === 'function') {
+          this._realtimeHandler({ table: 'products', ...payload });
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+        if (typeof this._realtimeHandler === 'function') {
+          this._realtimeHandler({ table: 'orders', ...payload });
+        }
+      })
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') {
+          this._isConnected = true;
+          console.log('✅ [Supabase Realtime] بۇلۇتقا دەل ۋاقتىدا ئۇلاندى');
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          this._isConnected = false;
+          console.warn(`⚠️ [Supabase Realtime] ئۈزۈلدى (${status})، 3 سېكۇنتتىن كېيىن قايتا ئۇلىنىدۇ...`);
+          _realtimeChannel = null;
+          clearTimeout(this._reconnectTimer);
+          this._reconnectTimer = setTimeout(() => {
+            if (this._realtimeHandler) {
+              this.subscribeToChanges(this._realtimeHandler, true);
+            }
+          }, 3000);
+        }
+      });
+    return true;
+  },
 
   // تاۋارلارنى بۇلۇتتىن ئوقۇش
   async fetchProducts() {
@@ -49,11 +114,16 @@ window.TeklimakanSupabase = {
     const sb = getSupabase();
     if (!sb) return false;
     try {
-      // unit نى translations JSONB ئىچىگە پۈتۈپ، بىرلىكنىڭ يوقاپ كەتمەسلىكىگە كاپالەتلىك قىلىش
+      // unit ۋە تەھرىر ھالىتىنى translations JSONB ئىچىگە پۈتۈپ، بارلىق ئۈسكۈنىلەردە ماسلىشىشىغا كاپالەتلىك قىلىش
       const translations = { ...(product.translations || {}) };
       if (product.unit) {
         translations.unit = product.unit;
       }
+      if (product.isUserEdited !== false) {
+        translations.isUserEdited = true;
+      }
+      const nowIso = product.updatedAt || new Date().toISOString();
+      translations.updatedAt = nowIso;
 
       const row = {
         id: product.id,
@@ -75,7 +145,8 @@ window.TeklimakanSupabase = {
         merchant_badge: product.merchantBadge || 'ئىشەنچىلىك سودىگەر',
         agent_id: product.agentId || null,
         agent_name: product.agentName || null,
-        translations: translations
+        translations: translations,
+        updated_at: nowIso
       };
       const { error } = await sb.from('products').upsert(row, { onConflict: 'id' });
       if (error) {
@@ -99,6 +170,18 @@ window.TeklimakanSupabase = {
       return !error;
     } catch (e) {
       console.warn('Supabase product ئۆچۈرۈش خاتالىقى:', e);
+      return false;
+    }
+  },
+  async deleteOrder(orderId) {
+    const sb = getSupabase();
+    if (!sb) return false;
+    try {
+      const { error } = await sb.from('orders').delete().eq('id', orderId);
+      if (error) console.warn('Supabase deleteOrder error:', error.message);
+      return !error;
+    } catch (e) {
+      console.warn('Supabase order deletion failed:', e);
       return false;
     }
   },
@@ -384,4 +467,3 @@ window.TeklimakanSupabase = {
     }
   }
 };
-

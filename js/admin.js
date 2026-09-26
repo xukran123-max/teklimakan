@@ -407,13 +407,13 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           `;
           matchedProducts.forEach(prod => {
-            const thumb = prod.image || 'images/default_product.jpg';
+            const thumb = prod.image || 'images/logo_circle.png';
             const priceStr = window.appStore ? window.appStore.formatPrice(prod.price) : `${prod.price} ₺`;
             const stockColor = (prod.stock || 0) <= 5 ? '#dc2626' : '#16a34a';
             const stockBg = (prod.stock || 0) <= 5 ? '#fef2f2' : '#f0fdf4';
             html += `
               <div class="admin-search-item" data-type="product" data-id="${escapeHtml(prod.id)}" data-name="${escapeHtml(prod.name)}">
-                <img src="${escapeHtml(thumb)}" class="admin-search-item-thumb" alt="${escapeHtml(prod.name)}" onerror="this.src='images/default_product.jpg'">
+                <img src="${escapeHtml(thumb)}" class="admin-search-item-thumb" alt="${escapeHtml(prod.name)}" onerror="this.onerror=null; this.src='images/logo_circle.png'">
                 <div class="admin-search-item-content">
                   <div class="admin-search-item-title">${highlightText(prod.name, q)}</div>
                   <div class="admin-search-item-sub">
@@ -1150,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
-            <img src="${product.image}" class="table-product-thumb" alt="${displayName}" onerror="this.src='images/default_product.jpg'">
+            <img src="${product.image || 'images/logo_circle.png'}" class="table-product-thumb" alt="${displayName}" onerror="this.onerror=null; this.src='images/logo_circle.png'">
             <div style="min-width: 0; flex: 1;">
               <div class="table-product-title">${displayName}</div>
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
@@ -1206,6 +1206,8 @@ document.addEventListener('DOMContentLoaded', () => {
           showAdminToast(res.message, 'success');
           renderProductsTable();
           renderDashboardMetrics();
+        } else {
+          showAdminToast(res.message, 'error');
         }
       });
     });
@@ -3643,10 +3645,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const enName = (product.translations?.en?.name) || '';
       const enDesc = (product.translations?.en?.description) || '';
 
-      if (nameTrEl) { nameTrEl.value = trName; nameTrEl.dataset.manuallyEdited = trName ? "true" : "false"; }
-      if (nameEnEl) { nameEnEl.value = enName; nameEnEl.dataset.manuallyEdited = enName ? "true" : "false"; }
-      if (descTrEl) { descTrEl.value = trDesc; descTrEl.dataset.manuallyEdited = trDesc ? "true" : "false"; }
-      if (descEnEl) { descEnEl.value = enDesc; descEnEl.dataset.manuallyEdited = enDesc ? "true" : "false"; }
+      if (nameTrEl) { nameTrEl.value = trName || window.appI18n.autoTranslateUyghur(product.name, 'tr'); nameTrEl.dataset.manuallyEdited = "false"; nameTrEl.dataset.sourceChanged = "false"; }
+      if (nameEnEl) { nameEnEl.value = enName || window.appI18n.autoTranslateUyghur(product.name, 'en'); nameEnEl.dataset.manuallyEdited = "false"; nameEnEl.dataset.sourceChanged = "false"; }
+      if (descTrEl) { descTrEl.value = trDesc || window.appI18n.autoTranslateUyghur(product.description || '', 'tr'); descTrEl.dataset.manuallyEdited = "false"; descTrEl.dataset.sourceChanged = "false"; }
+      if (descEnEl) { descEnEl.value = enDesc || window.appI18n.autoTranslateUyghur(product.description || '', 'en'); descEnEl.dataset.manuallyEdited = "false"; descEnEl.dataset.sourceChanged = "false"; }
     } else {
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
       document.getElementById('formProductId').value = '';
@@ -3658,10 +3660,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const nameEnEl = document.getElementById('formProductNameEn');
       const descTrEl = document.getElementById('formProductDescTr');
       const descEnEl = document.getElementById('formProductDescEn');
-      if (nameTrEl) { nameTrEl.value = ''; nameTrEl.dataset.manuallyEdited = "false"; }
-      if (nameEnEl) { nameEnEl.value = ''; nameEnEl.dataset.manuallyEdited = "false"; }
-      if (descTrEl) { descTrEl.value = ''; descTrEl.dataset.manuallyEdited = "false"; }
-      if (descEnEl) { descEnEl.value = ''; descEnEl.dataset.manuallyEdited = "false"; }
+      if (nameTrEl) { nameTrEl.value = ''; nameTrEl.dataset.manuallyEdited = "false"; nameTrEl.dataset.sourceChanged = "false"; }
+      if (nameEnEl) { nameEnEl.value = ''; nameEnEl.dataset.manuallyEdited = "false"; nameEnEl.dataset.sourceChanged = "false"; }
+      if (descTrEl) { descTrEl.value = ''; descTrEl.dataset.manuallyEdited = "false"; descTrEl.dataset.sourceChanged = "false"; }
+      if (descEnEl) { descEnEl.value = ''; descEnEl.dataset.manuallyEdited = "false"; descEnEl.dataset.sourceChanged = "false"; }
 
       if (scopeSelect) {
         scopeSelect.value = 'all';
@@ -5272,6 +5274,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function setupEventListeners() {
+    let adminImageProcessing = false;
+
     setupMessagingEvents();
     setupWebPushAdmin();
 
@@ -5373,6 +5377,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (productForm) {
       productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (adminImageProcessing) {
+          showAdminToast('رەسىم تېخى تەييارلىنىۋاتىدۇ؛ بىرئاز ساقلاپ قايتا ساقلاڭ.', 'info');
+          return;
+        }
         const submitBtn = productForm.querySelector('button[type="submit"]');
         const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
         if (submitBtn) {
@@ -5395,23 +5403,40 @@ document.addEventListener('DOMContentLoaded', () => {
           const badge = document.getElementById('formProductBadge').value;
           const descUg = document.getElementById('formProductDescUg').value.trim();
 
-          const nameTr = document.getElementById('formProductNameTr')?.value.trim() || nameUg;
-          const descTr = document.getElementById('formProductDescTr')?.value.trim() || descUg;
-
-          const nameEn = document.getElementById('formProductNameEn')?.value.trim() || nameUg;
-          const descEn = document.getElementById('formProductDescEn')?.value.trim() || descUg;
-
           if (!image) {
             image = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
           }
 
-          // سۈرەتنى باشقۇرغۇچى سۈپىتىدە تەكشۈرۈش (باشقۇرغۇچىغا چەكلىمە يوق)
-          const secCheck = window.appStore.validateProductImageSecurity(image, '', true);
+          let nameTr = document.getElementById('formProductNameTr')?.value.trim();
+          let descTr = document.getElementById('formProductDescTr')?.value.trim();
+          let nameEn = document.getElementById('formProductNameEn')?.value.trim();
+          let descEn = document.getElementById('formProductDescEn')?.value.trim();
+
+          // ئەگەر تۈركچە ياكى ئىنگلىزچە بوش قالغان ياكى ئۇيغۇرچە يېزىق پېتى قالغان بولسا ئاپتوماتىك تەرجىمە قىلىپ تولدۇرۇش
+          if (!nameTr || /[\u0600-\u06FF]/.test(nameTr)) {
+            nameTr = window.appI18n ? window.appI18n.autoTranslateUyghur(nameUg, 'tr') : nameUg;
+          }
+          if (!descTr || /[\u0600-\u06FF]/.test(descTr)) {
+            descTr = window.appI18n ? window.appI18n.autoTranslateUyghur(descUg, 'tr') : descUg;
+          }
+          if (!nameEn || /[\u0600-\u06FF]/.test(nameEn)) {
+            nameEn = window.appI18n ? window.appI18n.autoTranslateUyghur(nameUg, 'en') : nameUg;
+          }
+          if (!descEn || /[\u0600-\u06FF]/.test(descEn)) {
+            descEn = window.appI18n ? window.appI18n.autoTranslateUyghur(descUg, 'en') : descUg;
+          }
+
+          const categoryTr = window.appI18n ? window.appI18n.getCategoryName(category, 'tr') : category;
+          const categoryEn = window.appI18n ? window.appI18n.getCategoryName(category, 'en') : category;
+          const unitTr = window.appI18n ? window.appI18n.getUnitName(unit, 'tr') : unit;
+          const unitEn = window.appI18n ? window.appI18n.getUnitName(unit, 'en') : unit;
+          const badgeTr = (window.appI18n && badge) ? window.appI18n.getBadgeName(badge, 'tr') : badge;
+          const badgeEn = (window.appI18n && badge) ? window.appI18n.getBadgeName(badge, 'en') : badge;
 
           const translations = {
-            ug: { name: nameUg, description: descUg, category: category },
-            tr: { name: nameTr, description: descTr, category: category },
-            en: { name: nameEn, description: descEn, category: category }
+            ug: { name: nameUg, description: descUg, category: category, unit: unit, badge: badge },
+            tr: { name: nameTr, description: descTr, category: categoryTr, unit: unitTr, badge: badgeTr },
+            en: { name: nameEn, description: descEn, category: categoryEn, unit: unitEn, badge: badgeEn }
           };
 
           const data = {
@@ -5444,7 +5469,11 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('productFormModal').classList.remove('active');
           renderProductsTable();
           renderDashboardMetrics();
-          showAdminToast(id ? 'تاۋار ئۇچۇرى مەڭگۈلۈك يېڭىلاندى ھەمدە بۇلۇتقا ساقلاندى!' : `«${brand}» ماركىلىق تاۋار ئېلان قىلىندى!`, 'success');
+          if (saveRes.cloudSynced) {
+            showAdminToast(id ? 'تاۋار ئۇچۇرى بۇلۇتقا ساقلىنىپ، باشقا ئۈسكۈنىلەرگە ئەۋەتىلدى.' : `«${brand}» ماركىلىق تاۋار بۇلۇتقا ساقلىنىپ، باشقا ئۈسكۈنىلەرگە ئەۋەتىلدى.`, 'success');
+          } else {
+            showAdminToast('تاۋار بۇ ئۈسكۈنىدە ساقلاندى، ئەمما بۇلۇتقا يوللانمىدى. تور ۋە Supabase تەڭشىكىنى تەكشۈرۈڭ.', 'error');
+          }
 
           // 📲 يېڭى تاۋار ئېلان قىلىنغاندا تېلېفونلارغا تىلى بويىچە خەۋەرلەندۈرۈش چىقىرىش
           const pushCheck = document.getElementById('formProductPushNotify');
@@ -5506,30 +5535,75 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      adminImageProcessing = true;
+      showAdminToast('رەسىم ئەلالاشتۇرۇلۇپ ساقلاشقا تەييارلىنىۋاتىدۇ...', 'info');
+
       // ھۆججەتنى ئوقۇش ۋە ئالدىن كۆرسىتىش
       const reader = new FileReader();
+      reader.onerror = () => {
+        adminImageProcessing = false;
+        showAdminToast('رەسىمنى تېلېفوندىن ئوقۇغىلى بولمىدى؛ باشقا رەسىم تاللاڭ.', 'error');
+      };
       reader.onload = function(event) {
         const base64Data = event.target.result;
 
         const tempImg = new Image();
         tempImg.onload = function() {
-          // باشقۇرغۇچى بولغاچقا رەسىم بىۋاستە ئەكىرىلىدۇ
-          if (productImageInput) productImageInput.value = base64Data;
-          if (previewImg) previewImg.src = base64Data;
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(1, 1200 / Math.max(tempImg.naturalWidth, tempImg.naturalHeight));
+          canvas.width = Math.max(1, Math.round(tempImg.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(tempImg.naturalHeight * scale));
+          const context = canvas.getContext('2d');
+          if (!context) {
+            adminImageProcessing = false;
+            showAdminToast('رەسىمنى ئەلالاشتۇرغىلى بولمىدى؛ باشقا رەسىم تاللاڭ.', 'error');
+            return;
+          }
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+
+          let compressedImage = canvas.toDataURL('image/jpeg', 0.82);
+          while (compressedImage.length > 500 * 1024 * 4 / 3 && canvas.width > 480 && canvas.height > 480) {
+            const smallerCanvas = document.createElement('canvas');
+            smallerCanvas.width = Math.round(canvas.width * 0.8);
+            smallerCanvas.height = Math.round(canvas.height * 0.8);
+            const smallerContext = smallerCanvas.getContext('2d');
+            if (!smallerContext) break;
+            smallerContext.fillStyle = '#ffffff';
+            smallerContext.fillRect(0, 0, smallerCanvas.width, smallerCanvas.height);
+            smallerContext.drawImage(canvas, 0, 0, smallerCanvas.width, smallerCanvas.height);
+            canvas.width = smallerCanvas.width;
+            canvas.height = smallerCanvas.height;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(smallerCanvas, 0, 0);
+            compressedImage = canvas.toDataURL('image/jpeg', 0.78);
+          }
+
+          if (compressedImage.length > 500 * 1024 * 4 / 3) {
+            adminImageProcessing = false;
+            showAdminToast('رەسىم بەك چوڭ؛ تېخىمۇ كىچىك رەسىم تاللاڭ.', 'error');
+            return;
+          }
+
+          if (productImageInput) productImageInput.value = compressedImage;
+          if (previewImg) previewImg.src = compressedImage;
           if (previewBox) previewBox.style.display = 'block';
+          adminImageProcessing = false;
 
           if (secStatus) {
             secStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #2563eb;"></i> باشقۇرغۇچى ھوقۇقى: سۈرەت مۇۋەپپەقىيەتلىك ئەكىرىلدى';
             secStatus.style.color = '#2563eb';
           }
           if (secDetail) {
-            secDetail.textContent = `ھۆججەت: ${file.name || 'چاپلانغان رەسىم'} (${tempImg.width}x${tempImg.height}px) - باشقۇرغۇچى تەرىپىدىن تەستىقلاندى.`;
+            secDetail.textContent = `ھۆججەت: ${file.name || 'چاپلانغان رەسىم'} (${canvas.width}x${canvas.height}px) - بۇلۇتقا ئەۋەتىشكە ئەلالاشتۇرۇلدى.`;
           }
 
-          showAdminToast('✅ رەسىم مۇۋەپپەقىيەتلىك ئەكىرىلدى!', 'success');
+          showAdminToast('✅ رەسىم ئەلالاشتۇرۇلدى؛ مەھسۇلات بىلەن بىللە بۇلۇتقا ساقلىنىدۇ.', 'success');
         };
 
         tempImg.onerror = function() {
+          adminImageProcessing = false;
           alert('⚠️ رەسىمنى ئوقۇش مەغلۇپ بولدى، باشقا رەسىم تاللاڭ.');
           if (productFileInput) productFileInput.value = '';
           if (productCameraInput) productCameraInput.value = '';
@@ -5794,6 +5868,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) {
           el.addEventListener('input', () => {
             el.dataset.manuallyEdited = el.value.trim().length > 0 ? "true" : "false";
+            el.dataset.sourceChanged = "false";
           });
         }
       });
@@ -5802,14 +5877,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nameUg || !window.appI18n) return;
         const text = nameUg.value.trim();
         if (!text) {
-          if (nameTr && nameTr.dataset.manuallyEdited !== "true") nameTr.value = '';
-          if (nameEn && nameEn.dataset.manuallyEdited !== "true") nameEn.value = '';
+          if (nameTr && (nameTr.dataset.sourceChanged === "true" || nameTr.dataset.manuallyEdited !== "true")) nameTr.value = '';
+          if (nameEn && (nameEn.dataset.sourceChanged === "true" || nameEn.dataset.manuallyEdited !== "true")) nameEn.value = '';
           return;
         }
-        if (nameTr && nameTr.dataset.manuallyEdited !== "true") {
+        if (nameTr && (nameTr.dataset.sourceChanged === "true" || nameTr.dataset.manuallyEdited !== "true")) {
           nameTr.value = window.appI18n.autoTranslateUyghur(text, 'tr');
         }
-        if (nameEn && nameEn.dataset.manuallyEdited !== "true") {
+        if (nameEn && (nameEn.dataset.sourceChanged === "true" || nameEn.dataset.manuallyEdited !== "true")) {
           nameEn.value = window.appI18n.autoTranslateUyghur(text, 'en');
         }
       }
@@ -5818,23 +5893,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!descUg || !window.appI18n) return;
         const text = descUg.value.trim();
         if (!text) {
-          if (descTr && descTr.dataset.manuallyEdited !== "true") descTr.value = '';
-          if (descEn && descEn.dataset.manuallyEdited !== "true") descEn.value = '';
+          if (descTr && (descTr.dataset.sourceChanged === "true" || descTr.dataset.manuallyEdited !== "true")) descTr.value = '';
+          if (descEn && (descEn.dataset.sourceChanged === "true" || descEn.dataset.manuallyEdited !== "true")) descEn.value = '';
           return;
         }
-        if (descTr && descTr.dataset.manuallyEdited !== "true") {
+        if (descTr && (descTr.dataset.sourceChanged === "true" || descTr.dataset.manuallyEdited !== "true")) {
           descTr.value = window.appI18n.autoTranslateUyghur(text, 'tr');
         }
-        if (descEn && descEn.dataset.manuallyEdited !== "true") {
+        if (descEn && (descEn.dataset.sourceChanged === "true" || descEn.dataset.manuallyEdited !== "true")) {
           descEn.value = window.appI18n.autoTranslateUyghur(text, 'en');
         }
       }
 
       if (nameUg) {
-        nameUg.addEventListener('input', doAutoTranslateName);
+        nameUg.addEventListener('input', () => {
+          [nameTr, nameEn].forEach(el => {
+            if (el) el.dataset.sourceChanged = "true";
+          });
+          doAutoTranslateName();
+        });
       }
       if (descUg) {
-        descUg.addEventListener('input', doAutoTranslateDesc);
+        descUg.addEventListener('input', () => {
+          [descTr, descEn].forEach(el => {
+            if (el) el.dataset.sourceChanged = "true";
+          });
+          doAutoTranslateDesc();
+        });
       }
 
       const btnAuto = document.getElementById('btnAutoTranslateProduct');
@@ -5844,6 +5929,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (nameEn) nameEn.dataset.manuallyEdited = "false";
           if (descTr) descTr.dataset.manuallyEdited = "false";
           if (descEn) descEn.dataset.manuallyEdited = "false";
+          [nameTr, nameEn, descTr, descEn].forEach(el => {
+            if (el) el.dataset.sourceChanged = "true";
+          });
           doAutoTranslateName();
           doAutoTranslateDesc();
           showAdminToast('تۈركچە ۋە ئىنگلىزچە تەرجىمىسى قايتا ھاسىللاندى!', 'info');
@@ -7013,11 +7101,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('uyghur_store_sync', () => {
       renderDashboardMetrics();
       renderRecentOrders();
-      renderProductsTable();
+      const pModal = document.getElementById('productFormModal');
+      if (!pModal || !pModal.classList.contains('active')) {
+        renderProductsTable();
+      }
       renderOrdersTable();
       renderCustomersTable();
       renderCouponsTable();
       renderAgentsView();
+    });
+    window.addEventListener('teklimakan_cloud_sync_error', () => {
+      showAdminToast('بۇلۇتقا ساقلاش مەغلۇپ بولدى؛ باشقا ئۈسكۈنىلەرگە ماسلاشمىدى. تور ۋە Supabase تەڭشىكىنى تەكشۈرۈڭ.', 'error');
     });
 
     // 🔄 ئارقا سۇپىدا بۇلۇتتىن دەل ۋاقتىدا تەكشۈرۈش (ھەر 20 سېكۇنتتا يېڭى ئىلتىماس كەلگەن-كەلمىگەنلىكىنى تەكشۈرىدۇ)

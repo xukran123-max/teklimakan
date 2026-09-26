@@ -751,6 +751,8 @@ const CATEGORY_LOCALIZATIONS = {
   'گۈزەللىك ۋە ساغلاملىق': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
   'گۈلقەنتلەر': { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' },
   'گۈلقەنت': { ug: 'گۈلقەنت', tr: 'Gül Reçeli', en: 'Rose Jam' },
+  'قۇرۇق يەل-يېمىشلەر': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' },
+  'مەدەنىيەت بۇيۇملىرى': { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' },
   'كىتاپ ۋە مەدەنىيەت': { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
   'كىتابلار': { ug: 'كىتابلار', tr: 'Kitaplar', en: 'Books' },
   'مىللىي تەبىئىي مەھسۇلاتلار': { ug: 'مىللىي تەبىئىي مەھسۇلاتلار', tr: 'Doğal Yöresel Ürünler', en: 'Heritage Natural Products' },
@@ -946,8 +948,53 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'ۋاكالەتچى كىرىش', tr: 'Temsilci Girişi', en: 'Vendor Portal' },
   { ug: 'ۋاكالەتچى مەركىزى', tr: 'Temsilci Merkezi', en: 'Vendor Center' },
   { ug: 'ئارقا سۇپا', tr: 'Yönetim Paneli', en: 'Admin Panel' },
-  { ug: 'سودىگەر بولىمەن', tr: 'Satıcı Başvurusu', en: 'Become a Merchant' }
+  { ug: 'سودىگەر بولىمەن', tr: 'Satıcı Başvurusu', en: 'Become a Merchant' },
+  // 📦 تاۋار سۈپەتلىرى ۋە چۈشەندۈرۈش سۆزلىكى
+  { ug: 'ساپ تەبىئىي', tr: 'Saf Doğal', en: '100% Pure Natural' },
+  { ug: 'ئەلا سۈپەتلىك', tr: 'Üstün Kaliteli', en: 'Premium Quality' },
+  { ug: 'يۇقىرى سۈپەتلىك', tr: 'Yüksek Kaliteli', en: 'High Quality' },
+  { ug: 'يۇقىرى سۈپەت', tr: 'Yüksek Kalite', en: 'High Quality' },
+  { ug: 'ئىشەنچلىك', tr: 'Güvenilir', en: 'Reliable' },
+  { ug: 'شىپالىق', tr: 'Şifalı', en: 'Healing & Herbal' },
+  { ug: 'پايدىلىق', tr: 'Faydalı', en: 'Beneficial' },
+  { ug: 'قۇرۇتۇلغان', tr: 'Kurutulmuş', en: 'Dried' },
+  { ug: 'سوغۇق پىرىسلانغان', tr: 'Soğuk Sıkım', en: 'Cold-Pressed' },
+  { ug: 'قولدا ئىشلەنگەن', tr: 'El Yapımı', en: 'Handmade' },
+  { ug: 'مەھسۇلاتى', tr: 'Ürünü', en: 'Product' },
+  { ug: 'مەلھىمى', tr: 'Merhemi', en: 'Ointment' },
+  { ug: 'چېيى', tr: 'Çayı', en: 'Tea' },
+  { ug: 'مايى', tr: 'Yağı', en: 'Oil' },
+  { ug: 'گۈلقەنتى', tr: 'Gül Reçeli', en: 'Rose Petal Paste' },
+  { ug: 'مېغىزى', tr: 'İçi', en: 'Kernels' },
+  { ug: 'ئەسلى', tr: 'Orijinal', en: 'Original' },
+  { ug: 'ئېسىل', tr: 'Seçkin & Harika', en: 'Exquisite' },
+  { ug: 'تېز يەتكۈزۈش', tr: 'Hızlı Teslimat', en: 'Fast Delivery' },
+  { ug: 'كاپالەتلىك', tr: 'Garantili', en: 'Guaranteed' },
+  { ug: 'ھەقسىز', tr: 'Ücretsiz', en: 'Free' },
+  { ug: 'تېز توك قاچىلىغۇچ', tr: 'Hızlı Şarj Cihazı', en: 'Fast Charger' },
+  { ug: 'سىمسىز', tr: 'Kablosuz', en: 'Wireless' },
+  { ug: 'خاتىرە كومپيۇتېر', tr: 'Dizüstü Bilgisayar', en: 'Laptop' },
+  { ug: 'خاتىرە دەپتەر', tr: 'Not Defteri', en: 'Notebook' }
 ];
+
+const UNIT_LOCALIZATIONS = {
+  'دانە': { ug: 'دانە', tr: 'adet', en: 'pcs' },
+  'كىلو': { ug: 'كىلو', tr: 'kg', en: 'kg' },
+  'كىلوگرام': { ug: 'كىلوگرام', tr: 'kg', en: 'kg' },
+  'گىرام': { ug: 'گىرام', tr: 'g', en: 'g' },
+  'قاپ': { ug: 'قاپ', tr: 'kutu', en: 'box' },
+  'بوتۇلكا': { ug: 'بوتۇلكا', tr: 'şişe', en: 'bottle' },
+  'جۈپ': { ug: 'جۈپ', tr: 'çift', en: 'pair' },
+  'يۈرۈش': { ug: 'يۈرۈش', tr: 'set', en: 'set' },
+  'يۈرۈشلۈك': { ug: 'يۈرۈشلۈك', tr: 'set', en: 'set' },
+  'مېتىر': { ug: 'مېتىر', tr: 'metre', en: 'meter' },
+  'لىتىر': { ug: 'لىتىر', tr: 'litre', en: 'liter' },
+  'بولاق': { ug: 'بولاق', tr: 'paket', en: 'pack' },
+  'تال': { ug: 'تال', tr: 'adet', en: 'pcs' },
+  'پارچە': { ug: 'پارچە', tr: 'parça', en: 'piece' },
+  'پىلاستىنكا': { ug: 'پىلاستىنكا', tr: 'plaka', en: 'plate' },
+  'باغلام': { ug: 'باغلام', tr: 'bağ', en: 'bundle' }
+};
 
 class I18nManager {
   constructor() {
@@ -1075,6 +1122,20 @@ class I18nManager {
       }
     }
     return this.autoTranslateUyghur(name, lang);
+  }
+
+  // 📦 تاۋار بىرلىكى (Unit) نى كۆپ تىلغا ئايلاندۇرۇش
+  getUnitName(unit, targetLang = null) {
+    if (!unit) return '';
+    const lang = targetLang || this.currentLang;
+    if (lang === 'ug') return unit;
+    const clean = String(unit).trim().toLowerCase();
+    for (const [k, v] of Object.entries(UNIT_LOCALIZATIONS || {})) {
+      if (clean === k.toLowerCase() || clean === k || clean.includes(k) || k.includes(clean)) {
+        return v[lang] || unit;
+      }
+    }
+    return this.autoTranslateUyghur(unit, lang);
   }
 
   // ئەگەر ئۇيغۇرچە يېزىق قالغان بولسا تۈركچە ياكى ئىنگلىزچىگە ئاپتوماتىك دەل جايىدا تەرجىمە قىلىش

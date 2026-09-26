@@ -1451,33 +1451,27 @@ function initTeklimakanApp() {
 
       prodId = decodeURIComponent(prodId).trim();
 
-      // سۇپىدىكى تاۋارلار قاچىلىنىپ بولغۇچە پات-پات سىناپ تەكشۈرۈش
-      let attempts = 0;
-      const maxAttempts = 25;
-      const timer = setInterval(() => {
-        attempts++;
-        if (window.appStore && typeof window.appStore.getProducts === 'function') {
-          const prods = window.appStore.getProducts();
-          if (prods && prods.length > 0) {
-            const found = window.appStore.getProductById(prodId) ||
-                          window.appStore.getProductById('PRD-' + prodId);
-            if (found) {
-              clearInterval(timer);
-              setTimeout(() => {
-                openQuickView(found.id);
-                const el = document.querySelector(`[data-product-id="${found.id}"]`);
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }, 200);
-              return;
-            }
-          }
+      const findProduct = () => window.appStore?.getProductById(prodId) ||
+        window.appStore?.getProductById('PRD-' + prodId);
+      let opened = false;
+      const openFoundProduct = () => {
+        const found = findProduct();
+        if (!found || opened) return false;
+        opened = true;
+        window.removeEventListener('uyghur_store_sync', handleStoreSync);
+        setTimeout(() => openQuickView(found.id), 0);
+        return true;
+      };
+      const handleStoreSync = event => {
+        if (event.detail?.type === 'products' || event.detail?.type === 'all') {
+          openFoundProduct();
         }
-        if (attempts >= maxAttempts) {
-          clearInterval(timer);
-        }
-      }, 150);
+      };
+
+      if (!openFoundProduct()) {
+        window.addEventListener('uyghur_store_sync', handleStoreSync);
+        openFoundProduct();
+      }
     } catch (e) {
       console.warn('checkUrlForProduct error:', e);
     }
@@ -1495,6 +1489,7 @@ function initTeklimakanApp() {
     const modal = document.getElementById('quickViewModal');
     const modalBody = document.getElementById('quickViewModalBody');
     if (!modal || !modalBody) return;
+    modal.dataset.productId = product.id;
 
     const formattedPrice = window.appStore.formatPrice(product.price);
     const formattedOldPrice = product.oldPrice ? window.appStore.formatPrice(product.oldPrice) : null;
@@ -1596,7 +1591,8 @@ function initTeklimakanApp() {
       instantWaBtn.addEventListener('click', () => {
         const phone = '905551609999';
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
-        const itemUrl = `${window.location.origin}/p/${encodeURIComponent(product.id)}.html`;
+        const lang = window.appI18n.getLang();
+        const itemUrl = `${window.location.origin}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(product.updatedAt || '')}`;
         const msg = encodeURIComponent(
           `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
           `📦 مەھسۇلات: ${product.name}\n` +
@@ -1612,9 +1608,10 @@ function initTeklimakanApp() {
     const shareBtn = document.getElementById('modalShareProductBtn');
     if (shareBtn) {
       shareBtn.addEventListener('click', async () => {
-        const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.id)}.html`;
+        const lang = window.appI18n.getLang();
+        const shareUrl = `${window.location.origin}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}&v=${encodeURIComponent(product.updatedAt || '')}`;
         const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
-        const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}`;
+        const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n📝 ${product.description || ''}`;
         const fullShareMessage = `${shareDesc}\n\n🔗 كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
 
         // 1. يانفون سىستېمىلىق ھەمبەھىرلەش:
@@ -1925,7 +1922,7 @@ function initTeklimakanApp() {
       const activeProds = allProds.filter(p => !p.approvalStatus || p.approvalStatus === 'تەستىقلاندى');
       const product = (activeProds.length > 0)
         ? activeProds[Math.floor(Math.random() * activeProds.length)]
-        : { name: 'رىزە ئالىي قارا چاي يۈرۈشلۈكى', price: 180, image: 'images/default_product.jpg', id: 'TK-101' };
+        : { name: 'رىزە ئالىي قارا چاي يۈرۈشلۈكى', price: 180, image: 'images/logo_circle.png', id: 'TK-101' };
 
       // مەھسۇلات نامىنى نۆۋەتتىكى تىلغا ماسلاشتۇرۇش
       let prodName = product.name;
@@ -1945,7 +1942,7 @@ function initTeklimakanApp() {
 
       const verifiedBadgeText = window.appI18n ? (window.appI18n.t('liveVerifiedBadge') || 'تەستىقلانغان زاكاز') : 'تەستىقلانغان زاكاز';
       const priceFormatted = window.appStore ? window.appStore.formatPrice(product.price) : `${product.price} ₺`;
-      const prodImg = product.image || 'images/default_product.jpg';
+      const prodImg = product.image || 'images/logo_circle.png';
 
       const popup = document.createElement('div');
       popup.className = 'live-sales-popup';
@@ -1956,7 +1953,7 @@ function initTeklimakanApp() {
         <button type="button" class="live-sales-close" title="تاقاش" aria-label="Close">
           <i class="fas fa-times"></i>
         </button>
-        <img src="${prodImg}" class="live-sales-thumb" alt="${prodName}" onerror="this.src='images/default_product.jpg'">
+        <img src="${prodImg}" class="live-sales-thumb" alt="${prodName}" onerror="this.onerror=null; this.src='images/logo_circle.png'">
         <div class="live-sales-content">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; margin-bottom: 2px;">
             <span style="font-weight: 800; font-size: 0.82rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -2082,6 +2079,10 @@ function initTeklimakanApp() {
       renderCategories();
       renderProducts();
       updateCartUI();
+      const quickViewModal = document.getElementById('quickViewModal');
+      if (quickViewModal?.classList.contains('active') && quickViewModal.dataset.productId) {
+        openQuickView(quickViewModal.dataset.productId);
+      }
     });
 
     document.querySelectorAll('.cart-toggle-btn, #cartToggleBtn').forEach(btn => {
@@ -2654,11 +2655,18 @@ function initTeklimakanApp() {
       });
     }
 
-    window.addEventListener('uyghur_store_sync', () => {
+    window.addEventListener('uyghur_store_sync', event => {
       renderBrands();
       renderCategories();
       renderProducts();
       updateCartUI();
+      const quickViewModal = document.getElementById('quickViewModal');
+      const productId = quickViewModal?.dataset.productId;
+      if (event.detail?.type === 'products' && productId &&
+          (!event.detail.productId || event.detail.productId === productId) &&
+          quickViewModal.classList.contains('active')) {
+        openQuickView(productId);
+      }
     });
 
     window.addEventListener('teklimakan_lang_changed', (e) => {
@@ -4451,7 +4459,7 @@ function initTeklimakanApp() {
         return `
           <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:0.7rem 0.85rem; gap:0.6rem; flex-wrap:wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
             <div style="display:flex; align-items:center; gap:0.75rem; flex:1; min-width:200px;">
-              <img src="${p.image || 'images/default_product.jpg'}" onerror="this.src='images/default_product.jpg'" style="width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid #cbd5e1; flex-shrink:0;">
+              <img src="${p.image || 'images/logo_circle.png'}" onerror="this.onerror=null; this.src='images/logo_circle.png'" style="width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid #cbd5e1; flex-shrink:0;">
               <div style="min-width:0; flex:1;">
                 <div style="font-size:0.9rem; font-weight:800; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${p.name}">${p.name}</div>
                 <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; font-size:0.76rem; color:#64748b; margin-top:2px;">
@@ -4601,6 +4609,7 @@ function initTeklimakanApp() {
     const previewWrap = document.getElementById('agentImagePreviewWrap');
     const previewImg = document.getElementById('agentImagePreviewImg');
     const secStatus = document.getElementById('agentImageSecStatus');
+    let agentImageProcessing = false;
 
     async function processAgentProductFile(file) {
       if (!file) return;
@@ -4631,15 +4640,18 @@ function initTeklimakanApp() {
       }
 
       showToast('سۈرەت تەييارلىنىپ سۇپا تامغىسى بېسىلىۋاتىدۇ...', 'info');
+      agentImageProcessing = true;
 
       const reader = new FileReader();
       reader.onerror = () => {
+        agentImageProcessing = false;
         showToast('سۈرەت ھۆججىتىنى ئوقۇش مەغلۇپ بولدى', 'error');
       };
       reader.onload = function(evt) {
         const rawBase64 = evt.target.result;
         const img = new Image();
         img.onerror = () => {
+          agentImageProcessing = false;
           showToast('سۈرەت مەزمۇنىنى ئوقۇش مەغلۇپ بولدى', 'error');
         };
         img.onload = async function() {
@@ -4660,6 +4672,7 @@ function initTeklimakanApp() {
             if (agentFileInputCamera) agentFileInputCamera.value = '';
             if (agentImageInput) agentImageInput.value = '';
             if (previewWrap) previewWrap.style.display = 'none';
+            agentImageProcessing = false;
             return;
           }
 
@@ -4679,9 +4692,16 @@ function initTeklimakanApp() {
             console.warn('Watermark generation error:', wmErr);
           }
 
+          if (finalImageSrc.length > 700 * 1024 * 4 / 3) {
+            agentImageProcessing = false;
+            showToast('رەسىم يەنىلا چوڭ؛ تېلېفوندا كىچىكرەك نۇسخىسىنى تاللاڭ.', 'error');
+            return;
+          }
+
           if (agentImageInput) agentImageInput.value = finalImageSrc;
           if (previewImg) previewImg.src = finalImageSrc;
           if (previewWrap) previewWrap.style.display = 'block';
+          agentImageProcessing = false;
 
           // تېخنىكىلىق كۆرسەتكۈچلەرنى يېڭىلاش
           const dimBadge = document.getElementById('agentImgDimBadge');
@@ -4727,7 +4747,7 @@ function initTeklimakanApp() {
         if (tipBox) tipBox.style.display = 'none';
         if (previewWrap) previewWrap.style.display = 'none';
         if (agentImageInput) {
-          agentImageInput.value = 'images/default_product.jpg';
+          agentImageInput.value = '';
         }
         showToast('👑 «باشقۇرغۇچى يۈكلەش» تاللاندى! رەسىمسىزمۇ مەھسۇلاتنى تەستىققا يوللىيالايسىز.', 'success');
       });
@@ -4767,6 +4787,10 @@ function initTeklimakanApp() {
     if (formProductSubmit) {
       formProductSubmit.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (agentImageProcessing) {
+          showToast('رەسىم تېخى تەييارلىنىۋاتىدۇ؛ بىرئاز ساقلاپ قايتا يوللاڭ.', 'info');
+          return;
+        }
         if (!currentVerifiedAgent) {
           showToast('ئالدى بىلەن كىملىكىڭىزنى دەلىللەڭ!', 'error');
           return;
@@ -4802,7 +4826,7 @@ function initTeklimakanApp() {
         // 📷 تاۋار سۈرىتى تەكشۈرۈش
         if (needsAdminImgVal) {
           // ۋاكالەتچى سۈرەتنى باشقۇرغۇچىنىڭ يۈكلىشىنى تاللىغان بولسا رەسىمسىزمۇ تەستىققا ئۆتىدۇ!
-          finalImage = (image && image.length > 15) ? image : 'images/default_product.jpg';
+          finalImage = image;
         } else {
           if (!finalImage || finalImage.length < 15) {
             alert('⚠️ تاۋار سۈرىتى تاللانمىدى! «سۈرەت تاللاش» كۇنۇپكىسىنى بېسىپ سۈرەت يۈكلەڭ ياكى سۈرەتسىز يوللاش ئۈچۈن «👑 باشقۇرغۇچى يۈكلەش» كۇنۇپكىسىنى تاللاڭ.');
@@ -6576,5 +6600,3 @@ if (document.readyState === 'loading') {
 } else {
   initTeklimakanApp();
 }
-
-

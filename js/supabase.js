@@ -350,6 +350,8 @@ window.TeklimakanSupabase = {
 
       const metaObj = {
         _meta: true,
+        password: agent.password || '',
+        trustedDevices: Array.isArray(agent.trustedDevices) ? agent.trustedDevices : [],
         proposedBrands: agent.proposedBrands || '',
         notes: agent.notes || '',
         legalAgreement: agent.legalAgreement || null,

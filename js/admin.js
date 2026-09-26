@@ -2102,6 +2102,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="${isPending ? 'fas fa-check-circle' : 'fas fa-shield-alt'}"></i>
                 <span style="font-weight: 700; margin-right: 0.15rem;">${isPending ? 'تەستىق' : 'ماركا'}</span>
               </button>
+              <!-- پارول باشقۇرۇش -->
+              <button class="btn-action-edit btn-agent-password" onclick="event.stopPropagation(); if(window.openAdminAgentPasswordModal) window.openAdminAgentPasswordModal('${agent.id}');" data-id="${agent.id}" title="ۋاكالەتچى پارولىنى كۆرۈش، ئۆزگەرتىش ياكى قايتا بېكىتىش" style="background: #4f46e5 !important; border-color: #4f46e5 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-key"></i>
+                <span style="font-weight: 700; margin-right: 0.15rem;">پارول</span>
+              </button>
               <!-- ئۆچۈرۈش -->
               <button class="btn-action-delete btn-delete-agent" onclick="event.stopPropagation(); if(window.deleteAgent) window.deleteAgent('${agent.id}');" data-id="${agent.id}" title="ئۆچۈرۈش" style="padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
                 <i class="fas fa-trash"></i>
@@ -2361,6 +2366,53 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(err) {
       console.warn('Error rendering certificate details:', err);
     }
+  }
+
+  // 🔑 ۋاكالەتچى مەخپىي شىفىرىنى باشقۇرۇش كۆزنىكىنى ئېچىش (Admin Agent Password Modal)
+  function openAdminAgentPasswordModal(agentId) {
+    if (!agentId) return;
+    const allAgents = (window.appStore && typeof window.appStore.getAgents === 'function') 
+      ? window.appStore.getAgents('none') 
+      : [];
+    const agent = allAgents.find(a => String(a.id) === String(agentId));
+    if (!agent) {
+      showAdminToast('ۋاكالەتچى تېپىلمىدى', 'error');
+      return;
+    }
+
+    const modal = document.getElementById('modalAdminAgentPassword');
+    if (!modal) return;
+
+    const elName = document.getElementById('adminPwAgentName');
+    const elId = document.getElementById('adminPwAgentId');
+    const elPhone = document.getElementById('adminPwAgentPhone');
+    const elStatus = document.getElementById('adminPwCurrentStatus');
+    const hiddenId = document.getElementById('adminPwAgentHiddenId');
+    const newPwInput = document.getElementById('adminNewPasswordInput');
+
+    if (elName) elName.textContent = agent.name;
+    if (elId) elId.textContent = agent.id;
+    if (elPhone) elPhone.textContent = agent.phone || '-';
+    if (hiddenId) hiddenId.value = agent.id;
+
+    const defaultPw = (window.appStore && typeof window.appStore.getAgentDefaultPassword === 'function')
+      ? window.appStore.getAgentDefaultPassword(agent)
+      : (agent.phone ? agent.phone.replace(/\D/g, '').slice(-6) : '123456');
+
+    const hasCustomPw = !!(agent.password && String(agent.password).trim());
+
+    if (elStatus) {
+      elStatus.innerHTML = hasCustomPw
+        ? `🔐 ئۆزى بېكىتكەن مەخپىي شىفىر: <strong class="number-latin" style="color: #4f46e5; letter-spacing: 2px; font-size: 0.95rem;">${agent.password}</strong>`
+        : `ℹ️ دەسلەپكى سۈكۈتتىكى پارول (تېلېفوندىن): <strong class="number-latin" style="color: #b45309; letter-spacing: 2px; font-size: 0.95rem;">${defaultPw}</strong>`;
+    }
+
+    if (newPwInput) {
+      newPwInput.value = agent.password || defaultPw;
+      setTimeout(() => newPwInput.focus(), 100);
+    }
+
+    modal.classList.add('active');
   }
 
   // 📊 ئايلىق سېتىش نەتىجىسى ۋە كومىسسىيە خۇلاسە جەدۋىلىنى سىزىش
@@ -3101,6 +3153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.switchTab = switchTab;
   window.initAdmin = initAdmin;
   window.openAgentCertificateModal = openAgentCertificateModal;
+  window.openAdminAgentPasswordModal = openAdminAgentPasswordModal;
   window.openAgentMonthlySummaryModal = openAgentMonthlySummaryModal;
   window.renderAgentMonthlySummaryTable = renderAgentMonthlySummaryTable;
   window.openAgentWeeklySummaryModal = openAgentWeeklySummaryModal;
@@ -7739,6 +7792,53 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('addAgentModal').classList.remove('active');
         renderAgentsView();
         showAdminToast(`يېڭى ۋاكالەتچى «${name}» (${finalBrands.length} ماركا رۇخسىتى بىلەن) سېستىمىغا كىرگۈزۈلدى!`, 'success');
+      });
+    }
+
+    // 🔑 ۋاكالەتچى پارولىنى يېڭىلاش فورمىسى (Admin Password Management Form)
+    const formAdminPw = document.getElementById('formAdminEditAgentPassword');
+    if (formAdminPw) {
+      formAdminPw.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hiddenId = document.getElementById('adminPwAgentHiddenId');
+        const newPwInput = document.getElementById('adminNewPasswordInput');
+        const chkClearDev = document.getElementById('adminClearTrustedDevicesChk');
+
+        const agentId = hiddenId ? hiddenId.value : '';
+        const newPw = newPwInput ? newPwInput.value.trim() : '';
+        const clearDev = chkClearDev ? chkClearDev.checked : true;
+
+        if (!agentId || !newPw) {
+          showAdminToast('پارول كىرگۈزۈڭ!', 'warning');
+          return;
+        }
+
+        if (newPw.length < 6) {
+          showAdminToast('پارول كەم دېگەندە 6 خانىلىق بولسۇن!', 'warning');
+          return;
+        }
+
+        const res = await window.appStore.updateAgentPassword(agentId, newPw, clearDev);
+        if (res.success) {
+          window.hideModal('modalAdminAgentPassword');
+          renderAgentsTable();
+          showAdminToast(`✅ ۋاكالەتچىنىڭ مەخپىي شىفىرى يېڭىلاندى!`, 'success');
+        } else {
+          showAdminToast(res.message, 'error');
+        }
+      });
+    }
+
+    const btnGenPw = document.getElementById('btnAdminGenRandomPw');
+    if (btnGenPw) {
+      btnGenPw.addEventListener('click', () => {
+        const randomPin = Math.floor(100000 + Math.random() * 900000).toString();
+        const newPwInput = document.getElementById('adminNewPasswordInput');
+        if (newPwInput) {
+          newPwInput.value = randomPin;
+          newPwInput.focus();
+        }
+        showAdminToast(`🎲 يېڭى پارول ھاسىللاندى: ${randomPin}`, 'info');
       });
     }
 

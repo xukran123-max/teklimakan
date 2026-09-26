@@ -3836,8 +3836,19 @@ function initTeklimakanApp() {
         const name = document.getElementById('applyAgentName').value.trim();
         const email = document.getElementById('applyAgentEmail').value.trim();
         const phone = document.getElementById('applyAgentPhone').value.trim();
+        const password = document.getElementById('applyAgentPassword') ? document.getElementById('applyAgentPassword').value.trim() : '';
         const categoryInterest = document.getElementById('applyAgentCategory').value.trim();
         const notes = document.getElementById('applyAgentNotes').value.trim();
+
+        if (password && password.length < 6) {
+          alert('⚠️ مەخپىي شىفىر (پارول) ئەڭ كەم دېگەندە 6 خانىلىق بولۇشى شەرت!');
+          showToast('پارول كەم دېگەندە 6 خانە بولسۇن!', 'warning');
+          const pwInput = document.getElementById('applyAgentPassword');
+          if (pwInput) pwInput.focus();
+          return;
+        }
+
+        const devToken = typeof getOrCreateDeviceToken === 'function' ? getOrCreateDeviceToken() : '';
 
         const submitBtn = applyForm.querySelector('button[type="submit"]');
         const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
@@ -3851,6 +3862,8 @@ function initTeklimakanApp() {
             name,
             email,
             phone,
+            password,
+            deviceToken: devToken,
             salesMethod,
             proposedBrands: categoryInterest,
             notes
@@ -3991,12 +4004,22 @@ function initTeklimakanApp() {
       }
     }
 
+    function getOrCreateDeviceToken() {
+      let token = localStorage.getItem('teklimakan_device_token');
+      if (!token) {
+        token = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('teklimakan_device_token', token);
+      }
+      return token;
+    }
+
     function checkAgentSession() {
       const quickCard = document.getElementById('agentQuickSessionCard');
       const quickName = document.getElementById('quickAgentName');
       const quickSub = document.getElementById('quickAgentSub');
       const verifyWrap = document.getElementById('agentVerifyWrap');
       const dashHeader = document.getElementById('agentDashboardHeader');
+      const devToken = getOrCreateDeviceToken();
 
       if (currentVerifiedAgent) {
         updateAgentDashboard(currentVerifiedAgent);
@@ -4010,12 +4033,22 @@ function initTeklimakanApp() {
       try {
         const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
         if (saved && saved.id) {
-          if (quickCard) quickCard.style.display = 'block';
-          if (quickName) quickName.textContent = saved.name || 'ۋاكالەتچى';
-          if (quickSub) quickSub.textContent = `كودىڭىز: ${saved.id} • تەستىقلانغان سودىگەر`;
-          if (verifyWrap) verifyWrap.style.display = 'none';
-          if (dashHeader) dashHeader.style.display = 'none';
-          return;
+          // ئۈسكۈنە ئېتىراپ قىلىنغانمۇ تەكشۈرۈش
+          const isTrusted = window.appStore && typeof window.appStore.isAgentDeviceTrusted === 'function' 
+            ? window.appStore.isAgentDeviceTrusted(saved.id, devToken) 
+            : false;
+          
+          if (isTrusted) {
+            if (quickCard) quickCard.style.display = 'block';
+            if (quickName) quickName.textContent = saved.name || 'ۋاكالەتچى';
+            if (quickSub) quickSub.textContent = `كودىڭىز: ${saved.id} • 🛡️ ئىشەنچلىك ئۈسكۈنە`;
+            if (verifyWrap) verifyWrap.style.display = 'none';
+            if (dashHeader) dashHeader.style.display = 'none';
+            return;
+          } else {
+            // ئەگەر ئۈسكۈنە ئىشەنچلىك بولمىسا، باشقا ۋاكالەتچى ئۇچۇرى كۆرۈنۈپ قالماسلىق ئۈچۈن كېشنى تازىلاش
+            localStorage.removeItem('teklimakan_agent_session');
+          }
         }
       } catch(e) {}
 
@@ -4027,16 +4060,48 @@ function initTeklimakanApp() {
     // پۈتۈن بەت دائىرىسىدە زىيارەت قىلىش ئۈچۈن window غا باغلاش
     window.checkAgentSession = checkAgentSession;
 
-    function performAgentVerification(val, isStatusCheckOnly = false) {
+    function performAgentVerification(val, password = '', isStatusCheckOnly = false) {
       if (!val) {
         showToast('ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!', 'warning');
         return;
       }
 
-      const res = window.appStore.verifyAgentLogin(val);
+      const pwGroup = document.getElementById('agentPasswordGroup');
+      const pwInput = document.getElementById('agentLoginPassword');
+      const chkTrust = document.getElementById('chkTrustAgentDevice');
+      const devToken = getOrCreateDeviceToken();
+
+      const pwdVal = password || (pwInput ? pwInput.value.trim() : '');
+
+      const res = window.appStore.verifyAgentLogin(val, pwdVal, devToken);
       if (verifyMsg) verifyMsg.style.display = 'block';
 
+      // 🔐 ئەگەر مەخپىي شىفىر (پارول) تەلەپ قىلىنسا
+      if (res.requirePassword) {
+        if (pwGroup) pwGroup.style.display = 'block';
+        if (pwInput) pwInput.focus();
+        if (verifyMsg) {
+          verifyMsg.className = 'agent-verify-pending';
+          verifyMsg.style.color = '#b45309';
+          verifyMsg.style.background = '#fffbeb';
+          verifyMsg.style.padding = '0.65rem';
+          verifyMsg.style.borderRadius = '8px';
+          verifyMsg.style.border = '1.5px solid #fde68a';
+          verifyMsg.innerHTML = `<i class="fas fa-lock" style="color: #d97706;"></i> <strong>${res.message || 'مەخپىي شىفىر (پارول) كىرگۈزۈش تەلەپ قىلىنىدۇ.'}</strong>`;
+        }
+        showToast(res.message || 'مەخپىي شىفىر كىرگۈزۈڭ!', 'warning');
+        return;
+      }
+
       if (res.success) {
+        if (pwGroup) pwGroup.style.display = 'none';
+        if (pwInput) pwInput.value = '';
+
+        // ئەگەر ئۈسكۈنىنى ئەستە تۇتۇش تاللانغان بولسا
+        if (chkTrust && chkTrust.checked && window.appStore && typeof window.appStore.trustAgentDevice === 'function') {
+          window.appStore.trustAgentDevice(res.agent.id, devToken);
+        }
+
         currentVerifiedAgent = res.agent;
         if (verifiedIdInput) verifiedIdInput.value = res.agent.id;
 
@@ -4050,6 +4115,7 @@ function initTeklimakanApp() {
         } catch(e) {}
 
         const brands = res.agent.authorizedBrands && res.agent.authorizedBrands.length > 0 
+
           ? res.agent.authorizedBrands 
           : window.appStore.getBrands();
 
@@ -4215,12 +4281,37 @@ function initTeklimakanApp() {
     if (btnVerify && loginInput) {
       btnVerify.addEventListener('click', () => {
         const val = loginInput.value.trim();
-        performAgentVerification(val, false);
+        const pwInput = document.getElementById('agentLoginPassword');
+        const pw = pwInput ? pwInput.value.trim() : '';
+        performAgentVerification(val, pw, false);
       });
       loginInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           btnVerify.click();
+        }
+      });
+    }
+
+    const pwLoginInput = document.getElementById('agentLoginPassword');
+    if (pwLoginInput && btnVerify) {
+      pwLoginInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          btnVerify.click();
+        }
+      });
+    }
+
+    const btnToggleAgentLoginPw = document.getElementById('btnToggleAgentLoginPw');
+    if (btnToggleAgentLoginPw && pwLoginInput) {
+      btnToggleAgentLoginPw.addEventListener('click', () => {
+        const isPw = pwLoginInput.type === 'password';
+        pwLoginInput.type = isPw ? 'text' : 'password';
+        const icon = btnToggleAgentLoginPw.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye', !isPw);
+          icon.classList.toggle('fa-eye-slash', isPw);
         }
       });
     }
@@ -4233,7 +4324,7 @@ function initTeklimakanApp() {
           loginInput.focus();
           return;
         }
-        performAgentVerification(val, true);
+        performAgentVerification(val, '', true);
       });
     }
 
@@ -4242,7 +4333,7 @@ function initTeklimakanApp() {
         try {
           const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
           if (saved && saved.id) {
-            performAgentVerification(saved.id);
+            performAgentVerification(saved.id, '', false);
           }
         } catch(e) {}
       });
@@ -4258,6 +4349,10 @@ function initTeklimakanApp() {
           loginInput.value = '';
           loginInput.focus();
         }
+        const pwGroup = document.getElementById('agentPasswordGroup');
+        const pwInput = document.getElementById('agentLoginPassword');
+        if (pwGroup) pwGroup.style.display = 'none';
+        if (pwInput) pwInput.value = '';
       });
     }
 
@@ -4265,6 +4360,10 @@ function initTeklimakanApp() {
       btnLogout.addEventListener('click', () => {
         currentVerifiedAgent = null;
         try { localStorage.removeItem('teklimakan_agent_session'); } catch(e) {}
+        const pwGroup = document.getElementById('agentPasswordGroup');
+        const pwInput = document.getElementById('agentLoginPassword');
+        if (pwGroup) pwGroup.style.display = 'none';
+        if (pwInput) pwInput.value = '';
         const dashHeader = document.getElementById('agentDashboardHeader');
         if (dashHeader) dashHeader.style.display = 'none';
         const switcher = document.getElementById('agentVerifiedViewSwitcher');
@@ -4282,6 +4381,138 @@ function initTeklimakanApp() {
         if (tab1Text) tab1Text.textContent = '1. ۋاكالەتچى بولۇپ تىزىملىتىش';
         if (tab2Text) tab2Text.textContent = '2. كىرىش ۋە تاۋار سۇنۇش';
         showToast('ھېساباتتىن چىقتىڭىز', 'info');
+      });
+    }
+
+    // 🔑 مەخپىي شىفىرنى قايتا بېكىتىش كۆزنىكىنى كونترول قىلىش (Password Reset Modal Listeners)
+    const btnForgot = document.getElementById('btnForgotAgentPassword');
+    const modalReset = document.getElementById('modalAgentPasswordReset');
+    const btnCloseReset = document.getElementById('btnCloseResetPasswordModal');
+    const resetStep1 = document.getElementById('resetStep1');
+    const resetStep2 = document.getElementById('resetStep2');
+    const inputResetId = document.getElementById('inputResetIdentifier');
+    const btnSendResetCode = document.getElementById('btnSendResetCode');
+    const btnSubmitNewPw = document.getElementById('btnSubmitNewPassword');
+    const resetNoticeBox = document.getElementById('resetCodeNoticeBox');
+
+    let currentResetAgentId = '';
+
+    if (btnForgot && modalReset) {
+      btnForgot.addEventListener('click', () => {
+        if (inputResetId && loginInput) {
+          inputResetId.value = loginInput.value.trim();
+        }
+        if (resetStep1) resetStep1.style.display = 'block';
+        if (resetStep2) resetStep2.style.display = 'none';
+        modalReset.classList.add('active');
+        if (inputResetId) inputResetId.focus();
+      });
+    }
+
+    if (btnCloseReset && modalReset) {
+      btnCloseReset.addEventListener('click', () => {
+        modalReset.classList.remove('active');
+      });
+      modalReset.addEventListener('click', (e) => {
+        if (e.target === modalReset) modalReset.classList.remove('active');
+      });
+    }
+
+    if (btnSendResetCode) {
+      btnSendResetCode.addEventListener('click', async () => {
+        const idVal = inputResetId ? inputResetId.value.trim() : '';
+        if (!idVal) {
+          showToast('تېلېفون ياكى ئېلخەت كىرگۈزۈڭ!', 'warning');
+          if (inputResetId) inputResetId.focus();
+          return;
+        }
+
+        btnSendResetCode.disabled = true;
+        btnSendResetCode.innerHTML = '<i class="fas fa-spinner fa-spin"></i> يوللىنىۋاتىدۇ...';
+
+        try {
+          const res = await window.appStore.requestAgentPasswordReset(idVal);
+          if (res.success) {
+            currentResetAgentId = res.agentId;
+            if (resetStep1) resetStep1.style.display = 'none';
+            if (resetStep2) resetStep2.style.display = 'block';
+            if (resetNoticeBox) {
+              resetNoticeBox.innerHTML = `
+                <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
+                  <i class="fas fa-check-circle" style="color: #10b981;"></i> دەلىللەش كودى ئەۋەتىلدى!
+                </div>
+                <div><b>ۋاكالەتچى:</b> ${res.agentName} (${res.agentId})</div>
+                <div><b>ئېلخەت / تېلېفون:</b> ${res.maskedEmail || res.maskedPhone}</div>
+                <div style="margin-top: 0.45rem; padding: 0.45rem; background: #ffffff; border-radius: 6px; border: 1px dashed #93c5fd; text-align: center;">
+                  <span style="font-size: 0.8rem; color: #475569;">ئېكراندىكى بىخەتەرلىك كودىڭىز:</span>
+                  <div class="number-latin" style="font-weight: 900; font-size: 1.35rem; color: #2563eb; letter-spacing: 5px; margin-top: 2px;">${res.code}</div>
+                  <small style="color: #64748b; font-size: 0.72rem;">(كود 15 مىنۇت كۈچكە ئىگە، تۆۋەندىكى رامكىغا كىرگۈزۈڭ)</small>
+                </div>
+              `;
+            }
+            const inputCode = document.getElementById('inputResetCode');
+            if (inputCode) {
+              inputCode.value = res.code;
+              inputCode.focus();
+            }
+            showToast('دەلىللەش كودى ئەۋەتىلدى!', 'success');
+          } else {
+            alert(res.message);
+            showToast(res.message, 'error');
+          }
+        } catch(e) {
+          console.error('Reset request error:', e);
+          showToast('دەلىللەش كودى ئەۋەتىشتە خاتالىق كۆرۈلدى', 'error');
+        } finally {
+          btnSendResetCode.disabled = false;
+          btnSendResetCode.innerHTML = '<i class="fas fa-paper-plane"></i> <span>دەلىللەش كودى ئەۋەتىش</span>';
+        }
+      });
+    }
+
+    if (btnSubmitNewPw) {
+      btnSubmitNewPw.addEventListener('click', async () => {
+        const code = document.getElementById('inputResetCode')?.value.trim() || '';
+        const newPw = document.getElementById('inputResetNewPassword')?.value.trim() || '';
+        const confirmPw = document.getElementById('inputResetConfirmPassword')?.value.trim() || '';
+
+        if (!code || !newPw) {
+          showToast('بارلىق كىرگۈزۈش رامكىلىرىنى تولدۇرۇڭ!', 'warning');
+          return;
+        }
+
+        if (newPw.length < 6) {
+          showToast('مەخپىي شىفىر كەم دېگەندە 6 خانىلىق بولسۇن!', 'warning');
+          return;
+        }
+
+        if (newPw !== confirmPw) {
+          showToast('ئىككى قېتىم كىرگۈزگەن شىفىر ئوخشاش ئەمەس!', 'error');
+          return;
+        }
+
+        btnSubmitNewPw.disabled = true;
+        btnSubmitNewPw.innerHTML = '<i class="fas fa-spinner fa-spin"></i> يېڭىلىنىۋاتىدۇ...';
+
+        try {
+          const devToken = getOrCreateDeviceToken();
+          const res = await window.appStore.verifyAndResetAgentPassword(currentResetAgentId, code, newPw, devToken);
+          if (res.success) {
+            modalReset.classList.remove('active');
+            showToast('✅ مەخپىي شىفىر يېڭىلاندى! كىرىۋاتىسىز...', 'success');
+            // بىۋاسىتە شۇ ۋاكالەتچى قىلىپ كىرگۈزۈش
+            performAgentVerification(currentResetAgentId, newPw, false);
+          } else {
+            alert(res.message);
+            showToast(res.message, 'error');
+          }
+        } catch(e) {
+          console.error('Reset password error:', e);
+          showToast('پارولنى يېڭىلاشتا خاتالىق كۆرۈلدى', 'error');
+        } finally {
+          btnSubmitNewPw.disabled = false;
+          btnSubmitNewPw.innerHTML = '<i class="fas fa-check-circle"></i> <span>جەزملەش ۋە كىرىش</span>';
+        }
       });
     }
 

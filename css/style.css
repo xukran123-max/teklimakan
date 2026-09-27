@@ -5633,3 +5633,28 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
     font-size: 0.68rem;
   }
 }
+
+/* ==================== 📬 سۇپا ئىچى زاكاز ۋە ئۇقتۇرۇش ساندۇقى (Customer Order Inbox) ==================== */
+.inbox-tab-btn {
+  position: relative;
+  transition: all 0.25s ease;
+}
+.inbox-tab-btn:hover {
+  color: #0284c7 !important;
+}
+.inbox-tab-btn.active {
+  color: #0284c7 !important;
+  border-bottom: 2.5px solid #0284c7 !important;
+}
+.header-inbox-btn:hover {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+}
+@keyframes badgePop {
+  0% { transform: scale(0.6); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.inbox-counter-badge {
+  animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

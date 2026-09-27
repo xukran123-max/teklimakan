@@ -20,6 +20,7 @@ const STORAGE_KEYS = {
   SETTINGS: 'teklimakan_ecom_settings_v4',
   CURRENCY: 'teklimakan_currency_preference',
   SMS_HISTORY: 'teklimakan_ecom_sms_history_v1',
+  CUSTOMER_INBOX: 'teklimakan_customer_inbox_v1',
   COUPONS: 'teklimakan_ecom_coupons_v1'
 };
 
@@ -6329,25 +6330,67 @@ class StoreManager {
 
   updateOrderTracking(orderId, carrier, trackingNo) {
     const orders = this.getOrders();
-    const ord = orders.find(o => o.id === orderId);
+    const ord = orders.find(o => String(o.id) === String(orderId));
     if (!ord) return { success: false, message: 'زاكاز تېپىلمىدى!' };
 
-    ord.cargoCarrier = carrier;
-    ord.cargoTrackingNo = trackingNo;
+    ord.cargoCarrier = carrier || 'PTT Kargo';
+    ord.cargoTrackingNo = trackingNo || '';
     ord.status = 'يوللاندى';
     ord.shippedAt = new Date().toISOString();
-    ord.cargoTrackingUrl = this.getCargoTrackingUrl(carrier, trackingNo);
+    ord.cargoTrackingUrl = this.getCargoTrackingUrl(ord.cargoCarrier, ord.cargoTrackingNo);
+    ord.tracking = {
+      carrier: ord.cargoCarrier,
+      trackingNumber: ord.cargoTrackingNo,
+      trackingUrl: ord.cargoTrackingUrl,
+      updatedAt: ord.shippedAt
+    };
 
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     this.notifyDataChange('orders');
-    const savedOrder = orders.find(order => order.id === orderId);
-    if (savedOrder && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
-      this.trackCloudWrite(window.TeklimakanSupabase.updateOrderStatus(orderId, savedOrder.status, {
-        carrier,
-        number: trackingNo,
-        shippedAt: savedOrder.shippedAt
+
+    // ☁️ Supabase بۇلۇتقا يۈكلەش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderStatus === 'function') {
+      this.trackCloudWrite(window.TeklimakanSupabase.updateOrderStatus(orderId, ord.status, {
+        carrier: ord.cargoCarrier,
+        number: ord.cargoTrackingNo,
+        shippedAt: ord.shippedAt
       }), 'order tracking update');
     }
+
+    // 🤖 Telegram غا كود يوللانغانلىق ئۇقتۇرۇشى ئەۋەتىش
+    try {
+      this.sendTelegramAlert({
+        title: `🚚 زاكاز كارگوغا چىقىرىلدى! #${ord.id}`,
+        message: `📦 <b>زاكاز نومۇرى:</b> <code>#${ord.id}</code>\n` +
+                 `👤 <b>خېرىدار:</b> ${(ord.customer && ord.customer.name) || 'نامەلۇم'}\n` +
+                 `📞 <b>تېلېفون:</b> <code>${(ord.customer && ord.customer.phone) || '-'}</code>\n` +
+                 `🚚 <b>پوچتا شىركىتى:</b> <b>${ord.cargoCarrier}</b>\n` +
+                 `🔢 <b>ئىز قوغلاش كودى:</b> <code>${ord.cargoTrackingNo}</code>\n` +
+                 (ord.cargoTrackingUrl ? `🔗 <b>ئىز قوغلاش:</b> <a href="${ord.cargoTrackingUrl}">تور بەتتىن كۆرۈش</a>\n` : '') +
+                 `💰 <b>سوممىسى:</b> ${ord.totalFormatted || this.formatPrice(ord.totalCny || ord.total)}`,
+        isUrgent: false
+      });
+    } catch(tgErr) {
+      console.warn('Telegram tracking alert failed:', tgErr);
+    }
+
+    // 📬 خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا كارگو ئۇقتۇرۇشى قوشۇش
+    try {
+      this.addCustomerInboxNotification({
+        phone: (ord.customer && ord.customer.phone) || '',
+        orderId: ord.id,
+        title: 'زاكازىڭىز كارگوغا تاپشۇرۇلدى',
+        type: 'cargo_shipped',
+        carrier: ord.cargoCarrier,
+        trackingNo: ord.cargoTrackingNo,
+        trackingUrl: ord.cargoTrackingUrl,
+        message: `ھۆرمەتلىك ${(ord.customer && ord.customer.name) || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز ${ord.cargoCarrier} ئارقىلىق يوللاندى. ئىز قوغلاش نومۇرى: ${ord.cargoTrackingNo}.`,
+        timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
+      });
+    } catch(inbErr) {
+      console.warn('Customer inbox cargo update failed:', inbErr);
+    }
+
     return { success: true, order: ord, message: 'كارگو ئۇچۇرى ساقلاندى!' };
   }
 
@@ -6839,6 +6882,50 @@ class StoreManager {
     }
     localStorage.setItem('teklimakan_last_order_id', newOrder.id);
 
+    // 🤖 1. Telegram دەل ۋاقتىدا زاكاز ئۇقتۇرۇشى (Instant Telegram Bot Alert for New Order)
+    try {
+      const itemsList = (cartData.items || []).map((it, idx) => 
+        `${idx + 1}. <b>${it.product.name}</b> × ${it.quantity} (${this.formatPrice(it.product.price * it.quantity)})`
+      ).join('\n');
+
+      const paymentMethodName = paymentMethod === 'kapida' || paymentMethod === 'قوبۇل قىلغاندا نەق پۇل'
+        ? '💵 قوبۇل قىلغاندا نەق پۇل (Kapıda Ödeme)'
+        : '💳 بانكا كارتىسى / تېز يۆتكەش (EFT / Havale)';
+
+      const tgOrderMsg = 
+        `🆔 <b>زاكاز نومۇرى:</b> <code>#${newOrder.id}</code>\n` +
+        `👤 <b>خېرىدار:</b> ${customerData.name || 'نامەلۇم'}\n` +
+        `📞 <b>تېلېفون:</b> <code>${customerData.phone || '-'}</code>\n` +
+        `📍 <b>ئادرېس:</b> ${(customerData.city || '')} ${(customerData.district || '')} ${customerData.address || ''}\n` +
+        `💳 <b>تۆلەش شەكلى:</b> ${paymentMethodName}\n` +
+        `💰 <b>ئومۇمىي سومما:</b> <b>${this.formatPrice(finalTotalCny)}</b> (تەخمىنىي يەتكۈزۈش ھەققى: ${this.formatPrice(cartData.deliveryFeeCny)})\n\n` +
+        `📦 <b>سېتىۋالغان ماللار (${cartData.items.length} خىل):</b>\n${itemsList}\n` +
+        (notes ? `\n📝 <b>خېرىدار ئەسكەرتىشى:</b> ${notes}\n` : '') +
+        (newOrder.agentId ? `\n🤝 <b>تەۋە ۋاكالەتچى ID:</b> <code>${newOrder.agentId}</code>\n` : '');
+
+      this.sendTelegramAlert({
+        title: `🛍️ يېڭى زاكاز تاپشۇرۇۋېلىندى! #${newOrder.id}`,
+        message: tgOrderMsg,
+        isUrgent: true
+      });
+    } catch (tgOrderErr) {
+      console.warn('Telegram order alert failed:', tgOrderErr);
+    }
+
+    // 📬 2. خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا دەسلەپكى ئۇقتۇرۇشنى قوشۇش (Order Inbox Notification)
+    try {
+      this.addCustomerInboxNotification({
+        phone: customerData.phone || '',
+        orderId: newOrder.id,
+        title: 'زاكاز مۇۋەپپەقىيەتلىك تاپشۇرۇۋېلىندى',
+        type: 'order_created',
+        message: `ھۆرمەتلىك ${customerData.name || 'خېرىدار'}، #${newOrder.id} نومۇرلۇق زاكازىڭىز سىستېمىغا تىزىملاندى. ئومۇمىي سوممىسى: ${this.formatPrice(finalTotalCny)}. ئامبىرىمىز تاۋارلىرىڭىزنى رەتلەپ قاچىلاۋاتىدۇ.`,
+        timestamp: formattedDate
+      });
+    } catch (inboxErr) {
+      console.warn('Customer inbox initial notification failed:', inboxErr);
+    }
+
     return { success: true, order: newOrder };
   }
 
@@ -7030,31 +7117,6 @@ class StoreManager {
     return sampleOrder;
   }
 
-  updateOrderTracking(orderId, carrier, trackingNumber) {
-    const orders = this.getOrders();
-    const order = orders.find(o => String(o.id) === String(orderId));
-    if (order) {
-      order.cargoCarrier = carrier || 'PTT Kargo';
-      order.cargoTrackingNo = trackingNumber || '';
-      order.tracking = {
-        carrier: carrier || 'PTT Kargo',
-        trackingNumber: trackingNumber || '',
-        updatedAt: new Date().toISOString()
-      };
-      if (order.status === 'ساقلاۋاتىدۇ' || order.status === 'تەستىقلاندى') {
-        order.status = 'يوللاندى';
-      }
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-      this.notifyDataChange('orders');
-
-      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.updateOrderTracking === 'function') {
-        window.TeklimakanSupabase.updateOrderTracking(order.id, carrier, trackingNumber);
-      }
-
-      return { success: true, order: order };
-    }
-    return { success: false, message: 'زاكاز تېپىلمىدى' };
-  }
 
   getSettings() {
     let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || INITIAL_SETTINGS;
@@ -7230,6 +7292,196 @@ class StoreManager {
       this.saveSmsLog(payload);
       return { success: true, message: 'ئۇچۇر يەرلىك سىستېمىغا تىزىملاندى' };
     }
+  }
+
+  // ==================== 📬 سۇپا ئىچىدىكى خېرىدار زاكاز ۋە ئۇقتۇرۇش ساندۇقى (Customer Order Tracking Inbox) ====================
+  getCustomerInboxNotifications() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOMER_INBOX)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  addCustomerInboxNotification(notif) {
+    try {
+      const list = this.getCustomerInboxNotifications();
+      const newEntry = {
+        id: notif.id || ('INB-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6)),
+        phone: this.normalizePhone(notif.phone || ''),
+        orderId: notif.orderId || '',
+        title: notif.title || 'سۇپا ئۇقتۇرۇشى',
+        type: notif.type || 'info', // order_created, cargo_shipped, order_completed, admin_message, info
+        message: notif.message || '',
+        carrier: notif.carrier || '',
+        trackingNo: notif.trackingNo || '',
+        trackingUrl: notif.trackingUrl || '',
+        timestamp: notif.timestamp || new Date().toLocaleString('ug-CN', { hour12: false }),
+        createdAt: new Date().toISOString(),
+        isRead: false
+      };
+      list.unshift(newEntry);
+      if (list.length > 300) list.pop();
+      localStorage.setItem(STORAGE_KEYS.CUSTOMER_INBOX, JSON.stringify(list));
+      this.notifyDataChange('customer_inbox');
+      return newEntry;
+    } catch (e) {
+      console.error('Failed to add customer inbox notification:', e);
+      return null;
+    }
+  }
+
+  getCustomerInbox(phoneOrOrderQuery) {
+    if (!phoneOrOrderQuery) return { orders: [], notifications: [] };
+    const cleanQ = phoneOrOrderQuery.toString().trim();
+    const cleanPhone = this.normalizePhone(cleanQ);
+    const cleanDigits = cleanQ.replace(/\D/g, '');
+
+    // 1. خېرىدارغا ئالاقىدار بارلىق زاكازلارنى تېپىش
+    const allOrders = this.getOrders();
+    const matchedOrders = allOrders.filter(o => {
+      const oid = (o.id || '').toString().toLowerCase();
+      const oPhone = this.normalizePhone(o.customer?.phone || '');
+      const oPhoneDigits = (o.customer?.phone || '').toString().replace(/\D/g, '');
+      const oTracking = (o.cargoTrackingNo || o.trackingNumber || '').toString().toLowerCase();
+
+      if (cleanQ.toLowerCase() === oid) return true;
+      if (cleanDigits && cleanDigits.length >= 6 && (oPhoneDigits.endsWith(cleanDigits) || cleanDigits.endsWith(oPhoneDigits))) return true;
+      if (cleanPhone && oPhone && cleanPhone === oPhone) return true;
+      if (oTracking && oTracking === cleanQ.toLowerCase()) return true;
+      return false;
+    });
+
+    // 2. مەخسۇس ساقلانغان سۇپا ئۇقتۇرۇشلىرى
+    const savedNotifs = this.getCustomerInboxNotifications();
+    const matchedNotifs = savedNotifs.filter(n => {
+      const nPhone = this.normalizePhone(n.phone || '');
+      const nPhoneDigits = (n.phone || '').replace(/\D/g, '');
+      const nOid = (n.orderId || '').toLowerCase();
+
+      if (cleanQ.toLowerCase() === nOid) return true;
+      if (cleanDigits && cleanDigits.length >= 6 && (nPhoneDigits.endsWith(cleanDigits) || cleanDigits.endsWith(nPhoneDigits))) return true;
+      if (cleanPhone && nPhone && cleanPhone === nPhone) return true;
+      if (matchedOrders.some(mo => mo.id === n.orderId)) return true;
+      return false;
+    });
+
+    // 3. مۇناسىۋەتلىك SMS/سۇپا ئۇچۇرلىرىنى قوشۇش (ئەگەر خېرىدارغا باشقۇرۇش مەركىزىدىن خاس ئۇچۇر يوللانغان بولسا)
+    const smsHistory = this.getSmsHistory();
+    smsHistory.forEach(sms => {
+      const smsPhoneDigits = (sms.phone || '').replace(/\D/g, '');
+      const isMatch = (cleanDigits && cleanDigits.length >= 6 && (smsPhoneDigits.endsWith(cleanDigits) || cleanDigits.endsWith(smsPhoneDigits))) ||
+                      (sms.orderId && sms.orderId.toLowerCase() === cleanQ.toLowerCase()) ||
+                      matchedOrders.some(mo => mo.id === sms.orderId);
+      if (isMatch) {
+        const exists = matchedNotifs.some(mn => mn.message === sms.message && mn.timestamp === sms.timestamp);
+        if (!exists) {
+          matchedNotifs.push({
+            id: 'SMS-' + sms.id,
+            phone: sms.phone,
+            orderId: sms.orderId || '',
+            title: sms.channel === 'سۇپا' ? 'سۇپا باشقۇرغۇچىسى ئۇچۇرى' : 'خېرىدارلار مۇلازىمەت ئۇچۇرى',
+            type: 'admin_message',
+            message: sms.message,
+            timestamp: sms.timestamp || '',
+            createdAt: new Date().toISOString(),
+            isRead: false
+          });
+        }
+      }
+    });
+
+    // 4. ئەگەر بەزى زاكازلارنىڭ ساندۇق خاتىرىسى كەم بولسا، دەل ۋاقتىدا شەكىللەندۈرۈش
+    matchedOrders.forEach(ord => {
+      // زاكاز تاپشۇرۇۋېلىش قەدىمى
+      const hasCreated = matchedNotifs.some(n => n.orderId === ord.id && n.type === 'order_created');
+      if (!hasCreated) {
+        matchedNotifs.push({
+          id: 'DYN-CREATE-' + ord.id,
+          phone: ord.customer?.phone || '',
+          orderId: ord.id,
+          title: 'زاكاز تاپشۇرۇۋېلىندى',
+          type: 'order_created',
+          message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز سىستېمىغا تىزىملاندى. سوممىسى: ${ord.totalFormatted || this.formatPrice(ord.totalCny || ord.total)}.`,
+          timestamp: ord.date || '',
+          createdAt: ord.date || new Date().toISOString()
+        });
+      }
+
+      // كارگو قەدىمى
+      const carrier = ord.cargoCarrier || ord.trackingCarrier;
+      const trackingNo = ord.cargoTrackingNo || ord.trackingNumber;
+      if (carrier && trackingNo) {
+        const hasCargo = matchedNotifs.some(n => n.orderId === ord.id && n.type === 'cargo_shipped');
+        if (!hasCargo) {
+          matchedNotifs.push({
+            id: 'DYN-CARGO-' + ord.id,
+            phone: ord.customer?.phone || '',
+            orderId: ord.id,
+            title: 'زاكازىڭىز كارگوغا تاپشۇرۇلدى',
+            type: 'cargo_shipped',
+            carrier: carrier,
+            trackingNo: trackingNo,
+            trackingUrl: this.getCargoTrackingUrl(carrier, trackingNo),
+            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق ماللىرىڭىز ${carrier} ئارقىلىق يوللاندى. ئىز قوغلاش كودى: ${trackingNo}.`,
+            timestamp: ord.shippedAt ? new Date(ord.shippedAt).toLocaleString('ug-CN', { hour12: false }) : (ord.date || ''),
+            createdAt: ord.shippedAt || ord.date || new Date().toISOString()
+          });
+        }
+      }
+
+      // تاماملانغانلىق قەدىمى
+      if (ord.status === 'تاماملاندى') {
+        const hasCompleted = matchedNotifs.some(n => n.orderId === ord.id && n.type === 'order_completed');
+        if (!hasCompleted) {
+          matchedNotifs.push({
+            id: 'DYN-COMPL-' + ord.id,
+            phone: ord.customer?.phone || '',
+            orderId: ord.id,
+            title: 'زاكاز يەتكۈزۈلۈپ تاماملاندى',
+            type: 'order_completed',
+            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز ئوڭۇشلۇق يەتكۈزۈلدى. تەكلىماكاننى تاللىغىنىڭىزغا تەشەككۈر!`,
+            timestamp: ord.completedAt ? new Date(ord.completedAt).toLocaleString('ug-CN', { hour12: false }) : '',
+            createdAt: ord.completedAt || new Date().toISOString()
+          });
+        }
+      }
+    });
+
+    // ئەڭ يېڭى ئۇچۇر ئۈستىدە تەرتىپلەش
+    matchedNotifs.sort((a, b) => {
+      const ta = new Date(a.createdAt || a.timestamp || 0).getTime() || 0;
+      const tb = new Date(b.createdAt || b.timestamp || 0).getTime() || 0;
+      return tb - ta;
+    });
+
+    return {
+      orders: matchedOrders,
+      notifications: matchedNotifs
+    };
+  }
+
+  getUnreadCustomerInboxCount(phone) {
+    if (!phone) return 0;
+    try {
+      const { notifications } = this.getCustomerInbox(phone);
+      const lastRead = Number(localStorage.getItem('teklimakan_inbox_last_read_' + this.normalizePhone(phone)) || 0);
+      if (!lastRead) return notifications.length;
+      return notifications.filter(n => {
+        const t = new Date(n.createdAt || n.timestamp || 0).getTime();
+        return t > lastRead;
+      }).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  markCustomerInboxAsRead(phone) {
+    if (!phone) return;
+    try {
+      localStorage.setItem('teklimakan_inbox_last_read_' + this.normalizePhone(phone), Date.now().toString());
+      this.notifyDataChange('customer_inbox_read');
+    } catch (e) {}
   }
 
   // ==================== ياقتۇرغانلار تەپسىلاتى (Wishlist Detailed) ====================

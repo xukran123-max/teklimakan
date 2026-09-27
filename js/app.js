@@ -1418,21 +1418,78 @@ function initTeklimakanApp() {
     if (overlay) overlay.classList.remove('active');
   }
 
-  // ==================== 🚚 زاكاز ئىز قوغلاش ۋە تارىخىي كۆرۈش (Order Tracking & History UI) ====================
+  // ==================== 📬 سۇپا ئىچىدىكى خېرىدار زاكاز ۋە ئۇقتۇرۇش ساندۇقى (Customer Order Tracking Inbox UI) ====================
+  let currentInboxTab = 'notifs';
+  let currentInboxQuery = '';
+  let cachedInboxData = { orders: [], notifications: [] };
+
+  function updateCustomerInboxBadges() {
+    const phone = localStorage.getItem('teklimakan_customer_phone') || '';
+    const lastOid = localStorage.getItem('teklimakan_last_order_id') || '';
+    const query = phone || lastOid;
+    const bHeader = document.getElementById('headerInboxBadge');
+    const bNav = document.getElementById('navInboxBadge');
+
+    if (!query || !window.appStore || typeof window.appStore.getCustomerInbox !== 'function') {
+      if (bHeader) bHeader.style.display = 'none';
+      if (bNav) bNav.style.display = 'none';
+      return;
+    }
+
+    const unreadCount = window.appStore.getUnreadCustomerInboxCount(query);
+    const countDisplay = unreadCount > 0 ? (unreadCount > 9 ? '9+' : unreadCount) : '';
+
+    if (bHeader) {
+      if (unreadCount > 0) {
+        bHeader.textContent = countDisplay;
+        bHeader.style.display = 'inline-flex';
+      } else {
+        bHeader.style.display = 'none';
+      }
+    }
+
+    if (bNav) {
+      if (unreadCount > 0) {
+        bNav.textContent = countDisplay;
+        bNav.style.display = 'inline-flex';
+      } else {
+        bNav.style.display = 'none';
+      }
+    }
+  }
+
   function openTrackOrderModal(initialQuery = '') {
     const modal = document.getElementById('orderTrackModal');
     if (!modal) return;
     modal.classList.add('active');
+
+    const savedPhone = initialQuery || 
+                       localStorage.getItem('teklimakan_customer_phone') || 
+                       localStorage.getItem('teklimakan_last_order_id') || '';
+    const savedName = localStorage.getItem('teklimakan_customer_name') || 'ھۆرمەتلىك خېرىدار';
+
+    const banner = document.getElementById('inboxCustomerProfileBanner');
+    const nameEl = document.getElementById('inboxCustomerNameText');
+    const phoneEl = document.getElementById('inboxCustomerPhoneText');
+    const searchSection = document.getElementById('orderTrackSearchSection');
     const input = document.getElementById('orderTrackQueryInput');
-    if (input) {
-      const savedQuery = initialQuery || 
-                         localStorage.getItem('teklimakan_customer_phone') || 
-                         localStorage.getItem('teklimakan_last_order_id') || '';
-      if (savedQuery) {
-        input.value = savedQuery;
-        doTrackOrder(savedQuery);
+
+    if (savedPhone) {
+      if (banner) {
+        banner.style.display = 'flex';
+        if (nameEl) nameEl.textContent = savedName;
+        if (phoneEl) phoneEl.textContent = savedPhone;
       }
-      setTimeout(() => input.focus(), 200);
+      if (searchSection) searchSection.style.display = 'none';
+      if (input) input.value = savedPhone;
+      doTrackOrder(savedPhone, currentInboxTab || 'notifs');
+    } else {
+      if (banner) banner.style.display = 'none';
+      if (searchSection) searchSection.style.display = 'block';
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 250);
+      }
     }
   }
 
@@ -1441,7 +1498,31 @@ function initTeklimakanApp() {
     if (modal) modal.classList.remove('active');
   }
 
-  async function doTrackOrder(query) {
+  function switchInboxTab(tab) {
+    currentInboxTab = tab;
+    const tabNotifs = document.getElementById('tabBtnInboxNotifs');
+    const tabOrders = document.getElementById('tabBtnInboxOrders');
+    if (tabNotifs && tabOrders) {
+      if (tab === 'notifs') {
+        tabNotifs.classList.add('active');
+        tabNotifs.style.color = '#0284c7';
+        tabNotifs.style.borderBottom = '2.5px solid #0284c7';
+        tabOrders.classList.remove('active');
+        tabOrders.style.color = '#64748b';
+        tabOrders.style.borderBottom = '2.5px solid transparent';
+      } else {
+        tabOrders.classList.add('active');
+        tabOrders.style.color = '#0284c7';
+        tabOrders.style.borderBottom = '2.5px solid #0284c7';
+        tabNotifs.classList.remove('active');
+        tabNotifs.style.color = '#64748b';
+        tabNotifs.style.borderBottom = '2.5px solid transparent';
+      }
+    }
+    renderCustomerInboxContent();
+  }
+
+  async function doTrackOrder(query, tab = 'notifs') {
     const resultsWrap = document.getElementById('orderTrackResultsWrap');
     if (!resultsWrap) return;
     const i18n = window.appI18n;
@@ -1459,8 +1540,11 @@ function initTeklimakanApp() {
     }
 
     const cleanQ = query.trim();
-    const searchMsg = i18n.t('orderTrackSearching') || (lang === 'tr' ? 'Bulut arşivinden siparişleriniz sorgulanıyor...' : (lang === 'en' ? 'Querying orders from cloud archive...' : 'بۇلۇت ۋە ئارخىپتىن زاكازلار تەكشۈرۈلمەكتە...'));
-    const searchSub = i18n.t('orderTrackSearchingSub') || (lang === 'tr' ? 'Tüm geçmiş sipariş kayıtları yükleniyor' : (lang === 'en' ? 'Loading historical order records' : 'بارلىق تارىخىي ئۇچۇرلار يۈكلىنىۋاتىدۇ'));
+    currentInboxQuery = cleanQ;
+    if (tab) currentInboxTab = tab;
+
+    const searchMsg = i18n.t('orderTrackSearching') || (lang === 'tr' ? 'Bulut arşivinden siparişleriniz sorgulanıyor...' : (lang === 'en' ? 'Querying orders from cloud archive...' : 'سۇپا ۋە بۇلۇت ئامبىرىدىن زاكاز ساندۇقى يېڭىلىنىۋاتىدۇ...'));
+    const searchSub = i18n.t('orderTrackSearchingSub') || (lang === 'tr' ? 'Tüm geçmiş sipariş kayıtları yükleniyor' : (lang === 'en' ? 'Loading historical order records' : 'بارلىق دەل ۋاقتىدىكى ئۇقتۇرۇشلار يۈكلىنىۋاتىدۇ'));
 
     resultsWrap.innerHTML = `
       <div style="text-align: center; padding: 2.5rem 1rem; color: #0284c7;">
@@ -1471,20 +1555,61 @@ function initTeklimakanApp() {
     `;
 
     // ☁️ بۇلۇتتىن ۋە ئامباردىن تولۇق زاكازلارنى يۈكلەپ تەڭلەشتۈرۈش
-    let orders = [];
+    let cloudOrders = [];
     if (window.appStore.fetchOrdersFromCloudAndMatch) {
-      orders = await window.appStore.fetchOrdersFromCloudAndMatch(cleanQ);
-    } else {
-      orders = window.appStore.findOrdersByTrackCodeOrPhone(cleanQ);
+      try {
+        cloudOrders = await window.appStore.fetchOrdersFromCloudAndMatch(cleanQ);
+      } catch(e) {}
     }
 
-    if (!orders || orders.length === 0) {
-      const notFoundTitle = i18n.t('orderTrackNotFound') || (lang === 'tr' ? 'Herhangi Bir Sipariş Bulunamadı' : (lang === 'en' ? 'No Orders Found' : 'ھېچقانداق زاكاز تېپىلمىدى'));
+    const inboxData = window.appStore.getCustomerInbox(cleanQ);
+    // Merge cloud orders if any
+    if (cloudOrders && cloudOrders.length > 0) {
+      cloudOrders.forEach(co => {
+        if (!inboxData.orders.some(o => o.id === co.id)) {
+          inboxData.orders.push(co);
+        }
+      });
+    }
+
+    cachedInboxData = inboxData;
+
+    // نومۇرنى يەرلىككە ئەستە تۇتۇش
+    if (/^\+?\d{8,15}$/.test(cleanQ.replace(/[\s\-]/g, ''))) {
+      localStorage.setItem('teklimakan_customer_phone', cleanQ);
+    }
+
+    // ئوقۇلدى بەلگىسىنى قويۇش
+    window.appStore.markCustomerInboxAsRead(cleanQ);
+    updateCustomerInboxBadges();
+
+    // تاللىغۇچ كۆرسىتىش ۋە بەلگە سانىنى يېڭىلاش
+    const tabsHeader = document.getElementById('inboxTabsHeader');
+    const badgeNotifs = document.getElementById('tabBadgeInboxNotifs');
+    const badgeOrders = document.getElementById('tabBadgeInboxOrders');
+
+    if (tabsHeader) tabsHeader.style.display = 'flex';
+    if (badgeNotifs) badgeNotifs.textContent = inboxData.notifications.length;
+    if (badgeOrders) badgeOrders.textContent = inboxData.orders.length;
+
+    renderCustomerInboxContent();
+  }
+
+  function renderCustomerInboxContent() {
+    const resultsWrap = document.getElementById('orderTrackResultsWrap');
+    if (!resultsWrap) return;
+    const i18n = window.appI18n;
+    const lang = (i18n && i18n.getLang()) || 'ug';
+    const { orders, notifications } = cachedInboxData;
+    const cleanQ = currentInboxQuery;
+
+    if ((!orders || orders.length === 0) && (!notifications || notifications.length === 0)) {
+      const notFoundTitle = i18n.t('orderTrackNotFound') || (lang === 'tr' ? 'Herhangi Bir Sipariş Bulunamadı' : (lang === 'en' ? 'No Orders Found' : 'ھېچقانداق زاكاز ياكى ئۇقتۇرۇش تېپىلمىدى'));
       const notFoundDesc = lang === 'tr'
         ? `"${cleanQ}" için sistemde sipariş kaydı bulunamadı. Lütfen girdiğiniz numarayı kontrol edin veya WhatsApp üzerinden yöneticimiz ile iletişime geçin.`
         : (lang === 'en'
           ? `No order records found for "${cleanQ}". Please verify your input or contact our support team via WhatsApp.`
-          : `«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ئۇچۇرى بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.`);
+          : `«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ياكى ئۇقتۇرۇش بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.`);
       const waBtnText = lang === 'tr' ? 'WhatsApp ile Danışın' : (lang === 'en' ? 'Inquire via WhatsApp' : 'WhatsApp ئارقىلىق سۈرۈشتۈرۈش');
       const waMsg = lang === 'tr'
         ? `Merhaba Teklimakan yetkilisi, ${cleanQ} numarasıyla sipariş sorgulamasında destek alabilir miyim?`
@@ -1497,7 +1622,7 @@ function initTeklimakanApp() {
           <i class="fas fa-search" style="font-size: 2.5rem; color: #f43f5e; margin-bottom: 0.75rem;"></i>
           <h4 style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem;">${notFoundTitle}</h4>
           <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin: 0 0 1rem 0;">${notFoundDesc}</p>
-          <a href="https://wa.me/905551609999?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn-checkout" style="width: auto; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; font-size: 0.88rem; text-decoration: none; border-radius: 10px; background: #25D366;">
+          <a href="https://wa.me/905551609999?text=${encodeURIComponent(waMsg)}" target="_blank" class="btn-checkout" style="width: auto; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; font-size: 0.88rem; text-decoration: none; border-radius: 10px; background: #25D366; color: #ffffff;">
             <i class="fab fa-whatsapp"></i> ${waBtnText}
           </a>
         </div>
@@ -1505,11 +1630,125 @@ function initTeklimakanApp() {
       return;
     }
 
-    // ئەگەر تېپىلغان بولسا، نومۇرنى يەرلىك ئەستە تۇتۇش
-    if (/^\+?\d{8,15}$/.test(cleanQ.replace(/[\s\-]/g, ''))) {
-      localStorage.setItem('teklimakan_customer_phone', cleanQ);
+    // ========== 1. ساندۇق ئۇقتۇرۇشلىرى (NOTIFICATIONS TAB) ==========
+    if (currentInboxTab === 'notifs') {
+      if (!notifications || notifications.length === 0) {
+        resultsWrap.innerHTML = `
+          <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+            <i class="fas fa-bell-slash" style="font-size: 2.8rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
+            <h4 style="font-size: 1rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem;">ھازىرچە يېڭى ئۇقتۇرۇش يوق</h4>
+            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6;">زاكازىڭىز كارگوغا چىققاندا ياكى سۇپا باشقۇرغۇچىسى ئۇچۇر يازغاندا مۇشۇ يەرگە دەل ۋاقتىدا چىقىدۇ.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let notifsHtml = `<div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">`;
+
+      notifications.forEach(n => {
+        let iconBg = '#e0f2fe';
+        let iconColor = '#0284c7';
+        let iconClass = 'fa-bell';
+        let badgeText = 'ئۇقتۇرۇش';
+        let badgeBg = '#f0f9ff';
+        let badgeColor = '#0369a1';
+
+        if (n.type === 'cargo_shipped') {
+          iconBg = '#dcfce7';
+          iconColor = '#16a34a';
+          iconClass = 'fa-truck-fast';
+          badgeText = 'كارگو يوللاندى';
+          badgeBg = '#f0fdf4';
+          badgeColor = '#15803d';
+        } else if (n.type === 'order_created') {
+          iconBg = '#eef2ff';
+          iconColor = '#4f46e5';
+          iconClass = 'fa-file-invoice';
+          badgeText = 'زاكاز تاپشۇرۇۋېلىندى';
+          badgeBg = '#eef2ff';
+          badgeColor = '#4338ca';
+        } else if (n.type === 'order_completed') {
+          iconBg = '#ecfdf5';
+          iconColor = '#059669';
+          iconClass = 'fa-circle-check';
+          badgeText = 'يەتكۈزۈلدى';
+          badgeBg = '#ecfdf5';
+          badgeColor = '#047857';
+        } else if (n.type === 'admin_message') {
+          iconBg = '#fef3c7';
+          iconColor = '#d97706';
+          iconClass = 'fa-comment-dots';
+          badgeText = 'سۇپا خېتى';
+          badgeBg = '#fffbeb';
+          badgeColor = '#b45309';
+        }
+
+        notifsHtml += `
+          <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.15rem; box-shadow: 0 3px 12px rgba(0,0,0,0.04); position: relative; transition: all 0.2s;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.65rem;">
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: ${iconBg}; color: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                  <i class="fas ${iconClass}"></i>
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.95rem; color: #0f172a;">${n.title}</div>
+                  <div style="font-size: 0.76rem; color: #94a3b8;" class="number-latin">${n.timestamp || ''}</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                ${n.orderId ? `
+                  <span class="number-latin" style="font-size: 0.74rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px;">
+                    #${n.orderId}
+                  </span>
+                ` : ''}
+                <span style="font-size: 0.72rem; font-weight: 700; color: ${badgeColor}; background: ${badgeBg}; border: 1px solid ${iconColor}33; padding: 2px 8px; border-radius: 9999px;">
+                  ${badgeText}
+                </span>
+              </div>
+            </div>
+
+            <div style="font-size: 0.88rem; color: #334155; line-height: 1.6; margin-bottom: 0.75rem; white-space: pre-line;">
+              ${n.message}
+            </div>
+
+            ${(n.carrier || n.trackingNo) ? `
+              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 0.75rem 0.95rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    <span style="background: #0284c7; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800;">
+                      <i class="fas fa-truck"></i> ${n.carrier || 'پوچتا'}
+                    </span>
+                    <span class="number-latin" style="font-size: 0.92rem; font-weight: 800; color: #0369a1; direction: ltr;">
+                      ${n.trackingNo}
+                    </span>
+                    <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('${n.trackingNo}').then(() => showToast('ئىز قوغلاش نومۇرى كۆچۈرۈلدى!', 'success'))" style="border: none; background: #e0f2fe; color: #0284c7; border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;" title="كۆچۈرۈش">
+                      <i class="far fa-copy"></i>
+                    </button>
+                  </div>
+                  ${n.trackingUrl ? `
+                    <a href="${n.trackingUrl}" target="_blank" style="background: #0284c7; color: #fff; padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                      <i class="fas fa-external-link-alt"></i> پوچتىدىن تەكشۈرۈش
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            ` : ''}
+
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; border-top: 1px dashed #f1f5f9; padding-top: 0.55rem;">
+              <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ زاكاز نومۇرۇم: #${n.orderId || cleanQ}. سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="color: #16a34a; font-weight: 700; font-size: 0.8rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <i class="fab fa-whatsapp"></i> WhatsApp تىن سۈرۈشتۈرۈش
+              </a>
+            </div>
+          </div>
+        `;
+      });
+
+      notifsHtml += `</div>`;
+      resultsWrap.innerHTML = notifsHtml;
+      return;
     }
 
+    // ========== 2. زاكاز ۋە كارگو تەپسىلاتى (ORDERS TAB) ==========
     const statusMap = {
       'ساقلاۋاتىدۇ': 1,
       'تەستىقلاندى': 2,
@@ -1522,7 +1761,7 @@ function initTeklimakanApp() {
     const cloudBadge = lang === 'tr' ? 'Kalıcı Bulut Kaydı' : (lang === 'en' ? 'Permanent Cloud Record' : 'مەڭگۈ بۇلۇتتا ساقلانغان');
 
     let html = `
-      <div style="margin-top: 1rem; margin-bottom: 0.85rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+      <div style="margin-top: 0.5rem; margin-bottom: 0.85rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
         <div style="font-weight: 800; color: #166534; font-size: 0.95rem;">
           <i class="fas fa-check-circle" style="color: #22c55e;"></i> ${countText}
         </div>
@@ -1651,7 +1890,7 @@ function initTeklimakanApp() {
               </div>
               ${trackingUrl ? `
                 <div style="margin-top: 0.65rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                  <a href="${trackingUrl}" target="_blank" class="btn-checkout" style="width: auto; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 800; text-decoration: none; border-radius: 8px; background: #0284c7; display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <a href="${trackingUrl}" target="_blank" class="btn-checkout" style="width: auto; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 800; text-decoration: none; border-radius: 8px; background: #0284c7; display: inline-flex; align-items: center; gap: 0.4rem; color: #ffffff;">
                     <i class="fas fa-external-link-alt"></i> ${lblCarrierBtn}
                   </a>
                 </div>
@@ -1693,7 +1932,7 @@ function initTeklimakanApp() {
 
           <!-- WhatsApp Support Link -->
           <div style="text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 0.75rem;">
-            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`Salam Teklimakan, #${order.id} ...`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
+            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ زاكاز نومۇرۇم: #${order.id}. سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
               <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> ${lblWaInq}
             </a>
           </div>
@@ -2247,6 +2486,46 @@ function initTeklimakanApp() {
           doTrackOrder(orderTrackQueryInput.value);
         }
       });
+    }
+
+    // 📬 زاكاز ۋە ئۇقتۇرۇش ساندۇقى كۇنۇپكىسى (Header Inbox Button)
+    const headerInboxBtn = document.getElementById('headerInboxBtn');
+    if (headerInboxBtn) {
+      headerInboxBtn.addEventListener('click', () => openTrackOrderModal());
+    }
+
+    // 👤 نومۇر ئالماشتۇرۇش كۇنۇپكىسى
+    const btnToggleInboxSearch = document.getElementById('btnToggleInboxSearch');
+    if (btnToggleInboxSearch) {
+      btnToggleInboxSearch.addEventListener('click', () => {
+        const searchSec = document.getElementById('orderTrackSearchSection');
+        if (searchSec) {
+          searchSec.style.display = searchSec.style.display === 'none' ? 'block' : 'block';
+          const input = document.getElementById('orderTrackQueryInput');
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+        }
+      });
+    }
+
+    // 📑 ساندۇق ئىچى تاللىغۇچلىرى (Tabs)
+    const tabBtnInboxNotifs = document.getElementById('tabBtnInboxNotifs');
+    const tabBtnInboxOrders = document.getElementById('tabBtnInboxOrders');
+    if (tabBtnInboxNotifs) {
+      tabBtnInboxNotifs.addEventListener('click', () => switchInboxTab('notifs'));
+    }
+    if (tabBtnInboxOrders) {
+      tabBtnInboxOrders.addEventListener('click', () => switchInboxTab('orders'));
+    }
+
+    // دەسلەپكى ساندۇق يېڭى ئۇچۇر بەلگىسىنى يېڭىلاش
+    updateCustomerInboxBadges();
+    if (window.appStore && typeof window.appStore.on === 'function') {
+      window.appStore.on('customer_inbox', updateCustomerInboxBadges);
+      window.appStore.on('customer_inbox_read', updateCustomerInboxBadges);
+      window.appStore.on('orders', updateCustomerInboxBadges);
     }
 
     document.querySelectorAll('.btn-modal-close').forEach(btn => {

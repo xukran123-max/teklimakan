@@ -4007,9 +4007,15 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
 
   /* سېۋەت ياكى كۆزنەك ئوچۇق ۋاقتىدا لەيلىمە كۇنۇپكا خەتلەرنى ۋە باھانى توسۇۋالماسلىقى كېرەك */
   body.cart-drawer-open .floating-contact-wrap,
+  body.cart-drawer-open .floating-lucky-wheel-btn,
   body:has(.cart-overlay.active) .floating-contact-wrap,
+  body:has(.cart-overlay.active) .floating-lucky-wheel-btn,
   body:has(.modal-backdrop[style*="display: flex"]) .floating-contact-wrap,
-  body:has(.modal-backdrop[style*="display: block"]) .floating-contact-wrap {
+  body:has(.modal-backdrop[style*="display: flex"]) .floating-lucky-wheel-btn,
+  body:has(.modal-backdrop[style*="display: block"]) .floating-contact-wrap,
+  body:has(.modal-backdrop[style*="display: block"]) .floating-lucky-wheel-btn,
+  body:has(#adminLiveChatBox[style*="display: block"]) .floating-lucky-wheel-btn,
+  body:has(#adminLiveChatBox[style*="display: flex"]) .floating-lucky-wheel-btn {
     opacity: 0 !important;
     pointer-events: none !important;
     visibility: hidden !important;
@@ -5316,8 +5322,9 @@ img,
 /* ==================== 🎡 بۈگۈنكى بەخت چاقى لەيلىمە تۈگمىسى (Floating Lucky Wheel) ==================== */
 .floating-lucky-wheel-btn {
   position: fixed;
-  left: 20px;
-  bottom: 85px;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  left: auto;
   z-index: 996;
   background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
   color: #ffffff;
@@ -5333,7 +5340,18 @@ img,
   text-decoration: none;
   font-family: inherit;
   animation: luckyWheelPulse 3s infinite ease-in-out;
+}
+
+html[dir="rtl"] .floating-lucky-wheel-btn {
+  right: 1.5rem;
+  left: auto;
   direction: rtl;
+}
+
+html[dir="ltr"] .floating-lucky-wheel-btn {
+  left: 1.5rem;
+  right: auto;
+  direction: ltr;
 }
 
 .floating-lucky-wheel-btn:hover {
@@ -5511,9 +5529,16 @@ img,
 
 @media (max-width: 640px) {
   .floating-lucky-wheel-btn {
-    left: 14px;
     bottom: 74px;
     padding: 6px 10px 6px 8px;
+  }
+  html[dir="rtl"] .floating-lucky-wheel-btn {
+    right: 12px;
+    left: auto;
+  }
+  html[dir="ltr"] .floating-lucky-wheel-btn {
+    left: 12px;
+    right: auto;
   }
   .lucky-wheel-icon-wrap {
     width: 32px;

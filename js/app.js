@@ -4579,10 +4579,17 @@ function initTeklimakanApp() {
     // پۈتۈن بەت دائىرىسىدە زىيارەت قىلىش ئۈچۈن window غا باغلاش
     window.checkAgentSession = checkAgentSession;
 
-    function performAgentVerification(val, password = '', isStatusCheckOnly = false) {
+    async function performAgentVerification(val, password = '', isStatusCheckOnly = false) {
       if (!val) {
         showToast('ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!', 'warning');
         return;
+      }
+
+      // ئەگەر يەرلىك سىستېمىدا بولمىسا، دەرھال بۇلۇتتىن سىناپ تەكشۈرۈش ۋە ماسلاشتۇرۇش
+      if (window.appStore && typeof window.appStore.findAgentAsync === 'function') {
+        try {
+          await window.appStore.findAgentAsync(val);
+        } catch(e) {}
       }
 
       const pwGroup = document.getElementById('agentPasswordGroup');
@@ -4798,11 +4805,19 @@ function initTeklimakanApp() {
     }
 
     if (btnVerify && loginInput) {
-      btnVerify.addEventListener('click', () => {
+      btnVerify.addEventListener('click', async () => {
         const val = loginInput.value.trim();
         const pwInput = document.getElementById('agentLoginPassword');
         const pw = pwInput ? pwInput.value.trim() : '';
-        performAgentVerification(val, pw, false);
+        btnVerify.disabled = true;
+        const origHtml = btnVerify.innerHTML;
+        btnVerify.innerHTML = '<i class="fas fa-spinner fa-spin"></i> دەلىللىنىۋاتىدۇ...';
+        try {
+          await performAgentVerification(val, pw, false);
+        } finally {
+          btnVerify.disabled = false;
+          btnVerify.innerHTML = origHtml;
+        }
       });
       loginInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -4836,23 +4851,23 @@ function initTeklimakanApp() {
     }
 
     if (btnCheckStatus && loginInput) {
-      btnCheckStatus.addEventListener('click', () => {
+      btnCheckStatus.addEventListener('click', async () => {
         const val = loginInput.value.trim();
         if (!val) {
           showToast('سۈرۈشتۈرمەكچى بولغان تېلېفون، ئېلخەت ياكى كودنى كىرگۈزۈڭ!', 'warning');
           loginInput.focus();
           return;
         }
-        performAgentVerification(val, '', true);
+        await performAgentVerification(val, '', true);
       });
     }
 
     if (btnQuickLogin) {
-      btnQuickLogin.addEventListener('click', () => {
+      btnQuickLogin.addEventListener('click', async () => {
         try {
           const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
           if (saved && saved.id) {
-            performAgentVerification(saved.id, '', false);
+            await performAgentVerification(saved.id, '', false);
           }
         } catch(e) {}
       });
@@ -4916,96 +4931,31 @@ function initTeklimakanApp() {
 
     let currentResetAgentId = '';
 
-    async function triggerAgentPasswordResetFlow(identifier) {
-      if (!identifier) {
-        if (resetStep1) resetStep1.style.display = 'block';
-        if (resetStep2) resetStep2.style.display = 'none';
-        if (modalReset) modalReset.classList.add('active');
-        if (inputResetId) {
-          inputResetId.value = '';
+    // ⚡ ۋاكالەتچى شىفىرىنى بىۋاسىتە شەرتسىز ئالماشتۇرۇش كۆزنىكىنى ئېچىش
+    function openAgentPasswordResetModal(identifier = '') {
+      if (inputResetId) {
+        inputResetId.value = identifier;
+      }
+      const pw1 = document.getElementById('inputResetNewPassword');
+      const pw2 = document.getElementById('inputResetConfirmPassword');
+      if (pw1) pw1.value = '';
+      if (pw2) pw2.value = '';
+
+      if (modalReset) modalReset.classList.add('active');
+
+      setTimeout(() => {
+        if (identifier && pw1) {
+          pw1.focus();
+        } else if (inputResetId) {
           inputResetId.focus();
         }
-        return;
-      }
-
-      if (btnSendResetCode) {
-        btnSendResetCode.disabled = true;
-        btnSendResetCode.innerHTML = '<i class="fas fa-spinner fa-spin"></i> يوللىنىۋاتىدۇ...';
-      }
-      showToast('ئېلخەتكە پارول ئۇلانمىسى ئەۋەتىلىۋاتىدۇ...', 'info');
-
-      try {
-        const res = await window.appStore.requestAgentPasswordReset(identifier);
-        if (res.success) {
-          currentResetAgentId = res.agentId;
-
-          // 📧 ۋاكالەتچىنىڭ ئېلخېتىگە بىۋاسىتە ئۇلانما ۋە دەلىللەش كودى يوللاش!
-          sendEmailAgentPasswordReset(res.agent, res.code, res.resetLink);
-
-          if (resetStep1) resetStep1.style.display = 'none';
-          if (resetStep2) resetStep2.style.display = 'block';
-          if (modalReset) modalReset.classList.add('active');
-
-          if (resetNoticeBox) {
-            resetNoticeBox.innerHTML = `
-              <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
-                <i class="fas fa-check-circle" style="color: #10b981;"></i> پارول ئەسلىگە كەلتۈرۈش ئۇلانمىسى ئەۋەتىلدى!
-              </div>
-              <div style="font-size: 0.84rem; line-height: 1.6; margin-bottom: 0.4rem;">
-                <div><b>ۋاكالەتچى:</b> ${escapeModalHtml(res.agentName || '')} (${escapeModalHtml(res.agentId || '')})</div>
-                <div><b>ئېلخەت ئادرېسى:</b> <span class="number-latin" style="font-weight: bold; color: #1d4ed8;">${escapeModalHtml(res.email || res.maskedEmail || '')}</span></div>
-              </div>
-              <div style="background: #ffffff; border-radius: 8px; border: 1.5px dashed #93c5fd; padding: 0.5rem; text-align: center; margin-top: 0.45rem;">
-                <div style="font-size: 0.78rem; color: #475569;">ئېلخېتىڭىزدىكى ئۇلانمىنى باسىڭ ياكى بۇ كودنى ئىشلىتىڭ:</div>
-                <div class="number-latin" style="font-weight: 900; font-size: 1.35rem; color: #2563eb; letter-spacing: 5px; margin: 2px 0;">${escapeModalHtml(res.code || '')}</div>
-                <small style="color: #64748b; font-size: 0.72rem;">(ئېلخەت كېچىكسە ئېكراندىكى كود بىلەن پارولنى يېڭىلىسىڭىزمۇ بولىدۇ)</small>
-              </div>
-            `;
-          }
-          const inputCode = document.getElementById('inputResetCode');
-          if (inputCode) {
-            inputCode.value = res.code;
-          }
-          const inputNewPw = document.getElementById('inputResetNewPassword');
-          if (inputNewPw) setTimeout(() => inputNewPw.focus(), 250);
-
-          showToast('✅ ئېلخېتىڭىزگە قايتا بېكىتىش ئۇلانمىسى ئەۋەتىلدى!', 'success');
-        } else {
-          alert(res.message);
-          showToast(res.message, 'error');
-          if (resetStep1) resetStep1.style.display = 'block';
-          if (resetStep2) resetStep2.style.display = 'none';
-          if (modalReset) modalReset.classList.add('active');
-          if (inputResetId) {
-            inputResetId.value = identifier;
-            inputResetId.focus();
-          }
-        }
-      } catch(e) {
-        console.error('Reset request error:', e);
-        showToast('دەلىللەش كودى ئەۋەتىشتە خاتالىق كۆرۈلدى', 'error');
-      } finally {
-        if (btnSendResetCode) {
-          btnSendResetCode.disabled = false;
-          btnSendResetCode.innerHTML = '<i class="fas fa-paper-plane"></i> <span>دەلىللەش كودى ئەۋەتىش</span>';
-        }
-      }
+      }, 200);
     }
 
-    if (btnForgot && modalReset) {
+    if (btnForgot) {
       btnForgot.addEventListener('click', () => {
         const idVal = loginInput ? loginInput.value.trim() : '';
-        if (idVal) {
-          triggerAgentPasswordResetFlow(idVal);
-        } else {
-          if (resetStep1) resetStep1.style.display = 'block';
-          if (resetStep2) resetStep2.style.display = 'none';
-          modalReset.classList.add('active');
-          if (inputResetId) {
-            inputResetId.value = '';
-            inputResetId.focus();
-          }
-        }
+        openAgentPasswordResetModal(idVal);
       });
     }
 
@@ -5019,48 +4969,24 @@ function initTeklimakanApp() {
     }
 
     if (btnSendResetCode) {
-      btnSendResetCode.addEventListener('click', async () => {
+      btnSendResetCode.addEventListener('click', () => {
         const idVal = inputResetId ? inputResetId.value.trim() : '';
-        if (!idVal) {
-          showToast('تېلېفون ياكى ئېلخەت كىرگۈزۈڭ!', 'warning');
-          if (inputResetId) inputResetId.focus();
-          return;
-        }
-        await triggerAgentPasswordResetFlow(idVal);
+        openAgentPasswordResetModal(idVal);
       });
     }
 
-    // 🔗 ئېلخەتتىكى ئۇلانما ئارقىلىق بىۋاسىتە كىرگەندە پارول ئۆزگەرتىش كۆزنىكىنى ئېچىش (?reset_agent=...&code=...)
+    // 🔗 ئېلخەت ياكى تاشقى ئۇلانما ئارقىلىق كىرگەندە پارول ئۆزگەرتىش كۆزنىكىنى ئېچىش (?reset_agent=...)
     function checkUrlPasswordResetParams() {
       try {
         const params = new URLSearchParams(window.location.search);
         const agentId = params.get('reset_agent');
-        const code = params.get('code');
-        if (agentId && code) {
+        if (agentId) {
           const agentDrawer = document.getElementById('agentDrawer');
           if (agentDrawer) agentDrawer.classList.add('active');
           const agentBackdrop = document.getElementById('agentDrawerBackdrop');
           if (agentBackdrop) agentBackdrop.classList.add('active');
 
-          currentResetAgentId = agentId;
-          const inputCode = document.getElementById('inputResetCode');
-          if (inputCode) inputCode.value = code;
-          if (resetStep1) resetStep1.style.display = 'none';
-          if (resetStep2) resetStep2.style.display = 'block';
-          if (resetNoticeBox) {
-            resetNoticeBox.innerHTML = `
-              <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
-                <i class="fas fa-check-circle" style="color: #10b981;"></i> ئېلخەت ئۇلانمىسى دەلىللەندى!
-              </div>
-              <div><b>ۋاكالەتچى كودى:</b> <span class="number-latin">${escapeModalHtml(agentId)}</span></div>
-              <div style="margin-top: 0.45rem; padding: 0.45rem; background: #ffffff; border-radius: 6px; border: 1px dashed #93c5fd; text-align: center;">
-                <span style="font-size: 0.82rem; color: #2563eb; font-weight: bold;">تۆۋەنگە يېڭى مەخپىي شىفىرىڭىزنى كىرگۈزۈپ جەزملەڭ</span>
-              </div>
-            `;
-          }
-          if (modalReset) modalReset.classList.add('active');
-          const inputNewPw = document.getElementById('inputResetNewPassword');
-          if (inputNewPw) setTimeout(() => inputNewPw.focus(), 300);
+          openAgentPasswordResetModal(agentId);
         }
       } catch(e) {
         console.warn('checkUrlPasswordResetParams error:', e);
@@ -5070,12 +4996,19 @@ function initTeklimakanApp() {
 
     if (btnSubmitNewPw) {
       btnSubmitNewPw.addEventListener('click', async () => {
-        const code = document.getElementById('inputResetCode')?.value.trim() || '';
+        const identifier = inputResetId ? inputResetId.value.trim() : '';
         const newPw = document.getElementById('inputResetNewPassword')?.value.trim() || '';
         const confirmPw = document.getElementById('inputResetConfirmPassword')?.value.trim() || '';
 
-        if (!code || !newPw) {
-          showToast('بارلىق كىرگۈزۈش رامكىلىرىنى تولدۇرۇڭ!', 'warning');
+        if (!identifier) {
+          showToast('تېلېفون ياكى ئېلخەت كىرگۈزۈڭ!', 'warning');
+          if (inputResetId) inputResetId.focus();
+          return;
+        }
+
+        if (!newPw) {
+          showToast('يېڭى مەخپىي شىفىرنى كىرگۈزۈڭ!', 'warning');
+          document.getElementById('inputResetNewPassword')?.focus();
           return;
         }
 
@@ -5085,7 +5018,7 @@ function initTeklimakanApp() {
         }
 
         if (newPw !== confirmPw) {
-          showToast('ئىككى قېتىم كىرگۈزگەن شىفىر ئوخشاش ئەمەس!', 'error');
+          showToast('ئىككى قېتىم كىرگۈزگەن شىفىر بىر-بىرىگە ماس كەلمىدى!', 'error');
           return;
         }
 
@@ -5094,22 +5027,27 @@ function initTeklimakanApp() {
 
         try {
           const devToken = getOrCreateDeviceToken();
-          const res = await window.appStore.verifyAndResetAgentPassword(currentResetAgentId, code, newPw, devToken);
+          const res = await window.appStore.resetAgentPasswordDirect(identifier, newPw, devToken);
           if (res.success) {
             modalReset.classList.remove('active');
-            showToast('✅ مەخپىي شىفىر يېڭىلاندى! كىرىۋاتىسىز...', 'success');
-            // بىۋاسىتە شۇ ۋاكالەتچى قىلىپ كىرگۈزۈش
-            performAgentVerification(currentResetAgentId, newPw, false);
+            showToast('✅ مەخپىي شىفىرىڭىز مۇۋەپپەقىيەتلىك يېڭىلاندى! كىرىۋاتىسىز...', 'success');
+
+            // كىرىش رامكىسىنى تولدۇرۇپ بىۋاسىتە سىستېمىغا كىرگۈزۈش
+            if (loginInput) loginInput.value = res.agent.id || identifier;
+            const pwInput = document.getElementById('agentLoginPassword');
+            if (pwInput) pwInput.value = newPw;
+
+            await performAgentVerification(res.agent.id || identifier, newPw, false);
           } else {
-            alert(res.message);
             showToast(res.message, 'error');
+            alert(res.message);
           }
         } catch(e) {
           console.error('Reset password error:', e);
           showToast('پارولنى يېڭىلاشتا خاتالىق كۆرۈلدى', 'error');
         } finally {
           btnSubmitNewPw.disabled = false;
-          btnSubmitNewPw.innerHTML = '<i class="fas fa-check-circle"></i> <span>جەزملەش ۋە كىرىش</span>';
+          btnSubmitNewPw.innerHTML = '<i class="fas fa-save"></i> <span>مەخپىي شىفىرنى ساقلاش ۋە دەرھال كىرىش</span>';
         }
       });
     }

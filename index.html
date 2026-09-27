@@ -1567,55 +1567,51 @@
   </div>
 
   <!-- 🔑 ۋاكالەتچى مەخپىي شىفىرىنى ئەسلىگە كەلتۈرۈش كۆزنىكى (Agent Password Reset Modal) -->
+  <!-- 🔑 ۋاكالەتچى مەخپىي شىفىرىنى شەرتسىز ئالماشتۇرۇش كۆزنىكى (Agent Direct Password Reset Modal) -->
   <div class="modal-backdrop" id="modalAgentPasswordReset" style="z-index: 100002;">
     <div class="modal-content" style="max-width: 440px; border-radius: 16px; border: 1.5px solid #bfdbfe; box-shadow: 0 20px 50px rgba(30, 58, 138, 0.25);">
       <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #ffffff; padding: 1.1rem 1.25rem; border-radius: 14px 14px 0 0; display: flex; align-items: center; justify-content: space-between;">
         <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem; color: #ffffff;">
-          <i class="fas fa-key" style="color: #fde68a;"></i> <span>مەخپىي شىفىرنى قايتا بېكىتىش</span>
+          <i class="fas fa-key" style="color: #fde68a;"></i> <span>مەخپىي شىفىرنى شەرتسىز ئالماشتۇرۇش</span>
         </h4>
         <button type="button" class="btn-close-drawer btn-modal-close" id="btnCloseResetPasswordModal" style="color: #ffffff; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="padding: 1.25rem;">
-        <!-- 1-قەدەم: دەلىللەش كودى تەلەپ قىلىش -->
-        <div id="resetStep1">
-          <p style="font-size: 0.85rem; color: #475569; line-height: 1.55; margin-bottom: 1rem;">
-            سۇپىدا تىزىملاتقان تېلېفون نومۇرىڭىز، ئېلخېتىڭىز ياكى ۋاكالەتچى كودىڭىز (AGT-xxx) نى كىرگۈزۈڭ. سىستېما سىزگە 6 خانىلىق بىخەتەرلىك كودى ئەۋەتىدۇ:
-          </p>
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">تېلېفون، ئېلخەت ياكى كودىڭىز <span style="color: red;">*</span></label>
-            <input type="text" id="inputResetIdentifier" class="form-control number-latin" placeholder="0531... ياكى email@..." style="width: 100%; padding: 0.65rem 0.85rem;">
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 0.85rem; margin-bottom: 1.1rem; font-size: 0.82rem; color: #1e40af; line-height: 1.6;">
+          <i class="fas fa-shield-alt" style="color: #2563eb; font-size: 1rem; margin-left: 0.35rem;"></i>
+          <strong>شەرتسىز مەخپىي شىفىر ئالماشتۇرۇش:</strong>
+          <div style="color: #3b82f6; font-size: 0.78rem; margin-top: 0.25rem;">
+            تىزىملاتقان تېلېفون نومۇرىڭىز ياكى ئېلخېتىڭىزنى كىرگۈزۈپ، بىۋاسىتە يېڭى مەخپىي شىفىر بېكىتىڭ. دەلىللەش كودى تەلەپ قىلىنمايدۇ.
           </div>
-          <button type="button" id="btnSendResetCode" class="btn-checkout" style="width: 100%; padding: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
-            <i class="fas fa-paper-plane"></i> <span>دەلىللەش كودى ئەۋەتىش</span>
-          </button>
         </div>
 
-        <!-- 2-قەدەم: كودنى دەلىللەپ يېڭى پارول بېكىتىش -->
-        <div id="resetStep2" style="display: none;">
-          <div id="resetCodeNoticeBox" style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.82rem; color: #1e40af; line-height: 1.5;">
-            <!-- JS دە تولدۇرۇلىدۇ -->
-          </div>
-          <div class="form-group" style="margin-bottom: 0.85rem;">
-            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">6 خانىلىق دەلىللەش كودى <span style="color: red;">*</span></label>
-            <input type="text" id="inputResetCode" class="form-control number-latin" placeholder="123456" maxlength="6" style="width: 100%; letter-spacing: 4px; font-weight: 900; font-size: 1.2rem; text-align: center; padding: 0.55rem;">
-          </div>
-          <div class="form-group" style="margin-bottom: 0.85rem;">
-            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">يېڭى مەخپىي شىفىر <span style="color: red;">*</span></label>
-            <div style="position: relative;">
-              <input type="password" id="inputResetNewPassword" class="form-control number-latin" placeholder="ئەڭ كەم دېگەندە 6 خانىلىق" style="width: 100%; padding: 0.65rem 0.85rem 0.65rem 2.5rem;" minlength="6">
-              <button type="button" class="btn-toggle-pw" onclick="const p=document.getElementById('inputResetNewPassword'); p.type = p.type==='password'?'text':'password'; this.querySelector('i').classList.toggle('fa-eye'); this.querySelector('i').classList.toggle('fa-eye-slash');" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer;">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom: 1.15rem;">
-            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">يېڭى مەخپىي شىفىرنى جەزملەڭ <span style="color: red;">*</span></label>
-            <input type="password" id="inputResetConfirmPassword" class="form-control number-latin" placeholder="يېڭى شىفىرنى قايتا كىرگۈزۈڭ" style="width: 100%; padding: 0.65rem 0.85rem;" minlength="6">
-          </div>
-          <button type="button" id="btnSubmitNewPassword" class="btn-checkout" style="width: 100%; padding: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
-            <i class="fas fa-check-circle"></i> <span>جەزملەش ۋە كىرىش</span>
-          </button>
+        <div class="form-group" style="margin-bottom: 0.95rem;">
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">تېلېفون، ئېلخەت ياكى ۋاكالەتچى كودىڭىز <span style="color: red;">*</span></label>
+          <input type="text" id="inputResetIdentifier" class="form-control number-latin" placeholder="مەسىلەن: 0531... ياكى email@..." style="width: 100%; padding: 0.65rem 0.85rem;">
         </div>
+
+        <div class="form-group" style="margin-bottom: 0.95rem;">
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">يېڭى مەخپىي شىفىر (ئەڭ كەم دېگەندە 6 خانە) <span style="color: red;">*</span></label>
+          <div style="position: relative;">
+            <input type="password" id="inputResetNewPassword" class="form-control number-latin" placeholder="يېڭى شىفىر كىرگۈزۈڭ" style="width: 100%; padding: 0.65rem 0.85rem 0.65rem 2.5rem;" minlength="6">
+            <button type="button" class="btn-toggle-pw" onclick="const p=document.getElementById('inputResetNewPassword'); p.type = p.type==='password'?'text':'password'; this.querySelector('i').classList.toggle('fa-eye'); this.querySelector('i').classList.toggle('fa-eye-slash');" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer;">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.15rem;">
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 0.35rem;">يېڭى شىفىرنى قايتا تەكرارلاڭ <span style="color: red;">*</span></label>
+          <input type="password" id="inputResetConfirmPassword" class="form-control number-latin" placeholder="يېڭى شىفىرنى قايتا كىرگۈزۈڭ" style="width: 100%; padding: 0.65rem 0.85rem;" minlength="6">
+        </div>
+
+        <button type="button" id="btnSubmitNewPassword" class="btn-checkout" style="width: 100%; padding: 0.8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+          <i class="fas fa-save"></i> <span>مەخپىي شىفىرنى ساقلاش ۋە دەرھال كىرىش</span>
+        </button>
+
+        <!-- كونا قوللىنىشچان ئېلېمېنتلار يوشۇرۇن ھالەتتە ساقلاندى -->
+        <div id="resetStep1" style="display: none;"><button type="button" id="btnSendResetCode" style="display:none;"></button></div>
+        <div id="resetStep2" style="display: none;"><input type="hidden" id="inputResetCode" value=""><div id="resetCodeNoticeBox" style="display:none;"></div></div>
       </div>
     </div>
   </div>
@@ -2078,8 +2074,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js?v=20260927_v110"></script>
   <script src="js/i18n.js?v=20260927_v113"></script>
-  <script src="js/store.js?v=20260927_v113"></script>
-  <script src="js/app.js?v=20260927_v113"></script>
+  <script src="js/store.js?v=20260927_v114"></script>
+  <script src="js/app.js?v=20260927_v114"></script>
   <script src="js/push-manager.js?v=20260927_v110"></script>
 </body>
 </html>

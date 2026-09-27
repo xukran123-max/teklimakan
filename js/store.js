@@ -3960,14 +3960,23 @@ class StoreManager {
   // 🔐 ۋاكالەتچىنىڭ كىرىشىنى دەلىللەش (ئۈسكۈنە ۋە مەخپىي شىفىرنى تەكشۈرۈش)
   verifyAgentLogin(identifier, password = '', deviceToken = '') {
     if (!identifier) return { success: false, message: 'ئېلخەت ياكى تېلېفون كىرگۈزۈڭ!' };
-    const term = identifier.trim().toLowerCase();
+    const raw = String(identifier).trim();
+    const term = raw.toLowerCase();
     const normPhone = this.normalizePhoneNumber(term);
+    const cleanDigits = raw.replace(/\D/g, '');
     const agents = this.getAgents('none');
-    const agent = agents.find(a => 
-      (a.email && this.normalizeEmail(a.email) === term) || 
-      (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) ||
-      (a.id && a.id.toLowerCase() === term)
-    );
+    const agent = agents.find(a => {
+      if (a.id && a.id.toLowerCase() === term) return true;
+      if (a.email && this.normalizeEmail(a.email) === term) return true;
+      if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
+      const aDigits = (a.phone || '').replace(/\D/g, '');
+      if (cleanDigits && aDigits) {
+        if (aDigits === cleanDigits) return true;
+        if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
+        if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
+      }
+      return false;
+    });
 
     if (!agent) {
       return { success: false, message: 'بۇ ئۇچۇر بىلەن تىزىملاتقان ۋاكالەتچى بايقالمىدى. ئالدى بىلەن ئىلتىماس سۇنۇڭ.' };
@@ -4129,17 +4138,206 @@ class StoreManager {
     return { success: true, message: 'مەخپىي شىفىر مۇۋەپپەقىيەتلىك ساقلاندى!' };
   }
 
-  // 📩 پارول ئەسلىگە كەلتۈرۈش كودى تەلەپ قىلىش (Reset Code Request)
+  // 🔍 ۋاكالەتچىنى تېلېفون، ئېلخەت ياكى ID ئارقىلىق ئىزدەش (يەرلىك ۋە Supabase بۇلۇتتىن تولۇق ئىزدىنىدۇ)
+  async findAgentAsync(identifier) {
+    if (!identifier) return null;
+    const raw = String(identifier).trim();
+    const term = raw.toLowerCase();
+    const normPhone = this.normalizePhoneNumber(term);
+    const cleanDigits = raw.replace(/\D/g, '');
+
+    // 1. ئالدى بىلەن يەرلىك ساقلىغۇچ (localStorage) دىن ئىزدەش
+    let agents = this.getAgents('none');
+    let agent = agents.find(a => {
+      if (a.id && a.id.toLowerCase() === term) return true;
+      if (a.email && this.normalizeEmail(a.email) === term) return true;
+      if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
+      const aDigits = (a.phone || '').replace(/\D/g, '');
+      if (cleanDigits && aDigits) {
+        if (aDigits === cleanDigits) return true;
+        if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
+        if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
+      }
+      return false;
+    });
+
+    if (agent) return agent;
+
+    // 2. ئەگەر يەرلىكتە تېپىلمىسا، دەرھال Supabase بۇلۇت ئامبىرىدىن تەكشۈرۈش ۋە يەرلىككە بىرىكتۈرۈش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.fetchAgents === 'function') {
+      try {
+        const remoteAgents = await window.TeklimakanSupabase.fetchAgents();
+        if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
+          const localMap = new Map();
+          agents.forEach(a => localMap.set(a.id, a));
+
+          remoteAgents.forEach(ra => {
+            let authorizedBrands = [];
+            let password = '';
+            let trustedDevices = [];
+            let proposedBrands = '';
+            let notes = '';
+            let legalAgreement = null;
+            let suspendedUntil = null;
+            let suspensionReason = '';
+
+            if (Array.isArray(ra.authorized_brands)) {
+              ra.authorized_brands.forEach(item => {
+                if (typeof item === 'string') {
+                  authorizedBrands.push(item);
+                } else if (item && typeof item === 'object') {
+                  if (item.password) password = item.password;
+                  if (Array.isArray(item.trustedDevices)) trustedDevices = item.trustedDevices;
+                  if (item.proposedBrands) proposedBrands = item.proposedBrands;
+                  if (item.notes) notes = item.notes;
+                  if (item.legalAgreement) legalAgreement = item.legalAgreement;
+                  if (item.suspendedUntil) suspendedUntil = item.suspendedUntil;
+                  if (item.suspensionReason) suspensionReason = item.suspensionReason;
+                }
+              });
+            }
+
+            const existingLocal = localMap.get(ra.id) || {};
+            localMap.set(ra.id, {
+              ...existingLocal,
+              password: password || existingLocal.password || '',
+              trustedDevices: trustedDevices.length > 0 ? trustedDevices : (existingLocal.trustedDevices || []),
+              id: ra.id,
+              name: ra.name,
+              email: ra.email,
+              phone: ra.phone,
+              city: ra.city || existingLocal.city || 'ئىستانبۇل',
+              status: ra.status || existingLocal.status || 'تەستىقلاندى',
+              reputation: ra.reputation || existingLocal.reputation || 'ئىشەنچىلىك سودىگەر',
+              canPublishMultilingual: !!ra.can_publish_multilingual,
+              authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal.authorizedBrands || []),
+              registeredAt: ra.registered_at || existingLocal.registeredAt,
+              authExpireDate: ra.auth_expire_date || existingLocal.authExpireDate,
+              certCode: ra.cert_code || existingLocal.certCode,
+              productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal.productsCount || 0),
+              salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal.salesTotal || 0)),
+              monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal.monthlySales || 0)),
+              monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal.monthlyOrders || 0)),
+              commissionRate: Number(ra.commission_rate !== undefined ? ra.commission_rate : (existingLocal.commissionRate || 15)),
+              violationsCount: Number(ra.violations_count !== undefined ? ra.violations_count : (existingLocal.violationsCount || 0)),
+              proposedBrands: proposedBrands || existingLocal.proposedBrands || '',
+              notes: notes || existingLocal.notes || '',
+              legalAgreement: legalAgreement || existingLocal.legalAgreement || null,
+              suspendedUntil: suspendedUntil || existingLocal.suspendedUntil || null,
+              suspensionReason: suspensionReason || existingLocal.suspensionReason || ''
+            });
+          });
+
+          agents = Array.from(localMap.values());
+          this.saveAgents(agents);
+
+          // قايتىدىن بىرىكتۈرۈلگەن سىستېمىدىن ئىزدەش
+          agent = agents.find(a => {
+            if (a.id && a.id.toLowerCase() === term) return true;
+            if (a.email && this.normalizeEmail(a.email) === term) return true;
+            if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
+            const aDigits = (a.phone || '').replace(/\D/g, '');
+            if (cleanDigits && aDigits) {
+              if (aDigits === cleanDigits) return true;
+              if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
+              if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
+            }
+            return false;
+          });
+          if (agent) return agent;
+        }
+      } catch (sbErr) {
+        console.warn('findAgentAsync Supabase fetch error:', sbErr);
+      }
+    }
+
+    return null;
+  }
+
+  // ⚡ ۋاكالەتچى مەخپىي شىفىرىنى شەرتسىز، بىۋاسىتە يېڭىلاش (Direct Unconditional Password Reset)
+  async resetAgentPasswordDirect(identifier, newPassword, deviceToken = '') {
+    if (!identifier) {
+      return { success: false, message: 'تېلېفون نومۇرى، ئېلخەت ياكى ۋاكالەتچى كودىڭىزنى كىرگۈزۈڭ!' };
+    }
+    const cleanPw = (newPassword || '').trim();
+    if (!cleanPw || cleanPw.length < 6) {
+      return { success: false, message: 'يېڭى مەخپىي شىفىر ئەڭ كەم دېگەندە 6 خانىلىق بولۇشى شەرت!' };
+    }
+
+    const agent = await this.findAgentAsync(identifier);
+    if (!agent) {
+      return { 
+        success: false, 
+        message: 'بۇ ئۇچۇرغا تەۋە ۋاكالەتچى بايقالمىدى! تېلېفون نومۇرى ياكى ئېلخېتىڭىزنى قايتا تەكشۈرۈپ كۆرۈڭ.' 
+      };
+    }
+
+    // مەخپىي شىفىرنى يېڭىلاش
+    agent.password = cleanPw;
+    agent.passwordResetCode = null;
+    agent.passwordResetExpires = null;
+
+    if (deviceToken) {
+      if (!Array.isArray(agent.trustedDevices)) agent.trustedDevices = [];
+      if (!agent.trustedDevices.includes(deviceToken)) agent.trustedDevices.push(deviceToken);
+    }
+
+    let allAgents = this.getAgents('none');
+    const idx = allAgents.findIndex(a => a.id === agent.id);
+    if (idx !== -1) {
+      allAgents[idx] = agent;
+    } else {
+      allAgents.unshift(agent);
+    }
+    this.saveAgents(allAgents);
+
+    // 🌐 Supabase بۇلۇت ئامبىرىغا دەرھال يېڭىلاپ ساقلاش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+      try {
+        await window.TeklimakanSupabase.upsertAgent(agent);
+      } catch(sbErr) {
+        console.warn('Supabase upsert error in resetAgentPasswordDirect:', sbErr);
+      }
+    }
+
+    // 🤖 باشقۇرغۇچىغا Telegram ئارقىلىق بىخەتەرلىك ئۇقتۇرۇشى ئەۋەتىش
+    try {
+      this.sendTelegramAlert({
+        title: `🔑 [ۋاكالەتچى پارولى يېڭىلاندى] ${agent.name}`,
+        message: `👤 <b>ۋاكالەتچى:</b> <b>${agent.name}</b> (<code>${agent.id}</code>)\n` +
+                 `📞 <b>تېلېفون:</b> <code>${agent.phone || '-'}</code>\n` +
+                 `📧 <b>ئېلخەت:</b> <code>${agent.email || '-'}</code>\n` +
+                 `🕒 <b>ۋاقتى:</b> ${new Date().toLocaleString('ug-CN', { hour12: false })}\n` +
+                 `✅ مەخپىي شىفىر شەرتسىز مۇۋەپپەقىيەتلىك ئالماشتۇرۇلدى.`,
+        isUrgent: false
+      });
+    } catch(e) {}
+
+    // SMS ۋە سىستېما خاتىرىسى
+    this.saveSmsLog({
+      id: 'LOG-RESET-DIRECT-' + Date.now(),
+      recipientName: agent.name,
+      phone: agent.phone || agent.email || 'SYSTEM',
+      recipientRole: 'ۋاكالەتچى',
+      channel: 'agent_direct_reset',
+      message: `[مەخپىي شىفىر ئالماشتۇرۇلدى] ۋاكالەتچى ${agent.name} مەخپىي شىفىرىنى مۇۋەپپەقىيەتلىك يېڭىلىدى.`,
+      orderId: 'RESET-DIRECT',
+      timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
+    });
+
+    this.notifyDataChange('agents');
+
+    return {
+      success: true,
+      agent,
+      message: '✅ مەخپىي شىفىرىڭىز مۇۋەپپەقىيەتلىك يېڭىلاندى!'
+    };
+  }
+
+  // 📩 پارول ئەسلىگە كەلتۈرۈش كودى تەلەپ قىلىش (Reset Code Request - ئەگەر قايتا ئىشلىتىلسە)
   async requestAgentPasswordReset(identifier) {
     if (!identifier) return { success: false, message: 'ئېلخەت ياكى تېلېفون نومۇرىنى كىرگۈزۈڭ!' };
-    const term = identifier.trim().toLowerCase();
-    const normPhone = this.normalizePhoneNumber(term);
-    const agents = this.getAgents('none');
-    const agent = agents.find(a => 
-      (a.email && this.normalizeEmail(a.email) === term) || 
-      (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) ||
-      (a.id && a.id.toLowerCase() === term)
-    );
+    const agent = await this.findAgentAsync(identifier);
 
     if (!agent) {
       return { success: false, message: 'بۇ ئۇچۇرغا تەۋە ۋاكالەتچى تېپىلمىدى.' };
@@ -4169,7 +4367,7 @@ class StoreManager {
     const maskedEmail = agent.email ? agent.email.replace(/(.{2})(.*)(@.*)/, '$1****$3') : 'ئېلخەت';
     const maskedPhone = agent.phone ? agent.phone.replace(/(\d{3})\d{4}(\d+)/, '$1****$2') : '';
 
-    // تېلېگرامغا ۋە خەۋەر ساندۇقىغا ئەۋەتىش
+    // تېلېگرامغا ئەۋەتىش
     try {
       this.sendTelegramAlert({
         title: `🔑 [ۋاكالەتچى پارول ئەسلىگە كەلتۈرۈش] ${agent.name}`,
@@ -4177,17 +4375,6 @@ class StoreManager {
         isUrgent: false
       });
     } catch(e) {}
-
-    this.saveSmsLog({
-      id: 'LOG-RESET-' + Date.now(),
-      recipientName: agent.name,
-      phone: agent.phone || agent.email || 'SYSTEM',
-      recipientRole: 'ۋاكالەتچى',
-      channel: 'agent_password_reset',
-      message: `[پارول ئەسلىگە كەلتۈرۈش كودى] كودىڭىز: ${code}، ئۇلانما: ${resetLink}`,
-      orderId: 'RESET-CODE',
-      timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
-    });
 
     return {
       success: true,
@@ -4200,51 +4387,27 @@ class StoreManager {
       maskedPhone,
       code,
       resetLink,
-      message: `دەلىللەش كودى ۋە ئۇلانما سىزنىڭ ئېلخېتىڭىزگە يوللاندى.`
+      message: `دەلىللەش كودى ۋە ئۇلانما ھاسىللاندى.`
     };
   }
 
   // ✅ دەلىللەش كودىنى تەكشۈرۈپ يېڭى پارول بېكىتىش
   async verifyAndResetAgentPassword(agentId, resetCode, newPassword, deviceToken = '') {
-    if (!agentId || !resetCode || !newPassword) {
+    if (!agentId || !newPassword) {
       return { success: false, message: 'بارلىق مەزمۇنلارنى تولدۇرۇڭ!' };
     }
-    let agents = this.getAgents('none');
-    const idx = agents.findIndex(a => a.id === agentId);
-    if (idx === -1) return { success: false, message: 'ۋاكالەتچى بايقالمىدى!' };
+    const agent = await this.findAgentAsync(agentId);
+    if (!agent) return { success: false, message: 'ۋاكالەتچى بايقالمىدى!' };
 
-    let agent = agents[idx];
-    if (!agent.passwordResetCode || agent.passwordResetCode !== resetCode.trim()) {
+    if (resetCode && agent.passwordResetCode && agent.passwordResetCode !== resetCode.trim()) {
       return { success: false, message: '❌ كىرگۈزگەن دەلىللەش كودى خاتا! قايتا تەكشۈرۈپ كىرگۈزۈڭ.' };
-    }
-    if (agent.passwordResetExpires && Date.now() > agent.passwordResetExpires) {
-      return { success: false, message: '⏰ دەلىللەش كودىنىڭ ۋاقتى توشقان (15 مىنۇت)، قايتىدىن كود تەلەپ قىلىڭ.' };
     }
 
     if (newPassword.trim().length < 6) {
       return { success: false, message: 'مەخپىي شىفىر كەم دېگەندە 6 خانىلىق بولۇشى شەرت!' };
     }
 
-    agent.password = newPassword.trim();
-    agent.passwordResetCode = null;
-    agent.passwordResetExpires = null;
-    if (deviceToken) {
-      if (!Array.isArray(agent.trustedDevices)) agent.trustedDevices = [];
-      if (!agent.trustedDevices.includes(deviceToken)) agent.trustedDevices.push(deviceToken);
-    }
-    agents[idx] = agent;
-    this.saveAgents(agents);
-
-    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
-      try { await window.TeklimakanSupabase.upsertAgent(agent); } catch(e) {}
-    }
-
-    this.notifyDataChange('agents');
-    return {
-      success: true,
-      agent,
-      message: '✅ مەخپىي شىفىر (پارول) مۇۋەپپەقىيەتلىك يېڭىلاندى!'
-    };
+    return await this.resetAgentPasswordDirect(agent.id, newPassword, deviceToken);
   }
 
   // ==================== 🚨 ۋاكالەتچى قائىدىگە خىلاپلىق قىلىش ۋە ئاپتوماتىك كۈن سانىچە توختىتىش ====================

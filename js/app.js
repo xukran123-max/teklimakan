@@ -53,6 +53,8 @@ function initTeklimakanApp() {
   try { initStore(); } catch (e) { console.error('initStore error:', e); }
   try { setupEventListeners(); } catch (e) { console.error('setupEventListeners error:', e); }
   try { initFlashCountdown(); } catch (e) { console.error('initFlashCountdown error:', e); }
+  try { initDailyFlashSaleShelf(); } catch (e) { console.error('initDailyFlashSaleShelf error:', e); }
+  try { initCustomerLuckyWheel(); } catch (e) { console.error('initCustomerLuckyWheel error:', e); }
   try { initFlashWeather(); } catch (e) { console.error('initFlashWeather error:', e); }
   try { initFlashSaleRoseDeal(); } catch (e) { console.error('initFlashSaleRoseDeal error:', e); }
   try { initLiveSalesPopups(); } catch (e) { console.error('initLiveSalesPopups error:', e); }
@@ -1963,27 +1965,28 @@ function initTeklimakanApp() {
 
   // ==================== ⚡ چەكلىك ۋاقىت ئېتىبار سائىتى ====================
   function initFlashCountdown() {
-    let hours = 8, minutes = 45, seconds = 20;
     const hEl = document.getElementById('flashHours');
     const mEl = document.getElementById('flashMinutes');
     const sEl = document.getElementById('flashSeconds');
 
-    setInterval(() => {
-      if (seconds > 0) {
-        seconds--;
-      } else {
-        seconds = 59;
-        if (minutes > 0) {
-          minutes--;
-        } else {
-          minutes = 59;
-          if (hours > 0) hours--;
-        }
-      }
+    function update() {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      const diffMs = tomorrow - now;
+      if (diffMs <= 0) return;
+
+      const totalSec = Math.floor(diffMs / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+
       if (hEl) hEl.textContent = String(hours).padStart(2, '0');
       if (mEl) mEl.textContent = String(minutes).padStart(2, '0');
       if (sEl) sEl.textContent = String(seconds).padStart(2, '0');
-    }, 1000);
+    }
+
+    update();
+    setInterval(update, 1000);
   }
 
   // ==================== 🌤️ چەكلىك ئېتىبار رامكىسىدىكى ھاۋارايى مەلۇماتى ====================
@@ -2498,16 +2501,55 @@ function initTeklimakanApp() {
     if (applyCouponBtn && couponInput) {
       applyCouponBtn.addEventListener('click', () => {
         const code = couponInput.value.trim().toUpperCase();
-        if (code === 'TEKLIMAKAN20' || code === 'BULAQ20') {
+        if (!code) {
+          showToast('كۇپون كودىنى كىرگۈزۈڭ!', 'error');
+          return;
+        }
+        const cartData = window.appStore ? window.appStore.getCart() : { totalCny: 0 };
+        const check = window.appStore ? window.appStore.validateCoupon(code, cartData.totalCny) : null;
+        if (check && check.valid) {
+          appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
+          if (typeof playChime === 'function') playChime('success');
+          showToast(`🎉 ${check.message}`, 'success');
+          updateCartUI();
+        } else if (code === 'TEKLIMAKAN20' || code === 'BULAQ20') {
           appliedCoupon = { code: 'TEKLIMAKAN20', discount: 20 };
           if (typeof playChime === 'function') playChime('success');
           showToast('🎉 ئېتىبار كودى تەستىقلاندى! 20 لىرا ئېتىبار بېرىلدى.', 'success');
           updateCartUI();
         } else {
-          showToast('ئېتىبار كودى ئىناۋەتسىز!', 'error');
+          showToast(check ? check.message : 'ئېتىبار كودى ئىناۋەتسىز!', 'error');
         }
       });
     }
+
+    window.applyCustomerCouponToCart = function(couponCode) {
+      if (!couponCode) return;
+      const code = couponCode.trim().toUpperCase();
+      const cartData = window.appStore ? window.appStore.getCart() : { totalCny: 0 };
+      const check = window.appStore ? window.appStore.validateCoupon(code, cartData.totalCny) : null;
+      if (check && check.valid) {
+        appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
+        const coupInp = document.getElementById('couponCodeInput');
+        if (coupInp) coupInp.value = code;
+        updateCartUI();
+        if (typeof playChime === 'function') playChime('success');
+        showToast(`🎉 ${check.message}`, 'success');
+      } else {
+        appliedCoupon = { code: code, discount: 20 };
+        const coupInp = document.getElementById('couponCodeInput');
+        if (coupInp) coupInp.value = code;
+        updateCartUI();
+        showToast(`🎉 كۇپون (${code}) سېۋەتكە كۈچكە ئىگە قىلىندى!`, 'success');
+      }
+      // سېۋەت رامكىسىنى ئېچىش
+      const cartDrawer = document.getElementById('cartDrawer');
+      const drawerBackdrop = document.getElementById('drawerBackdrop');
+      if (cartDrawer && drawerBackdrop) {
+        cartDrawer.classList.add('is-open');
+        drawerBackdrop.classList.add('is-open');
+      }
+    };
 
     const proceedCheckoutBtn = document.getElementById('proceedCheckoutBtn');
     if (proceedCheckoutBtn) proceedCheckoutBtn.addEventListener('click', openCheckoutModal);
@@ -7699,6 +7741,404 @@ ${text}
       return false;
     }
   }, { capture: true });
+
+  // ==================== ⚡ كۈندىلىك تالاش-تارتىش تاۋارلىرى رېشاتكىسى (Daily Flash Sale Shelf) ====================
+  function initDailyFlashSaleShelf() {
+    const container = document.getElementById('customerFlashSaleProductsContainer');
+    const flashBar = document.querySelector('.flash-sale-bar');
+    if (!container || !window.appStore) return;
+
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const flash = retention.flashSale || {};
+
+    if (flash.enabled === false) {
+      if (flashBar) flashBar.style.display = 'none';
+      return;
+    }
+    if (flashBar) flashBar.style.display = 'flex';
+
+    const flashTitleEl = document.getElementById('flashSaleBadge');
+    if (flashTitleEl && flash.title) flashTitleEl.textContent = flash.title;
+
+    const prods = window.appStore.getCustomerDailyFlashSaleProducts();
+    if (!prods || prods.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'grid';
+    container.innerHTML = prods.map(p => {
+      const origPrice = p.originalPrice || p.price;
+      const flashPrice = p.price;
+      const discPct = p.flashDiscountPercent || flash.discountPercentage || 20;
+
+      return `
+        <div class="flash-sale-product-card" data-product-id="${p.id}">
+          <span class="flash-sale-badge-corner">-%${discPct}</span>
+          <div class="flash-sale-card-img-wrap" onclick="openProductQuickView('${p.id}')">
+            <img src="${p.image || 'images/default_product.jpg'}" alt="${p.name}" loading="lazy">
+          </div>
+          <h4 class="flash-sale-card-title" onclick="openProductQuickView('${p.id}')" title="${p.name}">${p.name}</h4>
+          <div class="flash-sale-card-prices">
+            <span class="flash-sale-price-current">${window.appStore.formatPrice(flashPrice)}</span>
+            <span class="flash-sale-price-old">${window.appStore.formatPrice(origPrice)}</span>
+          </div>
+          <button type="button" class="flash-sale-btn-add" onclick="handleFlashAddToCart('${p.id}')">
+            <i class="fas fa-cart-plus"></i> <span>سېۋەتكە سېلىش</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.handleFlashAddToCart = function(productId) {
+    if (!window.appStore) return;
+    const res = window.appStore.addToCart(productId, 1, window.appI18n.getLang());
+    if (res && res.success) {
+      if (typeof playChime === 'function') playChime('click');
+      showToast('🛒 ئېتىبار باھالىق تاۋار سېۋەتكە قوشۇلدى!', 'success');
+      updateCartUI();
+    }
+  };
+
+  // ==================== 🎡 كۈندىلىك بەخت چاقى لوگىكىسى (Customer Daily Lucky Wheel) ====================
+  let luckyWheelRotation = 0;
+  let isLuckyWheelSpinning = false;
+  let luckyWheelAnimFrame = null;
+
+  function initCustomerLuckyWheel() {
+    const btnOpen = document.getElementById('btnOpenLuckyWheel');
+    const modal = document.getElementById('modalCustomerLuckyWheel');
+    const btnClose = document.getElementById('btnCloseLuckyWheel');
+    const btnSpin = document.getElementById('btnSpinWheelAction');
+
+    if (!btnOpen || !modal || !window.appStore) return;
+
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const wheelCfg = retention.luckyWheel || {};
+
+    if (wheelCfg.enabled === false) {
+      btnOpen.style.display = 'none';
+      return;
+    }
+    btnOpen.style.display = 'flex';
+
+    const titleEl = document.getElementById('luckyWheelModalTitle');
+    const subEl = document.getElementById('luckyWheelModalSubtitle');
+    if (titleEl && wheelCfg.title) titleEl.textContent = `🎡 ${wheelCfg.title}`;
+    if (subEl && wheelCfg.subtitle) subEl.textContent = wheelCfg.subtitle;
+
+    btnOpen.addEventListener('click', () => {
+      openLuckyWheelModal();
+    });
+
+    if (btnClose) {
+      btnClose.addEventListener('click', () => {
+        closeLuckyWheelModal();
+      });
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal && !isLuckyWheelSpinning) {
+        closeLuckyWheelModal();
+      }
+    });
+
+    if (btnSpin) {
+      btnSpin.addEventListener('click', () => {
+        handleLuckyWheelSpin();
+      });
+    }
+
+    window.addEventListener('uyghur_store_sync', (e) => {
+      if (e.detail?.type === 'customerRetention' || e.detail?.type === 'settings') {
+        const updated = window.appStore.getCustomerRetentionSettings();
+        if (updated.luckyWheel?.enabled === false) {
+          btnOpen.style.display = 'none';
+        } else {
+          btnOpen.style.display = 'flex';
+        }
+        initDailyFlashSaleShelf();
+      }
+    });
+  }
+
+  function openLuckyWheelModal() {
+    const modal = document.getElementById('modalCustomerLuckyWheel');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+    drawLuckyWheel(luckyWheelRotation);
+    updateLuckyWheelStatusCard();
+  }
+
+  function closeLuckyWheelModal() {
+    const modal = document.getElementById('modalCustomerLuckyWheel');
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+  }
+
+  function drawLuckyWheel(currentAngleRad = 0) {
+    const canvas = document.getElementById('luckyWheelCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = width / 2 - 8;
+
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const slices = retention.luckyWheel?.slices || [];
+    if (slices.length === 0) return;
+
+    const numSlices = slices.length;
+    const sliceAngle = (2 * Math.PI) / numSlices;
+
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(currentAngleRad);
+
+    slices.forEach((slice, i) => {
+      const angle = i * sliceAngle;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, radius, angle, angle + sliceAngle);
+      ctx.closePath();
+
+      ctx.fillStyle = slice.color || '#f59e0b';
+      ctx.fill();
+
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.stroke();
+
+      ctx.save();
+      ctx.rotate(angle + sliceAngle / 2);
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "Microsoft YaHei", sans-serif';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(slice.text || '', radius - 22, 0);
+      ctx.restore();
+    });
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    for (let j = 0; j < numSlices * 2; j++) {
+      const studAngle = j * (Math.PI / numSlices);
+      const studX = (radius - 2) * Math.cos(studAngle);
+      const studY = (radius - 2) * Math.sin(studAngle);
+      ctx.beginPath();
+      ctx.arc(studX, studY, 2.5, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fef08a';
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  function updateLuckyWheelStatusCard() {
+    const card = document.getElementById('luckyWheelStatusCard');
+    const btnSpin = document.getElementById('btnSpinWheelAction');
+    if (!card || !window.appStore) return;
+
+    const check = window.appStore.canCustomerSpinToday();
+
+    if (check.canSpin) {
+      if (btnSpin) {
+        btnSpin.disabled = false;
+        btnSpin.style.opacity = '1';
+        btnSpin.style.cursor = 'pointer';
+      }
+      card.innerHTML = `
+        <div style="color: #0f172a; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem;">
+          🎁 سىزنىڭ بۈگۈنكى <span style="color: #ef4444;">1 قېتىملىق ھەقسىز</span> پۇرسىتىڭىز بار!
+        </div>
+        <p style="font-size: 0.8rem; color: #64748b; margin: 0;">ئوتتۇرىدىكى «ئايلاندۇر» كۇنۇپكىسىنى بېسىپ مۇكاپات ئۇتۇۋېلىڭ.</p>
+      `;
+    } else {
+      if (btnSpin) {
+        btnSpin.disabled = true;
+        btnSpin.style.opacity = '0.6';
+        btnSpin.style.cursor = 'not-allowed';
+      }
+      const last = check.lastSpin || {};
+      const hasCoupon = last.couponCode && last.type !== 'none';
+
+      card.innerHTML = `
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 0.75rem; margin-bottom: 0.65rem;">
+          <div style="color: #166534; font-weight: 800; font-size: 0.9rem;">
+            ✅ بۈگۈنكى ئۇتۇقىڭىز: <span style="color: #047857;">${last.text || 'تەلەيلىك بولۇڭ'}</span>
+          </div>
+          ${hasCoupon ? `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+              <code class="number-latin" style="background: #ffffff; border: 1px dashed #10b981; color: #047857; font-weight: 800; font-size: 0.95rem; padding: 3px 10px; border-radius: 6px;">${last.couponCode}</code>
+              <button type="button" class="btn-primary" onclick="window.applyCustomerCouponToCart('${last.couponCode}')" style="background: #059669; padding: 4px 12px; font-size: 0.8rem; font-weight: 800; border-radius: 6px;">
+                <i class="fas fa-shopping-cart"></i> سېۋەتكە ئىشلىتىش
+              </button>
+            </div>
+          ` : ''}
+        </div>
+        <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+          <i class="fas fa-clock" style="color: #f59e0b;"></i>
+          <span>كېيىنكى ھەقسىز پۇرسەتكە قالغان ۋاقىت:</span>
+          <strong id="luckyWheelNextCountdown" class="number-latin" style="color: #ef4444; font-weight: 800;">--:--:--</strong>
+        </div>
+      `;
+      startLuckyWheelCountdown();
+    }
+  }
+
+  let wheelCountdownInterval = null;
+  function startLuckyWheelCountdown() {
+    if (wheelCountdownInterval) clearInterval(wheelCountdownInterval);
+
+    function update() {
+      const el = document.getElementById('luckyWheelNextCountdown');
+      if (!el) return;
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      const diff = Math.max(0, Math.floor((tomorrow - now) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      el.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    update();
+    wheelCountdownInterval = setInterval(update, 1000);
+  }
+
+  function handleLuckyWheelSpin() {
+    if (isLuckyWheelSpinning) return;
+    const check = window.appStore.canCustomerSpinToday();
+    if (!check.canSpin) {
+      showToast(check.message, 'info');
+      return;
+    }
+
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const slices = retention.luckyWheel?.slices || [];
+    if (slices.length < 2) return;
+
+    const totalWeight = slices.reduce((acc, s) => acc + (Number(s.weight) || 10), 0);
+    let randomNum = Math.random() * totalWeight;
+    let winningIndex = 0;
+    for (let i = 0; i < slices.length; i++) {
+      randomNum -= (Number(slices[i].weight) || 10);
+      if (randomNum <= 0) {
+        winningIndex = i;
+        break;
+      }
+    }
+
+    const winningSlice = slices[winningIndex];
+    const numSlices = slices.length;
+    const sliceAngle = (2 * Math.PI) / numSlices;
+
+    const pointerAngle = 1.5 * Math.PI;
+    const sliceCenter = winningIndex * sliceAngle + sliceAngle / 2;
+    let targetAngle = pointerAngle - sliceCenter;
+    while (targetAngle < 0) targetAngle += 2 * Math.PI;
+
+    const extraSpins = 6;
+    const finalRotation = (2 * Math.PI * extraSpins) + targetAngle;
+
+    isLuckyWheelSpinning = true;
+    const btnSpin = document.getElementById('btnSpinWheelAction');
+    if (btnSpin) {
+      btnSpin.disabled = true;
+      btnSpin.style.opacity = '0.5';
+    }
+
+    const card = document.getElementById('luckyWheelStatusCard');
+    if (card) {
+      card.innerHTML = `
+        <div style="color: #f59e0b; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>چاق تېز ئايلانماقتا... تەلەيلىك بولۇڭ!</span>
+        </div>
+      `;
+    }
+
+    const startTime = performance.now();
+    const duration = 4500;
+    const startRotation = luckyWheelRotation % (2 * Math.PI);
+    const totalDelta = finalRotation - startRotation;
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = easeOutCubic(progress);
+
+      luckyWheelRotation = startRotation + totalDelta * ease;
+      drawLuckyWheel(luckyWheelRotation);
+
+      if (progress < 1) {
+        luckyWheelAnimFrame = requestAnimationFrame(animate);
+      } else {
+        isLuckyWheelSpinning = false;
+        luckyWheelRotation = finalRotation % (2 * Math.PI);
+        drawLuckyWheel(luckyWheelRotation);
+
+        window.appStore.recordCustomerSpin(winningSlice);
+        if (typeof playChime === 'function') playChime('success');
+
+        showWinningCelebration(winningSlice);
+      }
+    }
+
+    luckyWheelAnimFrame = requestAnimationFrame(animate);
+  }
+
+  function showWinningCelebration(slice) {
+    const card = document.getElementById('luckyWheelStatusCard');
+    if (!card) return;
+
+    const hasCoupon = slice.couponCode && slice.type !== 'none';
+
+    card.innerHTML = `
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%); border: 2px solid #f59e0b; border-radius: 14px; padding: 1rem; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);">
+        <div style="font-size: 1.25rem; font-weight: 900; color: #b45309; margin-bottom: 0.35rem;">
+          🎉 مۇبارەك بولسۇن!
+        </div>
+        <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 0.65rem;">
+          سىز «<span style="color: #ef4444;">${slice.text}</span>» ئۇتتىڭىز!
+        </div>
+        ${hasCoupon ? `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-top: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <code class="number-latin" style="background: #ffffff; border: 1.5px dashed #f59e0b; color: #b45309; font-weight: 900; font-size: 1.15rem; padding: 4px 14px; border-radius: 8px; letter-spacing: 1px;">${slice.couponCode}</code>
+              <button type="button" class="btn-primary" onclick="navigator.clipboard?.writeText('${slice.couponCode}'); showToast('📋 كۇپون كودى كۆچۈرۈلدى!', 'success');" style="background: #64748b; padding: 5px 10px; font-size: 0.8rem;">
+                <i class="fas fa-copy"></i> كۆچۈرۈش
+              </button>
+            </div>
+            <button type="button" class="btn-primary" onclick="window.applyCustomerCouponToCart('${slice.couponCode}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; padding: 0.65rem; font-weight: 900; font-size: 0.95rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              <i class="fas fa-cart-arrow-down"></i> دەرھال سېۋەتكە ئىشلىتىش (Use in Cart)
+            </button>
+          </div>
+        ` : `
+          <p style="font-size: 0.85rem; color: #64748b; margin: 0;">بۈگۈن پۇرسىتىڭىز ئوڭدىن كەلمىدى، ئەتىگە چوقۇم يەنە كۆرۈشەيلى!</p>
+        `}
+      </div>
+    `;
+
+    showToast(`🎉 بەخت چاقى: سىز ${slice.text} ئۇتتىڭىز!`, 'success');
+  }
 
   window.showToast = showToast;
   window.openTrackOrderModal = openTrackOrderModal;

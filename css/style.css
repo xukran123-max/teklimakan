@@ -5312,3 +5312,218 @@ img,
   background-color: #eff6ff !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
 }
+
+/* ==================== 🎡 بۈگۈنكى بەخت چاقى لەيلىمە تۈگمىسى (Floating Lucky Wheel) ==================== */
+.floating-lucky-wheel-btn {
+  position: fixed;
+  left: 20px;
+  bottom: 85px;
+  z-index: 996;
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 9999px;
+  padding: 7px 14px 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35), 0 0 16px rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+  font-family: inherit;
+  animation: luckyWheelPulse 3s infinite ease-in-out;
+  direction: rtl;
+}
+
+.floating-lucky-wheel-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 14px 30px rgba(239, 68, 68, 0.5), 0 0 22px rgba(245, 158, 11, 0.6);
+}
+
+.lucky-wheel-icon-wrap {
+  width: 38px;
+  height: 38px;
+  background: #ffffff;
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  animation: wheelIconSpin 12s linear infinite;
+}
+
+.lucky-wheel-btn-texts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.lucky-wheel-btn-title {
+  font-weight: 900;
+  font-size: 0.92rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  white-space: nowrap;
+}
+
+.lucky-wheel-btn-sub {
+  font-size: 0.72rem;
+  color: #fef08a;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@keyframes luckyWheelPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes wheelIconSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== ⚡ كۈندىلىك تالاش-تارتىش تاۋارلىرى رېشاتكىسى (Flash Sale Shelf) ==================== */
+.flash-sale-products-shelf {
+  width: 100%;
+}
+
+.flash-sale-product-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  text-align: right;
+  color: #ffffff;
+}
+
+.flash-sale-product-card:hover {
+  transform: translateY(-4px);
+  border-color: #f59e0b;
+  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.25);
+}
+
+.flash-sale-badge-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  z-index: 2;
+}
+
+.flash-sale-card-img-wrap {
+  width: 100%;
+  height: 140px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+  cursor: pointer;
+}
+
+.flash-sale-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.flash-sale-product-card:hover .flash-sale-card-img-wrap img {
+  transform: scale(1.06);
+}
+
+.flash-sale-card-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.flash-sale-card-title:hover {
+  color: #f59e0b;
+}
+
+.flash-sale-card-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: auto;
+  margin-bottom: 0.55rem;
+}
+
+.flash-sale-price-current {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.flash-sale-price-old {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.flash-sale-btn-add {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.flash-sale-btn-add:hover {
+  background: #fbbf24;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .floating-lucky-wheel-btn {
+    left: 14px;
+    bottom: 74px;
+    padding: 6px 10px 6px 8px;
+  }
+  .lucky-wheel-icon-wrap {
+    width: 32px;
+    height: 32px;
+    font-size: 1.05rem;
+  }
+  .lucky-wheel-btn-title {
+    font-size: 0.82rem;
+  }
+  .lucky-wheel-btn-sub {
+    font-size: 0.68rem;
+  }
+}

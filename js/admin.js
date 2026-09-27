@@ -421,6 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadSettingsForm();
     populateCategoryDropdowns();
+    renderCustomerRetentionAdmin();
+    setupCustomerRetentionListeners();
     initGlobalAdminSearch();
     initProductImageLightboxControls();
   }
@@ -1005,6 +1007,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (tabId === 'messages') {
       renderMessagesCenter();
+    } else if (tabId === 'retention') {
+      renderCustomerRetentionAdmin();
     } else if (tabId === 'settings') {
       loadSettingsForm();
     }
@@ -8687,6 +8691,271 @@ document.addEventListener('DOMContentLoaded', () => {
     if (status === 'تاماملاندى') return 'status-completed';
     if (status === 'بىكار قىلىندى') return 'status-cancelled';
     return 'status-pending';
+  }
+
+  // ==================== 🎡 خېرىدار ئاكتىپلىقى: بەخت چاقى ۋە كۈندىلىك تالاش-تارتىش باشقۇرۇش مەركىزى ====================
+  let currentWheelSlices = [];
+
+  function renderCustomerRetentionAdmin() {
+    if (!window.appStore) return;
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const wheel = retention.luckyWheel || {};
+    const flash = retention.flashSale || {};
+
+    // 1. بەخت چاقى سەپلىمىسى
+    const wheelEnabledCb = document.getElementById('retentionWheelEnabled');
+    if (wheelEnabledCb) wheelEnabledCb.checked = wheel.enabled !== false;
+
+    const wheelTitleInp = document.getElementById('retentionWheelTitle');
+    if (wheelTitleInp) wheelTitleInp.value = wheel.title || 'بۈگۈنكى بەخت چاقى';
+
+    const wheelSubInp = document.getElementById('retentionWheelSubtitle');
+    if (wheelSubInp) wheelSubInp.value = wheel.subtitle || 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئېتىبار كۇپونى ئۇتۇڭ!';
+
+    currentWheelSlices = JSON.parse(JSON.stringify(wheel.slices || []));
+    renderWheelSlicesTable();
+
+    // 2. كۈندىلىك تالاش-تارتىش سەپلىمىسى
+    const flashEnabledCb = document.getElementById('retentionFlashEnabled');
+    if (flashEnabledCb) flashEnabledCb.checked = flash.enabled !== false;
+
+    const flashTitleInp = document.getElementById('retentionFlashTitle');
+    if (flashTitleInp) flashTitleInp.value = flash.title || '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى';
+
+    const flashDiscInp = document.getElementById('retentionFlashDiscount');
+    if (flashDiscInp) flashDiscInp.value = flash.discountPercentage || 20;
+
+    const hasManualIds = Array.isArray(flash.productIds) && flash.productIds.length > 0;
+    const modeAutoRadio = document.getElementById('flashModeAuto');
+    const modeManualRadio = document.getElementById('flashModeManual');
+    const manualWrap = document.getElementById('flashManualProductsWrap');
+
+    if (hasManualIds) {
+      if (modeManualRadio) modeManualRadio.checked = true;
+      if (manualWrap) manualWrap.style.display = 'block';
+    } else {
+      if (modeAutoRadio) modeAutoRadio.checked = true;
+      if (manualWrap) manualWrap.style.display = 'none';
+    }
+
+    renderFlashManualProductsList(flash.productIds || []);
+  }
+
+  function renderWheelSlicesTable() {
+    const tbody = document.getElementById('wheelSlicesTableBody');
+    if (!tbody) return;
+
+    if (!Array.isArray(currentWheelSlices) || currentWheelSlices.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 1.5rem;">ھېچقانداق بۆلەك يوق. «يېڭى بۆلەك قوشۇش» ياكى «ئەسلىگە قايتۇرۇش» نى بېسىڭ.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = currentWheelSlices.map((slice, idx) => {
+      const typeOptions = [
+        { val: 'fixed', label: 'نەق پۇل (₺ Fixed)' },
+        { val: 'percentage', label: 'پىرسەنت (% Discount)' },
+        { val: 'free_shipping', label: 'ھەقسىز يەتكۈزۈش' },
+        { val: 'none', label: 'بوش (مۇكاپات يوق)' }
+      ].map(opt => `<option value="${opt.val}" ${slice.type === opt.val ? 'selected' : ''}>${opt.label}</option>`).join('');
+
+      return `
+        <tr data-slice-idx="${idx}">
+          <td style="text-align: center;">
+            <input type="color" class="slice-input-color" value="${slice.color || '#f59e0b'}" style="width: 32px; height: 32px; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+          </td>
+          <td>
+            <input type="text" class="form-control slice-input-text" value="${slice.text || ''}" placeholder="مەسىلەن: ₺20 ئېتىبار" style="font-weight: 700;">
+          </td>
+          <td>
+            <input type="text" class="form-control number-latin slice-input-code" value="${slice.couponCode || ''}" placeholder="LUCKY20" style="text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
+          </td>
+          <td>
+            <select class="form-control slice-input-type" style="font-size: 0.85rem; font-weight: 700;">
+              ${typeOptions}
+            </select>
+          </td>
+          <td>
+            <input type="number" class="form-control number-latin slice-input-val" value="${slice.value !== undefined ? slice.value : 10}" min="0" style="font-weight: 800; width: 85px;">
+          </td>
+          <td>
+            <input type="number" class="form-control number-latin slice-input-min" value="${slice.minSpend !== undefined ? slice.minSpend : 0}" min="0" style="font-weight: 700; width: 95px;">
+          </td>
+          <td>
+            <input type="number" class="form-control number-latin slice-input-weight" value="${slice.weight !== undefined ? slice.weight : 10}" min="1" max="100" style="font-weight: 800; width: 80px; color: #2563eb;">
+          </td>
+          <td style="text-align: center;">
+            <button type="button" class="action-btn btn-delete-slice" data-idx="${idx}" title="ئۆچۈرۈش" style="color: #ef4444; border-color: #fecaca; background: #fef2f2;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.btn-delete-slice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        if (currentWheelSlices.length <= 2) {
+          showAdminToast('چاقتا ئەڭ ئاز بولغاندا 2 بۆلەك بولۇشى شەرت!', 'error');
+          return;
+        }
+        currentWheelSlices.splice(idx, 1);
+        renderWheelSlicesTable();
+      });
+    });
+  }
+
+  function collectWheelSlicesFromTable() {
+    const tbody = document.getElementById('wheelSlicesTableBody');
+    if (!tbody) return currentWheelSlices;
+    const rows = tbody.querySelectorAll('tr[data-slice-idx]');
+    const slices = [];
+    rows.forEach((row, i) => {
+      const color = row.querySelector('.slice-input-color')?.value || '#f59e0b';
+      const text = row.querySelector('.slice-input-text')?.value.trim() || `مۇكاپات ${i + 1}`;
+      const code = row.querySelector('.slice-input-code')?.value.trim().toUpperCase() || '';
+      const type = row.querySelector('.slice-input-type')?.value || 'fixed';
+      const val = parseFloat(row.querySelector('.slice-input-val')?.value) || 0;
+      const minSpend = parseFloat(row.querySelector('.slice-input-min')?.value) || 0;
+      const weight = parseInt(row.querySelector('.slice-input-weight')?.value, 10) || 10;
+      slices.push({
+        id: `sw_${i + 1}_${Date.now() % 10000}`,
+        color,
+        text,
+        couponCode: code,
+        type,
+        value: val,
+        minSpend,
+        weight
+      });
+    });
+    return slices;
+  }
+
+  function renderFlashManualProductsList(selectedIds = []) {
+    const listEl = document.getElementById('flashManualProductsList');
+    if (!listEl || !window.appStore) return;
+    const allProds = window.appStore.getProducts().filter(p => p.status === 'approved');
+    listEl.innerHTML = allProds.map(p => {
+      const isChecked = selectedIds.includes(p.id);
+      return `
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; padding: 0.35rem 0.5rem; border-radius: 6px; background: ${isChecked ? '#eff6ff' : 'transparent'}; border: 1px solid ${isChecked ? '#bfdbfe' : '#f1f5f9'};">
+          <input type="checkbox" class="flash-prod-checkbox" value="${p.id}" ${isChecked ? 'checked' : ''}>
+          <span style="font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">${p.name}</span>
+          <span class="number-latin" style="color: #64748b; font-size: 0.78rem; margin-right: auto;">₺${p.price}</span>
+        </label>
+      `;
+    }).join('');
+  }
+
+  function saveCustomerRetentionAdmin() {
+    if (!window.appStore) return;
+    const slices = collectWheelSlicesFromTable();
+    if (slices.length < 2) {
+      showAdminToast('بەخت چاقى ئۈچۈن ئەڭ ئاز دېگەندە 2 بۆلەك كىرگۈزۈڭ!', 'error');
+      return;
+    }
+
+    const wheelEnabled = document.getElementById('retentionWheelEnabled')?.checked ?? true;
+    const wheelTitle = document.getElementById('retentionWheelTitle')?.value.trim() || 'بۈگۈنكى بەخت چاقى';
+    const wheelSubtitle = document.getElementById('retentionWheelSubtitle')?.value.trim() || 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئېتىبار كۇپونى ئۇتۇڭ!';
+
+    const flashEnabled = document.getElementById('retentionFlashEnabled')?.checked ?? true;
+    const flashTitle = document.getElementById('retentionFlashTitle')?.value.trim() || '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى';
+    const flashDiscount = parseInt(document.getElementById('retentionFlashDiscount')?.value, 10) || 20;
+
+    const isManualMode = document.getElementById('flashModeManual')?.checked;
+    let productIds = [];
+    if (isManualMode) {
+      const checkedBoxes = document.querySelectorAll('.flash-prod-checkbox:checked');
+      productIds = Array.from(checkedBoxes).map(cb => cb.value);
+    }
+
+    const newRetention = {
+      luckyWheel: {
+        enabled: wheelEnabled,
+        dailySpinLimit: 1,
+        title: wheelTitle,
+        subtitle: wheelSubtitle,
+        slices
+      },
+      flashSale: {
+        enabled: flashEnabled,
+        title: flashTitle,
+        subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
+        discountPercentage: flashDiscount,
+        productIds
+      }
+    };
+
+    window.appStore.saveCustomerRetentionSettings(newRetention);
+    showAdminToast('✅ بەخت چاقى ۋە كۈندىلىك تالاش-تارتىش تەڭشەكلىرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
+  }
+
+  function syncCustomerRetentionCouponsAdmin() {
+    if (!window.appStore) return;
+    window.appStore.syncLuckyWheelCoupons();
+    showAdminToast('🎉 بارلىق بەخت چاقى كۇپونلىرى سىستېمىغا تولۇق ئۇلاندى!', 'success');
+    if (typeof renderCouponsTable === 'function') {
+      renderCouponsTable();
+    }
+  }
+
+  function setupCustomerRetentionListeners() {
+    const btnSave1 = document.getElementById('btnSaveRetentionSettings');
+    const btnSave2 = document.getElementById('btnSaveRetentionSettingsBottom');
+    if (btnSave1) btnSave1.addEventListener('click', saveCustomerRetentionAdmin);
+    if (btnSave2) btnSave2.addEventListener('click', saveCustomerRetentionAdmin);
+
+    const btnSync = document.getElementById('btnSyncRetentionCoupons');
+    if (btnSync) btnSync.addEventListener('click', syncCustomerRetentionCouponsAdmin);
+
+    const btnAdd = document.getElementById('btnAddWheelSlice');
+    if (btnAdd) {
+      btnAdd.addEventListener('click', () => {
+        const colors = ['#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899', '#14b8a6', '#f97316'];
+        const randomColor = colors[currentWheelSlices.length % colors.length];
+        currentWheelSlices.push({
+          id: `sw_${currentWheelSlices.length + 1}_${Date.now() % 10000}`,
+          color: randomColor,
+          text: '₺15 ئېتىبار',
+          couponCode: `LUCKY${10 + currentWheelSlices.length * 5}`,
+          type: 'fixed',
+          value: 15,
+          minSpend: 150,
+          weight: 20
+        });
+        renderWheelSlicesTable();
+      });
+    }
+
+    const btnReset = document.getElementById('btnResetDefaultWheel');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (!confirm('بەخت چاقىنى ئەسلىدىكى سۈكۈتتىكى 6 بۆلەكلىك ھالەتكە قايتۇرامسىز؟')) return;
+        currentWheelSlices = [
+          { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
+          { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
+          { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
+          { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
+          { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
+          { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
+        ];
+        renderWheelSlicesTable();
+      });
+    }
+
+    const modeAuto = document.getElementById('flashModeAuto');
+    const modeManual = document.getElementById('flashModeManual');
+    const manualWrap = document.getElementById('flashManualProductsWrap');
+    if (modeAuto && modeManual && manualWrap) {
+      modeAuto.addEventListener('change', () => {
+        if (modeAuto.checked) manualWrap.style.display = 'none';
+      });
+      modeManual.addEventListener('change', () => {
+        if (modeManual.checked) manualWrap.style.display = 'block';
+      });
+    }
   }
 
   function showAdminToast(message, type = 'info') {

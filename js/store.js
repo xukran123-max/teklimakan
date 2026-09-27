@@ -68,6 +68,61 @@ const INITIAL_COUPONS = [
     usedCount: 82,
     isActive: true,
     description: 'يېڭى خېرىدارلارغا 15% ئەلا كۇپون'
+  },
+  {
+    code: 'LUCKY10',
+    type: 'fixed',
+    value: 10,
+    minSpend: 100,
+    expireDate: '2028-12-31',
+    usageLimit: 100000,
+    usedCount: 15,
+    isActive: true,
+    description: '🎡 بەخت چاقى ₺10 ئېتىبار كۇپونى'
+  },
+  {
+    code: 'LUCKY20',
+    type: 'fixed',
+    value: 20,
+    minSpend: 200,
+    expireDate: '2028-12-31',
+    usageLimit: 100000,
+    usedCount: 9,
+    isActive: true,
+    description: '🎡 بەخت چاقى ₺20 ئېتىبار كۇپونى'
+  },
+  {
+    code: 'LUCKY50',
+    type: 'fixed',
+    value: 50,
+    minSpend: 400,
+    expireDate: '2028-12-31',
+    usageLimit: 100000,
+    usedCount: 3,
+    isActive: true,
+    description: '🎡 بەخت چاقى ₺50 كاتتا سوۋغات كۇپونى'
+  },
+  {
+    code: 'LUCKYFREE',
+    type: 'free_shipping',
+    value: 35,
+    minSpend: 150,
+    expireDate: '2028-12-31',
+    usageLimit: 100000,
+    usedCount: 12,
+    isActive: true,
+    description: '🎡 بەخت چاقى ھەقسىز يەتكۈزۈش (كارگو) كۇپونى'
+  },
+  {
+    code: 'LUCKY5PCT',
+    type: 'percentage',
+    value: 5,
+    minSpend: 50,
+    expireDate: '2028-12-31',
+    usageLimit: 100000,
+    usedCount: 22,
+    isActive: true,
+    description: '🎡 بەخت چاقى %5 پۈتۈن دۇكان ئېتىبارى'
   }
 ];
 
@@ -1612,6 +1667,29 @@ const INITIAL_SETTINGS = {
     inactivityThresholdDays: 3,
     dailyFlashDealsEnabled: true,
     dailyFlashDealsDiscount: 15
+  },
+  customerRetention: {
+    luckyWheel: {
+      enabled: true,
+      dailySpinLimit: 1,
+      title: 'بۈگۈنكى بەخت چاقى',
+      subtitle: 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئالاھىدە پۇل ئېتىبار كۇپونى ئۇتۇۋېلىڭ!',
+      slices: [
+        { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
+        { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
+        { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
+        { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
+        { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
+        { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
+      ]
+    },
+    flashSale: {
+      enabled: true,
+      title: '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى',
+      subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
+      discountPercentage: 20,
+      productIds: []
+    }
   }
 };
 
@@ -6135,8 +6213,10 @@ class StoreManager {
     let discount = 0;
     if (c.type === 'percentage') {
       discount = (subtotal * c.value) / 100;
+    } else if (c.type === 'free_shipping') {
+      discount = Number(c.value) || 35;
     } else {
-      discount = c.value;
+      discount = Number(c.value) || 0;
     }
     discount = Math.min(discount, subtotal);
 
@@ -7160,6 +7240,166 @@ class StoreManager {
       return c.isActive;
     }
     return false;
+  }
+
+  // ==================== 🎡 خېرىدارلارنىڭ كۈندىلىك پائالىيىتى: بەخت چاقى ۋە كۈندىلىك ئېتىبار (Customer Retention) ====================
+  getCustomerRetentionSettings() {
+    const settings = this.getSettings() || {};
+    const defaults = {
+      luckyWheel: {
+        enabled: true,
+        dailySpinLimit: 1,
+        title: 'بۈگۈنكى بەخت چاقى',
+        subtitle: 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئالاھىدە پۇل ئېتىبار كۇپونى ئۇتۇۋېلىڭ!',
+        slices: [
+          { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
+          { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
+          { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
+          { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
+          { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
+          { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
+        ]
+      },
+      flashSale: {
+        enabled: true,
+        title: '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى',
+        subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
+        discountPercentage: 20,
+        productIds: []
+      }
+    };
+
+    if (!settings.customerRetention) return defaults;
+    return {
+      luckyWheel: { ...defaults.luckyWheel, ...(settings.customerRetention.luckyWheel || {}) },
+      flashSale: { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) }
+    };
+  }
+
+  saveCustomerRetentionSettings(retention) {
+    const settings = this.getSettings() || {};
+    settings.customerRetention = retention;
+    this.updateSettings(settings);
+    this.syncLuckyWheelCoupons();
+    this.notifyDataChange('settings');
+    this.notifyDataChange('customerRetention');
+    return true;
+  }
+
+  syncLuckyWheelCoupons() {
+    try {
+      const retention = this.getCustomerRetentionSettings();
+      if (!retention || !retention.luckyWheel || !Array.isArray(retention.luckyWheel.slices)) return;
+      const coupons = this.getCoupons();
+      let changed = false;
+
+      retention.luckyWheel.slices.forEach(slice => {
+        if (!slice.couponCode || slice.type === 'none') return;
+        const code = slice.couponCode.trim().toUpperCase();
+        let existing = coupons.find(c => c.code.toUpperCase() === code);
+        if (!existing) {
+          coupons.push({
+            code: code,
+            type: slice.type || 'fixed',
+            value: Number(slice.value) || 10,
+            minSpend: Number(slice.minSpend) || 0,
+            expireDate: '2028-12-31',
+            usageLimit: 100000,
+            usedCount: 0,
+            isActive: true,
+            description: `🎡 بەخت چاقى مۇكاپات كۇپونى: ${slice.text}`
+          });
+          changed = true;
+        } else {
+          if (existing.type !== slice.type || existing.value !== Number(slice.value) || existing.minSpend !== Number(slice.minSpend)) {
+            existing.type = slice.type || 'fixed';
+            existing.value = Number(slice.value) || 10;
+            existing.minSpend = Number(slice.minSpend) || 0;
+            existing.description = `🎡 بەخت چاقى مۇكاپات كۇپونى: ${slice.text}`;
+            changed = true;
+          }
+        }
+      });
+
+      if (changed) {
+        localStorage.setItem(STORAGE_KEYS.COUPONS, JSON.stringify(coupons));
+        this.notifyDataChange('coupons');
+      }
+    } catch (e) {
+      console.error('Failed to sync lucky wheel coupons:', e);
+    }
+  }
+
+  canCustomerSpinToday() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastSpin = this.getCustomerLastSpin();
+    if (!lastSpin || !lastSpin.date) return { canSpin: true };
+    if (lastSpin.date === today) {
+      return { 
+        canSpin: false, 
+        lastSpin,
+        message: 'بۈگۈنكى ھەقسىز ئايلاندۇرۇش پۇرسىتىڭىزنى ئىشلىتىپ بولدىڭىز! ئەتىگە يەنە كۆرۈشەيلى.' 
+      };
+    }
+    return { canSpin: true };
+  }
+
+  getCustomerLastSpin() {
+    try {
+      const data = localStorage.getItem('teklimakan_customer_last_spin');
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  recordCustomerSpin(prizeSlice) {
+    const today = new Date().toISOString().split('T')[0];
+    const spinRecord = {
+      date: today,
+      time: new Date().toISOString(),
+      prizeId: prizeSlice.id,
+      text: prizeSlice.text,
+      couponCode: prizeSlice.couponCode || '',
+      type: prizeSlice.type,
+      value: prizeSlice.value,
+      minSpend: prizeSlice.minSpend
+    };
+    try {
+      localStorage.setItem('teklimakan_customer_last_spin', JSON.stringify(spinRecord));
+      this.notifyDataChange('customerSpin', spinRecord);
+    } catch (e) {}
+    return spinRecord;
+  }
+
+  getCustomerDailyFlashSaleProducts() {
+    const ret = this.getCustomerRetentionSettings();
+    const flash = ret.flashSale || {};
+    if (!flash.enabled) return [];
+
+    const discountPct = Number(flash.discountPercentage) || 20;
+    const allProds = this.getProducts().filter(p => p.status === 'approved' && (Number(p.stock) || 0) > 0);
+
+    let selected = [];
+    if (Array.isArray(flash.productIds) && flash.productIds.length > 0) {
+      selected = allProds.filter(p => flash.productIds.includes(p.id));
+    }
+
+    if (selected.length === 0) {
+      selected = allProds.slice(0, 6);
+    }
+
+    return selected.map(p => {
+      const origPrice = Number(p.price) || 0;
+      const flashPrice = Math.max(1, Math.round(origPrice * (1 - discountPct / 100)));
+      return {
+        ...p,
+        originalPrice: origPrice,
+        price: flashPrice,
+        flashDiscountPercent: discountPct,
+        isFlashSale: true
+      };
+    });
   }
 
   notifyDataChange(type, detail = {}) {

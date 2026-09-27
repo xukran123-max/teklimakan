@@ -1685,7 +1685,7 @@ const INITIAL_SETTINGS = {
     },
     flashSale: {
       enabled: true,
-      title: '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى',
+      title: '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
       subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
       discountPercentage: 20,
       productIds: []
@@ -7262,7 +7262,7 @@ class StoreManager {
       },
       flashSale: {
         enabled: true,
-        title: '⚡ كۈندىلىك تالاش-تارتىش ئەرزان تاۋارلىرى',
+        title: '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
         subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
         discountPercentage: 20,
         productIds: []
@@ -7270,9 +7270,14 @@ class StoreManager {
     };
 
     if (!settings.customerRetention) return defaults;
+    const luckyWheel = { ...defaults.luckyWheel, ...(settings.customerRetention.luckyWheel || {}) };
+    const flashSale = { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) };
+    if (!flashSale.title || flashSale.title.includes('كۈندىلىك تالاش-تارتىش') || flashSale.title === 'بۈگۈنكى ئېتىبارلارنى كۆرۈش') {
+      flashSale.title = '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
+    }
     return {
-      luckyWheel: { ...defaults.luckyWheel, ...(settings.customerRetention.luckyWheel || {}) },
-      flashSale: { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) }
+      luckyWheel,
+      flashSale
     };
   }
 

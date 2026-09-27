@@ -7742,7 +7742,7 @@ ${text}
     }
   }, { capture: true });
 
-  // ==================== ⚡ كۈندىلىك تالاش-تارتىش تاۋارلىرى رېشاتكىسى (Daily Flash Sale Shelf) ====================
+  // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
   function initDailyFlashSaleShelf() {
     const container = document.getElementById('customerFlashSaleProductsContainer');
     const flashBar = document.querySelector('.flash-sale-bar');

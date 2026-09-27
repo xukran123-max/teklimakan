@@ -7684,9 +7684,7 @@ ${text}
 
     const container = document.getElementById('customerFlashSaleProductsContainer');
     const badgeChevron = document.getElementById('flashSaleBadgeChevron');
-    const ctaChevron = document.getElementById('btnToggleFlashSaleChevron');
-    const ctaBtn = document.getElementById('btnToggleFlashSaleShelf');
-    const ctaText = document.getElementById('btnToggleFlashSaleText');
+    const btn = document.getElementById('flashSaleBtn');
 
     if (!container) return;
 
@@ -7700,9 +7698,7 @@ ${text}
       container.classList.add('is-open');
 
       if (badgeChevron) badgeChevron.style.transform = 'rotate(180deg)';
-      if (ctaChevron) ctaChevron.style.transform = 'rotate(180deg)';
-      if (ctaBtn) ctaBtn.classList.add('is-active');
-      if (ctaText) ctaText.textContent = 'مەھسۇلاتلارنى يوشۇرۇش';
+      if (btn) btn.classList.add('is-active');
 
       if (typeof playChime === 'function') playChime('click');
 
@@ -7714,9 +7710,7 @@ ${text}
       container.classList.remove('is-open');
 
       if (badgeChevron) badgeChevron.style.transform = 'rotate(0deg)';
-      if (ctaChevron) ctaChevron.style.transform = 'rotate(0deg)';
-      if (ctaBtn) ctaBtn.classList.remove('is-active');
-      if (ctaText) ctaText.textContent = 'بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلارنى كۆرۈش';
+      if (btn) btn.classList.remove('is-active');
     }
   };
 
@@ -7738,13 +7732,10 @@ ${text}
     if (flashTitleEl && flash.title) flashTitleEl.textContent = flash.title;
 
     const prods = window.appStore.getCustomerDailyFlashSaleProducts();
-    const ctaWrap = document.getElementById('btnToggleFlashSaleShelf')?.parentElement;
     if (!prods || prods.length === 0) {
       container.style.display = 'none';
-      if (ctaWrap) ctaWrap.style.display = 'none';
       return;
     }
-    if (ctaWrap) ctaWrap.style.display = 'flex';
 
     container.innerHTML = prods.map(p => {
       const origPrice = p.originalPrice || p.price;
@@ -7769,7 +7760,7 @@ ${text}
       `;
     }).join('');
 
-    // نورمالدا يوشۇرۇن تۇرسۇن: پەقەت ئىشلەتكۈچى كۇنۇپكىنى باسقاندىلا كۆرۈنىدۇ
+    // نورمالدا يوشۇرۇن تۇرسۇن: پەقەت ئۈستىدىكى كۇنۇپكىنى باسقاندىلا كۆرۈنىدۇ
     if (!isFlashProductsOpen) {
       container.style.display = 'none';
       container.classList.remove('is-open');

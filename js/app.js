@@ -7295,6 +7295,19 @@ function initTeklimakanApp() {
               };
               history.push(newReplyObj);
               hasNewReply = true;
+
+              if (window.appStore && typeof window.appStore.addCustomerInboxNotification === 'function') {
+                window.appStore.addCustomerInboxNotification({
+                  phone: currentPhone,
+                  title: '👑 ئالىي باشقۇرغۇچىدىن يېڭى ئۇچۇر',
+                  type: 'admin_message',
+                  message: replyContent,
+                  timestamp: new Date(msg.date * 1000).toLocaleString('ug-CN', { hour12: false })
+                });
+                if (typeof updateCustomerInboxBadges === 'function') {
+                  updateCustomerInboxBadges();
+                }
+              }
             }
           }
         }

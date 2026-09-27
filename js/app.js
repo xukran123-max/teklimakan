@@ -1604,18 +1604,18 @@ function initTeklimakanApp() {
     const cleanQ = currentInboxQuery;
 
     if ((!orders || orders.length === 0) && (!notifications || notifications.length === 0)) {
-      const notFoundTitle = i18n.t('orderTrackNotFound') || (lang === 'tr' ? 'Herhangi Bir Sipariş Bulunamadı' : (lang === 'en' ? 'No Orders Found' : 'ھېچقانداق زاكاز ياكى ئۇقتۇرۇش تېپىلمىدى'));
+      const notFoundTitle = i18n.t('orderTrackNotFound') || (lang === 'tr' ? 'Herhangi Bir Sipariş Bulunamadı' : (lang === 'en' ? 'No Orders Found' : 'ھېچقانداق پوسۇلكا ياكى ئۇقتۇرۇش تېپىلمىدى'));
       const notFoundDesc = lang === 'tr'
         ? `"${cleanQ}" için sistemde sipariş kaydı bulunamadı. Lütfen girdiğiniz numarayı kontrol edin veya WhatsApp üzerinden yöneticimiz ile iletişime geçin.`
         : (lang === 'en'
           ? `No order records found for "${cleanQ}". Please verify your input or contact our support team via WhatsApp.`
-          : `«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن زاكاز ياكى ئۇقتۇرۇش بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.`);
+          : `«${cleanQ}» بويىچە دۇكان سىستېمىسىدىن پوسۇلكا، مېلىڭىز ياكى ئۇقتۇرۇش بايقالمىدى. نومۇرنىڭ توغرىلىقىنى قايتا تەكشۈرۈپ سىناپ بېقىڭ ياكى ئالىي باشقۇرغۇچى بىلەن WhatsApp ئارقىلىق ئالاقىلىشىڭ.`);
       const waBtnText = lang === 'tr' ? 'WhatsApp ile Danışın' : (lang === 'en' ? 'Inquire via WhatsApp' : 'WhatsApp ئارقىلىق سۈرۈشتۈرۈش');
       const waMsg = lang === 'tr'
         ? `Merhaba Teklimakan yetkilisi, ${cleanQ} numarasıyla sipariş sorgulamasında destek alabilir miyim?`
         : (lang === 'en'
           ? `Hello Teklimakan support, I need assistance querying order ${cleanQ}.`
-          : `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن ${cleanQ} نومۇر بويىچە زاكاز تېپىشتا ياردەم سورىماقچىتىم.`);
+          : `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن ${cleanQ} نومۇر بويىچە پوسۇلكامنى سۈرۈشتۈرمەكچىتىم.`);
 
       resultsWrap.innerHTML = `
         <div style="text-align: center; color: #991b1b; padding: 2rem 1.25rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 14px; margin-top: 1rem;">
@@ -1637,7 +1637,7 @@ function initTeklimakanApp() {
           <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
             <i class="fas fa-bell-slash" style="font-size: 2.8rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
             <h4 style="font-size: 1rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem;">ھازىرچە يېڭى ئۇقتۇرۇش يوق</h4>
-            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6;">زاكازىڭىز كارگوغا چىققاندا ياكى سۇپا باشقۇرغۇچىسى ئۇچۇر يازغاندا مۇشۇ يەرگە دەل ۋاقتىدا چىقىدۇ.</p>
+            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6;">پوسۇلكىڭىز كارگوغا چىققاندا ياكى سۇپا باشقۇرغۇچىسى ئۇچۇر يازغاندا مۇشۇ يەرگە دەل ۋاقتىدا چىقىدۇ.</p>
           </div>
         `;
         return;
@@ -1664,14 +1664,14 @@ function initTeklimakanApp() {
           iconBg = '#eef2ff';
           iconColor = '#4f46e5';
           iconClass = 'fa-file-invoice';
-          badgeText = 'زاكاز تاپشۇرۇۋېلىندى';
+          badgeText = 'مېلىڭىز قوبۇل قىلىندى';
           badgeBg = '#eef2ff';
           badgeColor = '#4338ca';
         } else if (n.type === 'order_completed') {
           iconBg = '#ecfdf5';
           iconColor = '#059669';
           iconClass = 'fa-circle-check';
-          badgeText = 'يەتكۈزۈلدى';
+          badgeText = 'مېلىڭىز يەتكۈزۈلدى';
           badgeBg = '#ecfdf5';
           badgeColor = '#047857';
         } else if (n.type === 'admin_message') {
@@ -1735,7 +1735,7 @@ function initTeklimakanApp() {
             ` : ''}
 
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; border-top: 1px dashed #f1f5f9; padding-top: 0.55rem;">
-              <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ زاكاز نومۇرۇم: #${n.orderId || cleanQ}. سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="color: #16a34a; font-weight: 700; font-size: 0.8rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ پوسۇلكا كود نومۇرۇم: #${n.orderId || cleanQ}. مېلىمنى سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="color: #16a34a; font-weight: 700; font-size: 0.8rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
                 <i class="fab fa-whatsapp"></i> WhatsApp تىن سۈرۈشتۈرۈش
               </a>
             </div>
@@ -1757,7 +1757,7 @@ function initTeklimakanApp() {
       'بىكار قىلىندى': 0
     };
 
-    const countText = lang === 'tr' ? `Toplam <b>${orders.length}</b> adet sipariş bulundu` : (lang === 'en' ? `Found <b>${orders.length}</b> orders` : `جەمئىي <b>${orders.length}</b> تال زاكاز تېپىلدى`);
+    const countText = lang === 'tr' ? `Toplam <b>${orders.length}</b> adet sipariş bulundu` : (lang === 'en' ? `Found <b>${orders.length}</b> orders` : `جەمئىي <b>${orders.length}</b> دانە پوسۇلكا / مال تېپىلدى`);
     const cloudBadge = lang === 'tr' ? 'Kalıcı Bulut Kaydı' : (lang === 'en' ? 'Permanent Cloud Record' : 'مەڭگۈ بۇلۇتتا ساقلانغان');
 
     let html = `
@@ -1772,24 +1772,24 @@ function initTeklimakanApp() {
       <div style="display: flex; flex-direction: column; gap: 1.25rem;">
     `;
 
-    const lblOrderId = lang === 'tr' ? 'Sipariş No:' : (lang === 'en' ? 'Order ID:' : 'زاكاز نومۇرى:');
-    const lblOrderDate = lang === 'tr' ? 'Sipariş Tarihi:' : (lang === 'en' ? 'Order Date:' : 'زاكاز ۋاقتى:');
+    const lblOrderId = lang === 'tr' ? 'Sipariş No:' : (lang === 'en' ? 'Order ID:' : 'پوسۇلكا / زاكاز نومۇرى:');
+    const lblOrderDate = lang === 'tr' ? 'Sipariş Tarihi:' : (lang === 'en' ? 'Order Date:' : 'سېتىۋالغان ۋاقتى:');
     const lblCopy = lang === 'tr' ? 'Kopyala' : (lang === 'en' ? 'Copy' : 'كۆچۈرۈش');
-    const toastCopied = lang === 'tr' ? 'Sipariş kodu kopyalandı!' : (lang === 'en' ? 'Order code copied!' : 'زاكاز كودى كۆچۈرۈلدى!');
+    const toastCopied = lang === 'tr' ? 'Sipariş kodu kopyalandı!' : (lang === 'en' ? 'Order code copied!' : 'پوسۇلكا كودى كۆچۈرۈلدى!');
     const anonNotice = lang === 'tr'
       ? '<strong>🛡️ Gizlilik Koruması:</strong> Sipariş tesliminden 10 gün sonra telefon ve adres bilgileri güvenle gizlenmiştir.'
       : (lang === 'en'
         ? '<strong>🛡️ Privacy Protected:</strong> Customer phone and address are anonymized 10 days after delivery.'
-        : '<strong>🛡️ خېرىدار مەخپىيەتلىكى قوغدالدى:</strong> بۇ زاكاز تاماملانغاندىن كېيىن 10 كۈندىن ئاشقاچقا، بارلىق تېلېفون ۋە ئادرېس ئۇچۇرلىرى ئۆچۈرۈلگەن.');
+        : '<strong>🛡️ خېرىدار مەخپىيەتلىكى قوغدالدى:</strong> بۇ مال تاپشۇرۇلغاندىن كېيىن 10 كۈندىن ئاشقاچقا، بارلىق تېلېفون ۋە ئادرېس ئۇچۇرلىرى ئۆچۈرۈلگەن.');
 
     const stepsTitles = {
-      ug: ['تاپشۇرۇۋېلىندى', 'تەستىقلاندى', 'كارگودا يوللاندى', 'تاپشۇرۇپ ئېلىندى'],
+      ug: ['مېلىڭىز تاپشۇرۇۋېلىندى', 'تەستىقلاندى', 'پوسۇلكىڭىز يوللاندى', 'مېلىڭىز يەتكۈزۈلدى'],
       tr: ['Alındı', 'Onaylandı', 'Kargoya Verildi', 'Teslim Edildi'],
       en: ['Received', 'Confirmed', 'Shipped', 'Delivered']
     };
     const curSteps = stepsTitles[lang] || stepsTitles.ug;
 
-    const lblCancelled = lang === 'tr' ? 'Bu sipariş iptal edilmiştir' : (lang === 'en' ? 'This order was cancelled' : 'بۇ زاكاز بىكار قىلىنغان');
+    const lblCancelled = lang === 'tr' ? 'Bu sipariş iptal edilmiştir' : (lang === 'en' ? 'This order was cancelled' : 'بۇ پوسۇلكا بىكار قىلىنغان');
     const lblCarrier = lang === 'tr' ? 'Kargo Firması' : (lang === 'en' ? 'Carrier' : 'پوچتا شىركىتى');
     const lblTrackNo = lang === 'tr' ? 'Takip Kodu:' : (lang === 'en' ? 'Tracking Code:' : 'ئىز قوغلاش كودى:');
     const lblCarrierBtn = lang === 'tr' ? 'Kargo Sitesinden Takip Et' : (lang === 'en' ? 'Track on Carrier Website' : 'پوچتا تورىدىن كۆرۈش');
@@ -1800,8 +1800,8 @@ function initTeklimakanApp() {
     const lblAddr = lang === 'tr' ? 'Şehir / Adres:' : (lang === 'en' ? 'City / Address:' : 'شەھەر / ئادرېس:');
     const lblPayMethod = lang === 'tr' ? 'Ödeme Yöntemi:' : (lang === 'en' ? 'Payment Method:' : 'چىقىم ئۇسۇلى:');
     const lblTotal = lang === 'tr' ? 'Toplam Tutar:' : (lang === 'en' ? 'Total Amount:' : 'ئومۇمىي سومما:');
-    const lblItems = lang === 'tr' ? 'Satın Alınan Ürünler:' : (lang === 'en' ? 'Purchased Items:' : 'سېتىۋالغان ماللار:');
-    const lblWaInq = lang === 'tr' ? 'Bu sipariş hakkında WhatsApp üzerinden danışın' : (lang === 'en' ? 'Inquire about this order via WhatsApp' : 'بۇ زاكاز ھەققىدە باشقۇرغۇچىغا WhatsApp تا يېزىش');
+    const lblItems = lang === 'tr' ? 'Satın Alınan Ürünler:' : (lang === 'en' ? 'Purchased Items:' : 'سېتىۋالغان مېلىڭىز:');
+    const lblWaInq = lang === 'tr' ? 'Bu sipariş hakkında WhatsApp üzerinden danışın' : (lang === 'en' ? 'Inquire about this order via WhatsApp' : 'مېلىڭىز ۋە پوسۇلكا ھەققىدە WhatsApp تىن سۈرۈشتۈرۈش');
 
     orders.forEach((order) => {
       const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : 1;
@@ -1932,7 +1932,7 @@ function initTeklimakanApp() {
 
           <!-- WhatsApp Support Link -->
           <div style="text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 0.75rem;">
-            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ زاكاز نومۇرۇم: #${order.id}. سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
+            <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ پوسۇلكا نومۇرۇم: #${order.id}. سېتىۋالغان مېلىمنى سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.45rem; color: #16a34a; font-weight: 800; font-size: 0.86rem; text-decoration: none;">
               <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> ${lblWaInq}
             </a>
           </div>

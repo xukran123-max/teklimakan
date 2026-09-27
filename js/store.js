@@ -6426,12 +6426,12 @@ class StoreManager {
       this.addCustomerInboxNotification({
         phone: (ord.customer && ord.customer.phone) || '',
         orderId: ord.id,
-        title: 'زاكازىڭىز كارگوغا تاپشۇرۇلدى',
+        title: 'پوسۇلكىڭىز كارگوغا تاپشۇرۇلدى',
         type: 'cargo_shipped',
         carrier: ord.cargoCarrier,
         trackingNo: ord.cargoTrackingNo,
         trackingUrl: ord.cargoTrackingUrl,
-        message: `ھۆرمەتلىك ${(ord.customer && ord.customer.name) || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز ${ord.cargoCarrier} ئارقىلىق يوللاندى. ئىز قوغلاش نومۇرى: ${ord.cargoTrackingNo}.`,
+        message: `ھۆرمەتلىك ${(ord.customer && ord.customer.name) || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${ord.id}) رەتلەپ قاچىلىنىپ، پوسۇلكىڭىز ${ord.cargoCarrier} ئارقىلىق يوللاندى. پوچتا ئىز قوغلاش نومۇرى: ${ord.cargoTrackingNo}.`,
         timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
       });
     } catch(inbErr) {
@@ -6964,9 +6964,9 @@ class StoreManager {
       this.addCustomerInboxNotification({
         phone: customerData.phone || '',
         orderId: newOrder.id,
-        title: 'زاكاز مۇۋەپپەقىيەتلىك تاپشۇرۇۋېلىندى',
+        title: 'مېلىڭىز مۇۋەپپەقىيەتلىك تاپشۇرۇۋېلىندى',
         type: 'order_created',
-        message: `ھۆرمەتلىك ${customerData.name || 'خېرىدار'}، #${newOrder.id} نومۇرلۇق زاكازىڭىز سىستېمىغا تىزىملاندى. ئومۇمىي سوممىسى: ${this.formatPrice(finalTotalCny)}. ئامبىرىمىز تاۋارلىرىڭىزنى رەتلەپ قاچىلاۋاتىدۇ.`,
+        message: `ھۆرمەتلىك ${customerData.name || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${newOrder.id}) سىستېمىغا تىزىملاندى. ئومۇمىي سوممىسى: ${this.formatPrice(finalTotalCny)}. ئامبىرىمىز مېلىڭىزنى رەتلەپ، پوسۇلكىڭىزنى قاچىلاۋاتىدۇ.`,
         timestamp: formattedDate
       });
     } catch (inboxErr) {
@@ -7440,22 +7440,22 @@ class StoreManager {
 
     // 4. ئەگەر بەزى زاكازلارنىڭ ساندۇق خاتىرىسى كەم بولسا، دەل ۋاقتىدا شەكىللەندۈرۈش
     matchedOrders.forEach(ord => {
-      // زاكاز تاپشۇرۇۋېلىش قەدىمى
+      // مېلى تاپشۇرۇۋېلىش قەدىمى
       const hasCreated = matchedNotifs.some(n => n.orderId === ord.id && n.type === 'order_created');
       if (!hasCreated) {
         matchedNotifs.push({
           id: 'DYN-CREATE-' + ord.id,
           phone: ord.customer?.phone || '',
           orderId: ord.id,
-          title: 'زاكاز تاپشۇرۇۋېلىندى',
+          title: 'مېلىڭىز تاپشۇرۇۋېلىندى',
           type: 'order_created',
-          message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز سىستېمىغا تىزىملاندى. سوممىسى: ${ord.totalFormatted || this.formatPrice(ord.totalCny || ord.total)}.`,
+          message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${ord.id}) سىستېمىغا تىزىملاندى. سوممىسى: ${ord.totalFormatted || this.formatPrice(ord.totalCny || ord.total)}.`,
           timestamp: ord.date || '',
           createdAt: ord.date || new Date().toISOString()
         });
       }
 
-      // كارگو قەدىمى
+      // پوسۇلكا كارگو قەدىمى
       const carrier = ord.cargoCarrier || ord.trackingCarrier;
       const trackingNo = ord.cargoTrackingNo || ord.trackingNumber;
       if (carrier && trackingNo) {
@@ -7465,19 +7465,19 @@ class StoreManager {
             id: 'DYN-CARGO-' + ord.id,
             phone: ord.customer?.phone || '',
             orderId: ord.id,
-            title: 'زاكازىڭىز كارگوغا تاپشۇرۇلدى',
+            title: 'پوسۇلكىڭىز كارگوغا تاپشۇرۇلدى',
             type: 'cargo_shipped',
             carrier: carrier,
             trackingNo: trackingNo,
             trackingUrl: this.getCargoTrackingUrl(carrier, trackingNo),
-            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق ماللىرىڭىز ${carrier} ئارقىلىق يوللاندى. ئىز قوغلاش كودى: ${trackingNo}.`,
+            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${ord.id}) قاچىلىنىپ، پوسۇلكىڭىز ${carrier} ئارقىلىق يوللاندى. پوچتا ئىز قوغلاش كودى: ${trackingNo}.`,
             timestamp: ord.shippedAt ? new Date(ord.shippedAt).toLocaleString('ug-CN', { hour12: false }) : (ord.date || ''),
             createdAt: ord.shippedAt || ord.date || new Date().toISOString()
           });
         }
       }
 
-      // تاماملانغانلىق قەدىمى
+      // يەتكۈزۈلۈپ تاماملانغانلىق قەدىمى
       if (ord.status === 'تاماملاندى') {
         const hasCompleted = matchedNotifs.some(n => n.orderId === ord.id && n.type === 'order_completed');
         if (!hasCompleted) {
@@ -7485,9 +7485,9 @@ class StoreManager {
             id: 'DYN-COMPL-' + ord.id,
             phone: ord.customer?.phone || '',
             orderId: ord.id,
-            title: 'زاكاز يەتكۈزۈلۈپ تاماملاندى',
+            title: 'پوسۇلكىڭىز يەتكۈزۈلۈپ تاماملاندى',
             type: 'order_completed',
-            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، #${ord.id} نومۇرلۇق زاكازىڭىز ئوڭۇشلۇق يەتكۈزۈلدى. تەكلىماكاننى تاللىغىنىڭىزغا تەشەككۈر!`,
+            message: `ھۆرمەتلىك ${ord.customer?.name || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${ord.id}) ئوڭۇشلۇق يەتكۈزۈلۈپ، پوسۇلكىڭىز تاپشۇرۇلدى. تەكلىماكاننى تاللىغىنىڭىزغا تەشەككۈر!`,
             timestamp: ord.completedAt ? new Date(ord.completedAt).toLocaleString('ug-CN', { hour12: false }) : '',
             createdAt: ord.completedAt || new Date().toISOString()
           });

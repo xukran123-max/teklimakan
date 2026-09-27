@@ -151,8 +151,8 @@
             <option value="en">English</option>
           </select>
         </div>
-        <!-- 📬 زاكاز ۋە ساندۇقۇم كۇنۇپكىسى (Order Inbox Button) -->
-        <button type="button" id="headerInboxBtn" class="action-btn header-inbox-btn" onclick="window.openTrackOrderModal && window.openTrackOrderModal()" title="سۇپا ئىچى زاكاز ساندۇقى" style="position: relative;">
+        <!-- 📬 پوسۇلكا ۋە مېلىمنى ئىز قوغلاش ساندۇقى (Order & Parcel Inbox Button) -->
+        <button type="button" id="headerInboxBtn" class="action-btn header-inbox-btn" onclick="window.openTrackOrderModal && window.openTrackOrderModal()" title="سۇپا ئىچى پوسۇلكا ۋە مېلىمنى ئىز قوغلاش ساندۇقى" style="position: relative;">
           <i class="fas fa-inbox"></i>
           <span id="headerInboxBadge" class="badge-counter" style="display: none; position: absolute; top: -4px; right: -4px; background: #0284c7; color: #fff; font-size: 0.65rem; min-width: 17px; height: 17px; border-radius: 9999px; line-height: 17px; text-align: center; font-weight: 800; border: 2px solid var(--bg-card, #ffffff);">0</span>
         </button>
@@ -406,7 +406,7 @@
       <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1.5px solid #e2e8f0; padding: 1.1rem 1.4rem;">
         <h4 class="modal-title" id="orderTrackModalTitle" style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">
           <i class="fas fa-inbox" style="color: #0284c7; font-size: 1.35rem;"></i>
-          <span id="orderTrackModalTitleSpan">سۇپا ئىچى زاكاز ۋە ئۇقتۇرۇش ساندۇقى</span>
+          <span id="orderTrackModalTitleSpan">سۇپا ئىچى پوسۇلكا ۋە مېلىمنى ئىز قوغلاش ساندۇقى</span>
           <span style="font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 9999px; font-weight: 700; margin-inline-start: 4px;">
             <i class="fas fa-bolt" style="color: #0284c7;"></i> دەل ۋاقتىدا
           </span>
@@ -433,12 +433,12 @@
         <!-- 🔍 تېلېفون نومۇرى ياكى زاكاز كودى ئىزدەش رايونى -->
         <div id="orderTrackSearchSection" style="margin-bottom: 1.1rem;">
           <label id="orderTrackInputLabel" style="font-size: 0.88rem; font-weight: 700; display: block; margin-bottom: 0.45rem; color: #334155;">
-            تېلېفون نومۇرىڭىز ياكى زاكاز كودىنى كىرگۈزۈڭ:
+            تېلېفون نومۇرىڭىز ياكى پوسۇلكا / زاكاز كودىنى كىرگۈزۈڭ:
           </label>
           <div style="display: flex; gap: 0.5rem;">
             <input type="text" id="orderTrackQueryInput" class="form-control number-latin" placeholder="مەسىلەن: 05551609999 ياكى ORD-2026-..." style="direction: ltr; font-weight: 700; font-size: 0.98rem; flex: 1; border-radius: 12px; border: 1.5px solid #cbd5e1;">
             <button type="button" id="btnDoTrackOrder" class="btn-checkout" style="width: auto; padding: 0.65rem 1.4rem; white-space: nowrap; border-radius: 12px; font-weight: 800; background: #0284c7; border: none; color: #fff;">
-              <i class="fas fa-search"></i> <span id="btnDoTrackOrderText">ساندۇقنى كۆرۈش</span>
+              <i class="fas fa-search"></i> <span id="btnDoTrackOrderText">پوسۇلكامنى كۆرۈش</span>
             </button>
           </div>
         </div>
@@ -446,11 +446,11 @@
         <!-- 📑 ساندۇق ئىچى تاللىغۇچلىرى (Tabs) -->
         <div id="inboxTabsHeader" style="display: none; margin-bottom: 1rem; border-bottom: 1.5px solid #e2e8f0; gap: 0.4rem; padding-bottom: 0.2rem;">
           <button type="button" class="inbox-tab-btn active" id="tabBtnInboxNotifs" style="padding: 0.55rem 1rem; border: none; background: transparent; font-weight: 800; font-size: 0.88rem; color: #0284c7; border-bottom: 2.5px solid #0284c7; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
-            <i class="fas fa-bell"></i> <span>ساندۇق ئۇقتۇرۇشلىرى</span>
+            <i class="fas fa-bell"></i> <span>پوسۇلكا ئۇقتۇرۇشلىرى</span>
             <span id="tabBadgeInboxNotifs" style="background: #0284c7; color: #fff; font-size: 0.7rem; padding: 1px 7px; border-radius: 9999px; font-weight: 800;">0</span>
           </button>
           <button type="button" class="inbox-tab-btn" id="tabBtnInboxOrders" style="padding: 0.55rem 1rem; border: none; background: transparent; font-weight: 700; font-size: 0.88rem; color: #64748b; border-bottom: 2.5px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
-            <i class="fas fa-boxes-stacked"></i> <span>زاكازلىرىم ۋە كارگو</span>
+            <i class="fas fa-boxes-stacked"></i> <span>مېلىم ۋە پوسۇلكىلىرىم</span>
             <span id="tabBadgeInboxOrders" style="background: #f1f5f9; color: #64748b; font-size: 0.7rem; padding: 1px 7px; border-radius: 9999px; font-weight: 800;">0</span>
           </button>
         </div>
@@ -458,14 +458,14 @@
         <!-- 💡 مەڭگۈلۈك ئارخىپ كاپالىتى ئۇچۇرى -->
         <div id="orderTrackNoticeBox" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #166534; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.55rem; line-height: 1.5;">
           <i class="fas fa-shield-alt" style="color: #16a34a; font-size: 1.15rem; flex-shrink: 0;"></i>
-          <span id="orderTrackNoticeText"><b>مەڭگۈلۈك ئارخىپ كاپالىتى:</b> بارلىق زاكاز ۋە پوچتا ئىز قوغلاش خاتىرىلىرى سىستېما بۇلۇت ئامبىرىدا ساقلىنىدۇ، ھەرۋاقىت سۈرۈشتۈرەلەيسىز.</span>
+          <span id="orderTrackNoticeText"><b>مەڭگۈلۈك ئارخىپ كاپالىتى:</b> بارلىق سېتىۋالغان مېلىڭىز، پوسۇلكىڭىز ۋە پوچتا ئىز قوغلاش ئۇچۇرلىرى سىستېما بۇلۇت ئامبىرىدا ساقلىنىدۇ، ھەرۋاقىت سۈرۈشتۈرەلەيسىز.</span>
         </div>
 
         <!-- 📦 نەتىجە كۆرسىتىش رايونى -->
         <div id="orderTrackResultsWrap">
           <div style="text-align: center; color: #94a3b8; padding: 2.2rem 1rem;">
             <i class="fas fa-inbox" style="font-size: 3.2rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
-            <p id="orderTrackEmptyHint" style="margin: 0; font-size: 0.92rem; line-height: 1.6;">زاكازدا كىرگۈزگەن تېلېفون نومۇرىڭىز ياكى زاكاز كودىنى كىرگۈزۈپ، دەل ۋاقتىدىكى كارگو ئىز قوغلاش، سۇپا ئۇقتۇرۇشلىرى ۋە زاكاز تالونلىرىڭىزنى سۈرۈشتۈرۈڭ.</p>
+            <p id="orderTrackEmptyHint" style="margin: 0; font-size: 0.92rem; line-height: 1.6;">سېتىۋالغاندا كىرگۈزگەن تېلېفون نومۇرىڭىز ئارقىلىق، مېلىڭىزنىڭ تەپسىلاتى، پوسۇلكىڭىزنىڭ نەق مەيداندىكى ئورنى ۋە پوچتا ئىز قوغلاش نومۇرىنى كۆرەلەيسىز.</p>
           </div>
         </div>
       </div>
@@ -1924,8 +1924,8 @@
                 <i class="fas fa-truck-fast"></i>
               </div>
               <div class="footer-contact-text-box">
-                <span id="fLinkTrackOrderSpan" class="footer-contact-label" style="color: #ffffff; font-size: 0.95rem; font-weight: 700;">كارگو ئەھۋالىنى تەكشۈرۈش</span>
-                <span id="fLinkTrackOrderSub" style="color: #94a3b8; font-size: 0.78rem;">زاكاز ۋە يەتكۈزۈش سۈرۈشتۈرۈش</span>
+                <span id="fLinkTrackOrderSpan" class="footer-contact-label" style="color: #ffffff; font-size: 0.95rem; font-weight: 700;">پوسۇلكا ئەھۋالىنى تەكشۈرۈش</span>
+                <span id="fLinkTrackOrderSub" style="color: #94a3b8; font-size: 0.78rem;">مېلىڭىزنى ئىز قوغلاش ۋە سۈرۈشتۈرۈش</span>
               </div>
               <i class="fas fa-arrow-left footer-contact-arrow"></i>
             </a>
@@ -2027,13 +2027,13 @@
   <nav class="store-bottom-nav" id="storeBottomNav" aria-label="ئېكران ئاستى تىزىملىكى">
     <div class="store-bottom-nav-container">
 
-      <!-- 1. ئوڭدا: زاكاز ساندۇقى (Order & Tracking Inbox) -->
-      <button type="button" class="bottom-nav-item bottom-nav-orders track-order-btn" id="trackOrderNavBtn" title="زاكاز ۋە ساندۇقۇم">
+      <!-- 1. ئوڭدا: پوسۇلكام (Order & Tracking Inbox) -->
+      <button type="button" class="bottom-nav-item bottom-nav-orders track-order-btn" id="trackOrderNavBtn" title="پوسۇلكام ۋە زاكازلىرىم">
         <div class="bottom-nav-icon-wrap" style="position: relative;">
           <i class="fas fa-inbox"></i>
           <span id="navInboxBadge" class="badge-counter inbox-counter-badge" style="display: none; background: #0284c7; position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; border-radius: 9999px; font-size: 0.65rem; font-weight: 800; line-height: 17px; color: #fff; border: 2px solid var(--bg-card, #ffffff);">0</span>
         </div>
-        <span class="bottom-nav-text" id="navOrdersText">زاكاز ساندۇقى</span>
+        <span class="bottom-nav-text" id="navOrdersText">پوسۇلكام</span>
       </button>
 
       <!-- 2. ئوتتۇرىدا: سېۋەت (Shopping Cart - كۆزگە چېلىقىدىغان مەركىزىي كۇنۇپكا) -->
@@ -2068,9 +2068,9 @@
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js?v=20260927_v110"></script>
-  <script src="js/i18n.js?v=20260927_v110"></script>
-  <script src="js/store.js?v=20260927_v111"></script>
-  <script src="js/app.js?v=20260927_v110"></script>
+  <script src="js/i18n.js?v=20260927_v112"></script>
+  <script src="js/store.js?v=20260927_v112"></script>
+  <script src="js/app.js?v=20260927_v112"></script>
   <script src="js/push-manager.js?v=20260927_v110"></script>
 </body>
 </html>

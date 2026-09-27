@@ -234,6 +234,11 @@ function initTeklimakanApp() {
     const ordersBtnSpan = document.getElementById('navOrdersText') || document.querySelector('#trackOrderNavBtn span');
     if (ordersBtnSpan) ordersBtnSpan.textContent = i18n.t('navOrdersText') || 'سېتىۋالغىنىم';
 
+    // 🎡 لەيلىمە ئامەت چاقى (Lucky Wheel) نى كۆپ تىلغا يېڭىلاش
+    if (typeof window.updateLuckyWheelLocalization === 'function') {
+      window.updateLuckyWheelLocalization();
+    }
+
 
 
     // تەشۋىقات بۆلىكى (Hero Section Slides)
@@ -1019,13 +1024,15 @@ function initTeklimakanApp() {
         return `<span class="product-agent-badge compact" style="background: rgba(30, 58, 138, 0.06); color: #1e40af; border: 1px solid rgba(30, 58, 138, 0.2); padding: 1.5px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;" title="${labelText} ${tooltip}"><i class="fas fa-id-badge" style="color: #2563eb; font-size: 0.75rem;"></i><span class="number-latin" style="color: #1d4ed8; font-weight: 800;">${agentId}</span></span>`;
       }
 
-      return `<span class="product-agent-badge" style="background: rgba(37, 99, 235, 0.08); color: #1e3a8a; border: 1.2px solid rgba(37, 99, 235, 0.25); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);" title="مەھسۇلاتنى تەمىنلىگۈچى ۋاكالەتچى: ${tooltip}"><i class="fas fa-id-badge" style="color: #2563eb; font-size: 0.85rem;"></i> <span>${labelText}</span> <strong class="number-latin" style="color: #1d4ed8; font-weight: 900; letter-spacing: 0.4px;">${agentId}</strong></span>`;
+      const tooltipPrefix = (!i18n || i18n.getLang() === 'ug') ? 'مەھسۇلاتنى تەمىنلىگۈچى ۋاكالەتچى:' : (i18n.getLang() === 'tr' ? 'Tedarikçi Temsilci:' : 'Authorized Vendor Agent:');
+      return `<span class="product-agent-badge" style="background: rgba(37, 99, 235, 0.08); color: #1e3a8a; border: 1.2px solid rgba(37, 99, 235, 0.25); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);" title="${tooltipPrefix} ${tooltip}"><i class="fas fa-id-badge" style="color: #2563eb; font-size: 0.85rem;"></i> <span>${labelText}</span> <strong class="number-latin" style="color: #1d4ed8; font-weight: 900; letter-spacing: 0.4px;">${agentId}</strong></span>`;
     }
 
     // ئەگەر ۋاكالەتچى باغلانمىغان بولسا، سۇپا رەسمىي دەپ كۆرسىتىش
     const officialLabel = (i18n && typeof i18n.t === 'function' && i18n.t('platformOfficialLabel')) || 'تەكلىماكان سۇپىسى';
+    const compactPlatformLabel = (i18n && typeof i18n.t === 'function' && i18n.t('platformBadgeShort')) || 'سۇپا';
     if (isCompact) {
-      return `<span class="product-agent-badge compact platform" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; padding: 1.5px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.72rem;"></i><span style="color: #475569;">سۇپا</span></span>`;
+      return `<span class="product-agent-badge compact platform" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; padding: 1.5px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.72rem;"></i><span style="color: #475569;">${compactPlatformLabel}</span></span>`;
     }
     return `<span class="product-agent-badge platform" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.82rem;"></i> <span>${officialLabel}</span></span>`;
   }
@@ -1076,7 +1083,9 @@ function initTeklimakanApp() {
         return s;
       };
       const cleanedUnit = cleanUnitStr(rawUnit);
-      const stockUnitLabel = cleanedUnit ? (/\d/.test(cleanedUnit) ? `دانە (${cleanedUnit})` : cleanedUnit) : i18n.t('itemsUnit');
+      const localizedUnit = (i18n && typeof i18n.getUnitName === 'function') ? i18n.getUnitName(cleanedUnit) : cleanedUnit;
+      const unitWord = (i18n && typeof i18n.t === 'function') ? i18n.t('itemsUnit') : 'دانە';
+      const stockUnitLabel = localizedUnit ? (/\d/.test(localizedUnit) ? `${unitWord} (${localizedUnit})` : localizedUnit) : unitWord;
 
       if (product.stock <= 0) {
         stockHtml = `<span class="stock-status-out"><i class="fas fa-times-circle"></i> ${i18n.t('outOfStock')}</span>`;
@@ -8546,12 +8555,28 @@ ${text}
     }
     btnOpen.style.display = 'flex';
 
-    const titleEl = document.getElementById('luckyWheelModalTitle');
-    const subEl = document.getElementById('luckyWheelModalSubtitle');
-    if (titleEl && wheelCfg.title) titleEl.textContent = `🎡 ${wheelCfg.title}`;
-    if (subEl && wheelCfg.subtitle) subEl.textContent = wheelCfg.subtitle;
-    const btnTitleEl = btnOpen.querySelector('.lucky-wheel-btn-title');
-    if (btnTitleEl && wheelCfg.title) btnTitleEl.textContent = `🎡 ${wheelCfg.title}`;
+    const applyWheelTexts = () => {
+      const i18n = window.appI18n;
+      const wheelTitle = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelTitle')) || wheelCfg.title || 'ئامەت چاقى';
+      const wheelSub = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSub')) || wheelCfg.subtitle || 'كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!';
+      const wheelBtnSub = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelBtnSub')) || '1 قېتىم ھەقسىز!';
+
+      const titleEl = document.getElementById('luckyWheelModalTitle');
+      const subEl = document.getElementById('luckyWheelModalSubtitle');
+      if (titleEl) titleEl.textContent = `🎡 ${wheelTitle}`;
+      if (subEl) subEl.textContent = wheelSub;
+      const btnTitleEl = btnOpen.querySelector('.lucky-wheel-btn-title');
+      const btnSubEl = btnOpen.querySelector('.lucky-wheel-btn-sub');
+      if (btnTitleEl) btnTitleEl.textContent = `🎡 ${wheelTitle}`;
+      if (btnSubEl) btnSubEl.textContent = wheelBtnSub;
+      btnOpen.setAttribute('title', `${wheelTitle} — ${wheelSub}`);
+
+      if (btnSpin && !isLuckyWheelSpinning) {
+        btnSpin.innerHTML = `<i class="fas fa-play-circle"></i> ${(i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSpinBtn')) || 'ئايلاندۇرۇش'}`;
+      }
+    };
+    window.updateLuckyWheelLocalization = applyWheelTexts;
+    applyWheelTexts();
 
     btnOpen.addEventListener('click', () => {
       openLuckyWheelModal();

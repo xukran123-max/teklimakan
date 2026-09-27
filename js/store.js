@@ -5257,6 +5257,13 @@ class StoreManager {
           description = window.appI18n.autoTranslateUyghur(p.description || description, lang);
         }
       }
+      // 🛡️ تۈركچە ۋە ئىنگلىزچىدىكى تاۋار نامى ۋە چۈشەندۈرۈشىدىكى تەلەپپۇز سۆزلىرىنى ساپ، ئەقلىي تىلغا ئايلاندۇرۇش
+      if (typeof window.appI18n.refineLocalizedProductName === 'function') {
+        name = window.appI18n.refineLocalizedProductName(name, lang);
+        if (description) {
+          description = window.appI18n.refineLocalizedProductName(description, lang);
+        }
+      }
       if (typeof window.appI18n.getCategoryName === 'function') {
         category = window.appI18n.getCategoryName(category, lang);
       }

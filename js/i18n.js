@@ -250,7 +250,15 @@ const I18N_TRANSLATIONS = {
     bankCopyBtn: 'كۆچۈرۈش',
     bankNotice: 'ئەسكەرتىش: پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا kuruyemiş دەپ يېزىپ قويۇڭ.',
     cardDisabledBadge: 'پات ئارىدا (ھازىرچە پاسسىپ)',
-    whatsappPayHeader: 'ۋاتساپ ئارقىلىق زاكاز بېرىش ۋە خېرىدارلار بىلەن پۇل تۆلەش'
+    whatsappPayHeader: 'ۋاتساپ ئارقىلىق زاكاز بېرىش ۋە خېرىدارلار بىلەن پۇل تۆلەش',
+    platformBadgeShort: 'سۇپا',
+    luckyWheelTitle: 'ئامەت چاقى',
+    luckyWheelSub: 'كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!',
+    luckyWheelBtnTitle: 'ئامەت چاقى',
+    luckyWheelBtnSub: '1 قېتىم ھەقسىز!',
+    luckyWheelSpinBtn: 'ئايلاندۇرۇش',
+    luckyWheelSpinning: 'ئايلىنىۋاتىدۇ...',
+    luckyWheelAlreadySpun: 'بۈگۈنكى ھەقسىز پۇرسەت ئىشلىتىلدى!'
   },
 
   tr: {
@@ -496,7 +504,15 @@ const I18N_TRANSLATIONS = {
     bankCopyBtn: 'Kopyala',
     bankNotice: 'Not: Havale yaparken açıklama (Açıklama) kısmına kuruyemiş yazınız.',
     cardDisabledBadge: 'Yakında (Şu an devre dışı)',
-    whatsappPayHeader: 'WhatsApp ile Sipariş ve Ödeme'
+    whatsappPayHeader: 'WhatsApp ile Sipariş ve Ödeme',
+    platformBadgeShort: 'Platform',
+    luckyWheelTitle: 'Şans Çarkı',
+    luckyWheelSub: 'Her gün 1 defa özel indirim kuponu kazanın!',
+    luckyWheelBtnTitle: 'Şans Çarkı',
+    luckyWheelBtnSub: '1 Hak Ücretsiz!',
+    luckyWheelSpinBtn: 'Çarkı Çevir',
+    luckyWheelSpinning: 'Çevriliyor...',
+    luckyWheelAlreadySpun: 'Bugünkü ücretsiz hakkınızı kullandınız!'
   },
 
   en: {
@@ -743,7 +759,15 @@ const I18N_TRANSLATIONS = {
     bankCopyBtn: 'Copy',
     bankNotice: 'Note: When transferring funds, please write kuruyemiş in the description field.',
     cardDisabledBadge: 'Coming Soon (Inactive)',
-    whatsappPayHeader: 'Order and Pay via WhatsApp'
+    whatsappPayHeader: 'Order and Pay via WhatsApp',
+    platformBadgeShort: 'Platform',
+    luckyWheelTitle: 'Lucky Wheel',
+    luckyWheelSub: 'Spin and win a free discount coupon every day!',
+    luckyWheelBtnTitle: 'Lucky Wheel',
+    luckyWheelBtnSub: '1 Free Spin!',
+    luckyWheelSpinBtn: 'Spin Now',
+    luckyWheelSpinning: 'Spinning...',
+    luckyWheelAlreadySpun: "Today's free spin has already been used!"
   }
 };
 
@@ -966,6 +990,51 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'تەستىق كۈتۈۋاتىدۇ', tr: 'Onay Bekliyor', en: 'Pending Approval' },
   { ug: 'ۋاكالەتچى يوللىغان', tr: 'Temsilci Gönderisi', en: 'Agent Submission' },
   { ug: 'ۋاكالەتچى', tr: 'Temsilci', en: 'Agent' },
+  // ئالاھىدە مەھسۇلات ۋە تەبىئىي دورا-دەرمان ناملىرى
+  { ug: 'خۇش پۇراق تەبىئىي كەلەمپۇر', tr: 'Hoş Kokulu Doğal Karanfil Baharatı', en: 'Aromatic Natural Clove Spice' },
+  { ug: 'خۇش پۇراق كەلەمپۇر', tr: 'Hoş Kokulu Doğal Karanfil', en: 'Aromatic Natural Clove' },
+  { ug: 'خۇشپۇراق تەبىئىي كەلەمپۇر', tr: 'Hoş Kokulu Doğal Karanfil Baharatı', en: 'Aromatic Natural Clove Spice' },
+  { ug: 'خۇشپۇراق كەلەمپۇر', tr: 'Hoş Kokulu Doğal Karanfil', en: 'Aromatic Natural Clove' },
+  { ug: 'تەبىئىي كەلەمپۇر', tr: 'Doğal Karanfil Baharatı', en: 'Natural Clove Spice' },
+  { ug: 'كەلەمپۇر', tr: 'Karanfil', en: 'Clove' },
+  { ug: 'خۇشپۇراق', tr: 'Hoş Kokulu', en: 'Aromatic' },
+  { ug: 'خۇش پۇراق', tr: 'Hoş Kokulu', en: 'Aromatic' },
+  { ug: 'پىننە گۈلقەنتى', tr: 'Doğal Nane ve Gül Reçeli (Gülkand)', en: 'Natural Mint & Rose Gulkand' },
+  { ug: 'پىننە', tr: 'Nane', en: 'Mint' },
+  { ug: 'كاۋاپ تېتىتقۇ يۈرۈشلۈكى', tr: 'Geleneksel Kebap Baharat Çeşni Seti', en: 'Traditional Uyghur Kebab Spice Set' },
+  { ug: 'كاۋاپ تېتىتقۇسى', tr: 'Kebap Baharatı ve Çeşnisi', en: 'Kebab Seasoning Spice' },
+  { ug: 'كاۋاپ تېتىتقۇ', tr: 'Kebap Baharatı', en: 'Kebab Seasoning' },
+  { ug: 'تېتىتقۇ يۈرۈشلۈكى', tr: 'Baharat Çeşni Seti', en: 'Seasoning Spice Set' },
+  { ug: 'تېتىتقۇ', tr: 'Baharat Çeşnisi', en: 'Seasoning Spice' },
+  { ug: 'كاۋاپ', tr: 'Kebap', en: 'Kebab' },
+  { ug: 'ئوسما مېيى', tr: 'Doğal Saf Usma (Çivit Otu) Yağı', en: 'Pure Natural Usma Hair & Brow Oil' },
+  { ug: 'ئوسما', tr: 'Usma Otu (Çivit Otu)', en: 'Usma Herb' },
+  { ug: 'چاچ ئاسراش يۈرۈشلۈكى', tr: 'Doğal Bitkisel Saç Bakım Seti', en: 'Herbal Hair Nourishing Care Set' },
+  { ug: 'چاچ ئاسراش', tr: 'Saç Bakımı', en: 'Hair Care' },
+  { ug: 'زەيتۇن مېيى', tr: 'Soğuk Sıkım Saf Zeytinyağı', en: 'Extra Virgin Pure Olive Oil' },
+  { ug: 'زەيتۇن', tr: 'Zeytin', en: 'Olive' },
+  { ug: 'ئەنجۈر ئۇرۇقى مېيى', tr: 'Doğal Soğuk Sıkım İncir Çekirdeği Yağı', en: 'Cold-Pressed Pure Fig Seed Oil' },
+  { ug: 'ئۇرۇقى مېيى', tr: 'Çekirdeği Yağı', en: 'Seed Oil' },
+  { ug: 'ئۇرۇقى', tr: 'Çekirdeği', en: 'Seed' },
+  { ug: 'گۈل مېيى', tr: 'Saf Doğal Dağ Gülü Yağı', en: 'Pure Natural Rose Essential Oil' },
+  { ug: 'قىزىلگۈل گۈلقەنتى', tr: 'Doğal Kırmızı Dağ Gülü Reçeli', en: 'Wild Red Rose Petal Jam' },
+  { ug: 'قىزىلگۈل', tr: 'Kırmızı Gül', en: 'Red Rose' },
+  { ug: 'پىلە غوزىسى', tr: 'Doğal Saf İpek Kozası (Cilt Bakımı)', en: 'Natural Pure Silk Cocoons' },
+  { ug: 'پىلە', tr: 'İpek', en: 'Silk' },
+  { ug: 'غوزىسى', tr: 'Kozası', en: 'Cocoon' },
+  { ug: 'ئۇيغۇر تىبابەت قامۇسى', tr: 'Uygur Geleneksel Tıbbı Ansiklopedisi', en: 'Uyghur Traditional Medicine Encyclopedia' },
+  { ug: 'تىبابەت قامۇسى', tr: 'Tıp Ansiklopedisi', en: 'Medical Encyclopedia' },
+  { ug: 'تىبابەت', tr: 'Tıbbı', en: 'Medicine' },
+  { ug: 'كىچىك چىلان', tr: 'Doğal Küçük Boy Hünnap', en: 'Natural Small Jujube Dates' },
+  { ug: 'كىچىك', tr: 'Küçük', en: 'Small' },
+  { ug: 'قەغەز ياڭاق', tr: 'İnce Kabuklu Kağıt Ceviz', en: 'Thin Paper-Shell Walnuts' },
+  { ug: 'قارا ياغاچ موگۇسى', tr: 'Siyah Ağaç Kulak Mantarı', en: 'Black Wood Ear Mushroom' },
+  { ug: 'ياغاچ موگۇسى', tr: 'Ağaç Mantarı', en: 'Tree Mushroom' },
+  { ug: 'موگۇ', tr: 'Mantar', en: 'Mushroom' },
+  { ug: 'ئاسپىر مېيى', tr: 'Doğal Soğuk Sıkım Aspir Yağı', en: 'Pure Cold-Pressed Safflower Oil' },
+  { ug: 'زېغىر مېيى', tr: 'Doğal Keten Tohumu (Zığır) Yağı', en: 'Pure Flaxseed Oil' },
+  { ug: 'سۇپا رەسمىي', tr: 'Resmi Platform', en: 'Official Platform' },
+  { ug: 'سۇپا', tr: 'Platform', en: 'Platform' },
   // تۈرلەر ۋە تاۋار ناملىرىنىڭ ئەقلىي لۇغىتى (ئۇزۇن بىرىكمىلەر ئاۋۋال ئالماشتۇرۇلىدۇ)
   { ug: 'مىللىي گىلەملەر', tr: 'Geleneksel Halılar', en: 'Traditional Carpets' },
   { ug: 'مىللىي گىلەم', tr: 'Geleneksel Halı', en: 'Traditional Carpet' },
@@ -1345,7 +1414,154 @@ class I18nManager {
       translated = this.uyghurToLatin(translated, lang);
     }
 
+    if (typeof this.refineLocalizedProductName === 'function') {
+      translated = this.refineLocalizedProductName(translated, lang);
+    }
+
     return translated.trim();
+  }
+
+  // 🇹🇷 / 🇬🇧 تاۋار ناملىرى ۋە مەزمۇنلاردىكى تەلەپپۇزدا قېلىپ قالغان ئۇيغۇرچە سۆزلەرنى كۆركەم، سۈزۈك تىلغا تۈزەش
+  refineLocalizedProductName(text, targetLang = null) {
+    if (!text || typeof text !== 'string') return text;
+    const lang = targetLang || this.currentLang;
+    if (lang === 'ug') return text;
+
+    let res = text;
+    if (lang === 'tr') {
+      const trDict = [
+        { from: /Huşpurak Doğal Kelempur/gi, to: 'Hoş Kokulu Doğal Karanfil Baharatı' },
+        { from: /Khushpuraq Natural Qelempur/gi, to: 'Hoş Kokulu Doğal Karanfil Baharatı' },
+        { from: /Doğal Kelempur/gi, to: 'Doğal Karanfil Baharatı' },
+        { from: /Kelempur/gi, to: 'Karanfil' },
+        { from: /Qelempur/gi, to: 'Karanfil' },
+        { from: /Huşpurak/gi, to: 'Hoş Kokulu' },
+        { from: /Khushpuraq/gi, to: 'Hoş Kokulu' },
+        { from: /Pinne Gül Reçelii?/gi, to: 'Doğal Nane ve Gül Reçeli (Gülkand)' },
+        { from: /Pinne\s*Gül/gi, to: 'Nane ve Gül' },
+        { from: /Pinne/gi, to: 'Nane' },
+        { from: /Kizigül Gül Reçelii?/gi, to: 'Doğal Kırmızı Dağ Gülü Reçeli' },
+        { from: /Kizigül/gi, to: 'Kırmızı Gül' },
+        { from: /Qizigül/gi, to: 'Kırmızı Gül' },
+        { from: /Reçelii/gi, to: 'Reçeli' },
+        { from: /Kavap Tetitku Seti/gi, to: 'Geleneksel Kebap Baharat Çeşni Seti' },
+        { from: /Kavap Tetitqu Set/gi, to: 'Geleneksel Kebap Baharat Çeşni Seti' },
+        { from: /Kavap Tetitku/gi, to: 'Kebap Baharatı' },
+        { from: /Tetitku Seti/gi, to: 'Baharat Çeşni Seti' },
+        { from: /Tetitqu Set/gi, to: 'Baharat Çeşni Seti' },
+        { from: /Kavap/gi, to: 'Kebap' },
+        { from: /Tetitku/gi, to: 'Baharat Çeşnisi' },
+        { from: /Tetitqu/gi, to: 'Baharat Çeşnisi' },
+        { from: /Osma Meyi/gi, to: 'Doğal Saf Usma (Çivit Otu) Yağı' },
+        { from: /Osma/gi, to: 'Usma Otu (Çivit Otu)' },
+        { from: /Zeytun Meyi/gi, to: 'Soğuk Sıkım Saf Zeytinyağı' },
+        { from: /Zeytun/gi, to: 'Zeytin' },
+        { from: /Gül Meyi/gi, to: 'Saf Doğal Dağ Gülü Yağı' },
+        { from: /İncir Uruki Meyi/gi, to: 'Doğal Soğuk Sıkım İncir Çekirdeği Yağı' },
+        { from: /İncir Uruqi Meyi/gi, to: 'Doğal Soğuk Sıkım İncir Çekirdeği Yağı' },
+        { from: /Uruki Meyi/gi, to: 'Çekirdeği Yağı' },
+        { from: /Uruqi Meyi/gi, to: 'Çekirdeği Yağı' },
+        { from: /Uruki/gi, to: 'Çekirdeği' },
+        { from: /Uruqi/gi, to: 'Çekirdeği' },
+        { from: /Meyi\b/gi, to: 'Yağı' },
+        { from: /Yeghi\b/gi, to: 'Yağı' },
+        { from: /Çaç Asraş Yürüliki/gi, to: 'Doğal Bitkisel Saç Bakım Seti' },
+        { from: /Chach Asrash Yürüshliki/gi, to: 'Doğal Bitkisel Saç Bakım Seti' },
+        { from: /Çaç Asraş/gi, to: 'Saç Bakımı' },
+        { from: /Chach Asrash/gi, to: 'Saç Bakımı' },
+        { from: /Yürüliki\b/gi, to: 'Seti' },
+        { from: /Yürüshliki\b/gi, to: 'Seti' },
+        { from: /Kiçik\s+Hünnap/gi, to: 'Doğal Küçük Boy Hünnap' },
+        { from: /Kichik\s+Jujube/gi, to: 'Doğal Küçük Boy Hünnap' },
+        { from: /Kiçik\b/gi, to: 'Küçük' },
+        { from: /Kichik\b/gi, to: 'Küçük' },
+        { from: /Kağt Ceviz/gi, to: 'İnce Kabuklu Kağıt Ceviz' },
+        { from: /Kağt/gi, to: 'Kağıt' },
+        { from: /Pile Gozisi/gi, to: 'Doğal Saf İpek Kozası' },
+        { from: /Pile Ghozisi/gi, to: 'Doğal Saf İpek Kozası' },
+        { from: /Pile\b/gi, to: 'İpek' },
+        { from: /Gozisi\b/gi, to: 'Kozası' },
+        { from: /Ghozisi\b/gi, to: 'Kozası' },
+        { from: /Uygur Tibabet Ansiklopedii?/gi, to: 'Uygur Geleneksel Tıbbı Ansiklopedisi' },
+        { from: /Tibabet/gi, to: 'Tıbbı' },
+        { from: /Ansiklopedii\b/gi, to: 'Ansiklopedisi' },
+        { from: /Kizil Üzüm 500 Giram/gi, to: 'Turpan Doğal Kırmızı Kuru Üzüm (500g)' },
+        { from: /Qizil Üzüm 500 Giram/gi, to: 'Turpan Doğal Kırmızı Kuru Üzüm (500g)' },
+        { from: /Kizil Üzüm/gi, to: 'Kırmızı Kuru Üzüm' },
+        { from: /Qizil Üzüm/gi, to: 'Kırmızı Kuru Üzüm' },
+        { from: /\bGiram\b/gi, to: 'g' },
+        { from: /Kara Mor\b/gi, to: 'Siyah Ağaç Kulak Mantarı' },
+        { from: /Aspir Yağ\b/gi, to: 'Doğal Aspir Yağı' },
+        { from: /Zighir\b/gi, to: 'Keten Tohumu (Zığır)' }
+      ];
+      trDict.forEach(item => {
+        res = res.replace(item.from, item.to);
+      });
+    } else if (lang === 'en') {
+      const enDict = [
+        { from: /Khushpuraq Natural Qelempur/gi, to: 'Aromatic Natural Clove Spice' },
+        { from: /Huşpurak Doğal Kelempur/gi, to: 'Aromatic Natural Clove Spice' },
+        { from: /Doğal Kelempur/gi, to: 'Natural Clove Spice' },
+        { from: /Kelempur/gi, to: 'Clove' },
+        { from: /Qelempur/gi, to: 'Clove' },
+        { from: /Huşpurak/gi, to: 'Aromatic' },
+        { from: /Khushpuraq/gi, to: 'Aromatic' },
+        { from: /Pinne Rose Jami?/gi, to: 'Natural Mint & Rose Jam (Gulkand)' },
+        { from: /Pinne Gül Reçelii?/gi, to: 'Natural Mint & Rose Jam (Gulkand)' },
+        { from: /Pinne\b/gi, to: 'Mint' },
+        { from: /Rose Jami\b/gi, to: 'Rose Jam' },
+        { from: /Qizigül Rose Jami/gi, to: 'Wild Red Rose Petal Jam' },
+        { from: /Kizigül Gül Reçelii?/gi, to: 'Wild Red Rose Petal Jam' },
+        { from: /Kizigül\b/gi, to: 'Red Rose' },
+        { from: /Qizigül\b/gi, to: 'Red Rose' },
+        { from: /Kavap Tetitku Seti/gi, to: 'Traditional Kebab Seasoning & Spice Set' },
+        { from: /Kavap Tetitqu Set/gi, to: 'Traditional Kebab Seasoning & Spice Set' },
+        { from: /Kavap/gi, to: 'Kebab' },
+        { from: /Tetitku/gi, to: 'Seasoning' },
+        { from: /Tetitqu/gi, to: 'Seasoning' },
+        { from: /Osma Meyi/gi, to: 'Pure Usma (Isatis Leaf) Hair & Brow Oil' },
+        { from: /Osma\b/gi, to: 'Usma Leaf' },
+        { from: /Zeytun Meyi/gi, to: 'Cold-Pressed Pure Virgin Olive Oil' },
+        { from: /Zeytun\b/gi, to: 'Olive' },
+        { from: /Gül Meyi/gi, to: 'Natural Pure Rose Essential Oil' },
+        { from: /İncir Uruki Meyi/gi, to: 'Cold-Pressed Fig Seed Oil' },
+        { from: /Fig Uruqi Meyi/gi, to: 'Cold-Pressed Fig Seed Oil' },
+        { from: /Uruki/gi, to: 'Seed' },
+        { from: /Uruqi/gi, to: 'Seed' },
+        { from: /Meyi\b/gi, to: 'Oil' },
+        { from: /Yeghi\b/gi, to: 'Oil' },
+        { from: /Chach Asrash Yürüshliki/gi, to: 'Herbal Hair Nourishing Care Set' },
+        { from: /Çaç Asraş Yürüliki/gi, to: 'Herbal Hair Nourishing Care Set' },
+        { from: /Çaç Asraş/gi, to: 'Hair Care' },
+        { from: /Chach Asrash/gi, to: 'Hair Care' },
+        { from: /Yürüliki\b/gi, to: 'Set' },
+        { from: /Yürüshliki\b/gi, to: 'Set' },
+        { from: /Kichik\s+Jujube Dates/gi, to: 'Natural Small Jujube Dates' },
+        { from: /Kiçik\s+Hünnap/gi, to: 'Natural Small Jujube Dates' },
+        { from: /Kiçik\b/gi, to: 'Small' },
+        { from: /Kichik\b/gi, to: 'Small' },
+        { from: /Pile Ghozisi/gi, to: 'Natural Pure Silk Cocoons' },
+        { from: /Pile Gozisi/gi, to: 'Natural Pure Silk Cocoons' },
+        { from: /Pile\b/gi, to: 'Silk' },
+        { from: /Ghozisi\b/gi, to: 'Cocoon' },
+        { from: /Gozisi\b/gi, to: 'Cocoon' },
+        { from: /Uyghur Tibabet Encyclopediai/gi, to: 'Uyghur Traditional Medicine Encyclopedia' },
+        { from: /Uygur Tibabet Ansiklopedii?/gi, to: 'Uyghur Traditional Medicine Encyclopedia' },
+        { from: /Tibabet/gi, to: 'Medicine' },
+        { from: /Encyclopediai/gi, to: 'Encyclopedia' },
+        { from: /Qizil Üzüm 500 Giram/gi, to: 'Turpan Natural Red Raisins (500g)' },
+        { from: /Kizil Üzüm 500 Giram/gi, to: 'Turpan Natural Red Raisins (500g)' },
+        { from: /Qizil Üzüm/gi, to: 'Red Raisins' },
+        { from: /Kizil Üzüm/gi, to: 'Red Raisins' },
+        { from: /\bGiram\b/gi, to: 'g' },
+        { from: /Zighir Yeghi 5 Litir/gi, to: 'Pure Flaxseed Oil 5L' }
+      ];
+      enDict.forEach(item => {
+        res = res.replace(item.from, item.to);
+      });
+    }
+
+    return res.replace(/\s+/g, ' ').trim();
   }
 
   // ئۇيغۇرچىنى لاتىنچىغا ئەقلىي ئايلاندۇرۇش (Uyghur to Latin Phonetic Transliteration)

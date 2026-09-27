@@ -4036,6 +4036,24 @@ function initTeklimakanApp() {
       if (badgeNeeds) badgeNeeds.textContent = needsImg;
       if (switcherBadge) switcherBadge.textContent = products.length;
 
+      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى (1 مەھسۇلات/كۈن) يېڭىلاش
+      const quotaBadge = document.getElementById('agentDailyQuotaBadge');
+      if (quotaBadge && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+        const quota = window.appStore.checkAgentDailyProductLimit(agent.id);
+        quotaBadge.style.display = 'inline-block';
+        if (!quota.allowed) {
+          quotaBadge.textContent = '1/1 توشتى';
+          quotaBadge.style.background = '#fee2e2';
+          quotaBadge.style.color = '#b91c1c';
+          quotaBadge.style.border = '1px solid #fca5a5';
+        } else {
+          quotaBadge.textContent = '0/1 بۈگۈن';
+          quotaBadge.style.background = '#ecfdf5';
+          quotaBadge.style.color = '#047857';
+          quotaBadge.style.border = '1px solid #a7f3d0';
+        }
+      }
+
       // 💰 زاكاز، سېتىش، يوللانغان، تاماملانغان، بىكار قىلىنغان، قايتىپ كەلگەن ۋە پايدا كۆرسەتكۈچلىرىنى يېڭىلاش
       if (window.appStore && typeof window.appStore.getAgentSalesOrderStats === 'function') {
         const orderStats = window.appStore.getAgentSalesOrderStats(agent.id);
@@ -4895,6 +4913,32 @@ function initTeklimakanApp() {
       if (scopeSelect && currentVerifiedAgent) {
         scopeSelect.value = currentVerifiedAgent.canPublishMultilingual ? 'all' : 'ug';
       }
+
+      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (بۈگۈن 1 تال يېڭى تاۋار يوللىغان بولسا ئەسكەرتىش كۆرسىتىش)
+      const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
+      const submitBtn = document.getElementById('btnAgentSubmitProductAction');
+      if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+        const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+        if (!quota.allowed) {
+          if (dailyLimitBanner) dailyLimitBanner.style.display = 'block';
+          if (submitBtn) {
+            submitBtn.style.opacity = '0.65';
+            submitBtn.title = 'بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). ئەتە يوللىيالايسىز.';
+          }
+        } else {
+          if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
+          if (submitBtn) {
+            submitBtn.style.opacity = '1';
+            submitBtn.title = '';
+          }
+        }
+      } else {
+        if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.style.opacity = '1';
+          submitBtn.title = '';
+        }
+      }
     }
 
     // تېز ئالماشتۇرۇش كۇنۇپكىلىرى
@@ -4906,12 +4950,23 @@ function initTeklimakanApp() {
     const btnRefresh = document.getElementById('btnAgentRefreshData');
     const btnQuickContract = document.getElementById('btnAgentQuickViewContract');
     const btnCheckIn = document.getElementById('btnAgentDailyCheckIn');
+    const btnGoBackLimit = document.getElementById('btnGoBackToMyProductsFromLimit');
+
+    if (btnGoBackLimit) {
+      btnGoBackLimit.addEventListener('click', () => switchAgentPortalView('products'));
+    }
 
     if (btnSwitchProducts) {
       btnSwitchProducts.addEventListener('click', () => switchAgentPortalView('products'));
     }
     if (btnSwitchSubmit) {
       btnSwitchSubmit.addEventListener('click', () => {
+        if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+          const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+          if (!quota.allowed) {
+            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+          }
+        }
         resetToNewProductMode();
         switchAgentPortalView('submit');
       });
@@ -4946,12 +5001,24 @@ function initTeklimakanApp() {
     }
     if (btnQuickAdd) {
       btnQuickAdd.addEventListener('click', () => {
+        if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+          const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+          if (!quota.allowed) {
+            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+          }
+        }
         resetToNewProductMode();
         switchAgentPortalView('submit');
       });
     }
     if (btnAddNewMode) {
       btnAddNewMode.addEventListener('click', () => {
+        if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+          const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+          if (!quota.allowed) {
+            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+          }
+        }
         resetToNewProductMode();
         switchAgentPortalView('submit');
       });
@@ -5096,6 +5163,12 @@ function initTeklimakanApp() {
         const btnEmptyAdd = document.getElementById('btnEmptyAddProduct');
         if (btnEmptyAdd) {
           btnEmptyAdd.addEventListener('click', () => {
+            if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+              const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+              if (!quota.allowed) {
+                showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+              }
+            }
             resetToNewProductMode();
             switchAgentPortalView('submit');
           });
@@ -5244,6 +5317,16 @@ function initTeklimakanApp() {
             editBanner.style.display = 'flex';
             if (editBannerTitle) editBannerTitle.textContent = `«${p.name}» نى تەھرىرلەۋاتىسىز:`;
           }
+
+          // 💡 تەھرىرلەشكە ھېچقانداق چەك قويۇلمىغان؛ چەك ئەسكەرتمىسىنى يوشۇرۇش ۋە كۇنۇپكىنى تولۇق ئاكتىپلاش
+          const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
+          if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
+          const submitBtn = document.getElementById('btnAgentSubmitProductAction');
+          if (submitBtn) {
+            submitBtn.style.opacity = '1';
+            submitBtn.title = '';
+          }
+
           if (submitBtnText) submitBtnText.textContent = '💾 باھا ۋە ئۇچۇرنى ساقلاپ قايتا تەستىققا يوللاش';
           if (submitBtnIcon) submitBtnIcon.className = 'fas fa-save';
 
@@ -5816,6 +5899,16 @@ function initTeklimakanApp() {
         const image = (document.getElementById('agentProdImage')?.value || '').trim();
         const desc = document.getElementById('agentProdDesc').value.trim();
         const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+
+        // 🛑 كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (پەقەت يېڭى تاۋار يوللىغاندا تەكشۈرۈلىدۇ؛ تەھرىرلەشكە چەك قويۇلمىغان)
+        if (!editId && currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+          const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+          if (!quota.allowed) {
+            alert(quota.message);
+            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). كونا مەھسۇلاتلىرىڭىزنى چەكلىمىسىز تەھرىرلىسىڭىز بولىدۇ.', 'error');
+            return;
+          }
+        }
 
         const needsAdminImgVal = (document.getElementById('agentNeedsAdminImage')?.value === 'true');
         let finalImage = image;

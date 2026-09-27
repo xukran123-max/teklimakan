@@ -4650,12 +4650,71 @@ class StoreManager {
     }
   }
 
+  // 📅 ۋاكالەتچىنىڭ كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (Daily Upload Limit: 1 Product Per Day, Editing Unrestricted)
+  checkAgentDailyProductLimit(agentIdentifier) {
+    const loginRes = this.verifyAgentLogin(agentIdentifier);
+    if (!loginRes.success) {
+      return { allowed: false, countToday: 0, limit: 1, message: loginRes.message };
+    }
+    const agent = loginRes.agent;
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // سىستېمىدىكى تاۋارلاردىن بۈگۈن بۇ ۋاكالەتچى قوشقان يېڭى تاۋارلارنى ساناش
+    const allProducts = this.getProducts();
+    const uploadedToday = allProducts.filter(p => {
+      if (!p.isAgentSubmitted || String(p.agentId) !== String(agent.id)) return false;
+      if (!p.createdAt) return false;
+      const d = new Date(p.createdAt);
+      if (isNaN(d.getTime())) return false;
+      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return dStr === todayStr;
+    });
+
+    const count = uploadedToday.length;
+    const limit = 1; // كۈندە پەقەت 1 مەھسۇلات يوللاش چېكى
+
+    if (count >= limit) {
+      return {
+        allowed: false,
+        countToday: count,
+        limit: limit,
+        todayStr: todayStr,
+        message: '⚠️ بۈگۈنكى يېڭى مەھسۇلات يوللاش پۇرسىتىڭىز توشتى!\n\nۋاكالەتچىلەر كۈنىگە پەقەت 1 تال مەھسۇلات يوللىيالايدۇ (بۈگۈن 1 تال مەھسۇلات يوللاپ بولدىڭىز).\nيېڭى تاۋار يوللاشنى ئەتە قايتا سىناڭ.\n\n💡 ئەسكەرتىش: بۇرۇن يوللىغان بارلىق مەھسۇلاتلىرىڭىزنىڭ باھاسى ۋە ئۇچۇرلىرىنى خالىغانچە تەھرىرلىسىڭىز بولىدۇ (تەھرىرلەشكە چەك قويۇلمىغان).'
+      };
+    }
+
+    return {
+      allowed: true,
+      countToday: count,
+      limit: limit,
+      todayStr: todayStr,
+      remaining: limit - count,
+      message: 'سىز بۈگۈن يەنە 1 يېڭى مەھسۇلات يوللىيالايسىز.'
+    };
+  }
+
   submitAgentProduct(agentIdentifier, productData) {
     const loginRes = this.verifyAgentLogin(agentIdentifier);
     if (!loginRes.success) {
       return loginRes;
     }
     const agent = loginRes.agent;
+
+    const isEdit = !!productData.id;
+
+    // 🛑 كۈندىلىك يوللاش چېكىنى تەكشۈرۈش (پەقەت يېڭى تاۋار يوللىغاندا چەكلىنىدۇ، كونا تاۋارلارنى تەھرىرلەشكە چەك قويۇلمىغان)
+    if (!isEdit) {
+      const dailyCheck = this.checkAgentDailyProductLimit(agent.id);
+      if (!dailyCheck.allowed) {
+        return {
+          success: false,
+          dailyLimitReached: true,
+          message: dailyCheck.message
+        };
+      }
+    }
 
     // 1. ۋاكالەتچىگە بېرىلگەن ماركا ھوقۇقىنى تەكشۈرۈش
     const authorized = agent.authorizedBrands || [];
@@ -4708,7 +4767,6 @@ class StoreManager {
     const violType = detectedViol ? detectedViol.type : null;
     const violMatch = detectedViol ? detectedViol.match : null;
 
-    const isEdit = !!productData.id;
     const newProdData = {
       ...productData,
       brand: productData.brand || (authorized.length > 0 ? authorized[0] : 'تەكلىماكان سۈپەت'),
@@ -4733,8 +4791,12 @@ class StoreManager {
     }
 
     if (!isEdit) {
-      // ۋاكالەتچىنىڭ تاۋار سانىنى ئاشۇرۇش
+      // ۋاكالەتچىنىڭ تاۋار سانىنى ئاشۇرۇش ۋە ئاخىرقى قېتىملىق يوللاش ۋاقتىنى پۈتۈش
       agent.productsCount = (agent.productsCount || 0) + 1;
+      const now = new Date();
+      agent.lastProductUploadDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      agent.lastProductUploadTime = now.toISOString();
+
       let agents = this.getAgents('none');
       const aIdx = agents.findIndex(a => a.id === agent.id);
       if (aIdx !== -1) {

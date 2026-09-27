@@ -6654,7 +6654,12 @@ class StoreManager {
 
     const threshold = this.getFreeShippingThreshold();
     const convertedSubtotal = this.convertPrice(subtotalCny);
-    const deliveryFeeCny = convertedSubtotal >= threshold || subtotalCny === 0 ? 0 : 15;
+    // 🚚 1000 لىرادىن ئاز مەھسۇلات ئالغانلارنىڭ يەتكۈزۈش ھەققى ئومۇمىي مال سوممىسىنىڭ 25% پىرسەنتىنى ئاساس قىلىپ، 5 ياكى 10 لىرا بويىچە پۈتۈنلىنىپ (پارچە پۇلسىز) ھېسابلىنىدۇ
+    let deliveryFeeCny = 0;
+    if (subtotalCny > 0 && convertedSubtotal < threshold) {
+      const rawFee = subtotalCny * 0.25;
+      deliveryFeeCny = Math.max(5, Math.round(rawFee / 5) * 5);
+    }
     const totalCny = subtotalCny + deliveryFeeCny;
 
     return {

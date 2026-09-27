@@ -1258,7 +1258,7 @@ function initTeklimakanApp() {
 
     if (subtotalEl) subtotalEl.textContent = cartData.subtotalFormatted;
     if (deliveryEl) deliveryEl.textContent = cartData.deliveryFeeCny === 0 ? i18n.t('free') : cartData.deliveryFeeFormatted;
-    if (discountEl) discountEl.textContent = `-${store.formatPrice(discountValCny)}`;
+    if (discountEl) discountEl.textContent = discountValCny > 0 ? `-${store.formatPrice(discountValCny)}` : store.formatPrice(0);
     if (totalEl) totalEl.textContent = store.formatPrice(finalTotalCny);
 
     // 🚚 1000 لىرا ھەقسىز يەتكۈزۈش پىرسەنتى
@@ -1968,7 +1968,7 @@ function initTeklimakanApp() {
       // يەتكۈزۈش ھەققى
       const delRow = document.createElement('div');
       delRow.style.cssText = 'display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dotted var(--border-color);';
-      const delLabel = lang === 'tr' ? 'Kargo Ücreti:' : (lang === 'en' ? 'Shipping Fee:' : 'يەتكۈزۈش ھەققى:');
+      const delLabel = lang === 'tr' ? 'Tahmini Kargo Ücreti:' : (lang === 'en' ? 'Estimated Shipping Fee:' : 'تەخمىنىي يەتكۈزۈش ھەققى:');
       const delVal = cartData.deliveryFeeCny === 0 
         ? `<span style="color: #10b981; font-weight: 700;">${lang === 'tr' ? 'Ücretsiz' : (lang === 'en' ? 'Free' : 'ھەقسىز')}</span>`
         : `<strong>${cartData.deliveryFeeFormatted}</strong>`;

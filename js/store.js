@@ -78,7 +78,7 @@ const INITIAL_COUPONS = [
     usageLimit: 100000,
     usedCount: 15,
     isActive: true,
-    description: '🎡 بەخت چاقى ₺10 ئېتىبار كۇپونى'
+    description: '🎡 ئامەت چاقى ₺10 ئېتىبار كۇپونى'
   },
   {
     code: 'LUCKY20',
@@ -89,7 +89,7 @@ const INITIAL_COUPONS = [
     usageLimit: 100000,
     usedCount: 9,
     isActive: true,
-    description: '🎡 بەخت چاقى ₺20 ئېتىبار كۇپونى'
+    description: '🎡 ئامەت چاقى ₺20 ئېتىبار كۇپونى'
   },
   {
     code: 'LUCKY50',
@@ -100,7 +100,7 @@ const INITIAL_COUPONS = [
     usageLimit: 100000,
     usedCount: 3,
     isActive: true,
-    description: '🎡 بەخت چاقى ₺50 كاتتا سوۋغات كۇپونى'
+    description: '🎡 ئامەت چاقى ₺50 كاتتا سوۋغات كۇپونى'
   },
   {
     code: 'LUCKYFREE',
@@ -111,7 +111,7 @@ const INITIAL_COUPONS = [
     usageLimit: 100000,
     usedCount: 12,
     isActive: true,
-    description: '🎡 بەخت چاقى ھەقسىز يەتكۈزۈش (كارگو) كۇپونى'
+    description: '🎡 ئامەت چاقى ھەقسىز يەتكۈزۈش (كارگو) كۇپونى'
   },
   {
     code: 'LUCKY5PCT',
@@ -122,7 +122,7 @@ const INITIAL_COUPONS = [
     usageLimit: 100000,
     usedCount: 22,
     isActive: true,
-    description: '🎡 بەخت چاقى %5 پۈتۈن دۇكان ئېتىبارى'
+    description: '🎡 ئامەت چاقى %5 پۈتۈن دۇكان ئېتىبارى'
   }
 ];
 
@@ -1672,7 +1672,7 @@ const INITIAL_SETTINGS = {
     luckyWheel: {
       enabled: true,
       dailySpinLimit: 1,
-      title: 'بۈگۈنكى بەخت چاقى',
+      title: 'ئامەت چاقى',
       subtitle: 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئالاھىدە پۇل ئېتىبار كۇپونى ئۇتۇۋېلىڭ!',
       slices: [
         { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
@@ -7242,14 +7242,14 @@ class StoreManager {
     return false;
   }
 
-  // ==================== 🎡 خېرىدارلارنىڭ كۈندىلىك پائالىيىتى: بەخت چاقى ۋە كۈندىلىك ئېتىبار (Customer Retention) ====================
+  // ==================== 🎡 خېرىدارلارنىڭ كۈندىلىك پائالىيىتى: ئامەت چاقى ۋە كۈندىلىك ئېتىبار (Customer Retention) ====================
   getCustomerRetentionSettings() {
     const settings = this.getSettings() || {};
     const defaults = {
       luckyWheel: {
         enabled: true,
         dailySpinLimit: 1,
-        title: 'بۈگۈنكى بەخت چاقى',
+        title: 'ئامەت چاقى',
         subtitle: 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئالاھىدە پۇل ئېتىبار كۇپونى ئۇتۇۋېلىڭ!',
         slices: [
           { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
@@ -7271,6 +7271,9 @@ class StoreManager {
 
     if (!settings.customerRetention) return defaults;
     const luckyWheel = { ...defaults.luckyWheel, ...(settings.customerRetention.luckyWheel || {}) };
+    if (!luckyWheel.title || luckyWheel.title === 'بۈگۈنكى بەخت چاقى' || luckyWheel.title === 'بەخت چاقى') {
+      luckyWheel.title = 'ئامەت چاقى';
+    }
     const flashSale = { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) };
     if (!flashSale.title || flashSale.title.includes('كۈندىلىك تالاش-تارتىش') || flashSale.title === 'بۈگۈنكى ئېتىبارلارنى كۆرۈش') {
       flashSale.title = '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
@@ -7312,7 +7315,7 @@ class StoreManager {
             usageLimit: 100000,
             usedCount: 0,
             isActive: true,
-            description: `🎡 بەخت چاقى مۇكاپات كۇپونى: ${slice.text}`
+            description: `🎡 ئامەت چاقى مۇكاپات كۇپونى: ${slice.text}`
           });
           changed = true;
         } else {
@@ -7320,7 +7323,7 @@ class StoreManager {
             existing.type = slice.type || 'fixed';
             existing.value = Number(slice.value) || 10;
             existing.minSpend = Number(slice.minSpend) || 0;
-            existing.description = `🎡 بەخت چاقى مۇكاپات كۇپونى: ${slice.text}`;
+            existing.description = `🎡 ئامەت چاقى مۇكاپات كۇپونى: ${slice.text}`;
             changed = true;
           }
         }

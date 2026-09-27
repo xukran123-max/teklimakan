@@ -2025,7 +2025,7 @@ function initTeklimakanApp() {
     }, 15000);
   }
 
-  // ==================== 🌹 گۈلقەنتلەر تۈرىگە كىرىش ۋە ھەر قېتىم ئوخشىمىغان مەھسۇلاتنى كۆرسىتىش ====================
+  // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلارنى ئېچىش / يوشۇرۇش (Toggle Flash Sale) ====================
   function initFlashSaleRoseDeal() {
     const btn = document.getElementById('flashSaleBtn');
     if (!btn) return;
@@ -2044,77 +2044,8 @@ function initTeklimakanApp() {
       btn.appendChild(ripple);
       setTimeout(() => ripple.remove(), 600);
 
-      // باشقا ئىزدەش ۋە ماركا سۈزگۈچلىرىنى ئەسلىگە كەلتۈرۈش
-      searchQuery = '';
-      currentBrand = 'all';
-      const searchInput = document.getElementById('navbarSearchInput');
-      if (searchInput) searchInput.value = '';
-
-      // گۈلقەنتلەر تۈرىگە كىرىش
-      currentCategory = 'گۈلقەنتلەر';
-
-      // بارلىق Category Pills لارنى يېڭىلاش
-      document.querySelectorAll('.category-pill').forEach(pill => {
-        const text = pill.textContent || '';
-        const isRose = (text.includes('گۈلقەنت') || text.includes('Gül') || text.includes('Rose'));
-        if (isRose) {
-          pill.classList.add('active');
-        } else {
-          pill.classList.remove('active');
-        }
-      });
-
-      const select = document.getElementById('searchCategorySelect');
-      if (select) select.value = 'گۈلقەنتلەر';
-
-      // گۈلقەنتلەر تۈرىدىكى مەھسۇلاتلارنى ئېلىش
-      const lang = window.appI18n.getLang();
-      const allProducts = window.appStore.getProductsByLang(lang);
-      let roseProducts = allProducts.filter(p => 
-        p.category === 'گۈلقەنتلەر' || 
-        (p.originalProduct && p.originalProduct.category === 'گۈلقەنتلەر') ||
-        (p.translations && p.translations.ug && p.translations.ug.category === 'گۈلقەنتلەر') ||
-        p.name.includes('گۈلقەنت') || p.name.includes('ئەتىرگۈل')
-      );
-
-      if (roseProducts.length > 0) {
-        // ھەر قېتىم باسقاندا نۆۋەتتىكى ئوخشىمىغان مەھسۇلاتنى كۆرسىتىش (Cyclic selection)
-        currentRoseProductIndex = (currentRoseProductIndex + 1) % roseProducts.length;
-        const chosenProduct = roseProducts[currentRoseProductIndex];
-
-        // تاللانغان مەھسۇلاتنى ئەڭ ئالدىنقى ئورۇنغا چىقىرىش
-        window.spotlightProductId = chosenProduct.id;
-
-        // ماللار تىزىملىكىنى يېڭىلاپ سىزىش
-        renderProducts();
-
-        // تاللانغان مەھسۇلات كارتىسىغا راۋان بېرىپ نۇر چېچىش
-        setTimeout(() => {
-          const productCards = document.querySelectorAll('.product-card');
-          let targetCard = null;
-          productCards.forEach(card => {
-            if (card.classList.contains('deal-spotlight-active') || card.querySelector(`[data-id="${chosenProduct.id}"]`)) {
-              targetCard = card;
-            }
-          });
-
-          if (targetCard) {
-            targetCard.classList.remove('deal-spotlight-active');
-            void targetCard.offsetWidth; // trigger reflow
-            targetCard.classList.add('deal-spotlight-active');
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } else {
-            const catalogSec = document.getElementById('catalogSection');
-            if (catalogSec) catalogSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          const toastPrefix = window.appI18n.t('roseDealToast') || '🌹 گۈلقەنتلەر تۈرىگە كىردىڭىز، تاللانغان مەھسۇلات:';
-          showToast(`${toastPrefix} ${chosenProduct.name}`);
-        }, 150);
-      } else {
-        renderProducts();
-        const catalogSec = document.getElementById('catalogSection');
-        if (catalogSec) catalogSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof window.toggleFlashSaleProducts === 'function') {
+        window.toggleFlashSaleProducts(e);
       }
     });
   }
@@ -7743,6 +7674,52 @@ ${text}
   }, { capture: true });
 
   // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
+  let isFlashProductsOpen = false;
+
+  window.toggleFlashSaleProducts = function(e) {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    const container = document.getElementById('customerFlashSaleProductsContainer');
+    const badgeChevron = document.getElementById('flashSaleBadgeChevron');
+    const ctaChevron = document.getElementById('btnToggleFlashSaleChevron');
+    const ctaBtn = document.getElementById('btnToggleFlashSaleShelf');
+    const ctaText = document.getElementById('btnToggleFlashSaleText');
+
+    if (!container) return;
+
+    isFlashProductsOpen = !isFlashProductsOpen;
+
+    if (isFlashProductsOpen) {
+      if (!container.innerHTML.trim() || container.children.length === 0) {
+        initDailyFlashSaleShelf();
+      }
+      container.style.display = 'grid';
+      container.classList.add('is-open');
+
+      if (badgeChevron) badgeChevron.style.transform = 'rotate(180deg)';
+      if (ctaChevron) ctaChevron.style.transform = 'rotate(180deg)';
+      if (ctaBtn) ctaBtn.classList.add('is-active');
+      if (ctaText) ctaText.textContent = 'مەھسۇلاتلارنى يوشۇرۇش';
+
+      if (typeof playChime === 'function') playChime('click');
+
+      setTimeout(() => {
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    } else {
+      container.style.display = 'none';
+      container.classList.remove('is-open');
+
+      if (badgeChevron) badgeChevron.style.transform = 'rotate(0deg)';
+      if (ctaChevron) ctaChevron.style.transform = 'rotate(0deg)';
+      if (ctaBtn) ctaBtn.classList.remove('is-active');
+      if (ctaText) ctaText.textContent = 'بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلارنى كۆرۈش';
+    }
+  };
+
   function initDailyFlashSaleShelf() {
     const container = document.getElementById('customerFlashSaleProductsContainer');
     const flashBar = document.querySelector('.flash-sale-bar');
@@ -7761,12 +7738,14 @@ ${text}
     if (flashTitleEl && flash.title) flashTitleEl.textContent = flash.title;
 
     const prods = window.appStore.getCustomerDailyFlashSaleProducts();
+    const ctaWrap = document.getElementById('btnToggleFlashSaleShelf')?.parentElement;
     if (!prods || prods.length === 0) {
       container.style.display = 'none';
+      if (ctaWrap) ctaWrap.style.display = 'none';
       return;
     }
+    if (ctaWrap) ctaWrap.style.display = 'flex';
 
-    container.style.display = 'grid';
     container.innerHTML = prods.map(p => {
       const origPrice = p.originalPrice || p.price;
       const flashPrice = p.price;
@@ -7789,6 +7768,15 @@ ${text}
         </div>
       `;
     }).join('');
+
+    // نورمالدا يوشۇرۇن تۇرسۇن: پەقەت ئىشلەتكۈچى كۇنۇپكىنى باسقاندىلا كۆرۈنىدۇ
+    if (!isFlashProductsOpen) {
+      container.style.display = 'none';
+      container.classList.remove('is-open');
+    } else {
+      container.style.display = 'grid';
+      container.classList.add('is-open');
+    }
   }
 
   window.handleFlashAddToCart = function(productId) {
@@ -7827,6 +7815,8 @@ ${text}
     const subEl = document.getElementById('luckyWheelModalSubtitle');
     if (titleEl && wheelCfg.title) titleEl.textContent = `🎡 ${wheelCfg.title}`;
     if (subEl && wheelCfg.subtitle) subEl.textContent = wheelCfg.subtitle;
+    const btnTitleEl = btnOpen.querySelector('.lucky-wheel-btn-title');
+    if (btnTitleEl && wheelCfg.title) btnTitleEl.textContent = `🎡 ${wheelCfg.title}`;
 
     btnOpen.addEventListener('click', () => {
       openLuckyWheelModal();
@@ -8137,7 +8127,7 @@ ${text}
       </div>
     `;
 
-    showToast(`🎉 بەخت چاقى: سىز ${slice.text} ئۇتتىڭىز!`, 'success');
+    showToast(`🎉 ئامەت چاقى: سىز ${slice.text} ئۇتتىڭىز!`, 'success');
   }
 
   window.showToast = showToast;

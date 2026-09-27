@@ -35,7 +35,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260927_v105">
+  <link rel="stylesheet" href="css/style.css?v=20260927_v107">
 </head>
 <body class="font-modern">
 
@@ -249,7 +249,7 @@
         <div class="flash-sale-text-wrap">
           <button type="button" class="flash-sale-badge flash-sale-badge-btn" id="flashSaleBtn" onclick="window.toggleFlashSaleProducts(event)">
             <span class="flash-sale-pulse"></span>
-            <span id="flashSaleBadge">⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار</span>
+            <span id="flashSaleBadge">⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار</span>
             <i class="fas fa-chevron-down" id="flashSaleBadgeChevron" style="margin-right: 8px; font-size: 0.8rem; transition: transform 0.3s ease;"></i>
           </button>
         </div>
@@ -277,7 +277,7 @@
       </div>
 
 
-      <!-- 3-قۇر: بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تىزىملىكى (Daily Flash Sale Products Shelf) - سۈكۈتتە يوشۇرۇن -->
+      <!-- 3-قۇر: ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تىزىملىكى (Daily Flash Sale Products Shelf) - سۈكۈتتە يوشۇرۇن -->
       <div id="customerFlashSaleProductsContainer" class="flash-sale-products-shelf" style="display: none; z-index: 2;">
         <!-- Dynamic flash sale product cards rendered via app.js -->
       </div>
@@ -462,9 +462,18 @@
             </div>
           </div>
 
+          <!-- ⚠️ يەتكۈزۈش ئادرېسىنى تۈركچە يېزىش توغرىسىدا مۇھىم ئەسكەرتىش -->
+          <div style="background: #eff6ff; border: 1.5px solid #60a5fa; border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.65rem;">
+            <i class="fas fa-shipping-fast" style="color: #2563eb; font-size: 1.25rem; margin-top: 2px; flex-shrink: 0;"></i>
+            <div id="checkoutTurkishNoticeBanner" style="font-size: 0.82rem; color: #1e40af; line-height: 1.55;">
+              <strong>⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:</strong> يەتكۈزۈش خادىملىرى مالنى ئۆيىڭىزگە توغرا يەتكۈزۈپ بېرىشى ئۈچۈن، <strong>ئىسىم، شەھەر ۋە تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە)</strong> يېزىلىشى شەرت!
+            </div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label" id="checkoutCustNameLabel">تاپشۇرۇۋالغۇچىنىڭ ئىسمى <span style="color: var(--danger-color);">*</span></label>
-            <input type="text" id="checkoutCustName" class="form-control" placeholder="Ali / Murat / John" required>
+            <label class="form-label" id="checkoutCustNameLabel">تاپشۇرۇۋالغۇچىنىڭ ئىسمى (چوقۇم تۈركچە) <span style="color: var(--danger-color);">*</span></label>
+            <input type="text" id="checkoutCustName" class="form-control" placeholder="Ahmet Yılmaz / Murat Kaya (چوقۇم تۈركچە)" required>
+            <small id="checkoutCustNameHint" style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 3px;">💡 كارگو يەتكۈزۈش ئۈچۈن ئىسىمنى لاتىن ھەرپلىرى بىلەن يېزىڭ (مەسىلەن: Ahmet Yılmaz).</small>
           </div>
 
           <div class="form-group">
@@ -473,28 +482,47 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" id="checkoutCustCityLabel">ۋىلايەت / شەھەر <span style="color: var(--danger-color);">*</span></label>
+            <label class="form-label" id="checkoutCustCityLabel">ۋىلايەت / شەھەر (تۈركچە) <span style="color: var(--danger-color);">*</span></label>
             <select id="checkoutCustCity" class="form-control">
-              <option value="ئىستانبۇل (İstanbul)">ئىستانبۇل (İstanbul)</option>
-              <option value="ئەنقەرە (Ankara)">ئەنقەرە (Ankara)</option>
-              <option value="ئىزمىر (İzmir)">ئىزمىر (İzmir)</option>
-              <option value="بۇرسا (Bursa)">بۇرسا (Bursa)</option>
-              <option value="ئانتاليا (Antalya)">ئانتاليا (Antalya)</option>
-              <option value="كونيا (Konya)">كونيا (Konya)</option>
-              <option value="قەيسەرى (Kayseri)">قەيسەرى (Kayseri)</option>
-              <option value="سامسۇن (Samsun)">سامسۇن (Samsun)</option>
-              <option value="ترابزون (Trabzon)">ترابزون (Trabzon)</option>
-              <option value="گازىئانتەپ (Gaziantep)">گازىئانتەپ (Gaziantep)</option>
-              <option value="ئادانا (Adana)">ئادانا (Adana)</option>
-              <option value="مەرسىن (Mersin)">مەرسىن (Mersin)</option>
-              <option value="كوجائېلى / ئىزمىت (Kocaeli)">كوجائېلى / ئىزمىت (Kocaeli)</option>
-              <option value="باشقا شەھەرلەر (Diğer İller)">باشقا شەھەرلەر (Diğer İller)</option>
+              <option value="İstanbul">İstanbul (ئىستانبۇل)</option>
+              <option value="Ankara">Ankara (ئەنقەرە)</option>
+              <option value="İzmir">İzmir (ئىزمىر)</option>
+              <option value="Bursa">Bursa (بۇرسا)</option>
+              <option value="Antalya">Antalya (ئانتاليا)</option>
+              <option value="Konya">Konya (كونيا)</option>
+              <option value="Kayseri">Kayseri (قەيسەرى)</option>
+              <option value="Kocaeli">Kocaeli (كوجائېلى)</option>
+              <option value="Gaziantep">Gaziantep (گازىئانتەپ)</option>
+              <option value="Adana">Adana (ئادانا)</option>
+              <option value="Mersin">Mersin (مەرسىن)</option>
+              <option value="Samsun">Samsun (سامسۇن)</option>
+              <option value="Trabzon">Trabzon (ترابزون)</option>
+              <option value="Eskişehir">Eskişehir (ئەسكىشەھەر)</option>
+              <option value="Diyarbakır">Diyarbakır (دىياربەكىر)</option>
+              <option value="Şanlıurfa">Şanlıurfa (شانلىئۇرفا)</option>
+              <option value="Malatya">Malatya (مالاتيا)</option>
+              <option value="Kahramanmaraş">Kahramanmaraş (ماراش)</option>
+              <option value="Denizli">Denizli (دېڭىزلى)</option>
+              <option value="Sakarya">Sakarya (ساكاريا)</option>
+              <option value="Balıkesir">Balıkesir (بالىكەسىر)</option>
+              <option value="Manisa">Manisa (مانىسا)</option>
+              <option value="Aydın">Aydın (ئايدىن)</option>
+              <option value="Tekirdağ">Tekirdağ (تەكىرداغ)</option>
+              <option value="Muğla">Muğla (مۇغلا)</option>
+              <option value="Hatay">Hatay (خاتاي)</option>
+              <option value="Sivas">Sivas (سىۋاس)</option>
+              <option value="Erzurum">Erzurum (ئەرزۇرۇم)</option>
+              <option value="Van">Van (ۋان)</option>
+              <option value="Batman">Batman (باتمان)</option>
+              <option value="Elazığ">Elazığ (ئەلازىغ)</option>
+              <option value="Diğer Şehirler">Diğer İller (باشقا شەھەرلەر)</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label" id="checkoutCustAddressLabel">تەپسىلىي ئادرېسى <span style="color: var(--danger-color);">*</span></label>
-            <textarea id="checkoutCustAddress" class="form-control" rows="2" placeholder="مەھەللە، كوچا، بىنا-ئۆي، ناھىيە (Mahalle, Cadde, Sokak, No, İlçe...)" required></textarea>
+            <label class="form-label" id="checkoutCustAddressLabel">تەپسىلىي ئادرېسى (چوقۇم تۈركچە) <span style="color: var(--danger-color);">*</span></label>
+            <textarea id="checkoutCustAddress" class="form-control" rows="2" placeholder="مەھەللە، كوچا، بىنا نومۇرى، ناھىيە (Örnek: Sümer Mah. 28/2 Sok. No:5 D:3 Zeytinburnu / İstanbul)" required></textarea>
+            <small id="checkoutCustAddressHint" style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 3px;">💡 كارگو خادىملىرى تېپىشى ئۈچۈن مەھەللە، كوچا، ئىشىك نومۇرى ۋە ناھىيەنى چوقۇم تۈركچە (لاتىنچە) يېزىڭ.</small>
           </div>
 
           <div class="form-group">
@@ -1999,10 +2027,10 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260927_v105"></script>
-  <script src="js/i18n.js?v=20260927_v105"></script>
-  <script src="js/store.js?v=20260927_v105"></script>
-  <script src="js/app.js?v=20260927_v105"></script>
-  <script src="js/push-manager.js?v=20260927_v105"></script>
+  <script src="js/supabase.js?v=20260927_v107"></script>
+  <script src="js/i18n.js?v=20260927_v107"></script>
+  <script src="js/store.js?v=20260927_v107"></script>
+  <script src="js/app.js?v=20260927_v107"></script>
+  <script src="js/push-manager.js?v=20260927_v107"></script>
 </body>
 </html>

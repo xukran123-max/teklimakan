@@ -471,6 +471,7 @@ html[dir="ltr"] .marquee-item {
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
+  white-space: nowrap;
   background: rgba(245, 158, 11, 0.18);
   color: #fef08a;
   border: 1px solid rgba(245, 158, 11, 0.45);

@@ -8693,7 +8693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'status-pending';
   }
 
-  // ==================== 🎡 خېرىدار ئاكتىپلىقى: ئامەت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار باشقۇرۇش مەركىزى ====================
+  // ==================== 🎡 خېرىدار ئاكتىپلىقى: ئامەت چاقى ۋە ئالاھىدە ئېتىبارلىق مەھسۇلاتلار باشقۇرۇش مەركىزى ====================
   let currentWheelSlices = [];
 
   function renderCustomerRetentionAdmin() {
@@ -8715,12 +8715,12 @@ document.addEventListener('DOMContentLoaded', () => {
     currentWheelSlices = JSON.parse(JSON.stringify(wheel.slices || []));
     renderWheelSlicesTable();
 
-    // 2. بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار سەپلىمىسى
+    // 2. ئالاھىدە ئېتىبارلىق مەھسۇلاتلار سەپلىمىسى
     const flashEnabledCb = document.getElementById('retentionFlashEnabled');
     if (flashEnabledCb) flashEnabledCb.checked = flash.enabled !== false;
 
     const flashTitleInp = document.getElementById('retentionFlashTitle');
-    if (flashTitleInp) flashTitleInp.value = flash.title || '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
+    if (flashTitleInp) flashTitleInp.value = flash.title || '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
 
     const flashDiscInp = document.getElementById('retentionFlashDiscount');
     if (flashDiscInp) flashDiscInp.value = flash.discountPercentage || 20;
@@ -8915,7 +8915,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wheelSubtitle = document.getElementById('retentionWheelSubtitle')?.value.trim() || 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئېتىبار كۇپونى ئۇتۇڭ!';
 
     const flashEnabled = document.getElementById('retentionFlashEnabled')?.checked ?? true;
-    const flashTitle = document.getElementById('retentionFlashTitle')?.value.trim() || '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
+    const flashTitle = document.getElementById('retentionFlashTitle')?.value.trim() || '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
     const flashDiscount = parseInt(document.getElementById('retentionFlashDiscount')?.value, 10) || 20;
 
     const isManualMode = document.getElementById('flashModeManual')?.checked;
@@ -8943,7 +8943,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.appStore.saveCustomerRetentionSettings(newRetention);
-    showAdminToast('✅ ئامەت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تەڭشەكلىرى تولۇق ساقلاندى!', 'success');
+    showAdminToast('✅ ئامەت چاقى ۋە ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تەڭشەكلىرى تولۇق ساقلاندى!', 'success');
   }
   window.saveCustomerRetentionAdmin = saveCustomerRetentionAdmin;
 

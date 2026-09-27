@@ -1685,7 +1685,7 @@ const INITIAL_SETTINGS = {
     },
     flashSale: {
       enabled: true,
-      title: '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
+      title: '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
       subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
       discountPercentage: 20,
       productIds: []
@@ -2398,7 +2398,9 @@ class StoreManager {
   formatPrice(amountInTry) {
     const info = this.getCurrencyInfo();
     const rate = info ? info.rate : 1.0;
-    const converted = Math.round(Number(amountInTry || 0) * rate);
+    const num = Number(amountInTry);
+    const validAmount = isNaN(num) ? 0 : num;
+    const converted = Math.round(validAmount * rate);
     const formattedNum = converted.toLocaleString('en-US');
     if (this.currentCurrency === 'USD') {
       return `$${formattedNum}`;
@@ -6265,6 +6267,13 @@ class StoreManager {
     if (c.expireDate && new Date(c.expireDate) < new Date()) {
       return { valid: false, message: 'بۇ كۇپوننىڭ مۇددىتى توشقان!' };
     }
+
+    if (subtotal === undefined || subtotal === null || isNaN(Number(subtotal))) {
+      const detailed = this.getCartDetailed();
+      subtotal = detailed.subtotalCny || 0;
+    }
+    subtotal = Math.max(0, Number(subtotal) || 0);
+
     if (c.minSpend && subtotal < c.minSpend) {
       return { valid: false, message: `بۇ كۇپون ئەڭ تۆۋەن ₺${c.minSpend} لىك زاكازغا ئىشلىتىلىدۇ!` };
     }
@@ -6274,13 +6283,17 @@ class StoreManager {
 
     let discount = 0;
     if (c.type === 'percentage') {
-      discount = (subtotal * c.value) / 100;
+      discount = (subtotal * (Number(c.value) || 0)) / 100;
     } else if (c.type === 'free_shipping') {
       discount = Number(c.value) || 35;
     } else {
       discount = Number(c.value) || 0;
     }
-    discount = Math.min(discount, subtotal);
+    if (isNaN(discount) || discount < 0) discount = 0;
+    if (subtotal > 0) {
+      discount = Math.min(discount, subtotal);
+    }
+    discount = Math.round(discount);
 
     return {
       valid: true,
@@ -6749,14 +6762,16 @@ class StoreManager {
       notes = notes ? `${notes} | ${giftNoteText}` : giftNoteText;
     }
 
-    const finalTotalCny = Math.max(0, cartData.totalCny - couponDiscountCny);
+    const rawDisc = Number(couponDiscountCny);
+    const validDiscount = (isNaN(rawDisc) || rawDisc < 0) ? 0 : Math.min(rawDisc, cartData.subtotalCny);
+    const finalTotalCny = Math.max(0, cartData.totalCny - validDiscount);
 
     const newOrder = {
       id: orderId,
       customer: customerData,
       items: orderItems,
       subtotalCny: cartData.subtotalCny,
-      discountCny: couponDiscountCny,
+      discountCny: validDiscount,
       deliveryFeeCny: cartData.deliveryFeeCny,
       totalCny: finalTotalCny,
       totalFormatted: this.formatPrice(finalTotalCny),
@@ -7324,7 +7339,7 @@ class StoreManager {
       },
       flashSale: {
         enabled: true,
-        title: '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
+        title: '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار',
         subtitle: 'ھەر كۈنى چەكلىك ۋاقىتتا يېڭىلىنىدۇ، پۇرسەتنى چىڭ تۇتۇڭ!',
         discountPercentage: 20,
         productIds: []
@@ -7337,8 +7352,8 @@ class StoreManager {
       luckyWheel.title = 'ئامەت چاقى';
     }
     const flashSale = { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) };
-    if (!flashSale.title || flashSale.title.includes('كۈندىلىك تالاش-تارتىش') || flashSale.title === 'بۈگۈنكى ئېتىبارلارنى كۆرۈش') {
-      flashSale.title = '⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
+    if (!flashSale.title || flashSale.title.includes('بۈگۈنكى ئالاھىدە ئېتىبارلىق') || flashSale.title.includes('كۈندىلىك تالاش-تارتىش') || flashSale.title === 'بۈگۈنكى ئېتىبارلارنى كۆرۈش') {
+      flashSale.title = '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';
     }
     return {
       luckyWheel,

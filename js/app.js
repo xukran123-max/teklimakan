@@ -368,14 +368,24 @@ function initTeklimakanApp() {
     const checkoutTotLabel = document.getElementById('checkoutTotalLabel');
     if (checkoutTotLabel) checkoutTotLabel.textContent = i18n.t('checkoutTotalLabel');
 
+    const cNoticeBanner = document.getElementById('checkoutTurkishNoticeBanner');
+    if (cNoticeBanner) {
+      cNoticeBanner.innerHTML = `<strong>${lang === 'tr' ? '⚠️ Kargo Bilgilendirmesi:' : (lang === 'en' ? '⚠️ Delivery Notice:' : '⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:')}</strong> ${i18n.t('checkoutTurkishNotice') || ''}`;
+    }
     const cNameLabel = document.getElementById('checkoutCustNameLabel');
     if (cNameLabel) cNameLabel.innerHTML = `${i18n.t('custName')} <span style="color: var(--danger-color);">*</span>`;
+    const cNameHint = document.getElementById('checkoutCustNameHint');
+    if (cNameHint) cNameHint.textContent = i18n.t('custNameHint') || '';
+
     const cPhoneLabel = document.getElementById('checkoutCustPhoneLabel');
     if (cPhoneLabel) cPhoneLabel.innerHTML = `${i18n.t('custPhone')} <span style="color: var(--danger-color);">*</span>`;
     const cCityLabel = document.getElementById('checkoutCustCityLabel');
     if (cCityLabel) cCityLabel.innerHTML = `${i18n.t('custCity')} <span style="color: var(--danger-color);">*</span>`;
     const cAddrLabel = document.getElementById('checkoutCustAddressLabel');
     if (cAddrLabel) cAddrLabel.innerHTML = `${i18n.t('custAddress')} <span style="color: var(--danger-color);">*</span>`;
+    const cAddrHint = document.getElementById('checkoutCustAddressHint');
+    if (cAddrHint) cAddrHint.textContent = i18n.t('custAddressHint') || '';
+
     const cPayLabel = document.getElementById('checkoutPaymentLabel');
     if (cPayLabel) cPayLabel.textContent = i18n.t('paymentMethod');
 
@@ -649,22 +659,50 @@ function initTeklimakanApp() {
     const fbRet = document.getElementById('footerBadgeReturn');
     if (fbRet) fbRet.textContent = i18n.t('footerBadgeReturn');
 
-    // شەھەر تاللانمىلىرىنى تىل بويىچە يېڭىلاش
+    // شەھەر تاللانمىلىرىنى تىل بويىچە يېڭىلاش (تۈركىيە شەھەرلىرى)
     const citySelect = document.getElementById('checkoutCustCity');
     if (citySelect) {
-      const citiesMap = {
-        ug: ['ئىستانبۇل', 'ئەنقەرە', 'بۇرسا', 'ئۈرۈمچى شەھىرى', 'قەشقەر ۋىلايىتى', 'خوتەن ۋىلايىتى', 'تۇرپان شەھىرى', 'غۇلجا شەھىرى', 'باشقا شەھەرلەر'],
-        tr: ['İstanbul', 'Ankara', 'Bursa', 'Urumçi', 'Kaşgar', 'Hoten', 'Turpan', 'Gulca', 'Diğer Şehirler'],
-        en: ['Istanbul', 'Ankara', 'Bursa', 'Urumqi', 'Kashgar', 'Hotan', 'Turpan', 'Ghulja', 'Other Cities']
-      };
-      const currentCities = citiesMap[lang] || citiesMap.ug;
-      const savedIdx = Math.max(0, citySelect.selectedIndex);
+      const turkeyCities = [
+        { val: 'İstanbul', ug: 'İstanbul (ئىستانبۇل)', tr: 'İstanbul', en: 'Istanbul' },
+        { val: 'Ankara', ug: 'Ankara (ئەنقەرە)', tr: 'Ankara', en: 'Ankara' },
+        { val: 'İzmir', ug: 'İzmir (ئىزمىر)', tr: 'İzmir', en: 'Izmir' },
+        { val: 'Bursa', ug: 'Bursa (بۇرسا)', tr: 'Bursa', en: 'Bursa' },
+        { val: 'Antalya', ug: 'Antalya (ئانتاليا)', tr: 'Antalya', en: 'Antalya' },
+        { val: 'Konya', ug: 'Konya (كونيا)', tr: 'Konya', en: 'Konya' },
+        { val: 'Kayseri', ug: 'Kayseri (قەيسەرى)', tr: 'Kayseri', en: 'Kayseri' },
+        { val: 'Kocaeli', ug: 'Kocaeli (كوجائېلى)', tr: 'Kocaeli', en: 'Kocaeli' },
+        { val: 'Gaziantep', ug: 'Gaziantep (گازىئانتەپ)', tr: 'Gaziantep', en: 'Gaziantep' },
+        { val: 'Adana', ug: 'Adana (ئادانا)', tr: 'Adana', en: 'Adana' },
+        { val: 'Mersin', ug: 'Mersin (مەرسىن)', tr: 'Mersin', en: 'Mersin' },
+        { val: 'Samsun', ug: 'Samsun (سامسۇن)', tr: 'Samsun', en: 'Samsun' },
+        { val: 'Trabzon', ug: 'Trabzon (ترابزون)', tr: 'Trabzon', en: 'Trabzon' },
+        { val: 'Eskişehir', ug: 'Eskişehir (ئەسكىشەھەر)', tr: 'Eskişehir', en: 'Eskisehir' },
+        { val: 'Diyarbakır', ug: 'Diyarbakır (دىياربەكىر)', tr: 'Diyarbakır', en: 'Diyarbakir' },
+        { val: 'Şanlıurfa', ug: 'Şanlıurfa (شانلىئۇرفا)', tr: 'Şanlıurfa', en: 'Sanliurfa' },
+        { val: 'Malatya', ug: 'Malatya (مالاتيا)', tr: 'Malatya', en: 'Malatya' },
+        { val: 'Kahramanmaraş', ug: 'Kahramanmaraş (ماراش)', tr: 'Kahramanmaraş', en: 'Kahramanmaras' },
+        { val: 'Denizli', ug: 'Denizli (دېڭىزلى)', tr: 'Denizli', en: 'Denizli' },
+        { val: 'Sakarya', ug: 'Sakarya (ساكاريا)', tr: 'Sakarya', en: 'Sakarya' },
+        { val: 'Balıkesir', ug: 'Balıkesir (بالىكەسىر)', tr: 'Balıkesir', en: 'Balikesir' },
+        { val: 'Manisa', ug: 'Manisa (مانىسا)', tr: 'Manisa', en: 'Manisa' },
+        { val: 'Aydın', ug: 'Aydın (ئايدىن)', tr: 'Aydın', en: 'Aydin' },
+        { val: 'Tekirdağ', ug: 'Tekirdağ (تەكىرداغ)', tr: 'Tekirdağ', en: 'Tekirdag' },
+        { val: 'Muğla', ug: 'Muğla (مۇغلا)', tr: 'Muğla', en: 'Mugla' },
+        { val: 'Hatay', ug: 'Hatay (خاتاي)', tr: 'Hatay', en: 'Hatay' },
+        { val: 'Sivas', ug: 'Sivas (سىۋاس)', tr: 'Sivas', en: 'Sivas' },
+        { val: 'Erzurum', ug: 'Erzurum (ئەرزۇرۇم)', tr: 'Erzurum', en: 'Erzurum' },
+        { val: 'Van', ug: 'Van (ۋان)', tr: 'Van', en: 'Van' },
+        { val: 'Batman', ug: 'Batman (باتمان)', tr: 'Batman', en: 'Batman' },
+        { val: 'Elazığ', ug: 'Elazığ (ئەلازىغ)', tr: 'Elazığ', en: 'Elazig' },
+        { val: 'Diğer Şehirler', ug: 'Diğer İller (باشقا شەھەرلەر)', tr: 'Diğer Şehirler', en: 'Other Cities' }
+      ];
+      const savedVal = citySelect.value || 'İstanbul';
       citySelect.innerHTML = '';
-      currentCities.forEach((city, idx) => {
+      turkeyCities.forEach(city => {
         const opt = document.createElement('option');
-        opt.value = city;
-        opt.textContent = city;
-        if (idx === savedIdx) opt.selected = true;
+        opt.value = city.val;
+        opt.textContent = city[lang] || city.tr;
+        if (city.val === savedVal) opt.selected = true;
         citySelect.appendChild(opt);
       });
     }
@@ -1214,7 +1252,8 @@ function initTeklimakanApp() {
       drawerBody.appendChild(itemEl);
     });
 
-    const discountValCny = appliedCoupon ? appliedCoupon.discount : 0;
+    const rawDisc = appliedCoupon && !isNaN(appliedCoupon.discount) ? Number(appliedCoupon.discount) : 0;
+    const discountValCny = Math.min(Math.max(0, rawDisc), cartData.subtotalCny);
     const finalTotalCny = Math.max(0, cartData.totalCny - discountValCny);
 
     if (subtotalEl) subtotalEl.textContent = cartData.subtotalFormatted;
@@ -1907,11 +1946,15 @@ function initTeklimakanApp() {
   function openCheckoutModal() {
     const lang = window.appI18n.getLang();
     const cartData = window.appStore.getCartDetailed(lang);
-    if (cartData.items.length === 0) return;
+    if (!cartData || !cartData.items || cartData.items.length === 0) return;
 
     const modal = document.getElementById('checkoutModal');
     const orderItemsSummary = document.getElementById('checkoutOrderItemsSummary');
     const checkoutTotalEl = document.getElementById('checkoutTotalDisplay');
+
+    const rawDiscount = appliedCoupon && !isNaN(appliedCoupon.discount) ? Number(appliedCoupon.discount) : 0;
+    const discountVal = Math.min(Math.max(0, rawDiscount), cartData.subtotalCny);
+    const finalTotalCny = Math.max(0, cartData.totalCny - discountVal);
 
     if (orderItemsSummary) {
       orderItemsSummary.innerHTML = '';
@@ -1921,10 +1964,28 @@ function initTeklimakanApp() {
         row.innerHTML = `<span>${item.product.name} x ${item.quantity}</span><strong>${item.itemTotalFormatted}</strong>`;
         orderItemsSummary.appendChild(row);
       });
+
+      // يەتكۈزۈش ھەققى
+      const delRow = document.createElement('div');
+      delRow.style.cssText = 'display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dotted var(--border-color);';
+      const delLabel = lang === 'tr' ? 'Kargo Ücreti:' : (lang === 'en' ? 'Shipping Fee:' : 'يەتكۈزۈش ھەققى:');
+      const delVal = cartData.deliveryFeeCny === 0 
+        ? `<span style="color: #10b981; font-weight: 700;">${lang === 'tr' ? 'Ücretsiz' : (lang === 'en' ? 'Free' : 'ھەقسىز')}</span>`
+        : `<strong>${cartData.deliveryFeeFormatted}</strong>`;
+      delRow.innerHTML = `<span>${delLabel}</span>${delVal}`;
+      orderItemsSummary.appendChild(delRow);
+
+      // ئېتىبار كۇپونى بار بولسا
+      if (discountVal > 0) {
+        const coupRow = document.createElement('div');
+        coupRow.style.cssText = 'display: flex; justify-content: space-between; font-size: 0.85rem; color: #10b981; margin-top: 0.25rem; font-weight: 700;';
+        const coupCode = appliedCoupon?.code ? ` (${appliedCoupon.code})` : '';
+        const coupLabel = lang === 'tr' ? `İndirim Kuponu${coupCode}:` : (lang === 'en' ? `Coupon Discount${coupCode}:` : `ئېتىبار كۇپونى${coupCode}:`);
+        coupRow.innerHTML = `<span>${coupLabel}</span><span>-${window.appStore.formatPrice(discountVal)}</span>`;
+        orderItemsSummary.appendChild(coupRow);
+      }
     }
 
-    const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
-    const finalTotalCny = Math.max(0, cartData.totalCny - discountVal);
     if (checkoutTotalEl) checkoutTotalEl.textContent = window.appStore.formatPrice(finalTotalCny);
 
     const checkedPay = document.querySelector('input[name="checkoutPayment"]:checked');
@@ -2411,8 +2472,8 @@ function initTeklimakanApp() {
           showToast('كۇپون كودىنى كىرگۈزۈڭ!', 'error');
           return;
         }
-        const cartData = window.appStore ? window.appStore.getCart() : { totalCny: 0 };
-        const check = window.appStore ? window.appStore.validateCoupon(code, cartData.totalCny) : null;
+        const cartDetailed = window.appStore ? window.appStore.getCartDetailed() : { totalCny: 0, subtotalCny: 0 };
+        const check = window.appStore ? window.appStore.validateCoupon(code, cartDetailed.subtotalCny) : null;
         if (check && check.valid) {
           appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
           if (typeof playChime === 'function') playChime('success');
@@ -2432,8 +2493,8 @@ function initTeklimakanApp() {
     window.applyCustomerCouponToCart = function(couponCode) {
       if (!couponCode) return;
       const code = couponCode.trim().toUpperCase();
-      const cartData = window.appStore ? window.appStore.getCart() : { totalCny: 0 };
-      const check = window.appStore ? window.appStore.validateCoupon(code, cartData.totalCny) : null;
+      const cartDetailed = window.appStore ? window.appStore.getCartDetailed() : { totalCny: 0, subtotalCny: 0 };
+      const check = window.appStore ? window.appStore.validateCoupon(code, cartDetailed.subtotalCny) : null;
       if (check && check.valid) {
         appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
         const coupInp = document.getElementById('couponCodeInput');
@@ -2616,6 +2677,41 @@ function initTeklimakanApp() {
         const payment = document.querySelector('input[name="checkoutPayment"]:checked')?.value || 'بانكا ياكى خەلقئارالىق كارتا';
         const notes = document.getElementById('checkoutCustNotes')?.value.trim() || '';
         const lang = window.appI18n.getLang();
+
+        // ⚠️ تۈركىيە كارگو (پوچتا) تۈركچە ھەرپ تەكشۈرۈش (Alıcı ve Adres Türkçe/Latin harfleri olmalıdır)
+        const arabicRegex = /[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+        const latinRegex = /[a-zA-ZçğıöşüÇĞİÖŞÜ]/;
+
+        if (arabicRegex.test(name)) {
+          showToast('⚠️ كارگو (پوچتا) توغرا يەتكۈزۈشى ئۈچۈن، تاپشۇرۇۋالغۇچىنىڭ ئىسمى چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Ahmet Yılmaz', 'warning');
+          document.getElementById('checkoutCustName')?.focus();
+          return;
+        }
+
+        if (!latinRegex.test(name) || name.length < 2) {
+          showToast('⚠️ تاپشۇرۇۋالغۇچىنىڭ ئىسمىنى تۈركچە كىرگۈزۈڭ (مەسىلەن: Ahmet Yılmaz)!', 'warning');
+          document.getElementById('checkoutCustName')?.focus();
+          return;
+        }
+
+        const cleanPhone = phone.replace(/[^\d+]/g, '');
+        if (cleanPhone.length < 10) {
+          showToast('⚠️ تېلېفون نومۇرىنى تولۇق كىرگۈزۈڭ (مەسىلەن: 05XX XXX XX XX)!', 'warning');
+          document.getElementById('checkoutCustPhone')?.focus();
+          return;
+        }
+
+        if (arabicRegex.test(address)) {
+          showToast('⚠️ كارگو شىركىتى ئادرېسنى تېپىشى ئۈچۈن تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Mahalle, Cadde, Sokak, No...', 'warning');
+          document.getElementById('checkoutCustAddress')?.focus();
+          return;
+        }
+
+        if (!latinRegex.test(address) || address.length < 6) {
+          showToast('⚠️ تەپسىلىي تۈركچە ئادرېسنى تولۇق كىرگۈزۈڭ (مەھەللە، كوچا، بىنا نومۇرى، ناھىيە)!', 'warning');
+          document.getElementById('checkoutCustAddress')?.focus();
+          return;
+        }
 
         // ئەگەر بانكا كارتىسى تاللانغان بولسا، كارتا ئۇچۇرلىرىنى تەكشۈرۈش
         if (payment.includes('كارتا') || payment.includes('Card')) {
@@ -7741,7 +7837,7 @@ ${text}
     }
   }, { capture: true });
 
-  // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
+  // ==================== ⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
   let lastFlashToggleTime = 0;
 
   function renderFlashProductsCards() {

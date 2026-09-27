@@ -56,7 +56,6 @@ function initTeklimakanApp() {
   try { initDailyFlashSaleShelf(); } catch (e) { console.error('initDailyFlashSaleShelf error:', e); }
   try { initCustomerLuckyWheel(); } catch (e) { console.error('initCustomerLuckyWheel error:', e); }
   try { initFlashWeather(); } catch (e) { console.error('initFlashWeather error:', e); }
-  try { initFlashSaleRoseDeal(); } catch (e) { console.error('initFlashSaleRoseDeal error:', e); }
   try { initLiveSalesPopups(); } catch (e) { console.error('initLiveSalesPopups error:', e); }
   try { initAgentPortal(); } catch (e) { console.error('initAgentPortal error:', e); }
   try { initAboutUsModal(); } catch (e) { console.error('initAboutUsModal error:', e); }
@@ -2025,30 +2024,6 @@ function initTeklimakanApp() {
     }, 15000);
   }
 
-  // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلارنى ئېچىش / يوشۇرۇش (Toggle Flash Sale) ====================
-  function initFlashSaleRoseDeal() {
-    const btn = document.getElementById('flashSaleBtn');
-    if (!btn) return;
-
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      // نۇر دولقۇنى چىقىرىش ئۈنۈمى (Click Ripple Effect)
-      const ripple = document.createElement('span');
-      ripple.className = 'badge-click-ripple';
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX ? (e.clientX - rect.left) : (rect.width / 2);
-      const y = e.clientY ? (e.clientY - rect.top) : (rect.height / 2);
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      btn.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
-
-      if (typeof window.toggleFlashSaleProducts === 'function') {
-        window.toggleFlashSaleProducts(e);
-      }
-    });
-  }
 
   // ==================== 🛒 جانلىق زاكاز چىقىش ئۇقتۇرۇشى (Professional Live Sales Toast) ====================
   function initLiveSalesPopups() {
@@ -7674,13 +7649,56 @@ ${text}
   }, { capture: true });
 
   // ==================== ⚡ بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
-  let isFlashProductsOpen = false;
+  let lastFlashToggleTime = 0;
+
+  function renderFlashProductsCards() {
+    const container = document.getElementById('customerFlashSaleProductsContainer');
+    if (!container || !window.appStore) return false;
+
+    const retention = window.appStore.getCustomerRetentionSettings();
+    const flash = retention.flashSale || {};
+    const prods = window.appStore.getCustomerDailyFlashSaleProducts();
+    if (!prods || prods.length === 0) {
+      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.9rem;">ھازىرچە ئالاھىدە ئېتىبارلىق تاۋار تۈگىدى.</div>';
+      return false;
+    }
+
+    container.innerHTML = prods.map(p => {
+      const origPrice = p.originalPrice || p.price;
+      const flashPrice = p.price;
+      const discPct = p.flashDiscountPercent || flash.discountPercentage || 20;
+
+      return `
+        <div class="flash-sale-product-card" data-product-id="${p.id}">
+          <span class="flash-sale-badge-corner">-%${discPct}</span>
+          <div class="flash-sale-card-img-wrap" onclick="openProductQuickView('${p.id}')">
+            <img src="${p.image || 'images/default_product.jpg'}" alt="${p.name}" loading="lazy">
+          </div>
+          <h4 class="flash-sale-card-title" onclick="openProductQuickView('${p.id}')" title="${p.name}">${p.name}</h4>
+          <div class="flash-sale-card-prices">
+            <span class="flash-sale-price-current">${window.appStore.formatPrice(flashPrice)}</span>
+            <span class="flash-sale-price-old">${window.appStore.formatPrice(origPrice)}</span>
+          </div>
+          <button type="button" class="flash-sale-btn-add" onclick="handleFlashAddToCart('${p.id}')">
+            <i class="fas fa-cart-plus"></i> <span>سېۋەتكە سېلىش</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+    return true;
+  }
 
   window.toggleFlashSaleProducts = function(e) {
-    if (e && typeof e.preventDefault === 'function') {
-      e.preventDefault();
-      e.stopPropagation();
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
     }
+
+    const now = Date.now();
+    if (now - lastFlashToggleTime < 280) {
+      return;
+    }
+    lastFlashToggleTime = now;
 
     const container = document.getElementById('customerFlashSaleProductsContainer');
     const badgeChevron = document.getElementById('flashSaleBadgeChevron');
@@ -7688,12 +7706,12 @@ ${text}
 
     if (!container) return;
 
-    isFlashProductsOpen = !isFlashProductsOpen;
+    // Check actual computed visibility
+    const isHidden = container.style.display === 'none' || !container.style.display || window.getComputedStyle(container).display === 'none';
 
-    if (isFlashProductsOpen) {
-      if (!container.innerHTML.trim() || container.children.length === 0) {
-        initDailyFlashSaleShelf();
-      }
+    if (isHidden) {
+      // OPEN
+      renderFlashProductsCards();
       container.style.display = 'grid';
       container.classList.add('is-open');
 
@@ -7704,8 +7722,9 @@ ${text}
 
       setTimeout(() => {
         container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 100);
+      }, 80);
     } else {
+      // CLOSE
       container.style.display = 'none';
       container.classList.remove('is-open');
 
@@ -7731,43 +7750,12 @@ ${text}
     const flashTitleEl = document.getElementById('flashSaleBadge');
     if (flashTitleEl && flash.title) flashTitleEl.textContent = flash.title;
 
-    const prods = window.appStore.getCustomerDailyFlashSaleProducts();
-    if (!prods || prods.length === 0) {
-      container.style.display = 'none';
-      return;
-    }
+    // Render cards into container ahead of time
+    renderFlashProductsCards();
 
-    container.innerHTML = prods.map(p => {
-      const origPrice = p.originalPrice || p.price;
-      const flashPrice = p.price;
-      const discPct = p.flashDiscountPercent || flash.discountPercentage || 20;
-
-      return `
-        <div class="flash-sale-product-card" data-product-id="${p.id}">
-          <span class="flash-sale-badge-corner">-%${discPct}</span>
-          <div class="flash-sale-card-img-wrap" onclick="openProductQuickView('${p.id}')">
-            <img src="${p.image || 'images/default_product.jpg'}" alt="${p.name}" loading="lazy">
-          </div>
-          <h4 class="flash-sale-card-title" onclick="openProductQuickView('${p.id}')" title="${p.name}">${p.name}</h4>
-          <div class="flash-sale-card-prices">
-            <span class="flash-sale-price-current">${window.appStore.formatPrice(flashPrice)}</span>
-            <span class="flash-sale-price-old">${window.appStore.formatPrice(origPrice)}</span>
-          </div>
-          <button type="button" class="flash-sale-btn-add" onclick="handleFlashAddToCart('${p.id}')">
-            <i class="fas fa-cart-plus"></i> <span>سېۋەتكە سېلىش</span>
-          </button>
-        </div>
-      `;
-    }).join('');
-
-    // نورمالدا يوشۇرۇن تۇرسۇن: پەقەت ئۈستىدىكى كۇنۇپكىنى باسقاندىلا كۆرۈنىدۇ
-    if (!isFlashProductsOpen) {
-      container.style.display = 'none';
-      container.classList.remove('is-open');
-    } else {
-      container.style.display = 'grid';
-      container.classList.add('is-open');
-    }
+    // Default state: hidden
+    container.style.display = 'none';
+    container.classList.remove('is-open');
   }
 
   window.handleFlashAddToCart = function(productId) {

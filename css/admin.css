@@ -2344,21 +2344,34 @@ body.dark-mode select#agentFilterStatus {
   color: #2563eb !important;
 }
 
-/* 🛡️ رەسىملەرنى قوغداش ۋە چۈشۈرۈۋېلىش / كۆچۈرۈۋېلىشنى چەكلەش */
+/* 🛡️ رەسىملەرنى قوغداش ۋە كۆچۈرۈۋېلىشنى چەكلەش */
 img {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
   -webkit-user-drag: none !important;
   user-drag: none !important;
-  pointer-events: none !important;
 }
 
-.table-product-thumb, .agent-cert-preview {
+.table-product-thumb,
+#productImagePreviewImg,
+#previewModalImg,
+.clickable-product-img,
+.order-item-thumb {
+  pointer-events: auto !important;
+  cursor: zoom-in !important;
   position: relative;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
+}
+
+#productImagePreviewImg:hover,
+.table-product-thumb:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+
+#previewModalImg {
+  pointer-events: auto !important;
+  user-select: none;
 }
 
 

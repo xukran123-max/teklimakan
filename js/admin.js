@@ -85,6 +85,147 @@ document.addEventListener('DOMContentLoaded', () => {
     m.style.setProperty('pointer-events', 'none', 'important');
   };
 
+  // ==================== 🖼️ تاۋار رەسىمىنى تولۇق كۆرۈش (Product Image Lightbox) ====================
+  let _lightboxCurrentZoom = 1;
+  function applyLightboxZoom(newZoom) {
+    const img = document.getElementById('previewModalImg');
+    if (!img) return;
+    const minZoom = 0.5;
+    const maxZoom = 4.0;
+    _lightboxCurrentZoom = Math.min(maxZoom, Math.max(minZoom, newZoom));
+    img.style.transform = `scale(${_lightboxCurrentZoom})`;
+    img.style.cursor = _lightboxCurrentZoom > 1.05 ? 'zoom-out' : 'zoom-in';
+    if (_lightboxCurrentZoom > 1) {
+      img.style.maxHeight = 'none';
+      img.style.maxWidth = 'none';
+    } else {
+      img.style.maxHeight = '70vh';
+      img.style.maxWidth = '100%';
+    }
+  }
+
+  window.openProductImageFullPreview = function(imageUrl, productTitle = 'تاۋارنىڭ ئەسلى تولۇق سۈرىتى') {
+    if (!imageUrl || imageUrl.includes('default_product.jpg')) return;
+    const modal = document.getElementById('productImagePreviewModal');
+    const img = document.getElementById('previewModalImg');
+    const container = document.getElementById('previewModalImgContainer');
+    const titleEl = document.getElementById('previewModalProductTitle');
+    const dimEl = document.getElementById('previewModalDimensions');
+    const openOrigBtn = document.getElementById('btnOpenOriginalImage');
+
+    if (!modal || !img) return;
+
+    if (titleEl) titleEl.textContent = productTitle || 'تاۋارنىڭ ئەسلى تولۇق سۈرىتى';
+    if (dimEl) dimEl.textContent = 'سۈرەت يۈكلىنىۋاتىدۇ...';
+
+    if (openOrigBtn) {
+      openOrigBtn.href = imageUrl;
+      openOrigBtn.style.display = (imageUrl.startsWith('data:') || imageUrl.length > 500) ? 'none' : 'inline-flex';
+    }
+
+    applyLightboxZoom(1);
+
+    img.onload = function() {
+      if (dimEl) {
+        dimEl.textContent = `${this.naturalWidth} × ${this.naturalHeight} px`;
+      }
+    };
+    img.onerror = function() {
+      if (dimEl) dimEl.textContent = '';
+    };
+
+    img.src = imageUrl;
+
+    window.showModal('productImagePreviewModal');
+    modal.style.setProperty('z-index', '100050', 'important');
+    if (container) {
+      container.scrollLeft = 0;
+      container.scrollTop = 0;
+    }
+  };
+
+  function initProductImageLightboxControls() {
+    const zoomInBtn = document.getElementById('btnZoomInModalImg');
+    const zoomOutBtn = document.getElementById('btnZoomOutModalImg');
+    const resetZoomBtn = document.getElementById('btnResetZoomModalImg');
+    const img = document.getElementById('previewModalImg');
+    const container = document.getElementById('previewModalImgContainer');
+
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyLightboxZoom(_lightboxCurrentZoom + 0.3);
+      });
+    }
+
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyLightboxZoom(_lightboxCurrentZoom - 0.3);
+      });
+    }
+
+    if (resetZoomBtn) {
+      resetZoomBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyLightboxZoom(1);
+      });
+    }
+
+    if (img) {
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (_lightboxCurrentZoom > 1.1) {
+          applyLightboxZoom(1);
+        } else {
+          applyLightboxZoom(1.85);
+        }
+      });
+    }
+
+    if (container) {
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.25 : -0.25;
+        applyLightboxZoom(_lightboxCurrentZoom + delta);
+      }, { passive: false });
+    }
+
+    // ESC كۇنۇپكىسى بېسىلسا رەسىم كۆزنىكىنى تاقاش
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('productImagePreviewModal');
+        if (modal && modal.classList.contains('active')) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.hideModal('productImagePreviewModal');
+        }
+      }
+    });
+
+    // سۇپىدىكى ھەر قانداق تاۋار رەسىمى ياكى ئالدىن كۆرۈش رەسىمى چېكىلسە ئاپتوماتىك ئېچىش
+    document.addEventListener('click', (e) => {
+      const previewImg = e.target.closest('#productImagePreviewImg');
+      if (previewImg && previewImg.src && !e.target.closest('#btnRemoveImagePreview')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const prodName = document.getElementById('formProductNameUg')?.value || 'تاۋار سۈرىتى';
+        window.openProductImageFullPreview(previewImg.src, prodName);
+        return;
+      }
+
+      const tableThumb = e.target.closest('.table-product-thumb');
+      if (tableThumb && tableThumb.src) {
+        e.preventDefault();
+        e.stopPropagation();
+        const tr = tableThumb.closest('tr');
+        const title = tr ? (tr.querySelector('.table-product-title')?.textContent || 'تاۋار سۈرىتى') : 'تاۋار سۈرىتى';
+        window.openProductImageFullPreview(tableThumb.src, title);
+        return;
+      }
+    });
+  }
+
   window.deleteProductDirect = async function(id) {
     if (!id) return;
     if (confirm('راستلا بۇ تاۋارنى ئۆچۈرەمسىز؟')) {
@@ -281,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSettingsForm();
     populateCategoryDropdowns();
     initGlobalAdminSearch();
+    initProductImageLightboxControls();
   }
 
   // ==================== 🔍 ئارقا سۇپا مەركىزى ئومۇمىي ئىزدەش سىستېمىسى (Global Admin Search) ====================
@@ -1255,7 +1397,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td style="min-width: 280px; text-align: right;">
           <div class="table-product-info">
-            <img src="${product.image || 'images/default_product.jpg'}" class="table-product-thumb" alt="${displayName}" onerror="this.onerror=null; this.src='images/default_product.jpg'">
+            <img src="${product.image || 'images/default_product.jpg'}" class="table-product-thumb" alt="${displayName}" title="سۈرەتنى تولۇق چوڭ كۆرۈش ئۈچۈن چېكىڭ" onerror="this.onerror=null; this.src='images/default_product.jpg'">
             <div style="min-width: 0; flex: 1;">
               <div class="table-product-title">${displayName}</div>
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
@@ -6401,6 +6543,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewImg) previewImg.src = '';
         if (previewBox) previewBox.style.display = 'none';
         showAdminToast('رەسىم چىقىرىۋېتىلدى', 'info');
+      });
+    }
+
+    if (previewImg) {
+      previewImg.addEventListener('click', (e) => {
+        if (e.target.closest('#btnRemoveImagePreview')) return;
+        if (previewImg.src && !previewImg.src.includes('default_product.jpg')) {
+          const prodName = document.getElementById('formProductNameUg')?.value || 'تاۋارنىڭ ئەسلى تولۇق سۈرىتى';
+          window.openProductImageFullPreview(previewImg.src, prodName);
+        }
       });
     }
 

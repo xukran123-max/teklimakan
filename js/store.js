@@ -1502,16 +1502,16 @@ const INITIAL_PRODUCTS = [
 ];
 
 const INITIAL_CATEGORIES = [
-  { id: 'all', name: 'بارلىق مەھسۇلاتلار', icon: 'fas fa-th-large', translations: { ug: 'بارلىق مەھسۇلاتلار', tr: 'Tüm Ürünler', en: 'All Products' } },
-  { id: 'ئۇيغۇر تىبابىتى', name: 'ئۇيغۇر تىبابىتى', icon: 'fas fa-mortar-pestle', translations: { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' } },
-  { id: 'پىششىق دورىلار', name: 'پىششىق دورىلار', icon: 'fas fa-pills', translations: { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' } },
-  { id: 'ئۆسۈملۈك دورىلار', name: 'ئۆسۈملۈك دورىلار', icon: 'fas fa-leaf', translations: { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' } },
-  { id: 'تەبىئىي ياغلار', name: 'تەبىئىي ياغلار', icon: 'fas fa-tint', translations: { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' } },
-  { id: 'گۈزەللىك ۋە ساغلاملىق', name: 'گۈزەللىك ۋە ساغلاملىق', icon: 'fas fa-heartbeat', translations: { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' } },
-  { id: 'گۈلقەنتلەر', name: 'گۈلقەنتلەر', icon: 'fas fa-seedling', translations: { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' } },
-  { id: 'قۇرۇق يەل-يېمىشلەر', name: 'قۇرۇق يەل-يېمىشلەر', icon: 'fas fa-apple-alt', translations: { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' } },
-  { id: 'مەدەنىيەت بۇيۇملىرى', name: 'مەدەنىيەت بۇيۇملىرى', icon: 'fas fa-landmark', translations: { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' } },
-  { id: 'كىتاپ ۋە مەدەنىيەت', name: 'كىتاپ ۋە مەدەنىيەت', icon: 'fas fa-book-open', translations: { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
+  { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large', translations: { ug: 'بارلىق مەھسۇلاتلار', tr: 'Tüm Ürünler', en: 'All Products' } },
+  { id: 'ئۇيغۇر تىبابىتى', name: 'ئۇيغۇر تىبابىتى', order: 1, icon: 'fas fa-mortar-pestle', translations: { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' } },
+  { id: 'پىششىق دورىلار', name: 'پىششىق دورىلار', order: 2, icon: 'fas fa-pills', translations: { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' } },
+  { id: 'ئۆسۈملۈك دورىلار', name: 'ئۆسۈملۈك دورىلار', order: 3, icon: 'fas fa-leaf', translations: { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' } },
+  { id: 'تەبىئىي ياغلار', name: 'تەبىئىي ياغلار', order: 4, icon: 'fas fa-tint', translations: { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' } },
+  { id: 'گۈزەللىك ۋە ساغلاملىق', name: 'گۈزەللىك ۋە ساغلاملىق', order: 5, icon: 'fas fa-heartbeat', translations: { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' } },
+  { id: 'گۈلقەنتلەر', name: 'گۈلقەنتلەر', order: 6, icon: 'fas fa-seedling', translations: { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' } },
+  { id: 'قۇرۇق يەل-يېمىشلەر', name: 'قۇرۇق يەل-يېمىشلەر', order: 7, icon: 'fas fa-apple-alt', translations: { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' } },
+  { id: 'مەدەنىيەت بۇيۇملىرى', name: 'مەدەنىيەت بۇيۇملىرى', order: 8, icon: 'fas fa-landmark', translations: { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' } },
+  { id: 'كىتاپ ۋە مەدەنىيەت', name: 'كىتاپ ۋە مەدەنىيەت', order: 9, icon: 'fas fa-book-open', translations: { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
 ];
 
 const DEFAULT_MARQUEE_ITEMS = [
@@ -4723,6 +4723,275 @@ class StoreManager {
     // toString قوشۇش ئارقىلىق تېكىست سۈپىتىدە ئىشلەتسىمۇ خاتالىق چىقمايدىغان قىلىش
     badgeObj.toString = function() { return this.name; };
     return badgeObj;
+  }
+
+  // 🔍 ۋاكالەتچىلەر مەھسۇلات ئېلان قىلغاندا ئەقلىي ئىزدەش ۋە ئاپتوماتىك تولدۇرۇش تەكلىپلىرى (Autofill Suggestions)
+  findProductSuggestions(query, limit = 8) {
+    if (!query || typeof query !== 'string') return [];
+    const rawQ = query.trim().toLowerCase();
+    if (!rawQ) return [];
+
+    // ھەرپلەرنى جانلىق سېلىشتۇرۇش (ئۇيغۇرچە سوزۇق تاۋۇش ۋە ھەمزە، كۆپ ئۇچرايدىغان تۈركچە/ئىنگلىزچە تەرجىمىلىرى بىلەن)
+    const norm = (str) => {
+      if (!str) return '';
+      return String(str)
+        .toLowerCase()
+        .replace(/[\u064B-\u065F\u0670]/g, '')
+        .replace(/ئ/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    const qNorm = norm(rawQ);
+
+    // بارلىق مەۋجۇت تاۋارلار
+    const allProds = this.getProducts();
+    const candidates = [];
+    const seenNames = new Set();
+
+    for (const p of allProds) {
+      if (!p || !p.name) continue;
+      const cleanName = p.name.trim();
+      if (seenNames.has(cleanName)) continue;
+      seenNames.add(cleanName);
+      candidates.push({
+        id: p.id,
+        name: cleanName,
+        brand: p.brand || 'تەكلىماكان كىلاسسىك',
+        category: p.category || 'ئۇيغۇر تىبابىتى',
+        price: Number(p.price) || 100,
+        oldPrice: p.oldPrice ? Number(p.oldPrice) : Math.round((Number(p.price) || 100) * 1.25),
+        unit: p.unit || 'دانە',
+        stock: p.stock || 50,
+        image: p.image || '',
+        description: p.description || '',
+        keywords: `${cleanName} ${p.category || ''} ${p.brand || ''} ${p.description || ''} ${p.translations?.tr?.name || ''} ${p.translations?.en?.name || ''}`
+      });
+    }
+
+    // مەخسۇس ئۇيغۇر خاس مەھسۇلاتلىرىنىڭ يۇقىرى سۈپەتلىك تىپىك قېلىپلىرى (Preset Catalog)
+    const PRESET_PRODUCT_TEMPLATES = [
+      {
+        name: 'ئەلا سۈپەتلىك نېپىز قېپى تەبىئىي ياڭاق',
+        brand: 'تەكلىماكان كىلاسسىك',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 240,
+        oldPrice: 300,
+        unit: '1 كىلو',
+        stock: 50,
+        image: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80',
+        description: 'تەبىئىي، تاللانغان ئەلا سۈپەتلىك خوتەن نېپىز قېپى ياڭىقى. مېغىزى توق ۋە تەملىك.',
+        keywords: 'ياڭاق ceviz walnut yongaq'
+      },
+      {
+        name: 'قەشقەر قەغەز بادىمى (تاللانغان ئەلا سۈپەتلىك)',
+        brand: 'خوتەن مىراس',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 380,
+        oldPrice: 450,
+        unit: '1 كىلو',
+        stock: 40,
+        image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=800&q=80',
+        description: 'قەشقەرنىڭ ئەنئەنىۋى قەغەز بادىمى. قېپى يۇمشاق، ئاسان چاقىلىدىغان، مېغىزى قۇرغاق ھەم تاتلىق.',
+        keywords: 'بادام badem almond badam'
+      },
+      {
+        name: 'تۇرپان قارا كىشمىش قۇرۇق ئۈزۈمى',
+        brand: 'تۇرپان يېشىل',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 180,
+        oldPrice: 220,
+        unit: '1 كىلو',
+        stock: 60,
+        image: 'https://images.unsplash.com/photo-1595231776515-ddffb1f4eb73?auto=format&fit=crop&w=800&q=80',
+        description: 'قۇياش نۇرىدا تەبىئىي قۇرۇتۇلغان تۇرپاننىڭ داڭلىق شېكەرسىز، پاكىز قارا كىشمىش ئۈزۈمى.',
+        keywords: 'ئۈزۈم كىشمىش quruq uzum kismis kuru uzum raisin'
+      },
+      {
+        name: 'تەبىئىي شىپالىق پىننە گۈلقەنتى (ئاشقازان ۋە ھەزىمگە مەنپەئەتلىك)',
+        brand: 'تەكلىماكان تىبابىتى',
+        category: 'گۈلقەنتلەر',
+        price: 260,
+        oldPrice: 320,
+        unit: '1 كىلو',
+        stock: 35,
+        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
+        description: 'ئەنئەنىۋى تىبابەت رېتسىپى بويىچە يېڭى پىننە ۋە تەبىئىي گۈل شىرنىسىدىن ياسالغان، ھەزىم ۋە سۈرۈشكە مەنپەئەتلىك گۈلقەنت.',
+        keywords: 'گۈلقەنت پىننە gulqent nane gül reçeli gülqent'
+      },
+      {
+        name: 'خوتەن ئەلا سۈپەتلىك قىزىلگۈل گۈلقەنتى',
+        brand: 'خوتەن مىراس',
+        category: 'گۈلقەنتلەر',
+        price: 280,
+        oldPrice: 350,
+        unit: '1 كىلو',
+        stock: 45,
+        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
+        description: 'خوتەن قىزىلگۈلىدىن تەبىئىي ئېچىتىپ تەييارلانغان پۇراقلىق، يۈرەك ۋە باۋۇرنى قۇۋۋەتلىگۈچى خاس گۈلقەنت.',
+        keywords: 'قىزىلگۈل گۈلقەنت gulqent gül reçeli rose jam'
+      },
+      {
+        name: 'ئۇيغۇر مىللىي سەپەرگۈل چېيى (Safflower Tea)',
+        brand: 'ئىلى ئورگانىك',
+        category: 'ئۆسۈملۈك دورىلار',
+        price: 150,
+        oldPrice: 190,
+        unit: '100 گرام',
+        stock: 50,
+        image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80',
+        description: 'قان ئايلىنىشنى ياخشىلايدىغان، كۆكرەك ۋە يۈرەك راھەتلىكى ئۈچۈن تەبىئىي ئۆسۈملۈك سەپەرگۈل چېيى.',
+        keywords: 'سەپەرگۈل چاي sepergül aspir çayı safflower'
+      },
+      {
+        name: 'ئىلى ساپ ئورگانىك تاغ ھەسىلى (1kg)',
+        brand: 'ئىلى ئورگانىك',
+        category: 'ئۆسۈملۈك دورىلار',
+        price: 450,
+        oldPrice: 550,
+        unit: '1 كىلو',
+        stock: 30,
+        image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
+        description: 'ئىلى جىلغىسىنىڭ ياۋا تاغ گۈللىرىدىن ئېلىنغان ساپ، ھېچقانداق قەنت ياكى خۇرۇچ قوشۇلمىغان تەبىئىي تاغ ھەسىلى.',
+        keywords: 'ھەسەل hesel bal honey dağ balı'
+      },
+      {
+        name: 'خوتەن چوڭ دانىلىق تاتلىق قىزىل چىلىنى (Jujube)',
+        brand: 'خوتەن مىراس',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 160,
+        oldPrice: 200,
+        unit: '1 كىلو',
+        stock: 60,
+        image: 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=800&q=80',
+        description: 'خوتەن نۇرلۇق كىلىماتىدا يېتىلگەن ئەلا سۈپەتلىك، گۆشى قېلىن ۋە تاتلىق قىزىل چىلان.',
+        keywords: 'چىلان chilan hünnap jujube red date'
+      },
+      {
+        name: 'ئاتۇش ئەلا سۈپەتلىك سېرىق ئەنجۈر قېقى',
+        brand: 'قەشقەر قەدىمىي',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 220,
+        oldPrice: 270,
+        unit: '1 كىلو',
+        stock: 40,
+        image: 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=800&q=80',
+        description: 'ئاتۇشنىڭ داڭلىق ئاپتاپتا قۇرۇتۇلغان سېرىق ئەنجۈر قېقى. تاتلىق ۋە ئاشقازانغا شىپالىق.',
+        keywords: 'ئەنجۈر enjur incir fig dried figs'
+      },
+      {
+        name: 'ئەنئەنىۋى قولدا تىكىلگەن چىمەن دوپپا',
+        brand: 'خوتەن مىراس',
+        category: 'مەدەنىيەت بۇيۇملىرى',
+        price: 350,
+        oldPrice: 450,
+        unit: 'دانە',
+        stock: 25,
+        image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80',
+        description: 'ئۇيغۇر مىللىي كەشتىچىلىك سەنئىتى بىلەن قولدا تىكىلگەن يېشىل چىمەن ئەنئەنىۋى دوپپا.',
+        keywords: 'دوپپا doppa uygur doppa şapka külah'
+      },
+      {
+        name: 'ئەسلى خوتەن يىپەك ئەتلەس رەختى (مېتىرلىق)',
+        brand: 'خوتەن مىراس',
+        category: 'مەدەنىيەت بۇيۇملىرى',
+        price: 550,
+        oldPrice: 700,
+        unit: 'مېتىر',
+        stock: 30,
+        image: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80',
+        description: 'ساپ تەبىئىي يىپەكتىن توقۇلغان خوتەن ئەنئەنىۋى گۈللۈك ئەتلەس رەختى.',
+        keywords: 'ئاتلاس ئەتلەس atlas ipek kumaş etles'
+      },
+      {
+        name: 'قەشقەر ئەنئەنىۋى قول سەنئىتى مىس چەينىكى',
+        brand: 'قەشقەر قەدىمىي',
+        category: 'مەدەنىيەت بۇيۇملىرى',
+        price: 850,
+        oldPrice: 1100,
+        unit: 'دانە',
+        stock: 15,
+        image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80',
+        description: 'قەشقەر ھۈنەرۋەنلىرى تەرىپىدىن مىستىن ئەستايىدىل نەقىشلەنگەن مىللىي ئەنئەنىۋى سۇ چەينىكى.',
+        keywords: 'مىس چەينەك چۆگۈن bakır çaydanlık ibrik'
+      },
+      {
+        name: 'ساپ تەبىئىي كالا سۈتى قۇرۇتى (قەنتسىز)',
+        brand: 'ئىلى ئورگانىك',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 180,
+        oldPrice: 220,
+        unit: '1 كىلو',
+        stock: 50,
+        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
+        description: 'يايلاق كالىسىنىڭ ساپ سۈتىدىن ئەنئەنىۋى ئۇسۇلدا ئېچىتىلىپ قۇرۇتۇلغان ساغلام ۋە مەززىلىك قۇرۇت.',
+        keywords: 'قۇرۇت qurut kurut çökelek dried yogurt'
+      },
+      {
+        name: 'ئۇيغۇر ئەنئەنىۋى گۈل نېنى (قۇيۇق سۈتلۈك)',
+        brand: 'تەكلىماكان كىلاسسىك',
+        category: 'قۇرۇق يەل-يېمىشلەر',
+        price: 35,
+        oldPrice: 45,
+        unit: 'دانە',
+        stock: 100,
+        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
+        description: 'تونۇردا سۈت ۋە سېرىقماي بىلەن يېقىلغان، يۈزى نەقىشلىك مەززىلىك مىللىي گۈل نان.',
+        keywords: 'نان nan ekmek uygur ekmeği flatbread'
+      }
+    ];
+
+    for (const t of PRESET_PRODUCT_TEMPLATES) {
+      if (!seenNames.has(t.name)) {
+        seenNames.add(t.name);
+        candidates.push({
+          id: 'TMPL-' + Math.floor(100 + Math.random() * 900),
+          name: t.name,
+          brand: t.brand,
+          category: t.category,
+          price: t.price,
+          oldPrice: t.oldPrice,
+          unit: t.unit,
+          stock: t.stock,
+          image: t.image,
+          description: t.description,
+          keywords: `${t.name} ${t.category} ${t.brand} ${t.description} ${t.keywords}`
+        });
+      }
+    }
+
+    const matches = [];
+    for (const c of candidates) {
+      const cNameNorm = norm(c.name);
+      const cKwNorm = norm(c.keywords);
+      let score = 0;
+
+      if (cNameNorm === qNorm) {
+        score = 100;
+      } else if (cNameNorm.startsWith(qNorm)) {
+        score = 85;
+      } else if (cNameNorm.includes(qNorm)) {
+        score = 65;
+      } else if (cKwNorm.includes(qNorm)) {
+        score = 45;
+      } else {
+        const qWords = qNorm.split(' ').filter(w => w.length > 1);
+        let wordHits = 0;
+        for (const w of qWords) {
+          if (cKwNorm.includes(w)) wordHits++;
+        }
+        if (wordHits > 0) {
+          score = 25 * wordHits;
+        }
+      }
+
+      if (score > 0) {
+        matches.push({ product: c, score });
+      }
+    }
+
+    matches.sort((a, b) => b.score - a.score);
+    return matches.slice(0, limit).map(m => m.product);
   }
 
   // ==================== ئادەم رەسىمى ۋە يات خەتلەرنى تەكشۈرۈش / سۈزۈش ====================

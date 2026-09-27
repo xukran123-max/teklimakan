@@ -4597,6 +4597,14 @@ function initTeklimakanApp() {
       if (formProductSubmit) formProductSubmit.reset();
       if (previewWrap) previewWrap.style.display = 'none';
 
+      const autofillNotice = document.getElementById('agentAutofillNotice');
+      if (autofillNotice) autofillNotice.style.display = 'none';
+      const autocompleteList = document.getElementById('agentProdAutocompleteList');
+      if (autocompleteList) {
+        autocompleteList.style.display = 'none';
+        autocompleteList.innerHTML = '';
+      }
+
       if (agentUnitInput) agentUnitInput.value = 'دانە';
       if (agentUnitSelect) agentUnitSelect.value = 'دانە';
 
@@ -5146,6 +5154,321 @@ function initTeklimakanApp() {
         if (previewWrap) previewWrap.style.display = 'block';
         if (secStatus) {
           secStatus.innerHTML = '<span style="color: #059669;"><i class="fas fa-check-circle"></i> سۈرەت ئۇلانمىسى قوبۇل قىلىندى</span>';
+        }
+      });
+    }
+
+    // ==================== ⚡ مەھسۇلات نامى بويىچە بارلىق ئۇچۇر، باھا ۋە رەسىمنى ئاپتوماتىك ئەكىلىش ====================
+    const prodNameInput = document.getElementById('agentProdName');
+    const prodAutoList = document.getElementById('agentProdAutocompleteList');
+    const autofillNotice = document.getElementById('agentAutofillNotice');
+    const autofillNoticeTitle = document.getElementById('agentAutofillNoticeTitle');
+    const btnClearAutofill = document.getElementById('btnAgentClearAutofill');
+
+    let currentSuggestions = [];
+    let selectedSuggestIndex = -1;
+    let autofillDebounceTimer = null;
+
+    function highlightAgentField(el) {
+      if (!el) return;
+      el.style.transition = 'all 0.35s ease';
+      el.style.backgroundColor = '#ecfdf5';
+      el.style.borderColor = '#10b981';
+      el.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+      setTimeout(() => {
+        el.style.backgroundColor = '';
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+      }, 1500);
+    }
+
+    function autofillAgentProduct(p, showToastMsg = true) {
+      if (!p) return;
+
+      // 1. مەھسۇلات نامى
+      if (prodNameInput) {
+        prodNameInput.value = p.name;
+        highlightAgentField(prodNameInput);
+      }
+
+      // 2. ماركىسى
+      if (prodBrandSelect && p.brand) {
+        const hasBrand = Array.from(prodBrandSelect.options).some(opt => opt.value === p.brand);
+        if (hasBrand) {
+          prodBrandSelect.value = p.brand;
+        } else {
+          const opt = new Option(p.brand, p.brand, true, true);
+          prodBrandSelect.add(opt);
+          prodBrandSelect.value = p.brand;
+        }
+        highlightAgentField(prodBrandSelect);
+      }
+
+      // 3. تۈرى
+      if (prodCatSelect && p.category) {
+        const hasCat = Array.from(prodCatSelect.options).some(opt => opt.value === p.category);
+        if (hasCat) {
+          prodCatSelect.value = p.category;
+        } else {
+          const closeCat = Array.from(prodCatSelect.options).find(opt => 
+            opt.value.includes(p.category) || p.category.includes(opt.value)
+          );
+          if (closeCat) {
+            prodCatSelect.value = closeCat.value;
+          } else {
+            const opt = new Option(p.category, p.category, true, true);
+            prodCatSelect.add(opt);
+            prodCatSelect.value = p.category;
+          }
+        }
+        highlightAgentField(prodCatSelect);
+      }
+
+      // 4. باھاسى ۋە ئەسلى باھاسى
+      const priceInput = document.getElementById('agentProdPrice');
+      if (priceInput) {
+        priceInput.value = p.price;
+        highlightAgentField(priceInput);
+      }
+      const oldPriceInput = document.getElementById('agentProdOldPrice');
+      if (oldPriceInput) {
+        oldPriceInput.value = p.oldPrice || Math.round(Number(p.price) * 1.25);
+        highlightAgentField(oldPriceInput);
+      }
+
+      // 5. زاپاس مىقدارى
+      const stockInput = document.getElementById('agentProdStock');
+      if (stockInput) {
+        stockInput.value = p.stock || 50;
+        highlightAgentField(stockInput);
+      }
+
+      // 6. مىقدارى / بىرلىكى (Unit)
+      const pUnit = p.unit || 'دانە';
+      if (agentUnitInput) {
+        agentUnitInput.value = pUnit;
+        highlightAgentField(agentUnitInput);
+      }
+      if (agentUnitSelect) {
+        const match = Array.from(agentUnitSelect.options).find(opt => opt.value === pUnit);
+        agentUnitSelect.value = match ? pUnit : 'custom';
+      }
+
+      // 7. مەھسۇلات سۈرىتى
+      if (p.image) {
+        if (agentImageInput) {
+          agentImageInput.value = p.image;
+        }
+        if (previewImg) {
+          previewImg.src = p.image;
+        }
+        if (previewWrap) {
+          previewWrap.style.display = 'block';
+        }
+        if (secStatus) {
+          secStatus.innerHTML = '<span style="color: #059669; font-weight: 800;"><i class="fas fa-check-circle"></i> ئۆلچەملىك سۈرەت ئاپتوماتىك قوبۇل قىلىندى (800×800 px)</span>';
+        }
+        if (needsAdminImgInput) needsAdminImgInput.value = 'false';
+        if (adminImgCard) adminImgCard.style.display = 'none';
+        if (tipBox) tipBox.style.display = 'block';
+      }
+
+      // 8. مەھسۇلات تەپسىلاتى
+      const descInput = document.getElementById('agentProdDesc');
+      if (descInput) {
+        descInput.value = p.description || '';
+        highlightAgentField(descInput);
+      }
+
+      // 9. قائىدە كۆزنەكچىسىنى بەلگىلەش
+      const agreeCheck = document.getElementById('agentAgreeImgRules');
+      if (agreeCheck) {
+        agreeCheck.checked = true;
+      }
+
+      // 10. ئەسكەرتىش كۆرسىتىش
+      if (autofillNotice) {
+        autofillNotice.style.display = 'flex';
+        if (autofillNoticeTitle) autofillNoticeTitle.textContent = `«${p.name}»`;
+      }
+
+      hideSuggestions();
+
+      if (showToastMsg && typeof showToast === 'function') {
+        showToast(`✨ «${p.name}» نىڭ باھاسى (₺${p.price})، رەسىمى ۋە تەپسىلاتى ئاپتوماتىك تولدۇرۇلدى!`, 'success');
+      }
+    }
+
+    function hideSuggestions() {
+      if (prodAutoList) {
+        prodAutoList.style.display = 'none';
+        prodAutoList.innerHTML = '';
+      }
+      currentSuggestions = [];
+      selectedSuggestIndex = -1;
+    }
+
+    function renderSuggestions(suggestions, query) {
+      if (!prodAutoList) return;
+      if (!suggestions || suggestions.length === 0) {
+        hideSuggestions();
+        return;
+      }
+
+      currentSuggestions = suggestions;
+      selectedSuggestIndex = -1;
+
+      let html = `
+        <div style="padding: 0.45rem 0.65rem; font-size: 0.76rem; font-weight: 800; color: #1e40af; background: #eff6ff; border-radius: 8px; margin-bottom: 0.35rem; display: flex; align-items: center; justify-content: space-between;">
+          <span><i class="fas fa-magic" style="color: #3b82f6;"></i> تاللىسىڭىز باھا، رەسىم ۋە پۈتۈن ئۇچۇرلار ئاپتوماتىك تولدۇرۇلىدۇ:</span>
+          <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">${suggestions.length} تال تېپىلدى</span>
+        </div>
+      `;
+
+      suggestions.forEach((p, idx) => {
+        const pImg = p.image || 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=400&q=80';
+        html += `
+          <div class="agent-suggest-item" data-index="${idx}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.65rem; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; border-bottom: 1px solid #f1f5f9; user-select: none;">
+            <img src="${pImg}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1.5px solid #e2e8f0; flex-shrink: 0;" onerror="this.src='images/default_product.jpg'">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+              <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                <span style="background: #f1f5f9; padding: 1px 7px; border-radius: 5px; font-weight: 700; color: #334155;">🏷️ ${p.category}</span>
+                <span>•</span>
+                <span style="color: #2563eb; font-weight: 900; font-size: 0.82rem;">₺${p.price} / ${p.unit || 'دانە'}</span>
+                <span>•</span>
+                <span style="color: #059669; font-weight: 700;">ماركا: ${p.brand || 'تەكلىماكان'}</span>
+              </div>
+            </div>
+            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 4px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+              <i class="fas fa-magic"></i> <span>تولدۇرۇش</span>
+            </div>
+          </div>
+        `;
+      });
+
+      prodAutoList.innerHTML = html;
+      prodAutoList.style.display = 'block';
+
+      // چېكىش ھەرىكىتى
+      prodAutoList.querySelectorAll('.agent-suggest-item').forEach(itemEl => {
+        itemEl.addEventListener('mouseenter', () => {
+          itemEl.style.backgroundColor = '#f0fdf4';
+        });
+        itemEl.addEventListener('mouseleave', () => {
+          itemEl.style.backgroundColor = '';
+        });
+        itemEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(itemEl.dataset.index, 10);
+          if (currentSuggestions[idx]) {
+            autofillAgentProduct(currentSuggestions[idx], true);
+          }
+        });
+      });
+    }
+
+    if (prodNameInput) {
+      prodNameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        clearTimeout(autofillDebounceTimer);
+
+        if (!val || val.length < 1) {
+          hideSuggestions();
+          return;
+        }
+
+        autofillDebounceTimer = setTimeout(() => {
+          if (window.appStore && typeof window.appStore.findProductSuggestions === 'function') {
+            const matches = window.appStore.findProductSuggestions(val, 8);
+            if (matches.length > 0) {
+              renderSuggestions(matches, val);
+
+              // ئەگەر كىرگۈزگەن نام دەل 100% ماس كەلسە ۋە باھا بوش تۇرغان بولسا دەرھال ئاپتوماتىك تولدۇرۇش
+              const exact = matches.find(m => m.name.trim().toLowerCase() === val.toLowerCase());
+              const priceVal = document.getElementById('agentProdPrice')?.value.trim();
+              if (exact && !priceVal) {
+                autofillAgentProduct(exact, false);
+              }
+            } else {
+              hideSuggestions();
+            }
+          }
+        }, 120);
+      });
+
+      // كىرگۈزۈش رامكىسىنى بوش قىلىپ ئايرىلغاندا (Blur) ئەڭ ياخشى ماس كەلگىنىنى ئاپتوماتىك تولدۇرۇش
+      prodNameInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          const val = prodNameInput.value.trim();
+          const priceInput = document.getElementById('agentProdPrice');
+          if (val && (!priceInput || !priceInput.value.trim())) {
+            if (window.appStore && typeof window.appStore.findProductSuggestions === 'function') {
+              const matches = window.appStore.findProductSuggestions(val, 1);
+              if (matches && matches.length > 0) {
+                autofillAgentProduct(matches[0], true);
+              }
+            }
+          }
+          hideSuggestions();
+        }, 250);
+      });
+
+      // كۇنۇپكا ئارقىلىق تاللاش (Keyboard Navigation: Up / Down / Enter / Esc)
+      prodNameInput.addEventListener('keydown', (e) => {
+        if (!prodAutoList || prodAutoList.style.display === 'none' || currentSuggestions.length === 0) {
+          return;
+        }
+
+        const items = prodAutoList.querySelectorAll('.agent-suggest-item');
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedSuggestIndex = (selectedSuggestIndex + 1) % currentSuggestions.length;
+          items.forEach((el, i) => {
+            el.style.backgroundColor = (i === selectedSuggestIndex) ? '#f0fdf4' : '';
+          });
+          if (items[selectedSuggestIndex]) items[selectedSuggestIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedSuggestIndex = (selectedSuggestIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+          items.forEach((el, i) => {
+            el.style.backgroundColor = (i === selectedSuggestIndex) ? '#f0fdf4' : '';
+          });
+          if (items[selectedSuggestIndex]) items[selectedSuggestIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          if (selectedSuggestIndex >= 0 && currentSuggestions[selectedSuggestIndex]) {
+            e.preventDefault();
+            autofillAgentProduct(currentSuggestions[selectedSuggestIndex], true);
+          } else if (currentSuggestions[0]) {
+            e.preventDefault();
+            autofillAgentProduct(currentSuggestions[0], true);
+          }
+        } else if (e.key === 'Escape') {
+          hideSuggestions();
+        }
+      });
+    }
+
+    // پۈتۈن ھۆججەتتە سىرتقا چېكىلگەندە تەكلىپ كۆزنىكىنى يوشۇرۇش
+    document.addEventListener('click', (e) => {
+      if (prodAutoList && !prodAutoList.contains(e.target) && e.target !== prodNameInput) {
+        hideSuggestions();
+      }
+    });
+
+    if (btnClearAutofill) {
+      btnClearAutofill.addEventListener('click', () => {
+        if (autofillNotice) autofillNotice.style.display = 'none';
+        if (prodNameInput) {
+          prodNameInput.focus();
+          prodNameInput.select();
+        }
+        if (window.appStore && typeof window.appStore.findProductSuggestions === 'function') {
+          const val = prodNameInput ? prodNameInput.value.trim() : '';
+          if (val) {
+            const matches = window.appStore.findProductSuggestions(val, 8);
+            renderSuggestions(matches, val);
+          }
         }
       });
     }

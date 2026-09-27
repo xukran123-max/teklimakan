@@ -4012,6 +4012,13 @@ class StoreManager {
       this.saveAgents(allAgents);
     }
 
+    // 🔗 پارولنى قايتا بېكىتىش بىۋاسىتە ئۇلانمىسىنى ھاسىللاش
+    let resetBaseUrl = 'https://www.teklimakan.com';
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      resetBaseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+    }
+    const resetLink = `${resetBaseUrl}?reset_agent=${encodeURIComponent(agent.id)}&code=${encodeURIComponent(code)}`;
+
     const maskedEmail = agent.email ? agent.email.replace(/(.{2})(.*)(@.*)/, '$1****$3') : 'ئېلخەت';
     const maskedPhone = agent.phone ? agent.phone.replace(/(\d{3})\d{4}(\d+)/, '$1****$2') : '';
 
@@ -4019,7 +4026,7 @@ class StoreManager {
     try {
       this.sendTelegramAlert({
         title: `🔑 [ۋاكالەتچى پارول ئەسلىگە كەلتۈرۈش] ${agent.name}`,
-        message: `ۋاكالەتچى: ${agent.name} (${agent.id})\n📞 تېلېفون: ${agent.phone}\n📧 ئېلخەت: ${agent.email}\n🔢 دەلىللەش كودى: <b>${code}</b> (15 مىنۇت كۈچكە ئىگە)`,
+        message: `ۋاكالەتچى: ${agent.name} (${agent.id})\n📞 تېلېفون: ${agent.phone}\n📧 ئېلخەت: ${agent.email}\n🔢 دەلىللەش كودى: <b>${code}</b> (15 مىنۇت كۈچكە ئىگە)\n🔗 ئۇلانما: ${resetLink}`,
         isUrgent: false
       });
     } catch(e) {}
@@ -4030,19 +4037,23 @@ class StoreManager {
       phone: agent.phone || agent.email || 'SYSTEM',
       recipientRole: 'ۋاكالەتچى',
       channel: 'agent_password_reset',
-      message: `[پارول ئەسلىگە كەلتۈرۈش كودى] كودىڭىز: ${code}، 15 مىنۇت كۈچكە ئىگە.`,
+      message: `[پارول ئەسلىگە كەلتۈرۈش كودى] كودىڭىز: ${code}، ئۇلانما: ${resetLink}`,
       orderId: 'RESET-CODE',
       timestamp: new Date().toLocaleString('ug-CN', { hour12: false })
     });
 
     return {
       success: true,
+      agent: agent,
       agentId: agent.id,
       agentName: agent.name,
+      email: agent.email,
+      phone: agent.phone,
       maskedEmail,
       maskedPhone,
-      code, // ئېكراندا دەرھال بېشارەت بېرىش ئۈچۈن
-      message: `دەلىللەش كودى سىزنىڭ ئېلخېتىڭىز ۋە سىستېمىغا يوللاندى.`
+      code,
+      resetLink,
+      message: `دەلىللەش كودى ۋە ئۇلانما سىزنىڭ ئېلخېتىڭىزگە يوللاندى.`
     };
   }
 

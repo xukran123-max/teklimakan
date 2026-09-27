@@ -3251,6 +3251,106 @@ function initTeklimakanApp() {
     }
   }
 
+  // ==================== 🔑 Email ۋاكالەتچىگە پارول قايتا بېكىتىش ئۇلانمىسى ئەۋەتىش ====================
+  async function sendEmailAgentPasswordReset(agent, code, resetLink) {
+    if (!agent || !agent.email) {
+      console.warn('sendEmailAgentPasswordReset: No agent email found.');
+      return;
+    }
+
+    try {
+      const settings = window.appStore ? window.appStore.getSettings() : null;
+      const agentEmail = agent.email.trim();
+      const subject = `🔑 [تەكلىماكان] مەخپىي شىفىرنى قايتا بېكىتىش ئۇلانمىسى ۋە دەلىللەش كودى (${code})`;
+
+      // 1. ئەگەر سىستېمىدا Google SMTP سەپلەنگەن بولسا
+      if (settings && settings.smtpUser && settings.smtpPass) {
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 580px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 14px; background: #ffffff; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+            <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #ffffff; padding: 1.5rem; border-radius: 10px; text-align: center;">
+              <h2 style="margin: 0; font-size: 1.35rem;">🔑 تەكلىماكان ۋاكالەتچىلەر مەركىزى</h2>
+              <p style="margin: 6px 0 0; color: #fde68a; font-weight: bold; font-size: 0.95rem;">مەخپىي شىفىرنى (پارول) قايتا بېكىتىش</p>
+            </div>
+            <div style="padding: 1.5rem 0.5rem;">
+              <p style="font-size: 1rem; color: #0f172a; margin-top: 0;">ھۆرمەتلىك <b>${agent.name}</b> (${agent.id})،</p>
+              <p style="color: #334155; line-height: 1.6; font-size: 0.95rem;">
+                سىزنىڭ تەكلىماكان سۇپىسىدىكى ۋاكالەتچىلىك ھېساباتىڭىزنىڭ مەخپىي شىفىرىنى (پارول) قايتا بېكىتىش تەلىپىڭىز تاپشۇرۇۋېلىندى.
+              </p>
+              
+              <div style="background: #eff6ff; border: 1.5px dashed #3b82f6; border-radius: 10px; padding: 1.25rem; text-align: center; margin: 1.5rem 0;">
+                <span style="font-size: 0.85rem; color: #1e40af; display: block; margin-bottom: 6px; font-weight: bold;">6 خانىلىق دەلىللەش كودىڭىز:</span>
+                <div style="font-size: 32px; font-weight: 900; letter-spacing: 6px; color: #1d4ed8; font-family: monospace;" dir="ltr">${code}</div>
+                <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">(بۇ كود 15 مىنۇت كۈچكە ئىگە)</small>
+              </div>
+
+              <div style="text-align: center; margin: 1.75rem 0;">
+                <a href="${resetLink}" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.05rem; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);">
+                  🔗 بىۋاسىتە پارول بېكىتىش ئۇلانمىسى (بېسىڭ)
+                </a>
+              </div>
+
+              <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                ئەگەر كۇنۇپكا بېسىلمىسا، تۆۋەندىكى ئۇلانمىنى تور كۆرگۈچىڭىزگە كۆچۈرۈپ قويۇپ ئېچىڭ:<br>
+                <a href="${resetLink}" style="color: #2563eb; word-break: break-all; font-size: 0.82rem;" dir="ltr">${resetLink}</a>
+              </p>
+
+              <div style="font-size: 0.78rem; color: #94a3b8; text-align: center; margin-top: 1.5rem;">
+                ئەگەر بۇ تەلەپنى سىز يوللىمىغان بولسىڭىز، بۇ خەتكە پەرۋا قىلماڭ، مەخپىي شىفىرىڭىز ئۆزگەرمەيدۇ.
+              </div>
+            </div>
+          </div>
+        `;
+
+        try {
+          await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              smtpHost: settings.smtpHost || 'smtp.gmail.com',
+              smtpPort: settings.smtpPort || 587,
+              smtpUser: settings.smtpUser,
+              smtpPass: settings.smtpPass,
+              fromEmail: settings.smtpUser,
+              fromName: 'تەكلىماكان ۋاكالەتچىلەر مەركىزى',
+              toEmail: agentEmail,
+              subject: subject,
+              htmlBody: emailHtml
+            })
+          });
+          return;
+        } catch (smtpErr) {
+          console.warn('SMTP password reset send failed, falling back to formsubmit:', smtpErr);
+        }
+      }
+
+      // 2. FormSubmit ئارقىلىق ۋاكالەتچىنىڭ ئېلخېتىگە خەت يوللاش
+      const payload = {
+        _subject: subject,
+        _template: 'table',
+        _captcha: 'false',
+        'ئۇچۇر تۈرى': 'ۋاكالەتچى مەخپىي شىفىرنى قايتا بېكىتىش',
+        'ۋاكالەتچى نامى': agent.name,
+        'ۋاكالەتچى كودى': agent.id,
+        'تېلېفون نومۇرى': agent.phone || '-',
+        '6 خانىلىق دەلىللەش كودى': code,
+        'قايتا بېكىتىش ئۇلانمىسى': resetLink,
+        'كۈچكە ئىگە ۋاقتى': '15 مىنۇت',
+        'ئەسكەرتىش': 'يۇقىرىدىكى قايتا بېكىتىش ئۇلانمىسىنى چېكىپ ياكى دەلىللەش كودى ئارقىلىق يېڭى پارول بەلگىلەڭ.'
+      };
+
+      await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(agentEmail)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.warn('sendEmailAgentPasswordReset error:', err);
+    }
+  }
+
   function escapeModalHtml(str) {
     if (!str) return '';
     return String(str)
@@ -4397,15 +4497,96 @@ function initTeklimakanApp() {
 
     let currentResetAgentId = '';
 
-    if (btnForgot && modalReset) {
-      btnForgot.addEventListener('click', () => {
-        if (inputResetId && loginInput) {
-          inputResetId.value = loginInput.value.trim();
-        }
+    async function triggerAgentPasswordResetFlow(identifier) {
+      if (!identifier) {
         if (resetStep1) resetStep1.style.display = 'block';
         if (resetStep2) resetStep2.style.display = 'none';
-        modalReset.classList.add('active');
-        if (inputResetId) inputResetId.focus();
+        if (modalReset) modalReset.classList.add('active');
+        if (inputResetId) {
+          inputResetId.value = '';
+          inputResetId.focus();
+        }
+        return;
+      }
+
+      if (btnSendResetCode) {
+        btnSendResetCode.disabled = true;
+        btnSendResetCode.innerHTML = '<i class="fas fa-spinner fa-spin"></i> يوللىنىۋاتىدۇ...';
+      }
+      showToast('ئېلخەتكە پارول ئۇلانمىسى ئەۋەتىلىۋاتىدۇ...', 'info');
+
+      try {
+        const res = await window.appStore.requestAgentPasswordReset(identifier);
+        if (res.success) {
+          currentResetAgentId = res.agentId;
+
+          // 📧 ۋاكالەتچىنىڭ ئېلخېتىگە بىۋاسىتە ئۇلانما ۋە دەلىللەش كودى يوللاش!
+          sendEmailAgentPasswordReset(res.agent, res.code, res.resetLink);
+
+          if (resetStep1) resetStep1.style.display = 'none';
+          if (resetStep2) resetStep2.style.display = 'block';
+          if (modalReset) modalReset.classList.add('active');
+
+          if (resetNoticeBox) {
+            resetNoticeBox.innerHTML = `
+              <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
+                <i class="fas fa-check-circle" style="color: #10b981;"></i> پارول ئەسلىگە كەلتۈرۈش ئۇلانمىسى ئەۋەتىلدى!
+              </div>
+              <div style="font-size: 0.84rem; line-height: 1.6; margin-bottom: 0.4rem;">
+                <div><b>ۋاكالەتچى:</b> ${escapeModalHtml(res.agentName || '')} (${escapeModalHtml(res.agentId || '')})</div>
+                <div><b>ئېلخەت ئادرېسى:</b> <span class="number-latin" style="font-weight: bold; color: #1d4ed8;">${escapeModalHtml(res.email || res.maskedEmail || '')}</span></div>
+              </div>
+              <div style="background: #ffffff; border-radius: 8px; border: 1.5px dashed #93c5fd; padding: 0.5rem; text-align: center; margin-top: 0.45rem;">
+                <div style="font-size: 0.78rem; color: #475569;">ئېلخېتىڭىزدىكى ئۇلانمىنى باسىڭ ياكى بۇ كودنى ئىشلىتىڭ:</div>
+                <div class="number-latin" style="font-weight: 900; font-size: 1.35rem; color: #2563eb; letter-spacing: 5px; margin: 2px 0;">${escapeModalHtml(res.code || '')}</div>
+                <small style="color: #64748b; font-size: 0.72rem;">(ئېلخەت كېچىكسە ئېكراندىكى كود بىلەن پارولنى يېڭىلىسىڭىزمۇ بولىدۇ)</small>
+              </div>
+            `;
+          }
+          const inputCode = document.getElementById('inputResetCode');
+          if (inputCode) {
+            inputCode.value = res.code;
+          }
+          const inputNewPw = document.getElementById('inputResetNewPassword');
+          if (inputNewPw) setTimeout(() => inputNewPw.focus(), 250);
+
+          showToast('✅ ئېلخېتىڭىزگە قايتا بېكىتىش ئۇلانمىسى ئەۋەتىلدى!', 'success');
+        } else {
+          alert(res.message);
+          showToast(res.message, 'error');
+          if (resetStep1) resetStep1.style.display = 'block';
+          if (resetStep2) resetStep2.style.display = 'none';
+          if (modalReset) modalReset.classList.add('active');
+          if (inputResetId) {
+            inputResetId.value = identifier;
+            inputResetId.focus();
+          }
+        }
+      } catch(e) {
+        console.error('Reset request error:', e);
+        showToast('دەلىللەش كودى ئەۋەتىشتە خاتالىق كۆرۈلدى', 'error');
+      } finally {
+        if (btnSendResetCode) {
+          btnSendResetCode.disabled = false;
+          btnSendResetCode.innerHTML = '<i class="fas fa-paper-plane"></i> <span>دەلىللەش كودى ئەۋەتىش</span>';
+        }
+      }
+    }
+
+    if (btnForgot && modalReset) {
+      btnForgot.addEventListener('click', () => {
+        const idVal = loginInput ? loginInput.value.trim() : '';
+        if (idVal) {
+          triggerAgentPasswordResetFlow(idVal);
+        } else {
+          if (resetStep1) resetStep1.style.display = 'block';
+          if (resetStep2) resetStep2.style.display = 'none';
+          modalReset.classList.add('active');
+          if (inputResetId) {
+            inputResetId.value = '';
+            inputResetId.focus();
+          }
+        }
       });
     }
 
@@ -4426,49 +4607,47 @@ function initTeklimakanApp() {
           if (inputResetId) inputResetId.focus();
           return;
         }
-
-        btnSendResetCode.disabled = true;
-        btnSendResetCode.innerHTML = '<i class="fas fa-spinner fa-spin"></i> يوللىنىۋاتىدۇ...';
-
-        try {
-          const res = await window.appStore.requestAgentPasswordReset(idVal);
-          if (res.success) {
-            currentResetAgentId = res.agentId;
-            if (resetStep1) resetStep1.style.display = 'none';
-            if (resetStep2) resetStep2.style.display = 'block';
-            if (resetNoticeBox) {
-              resetNoticeBox.innerHTML = `
-                <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
-                  <i class="fas fa-check-circle" style="color: #10b981;"></i> دەلىللەش كودى ئەۋەتىلدى!
-                </div>
-                <div><b>ۋاكالەتچى:</b> ${res.agentName} (${res.agentId})</div>
-                <div><b>ئېلخەت / تېلېفون:</b> ${res.maskedEmail || res.maskedPhone}</div>
-                <div style="margin-top: 0.45rem; padding: 0.45rem; background: #ffffff; border-radius: 6px; border: 1px dashed #93c5fd; text-align: center;">
-                  <span style="font-size: 0.8rem; color: #475569;">ئېكراندىكى بىخەتەرلىك كودىڭىز:</span>
-                  <div class="number-latin" style="font-weight: 900; font-size: 1.35rem; color: #2563eb; letter-spacing: 5px; margin-top: 2px;">${res.code}</div>
-                  <small style="color: #64748b; font-size: 0.72rem;">(كود 15 مىنۇت كۈچكە ئىگە، تۆۋەندىكى رامكىغا كىرگۈزۈڭ)</small>
-                </div>
-              `;
-            }
-            const inputCode = document.getElementById('inputResetCode');
-            if (inputCode) {
-              inputCode.value = res.code;
-              inputCode.focus();
-            }
-            showToast('دەلىللەش كودى ئەۋەتىلدى!', 'success');
-          } else {
-            alert(res.message);
-            showToast(res.message, 'error');
-          }
-        } catch(e) {
-          console.error('Reset request error:', e);
-          showToast('دەلىللەش كودى ئەۋەتىشتە خاتالىق كۆرۈلدى', 'error');
-        } finally {
-          btnSendResetCode.disabled = false;
-          btnSendResetCode.innerHTML = '<i class="fas fa-paper-plane"></i> <span>دەلىللەش كودى ئەۋەتىش</span>';
-        }
+        await triggerAgentPasswordResetFlow(idVal);
       });
     }
+
+    // 🔗 ئېلخەتتىكى ئۇلانما ئارقىلىق بىۋاسىتە كىرگەندە پارول ئۆزگەرتىش كۆزنىكىنى ئېچىش (?reset_agent=...&code=...)
+    function checkUrlPasswordResetParams() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const agentId = params.get('reset_agent');
+        const code = params.get('code');
+        if (agentId && code) {
+          const agentDrawer = document.getElementById('agentDrawer');
+          if (agentDrawer) agentDrawer.classList.add('active');
+          const agentBackdrop = document.getElementById('agentDrawerBackdrop');
+          if (agentBackdrop) agentBackdrop.classList.add('active');
+
+          currentResetAgentId = agentId;
+          const inputCode = document.getElementById('inputResetCode');
+          if (inputCode) inputCode.value = code;
+          if (resetStep1) resetStep1.style.display = 'none';
+          if (resetStep2) resetStep2.style.display = 'block';
+          if (resetNoticeBox) {
+            resetNoticeBox.innerHTML = `
+              <div style="font-weight: 800; margin-bottom: 0.35rem; color: #1e3a8a;">
+                <i class="fas fa-check-circle" style="color: #10b981;"></i> ئېلخەت ئۇلانمىسى دەلىللەندى!
+              </div>
+              <div><b>ۋاكالەتچى كودى:</b> <span class="number-latin">${escapeModalHtml(agentId)}</span></div>
+              <div style="margin-top: 0.45rem; padding: 0.45rem; background: #ffffff; border-radius: 6px; border: 1px dashed #93c5fd; text-align: center;">
+                <span style="font-size: 0.82rem; color: #2563eb; font-weight: bold;">تۆۋەنگە يېڭى مەخپىي شىفىرىڭىزنى كىرگۈزۈپ جەزملەڭ</span>
+              </div>
+            `;
+          }
+          if (modalReset) modalReset.classList.add('active');
+          const inputNewPw = document.getElementById('inputResetNewPassword');
+          if (inputNewPw) setTimeout(() => inputNewPw.focus(), 300);
+        }
+      } catch(e) {
+        console.warn('checkUrlPasswordResetParams error:', e);
+      }
+    }
+    checkUrlPasswordResetParams();
 
     if (btnSubmitNewPw) {
       btnSubmitNewPw.addEventListener('click', async () => {

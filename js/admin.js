@@ -8693,7 +8693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'status-pending';
   }
 
-  // ==================== 🎡 خېرىدار ئاكتىپلىقى: بەخت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار باشقۇرۇش مەركىزى ====================
+  // ==================== 🎡 خېرىدار ئاكتىپلىقى: ئامەت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار باشقۇرۇش مەركىزى ====================
   let currentWheelSlices = [];
 
   function renderCustomerRetentionAdmin() {
@@ -8702,12 +8702,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const wheel = retention.luckyWheel || {};
     const flash = retention.flashSale || {};
 
-    // 1. بەخت چاقى سەپلىمىسى
+    // 1. ئامەت چاقى سەپلىمىسى
     const wheelEnabledCb = document.getElementById('retentionWheelEnabled');
     if (wheelEnabledCb) wheelEnabledCb.checked = wheel.enabled !== false;
 
     const wheelTitleInp = document.getElementById('retentionWheelTitle');
-    if (wheelTitleInp) wheelTitleInp.value = wheel.title || 'بۈگۈنكى بەخت چاقى';
+    if (wheelTitleInp) wheelTitleInp.value = wheel.title || 'ئامەت چاقى';
 
     const wheelSubInp = document.getElementById('retentionWheelSubtitle');
     if (wheelSubInp) wheelSubInp.value = wheel.subtitle || 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئېتىبار كۇپونى ئۇتۇڭ!';
@@ -8821,7 +8821,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addWheelSliceAdmin = addWheelSliceAdmin;
 
   function resetDefaultWheelAdmin() {
-    if (!confirm('بەخت چاقىنى ئەسلىدىكى سۈكۈتتىكى 6 بۆلەكلىك ھالەتكە قايتۇرامسىز؟')) return;
+    if (!confirm('ئامەت چاقىنى ئەسلىدىكى سۈكۈتتىكى 6 بۆلەكلىك ھالەتكە قايتۇرامسىز؟')) return;
     currentWheelSlices = [
       { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
       { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
@@ -8906,12 +8906,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!window.appStore) return;
     const slices = collectWheelSlicesFromTable();
     if (slices.length < 2) {
-      showAdminToast('بەخت چاقى ئۈچۈن ئەڭ ئاز دېگەندە 2 بۆلەك كىرگۈزۈڭ!', 'error');
+      showAdminToast('ئامەت چاقى ئۈچۈن ئەڭ ئاز دېگەندە 2 بۆلەك كىرگۈزۈڭ!', 'error');
       return;
     }
 
     const wheelEnabled = document.getElementById('retentionWheelEnabled')?.checked ?? true;
-    const wheelTitle = document.getElementById('retentionWheelTitle')?.value.trim() || 'بۈگۈنكى بەخت چاقى';
+    const wheelTitle = document.getElementById('retentionWheelTitle')?.value.trim() || 'ئامەت چاقى';
     const wheelSubtitle = document.getElementById('retentionWheelSubtitle')?.value.trim() || 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، ئېتىبار كۇپونى ئۇتۇڭ!';
 
     const flashEnabled = document.getElementById('retentionFlashEnabled')?.checked ?? true;
@@ -8943,14 +8943,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.appStore.saveCustomerRetentionSettings(newRetention);
-    showAdminToast('✅ بەخت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تەڭشەكلىرى تولۇق ساقلاندى!', 'success');
+    showAdminToast('✅ ئامەت چاقى ۋە بۈگۈنكى ئالاھىدە ئېتىبارلىق مەھسۇلاتلار تەڭشەكلىرى تولۇق ساقلاندى!', 'success');
   }
   window.saveCustomerRetentionAdmin = saveCustomerRetentionAdmin;
 
   function syncCustomerRetentionCouponsAdmin() {
     if (!window.appStore) return;
     window.appStore.syncLuckyWheelCoupons();
-    showAdminToast('🎉 بارلىق بەخت چاقى كۇپونلىرى سىستېمىغا تولۇق ئۇلاندى!', 'success');
+    showAdminToast('🎉 بارلىق ئامەت چاقى كۇپونلىرى سىستېمىغا تولۇق ئۇلاندى!', 'success');
     if (typeof renderCouponsTable === 'function') {
       renderCouponsTable();
     }

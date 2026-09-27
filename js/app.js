@@ -7789,7 +7789,7 @@ ${text}
     }
   };
 
-  // ==================== 🎡 كۈندىلىك بەخت چاقى لوگىكىسى (Customer Daily Lucky Wheel) ====================
+  // ==================== 🎡 كۈندىلىك ئامەت چاقى لوگىكىسى (Customer Daily Lucky Wheel) ====================
   let luckyWheelRotation = 0;
   let isLuckyWheelSpinning = false;
   let luckyWheelAnimFrame = null;

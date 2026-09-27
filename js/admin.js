@@ -1820,6 +1820,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (agentFilterStatus !== 'all') {
       if (agentFilterStatus === 'violation') {
         agents = agents.filter(a => Number(a.violationsCount || 0) > 0);
+      } else if (agentFilterStatus === 'exempt') {
+        agents = agents.filter(a => a.isExemptFromDailyRule === true);
+      } else if (agentFilterStatus === 'dormant') {
+        agents = agents.filter(a => a.inactivityStatus === 'dormant');
       } else {
         agents = agents.filter(a => a.status === agentFilterStatus);
       }
@@ -2120,7 +2124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </td>
 
-          <!-- 5. ھالىتى ۋە توختىتىش جازاسى -->
+          <!-- 5. ھالىتى، توختىتىش جازاسى ۋە كۈندىلىك ئاكتىپلىق -->
           <td>
             <select class="agent-table-status-select" data-id="${agent.id}" style="padding: 0.25rem 0.45rem; border-radius: var(--radius-sm); border: 1.5px solid ${agent.status === 'توختىتىلدى' ? '#f87171' : 'var(--admin-border)'}; background: ${agent.status === 'توختىتىلدى' ? '#fef2f2' : 'var(--admin-bg)'}; font-weight: 700; font-size: 0.8rem; color: ${agent.status === 'توختىتىلدى' ? '#dc2626' : 'inherit'};">
               <option value="تەستىقلاندى" ${agent.status === 'تەستىقلاندى' ? 'selected' : ''}>تەستىقلاندى</option>
@@ -2133,6 +2137,13 @@ document.addEventListener('DOMContentLoaded', () => {
                    <span class="number-latin" style="font-size: 0.65rem;">${new Date(agent.suspendedUntil).toLocaleDateString('ug-CN')} غىچە</span>
                  </div>`
               : ''}
+            ${agent.isExemptFromDailyRule
+              ? `<div style="margin-top: 0.25rem;"><span style="display: inline-flex; align-items: center; gap: 3px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 800;"><i class="fas fa-shield-alt"></i> مەجبۇرىيەتتىن خالىي</span></div>`
+              : (agent.inactivityStatus === 'dormant'
+                  ? `<div style="margin-top: 0.25rem;"><span style="display: inline-flex; align-items: center; gap: 3px; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 800;"><i class="fas fa-bed"></i> ئۇيقۇدا (${agent.checkInStreak || 0} كۈن)</span></div>`
+                  : `<div style="margin-top: 0.25rem;"><span style="display: inline-flex; align-items: center; gap: 3px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 800;"><i class="fas fa-fire" style="color: #ea580c;"></i> ${agent.checkInStreak || 0} كۈن ئاكتىپ</span></div>`
+                )
+            }
           </td>
 
           <!-- 6. رۇخسەت قىلىنغان ماركىلار ۋە تىل ھوقۇقى -->
@@ -2144,15 +2155,20 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
 
           <!-- 7. مەشغۇلاتلار -->
-          <td style="white-space: nowrap; width: 205px;">
+          <td style="white-space: nowrap; width: 245px;">
             <div style="display: flex; gap: 0.3rem; align-items: center; flex-wrap: nowrap;">
+              <!-- ئاكتىپلىق ۋە ئىستىسنا تەڭشىكى -->
+              <button class="btn-action-edit btn-agent-activity" onclick="event.stopPropagation(); if(window.openAgentActivityModal) window.openAgentActivityModal('${agent.id}');" data-id="${agent.id}" title="كۈندىلىك ئاكتىپلىق ۋە مەجبۇرىيەتتىن خالىي قىلىش تەڭشىكى" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-bolt"></i>
+                <span style="font-weight: 700; margin-right: 0.15rem;">ئاكتىپلىق</span>
+              </button>
               <!-- كىنىشكا -->
               <button class="btn-action-edit btn-agent-cert" onclick="event.stopPropagation(); if(window.openAgentCertificateModal) window.openAgentCertificateModal('${agent.id}');" data-id="${agent.id}" title="ماركا سېتىش كىنىشكىسىنى كۆرۈش ۋە چىقىرىش" style="background: #d97706 !important; border-color: #d97706 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
                 <i class="fas fa-award"></i>
                 <span style="font-weight: 700; margin-right: 0.15rem;">كىنىشكا</span>
               </button>
               <!-- ئۇچۇر -->
-              <button class="btn-action-edit btn-sms-agent" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" title="ۋاكالەتچىگە قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
+              <button class="btn-action-edit btn-sms-agent" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" title="ۋاكالەتچىگە قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #059669 !important; border-color: #059669 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
                 <i class="fas fa-sms"></i>
                 <span style="font-weight: 700; margin-right: 0.15rem;">ئۇچۇر</span>
               </button>
@@ -2201,6 +2217,13 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.querySelectorAll('.btn-agent-contract-archive').forEach(btn => {
       btn.addEventListener('click', () => {
         openAgentContractArchiveModal(btn.dataset.id);
+      });
+    });
+
+    // ⚡ جەدۋەلدىكى ئاكتىپلىق ۋە ئىستىسنا تەڭشەك كۇنۇپكىسى
+    tbody.querySelectorAll('.btn-agent-activity').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openAgentActivityModal(btn.dataset.id);
       });
     });
 
@@ -2345,6 +2368,147 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // ⚡ ۋاكالەتچىنىڭ كۈندىلىك ئاكتىپلىقى ۋە ئىستىسنا (Exemption) كۆزنىكىنى ئېچىش
+  function openAgentActivityModal(agentId) {
+    const agent = window.appStore.getAgents('none').find(a => a.id === agentId);
+    if (!agent) {
+      showAdminToast('ۋاكالەتچى تېپىلمىدى!', 'error');
+      return;
+    }
+
+    const modal = document.getElementById('modalAgentActivityRules');
+    if (!modal) return;
+
+    const nameEl = document.getElementById('activityModalAgentName');
+    const subEl = document.getElementById('activityModalAgentSub');
+    const idInput = document.getElementById('activityModalAgentId');
+    const chkExempt = document.getElementById('chkAgentExemptDailyRule');
+    const streakInput = document.getElementById('inputActivityStreak');
+    const pointsInput = document.getElementById('inputActivityPoints');
+    const lastDateInput = document.getElementById('inputActivityLastDate');
+    const statusSelect = document.getElementById('selectActivityDormantStatus');
+
+    if (nameEl) nameEl.textContent = agent.name;
+    if (subEl) subEl.textContent = `${agent.id} • ${agent.phone || ''} (${agent.city || 'ئىستانبۇل'})`;
+    if (idInput) idInput.value = agent.id;
+    if (chkExempt) chkExempt.checked = !!agent.isExemptFromDailyRule;
+    if (streakInput) streakInput.value = agent.checkInStreak || 0;
+    if (pointsInput) pointsInput.value = agent.checkInPoints || 0;
+    if (lastDateInput) lastDateInput.value = agent.lastCheckInDate || '';
+    if (statusSelect) statusSelect.value = agent.inactivityStatus || 'active';
+
+    modal.classList.add('active');
+  }
+  window.openAgentActivityModal = openAgentActivityModal;
+
+  // ⚙️ ئالىي باشقۇرغۇچىنىڭ پۈتۈن كۈندىلىك ئاكتىپلىق تۈزۈمى تەڭشەك كۆزنىكى
+  function openAgentDailyRulesConfig() {
+    const modal = document.getElementById('modalAgentDailyRulesConfig');
+    if (!modal) return;
+
+    const rules = window.appStore.getAgentDailyRules();
+    const chkEnabled = document.getElementById('cfgDailyRulesEnabled');
+    const inputPoints = document.getElementById('cfgCheckInPoints');
+    const inputBonus = document.getElementById('cfgStreak7Bonus');
+    const inputInactivity = document.getElementById('cfgInactivityDays');
+    const selFlash = document.getElementById('cfgFlashDealsToggle');
+
+    if (chkEnabled) chkEnabled.checked = rules.enabled !== false;
+    if (inputPoints) inputPoints.value = rules.pointsPerCheckin || 10;
+    if (inputBonus) inputBonus.value = rules.streak7BonusCommission || 1;
+    if (inputInactivity) inputInactivity.value = rules.inactivityThresholdDays || 3;
+    if (selFlash) selFlash.value = String(rules.dailyFlashDealsEnabled !== false);
+
+    modal.classList.add('active');
+  }
+  window.openAgentDailyRulesConfig = openAgentDailyRulesConfig;
+
+  function initAgentActivityModals() {
+    // 1. ئاكتىپلىق تەڭشەك كۇنۇپكىسى
+    const btnOpenRules = document.getElementById('btnOpenAgentDailyRulesConfig');
+    if (btnOpenRules) {
+      btnOpenRules.addEventListener('click', openAgentDailyRulesConfig);
+    }
+
+    // 2. كۆزنەكلەرنى تاقاش
+    const btnCloseActivity = document.getElementById('btnCloseAgentActivityModal');
+    const btnCancelActivity = document.getElementById('btnCancelAgentActivityModal');
+    const modalActivity = document.getElementById('modalAgentActivityRules');
+
+    [btnCloseActivity, btnCancelActivity].forEach(btn => {
+      if (btn && modalActivity) {
+        btn.addEventListener('click', () => modalActivity.classList.remove('active'));
+      }
+    });
+
+    const btnCloseRules = document.getElementById('btnCloseDailyRulesConfigModal');
+    const btnCancelRules = document.getElementById('btnCancelDailyRulesConfigModal');
+    const modalRules = document.getElementById('modalAgentDailyRulesConfig');
+
+    [btnCloseRules, btnCancelRules].forEach(btn => {
+      if (btn && modalRules) {
+        btn.addEventListener('click', () => modalRules.classList.remove('active'));
+      }
+    });
+
+    // 3. يەككە ۋاكالەتچى ئاكتىپلىقى ۋە ئىستىسنا تەڭشىكىنى ساقلاش
+    const btnSaveActivity = document.getElementById('btnSaveAgentActivityModal');
+    if (btnSaveActivity && modalActivity) {
+      btnSaveActivity.addEventListener('click', () => {
+        const agentId = document.getElementById('activityModalAgentId')?.value;
+        if (!agentId) return;
+
+        const isExempt = document.getElementById('chkAgentExemptDailyRule')?.checked || false;
+        const streak = parseInt(document.getElementById('inputActivityStreak')?.value) || 0;
+        const points = parseInt(document.getElementById('inputActivityPoints')?.value) || 0;
+        const lastDate = document.getElementById('inputActivityLastDate')?.value || '';
+        const status = document.getElementById('selectActivityDormantStatus')?.value || 'active';
+
+        window.appStore.updateAgentDailyActivity(agentId, {
+          isExemptFromDailyRule: isExempt,
+          checkInStreak: streak,
+          checkInPoints: points,
+          lastCheckInDate: lastDate,
+          inactivityStatus: status
+        });
+
+        modalActivity.classList.remove('active');
+        renderAgentsSlider();
+        showAdminToast('✅ ۋاكالەتچىنىڭ كۈندىلىك ئاكتىپلىقى ۋە ئىستىسنا تەڭشىكى ساقلاندى!', 'success');
+      });
+    }
+
+    // 4. ئومۇمىي كۈندىلىك ئاكتىپلىق تۈزۈمى تەڭشىكىنى ساقلاش
+    const btnSaveRules = document.getElementById('btnSaveDailyRulesConfigModal');
+    if (btnSaveRules && modalRules) {
+      btnSaveRules.addEventListener('click', () => {
+        const enabled = document.getElementById('cfgDailyRulesEnabled')?.checked || false;
+        const points = parseInt(document.getElementById('cfgCheckInPoints')?.value) || 10;
+        const bonus = parseFloat(document.getElementById('cfgStreak7Bonus')?.value) || 1;
+        const inactDays = parseInt(document.getElementById('cfgInactivityDays')?.value) || 3;
+        const flashEnabled = document.getElementById('cfgFlashDealsToggle')?.value === 'true';
+
+        window.appStore.updateAgentDailyRules({
+          enabled,
+          pointsPerCheckin: points,
+          streak7BonusCommission: bonus,
+          inactivityThresholdDays: inactDays,
+          dailyFlashDealsEnabled: flashEnabled
+        });
+
+        window.appStore.checkAndUpdateAllAgentsInactivity();
+        modalRules.classList.remove('active');
+        renderAgentsSlider();
+        showAdminToast('✅ كۈندىلىك ئاكتىپلىق ۋە ئىستىسنا تۈزۈمى ساقلاندى!', 'success');
+      });
+    }
+  }
+
+  // دەسلەپكى يۈكلەنگەندە قوزغىتىش
+  setTimeout(() => {
+    initAgentActivityModals();
+  }, 200);
 
   // 📜 رەسمىي ماركا سېتىش ھوقۇقى كىنىشكىسى كۆزنىكىنى ئېچىش
   function openAgentCertificateModal(agentId) {

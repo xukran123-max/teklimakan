@@ -1053,7 +1053,10 @@
               <span style="font-weight: 800; font-size: 0.88rem; color: #1e3a8a;">
                 <i class="fas fa-filter" style="color: #0284c7;"></i> كۆپ شەرتلىك تېز سۈزگۈچ ۋە ئىزدەش:
               </span>
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" id="btnOpenAgentDailyRulesConfig" class="btn-checkout" style="background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                  <i class="fas fa-sliders-h"></i> <span>⚙️ ئاكتىپلىق تۈزۈمى تەڭشىكى</span>
+                </button>
                 <span style="font-size: 0.8rem; background: #eff6ff; color: #1d4ed8; padding: 2px 9px; border-radius: 9999px; font-weight: 800;" id="agentFilterResultsCount">تېپىلغان: 4 نەپەر</span>
                 <button type="button" id="btnResetAgentFilters" style="background: none; border: none; color: #64748b; font-size: 0.78rem; text-decoration: underline; cursor: pointer; font-weight: 700;">
                   <i class="fas fa-undo"></i> قايتا تەڭشەش
@@ -1082,11 +1085,13 @@
                 <option value="bronze">🥉 مىس دەرىجە (&lt;₺8,000)</option>
               </select>
               <!-- 5. ھالەت بويىچە سۈزۈش -->
-              <select id="agentFilterStatus" class="form-control" style="flex: 1 1 130px; min-width: 120px; height: 40px; font-size: 0.88rem; font-weight: 700;">
+              <select id="agentFilterStatus" class="form-control" style="flex: 1 1 140px; min-width: 130px; height: 40px; font-size: 0.88rem; font-weight: 700;">
                 <option value="all">⚡ بارلىق ھالەت</option>
                 <option value="تەستىقلاندى">تەستىقلاندى (Approved)</option>
                 <option value="تەستىق كۈتۈۋاتىدۇ">تەستىق كۈتۈۋاتىدۇ (Pending)</option>
                 <option value="توختىتىلدى">⛔ توختىتىلدى (Suspended)</option>
+                <option value="dormant">😴 ئۇيقۇ ھالىتىدىكىلەر (Dormant)</option>
+                <option value="exempt">🛡️ مەجبۇرىيەتتىن خالىي (Exempt)</option>
                 <option value="violation">🚨 خىلاپلىق قىلغانلار (Violations)</option>
               </select>
             </div>
@@ -1099,12 +1104,12 @@
                 <thead>
                   <tr>
                     <th style="width: 75px;">ۋاكالەتچى ID</th>
-                    <th style="width: 175px;">ۋاكالەتچى / شەھىرى</th>
-                    <th style="width: 135px;">ئايلىق نەتىجە ۋە دەرىجە</th>
-                    <th style="width: 125px;">ئايلىق سېتىش ۋە پايدا</th>
-                    <th style="width: 110px;">ھالىتى</th>
-                    <th style="width: 150px;">رۇخسەت قىلىنغان ماركىلار</th>
-                    <th style="width: 205px;">مەشغۇلاتلار</th>
+                    <th style="width: 170px;">ۋاكالەتچى / شەھىرى</th>
+                    <th style="width: 130px;">ئايلىق نەتىجە ۋە دەرىجە</th>
+                    <th style="width: 120px;">ئايلىق سېتىش ۋە پايدا</th>
+                    <th style="width: 130px;">ھالىتى & ئاكتىپلىق</th>
+                    <th style="width: 140px;">رۇخسەت قىلىنغان ماركىلار</th>
+                    <th style="width: 245px;">مەشغۇلاتلار</th>
                   </tr>
                 </thead>
                 <tbody id="adminAgentsTbody">
@@ -1776,17 +1781,41 @@
   </div>
 
     <!-- 🖼️ تاۋار رەسىمىنى چوڭ كۆرۈش كۆزنىكى (Image Lightbox Modal) -->
-  <div class="modal-backdrop" id="productImagePreviewModal">
-    <div class="modal-content" style="max-width: 520px; border-radius: 20px; padding: 1.25rem; background: #ffffff; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.35);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
-        <h4 id="previewModalProductTitle" style="margin: 0; font-size: 1rem; font-weight: 800; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 420px;">تاۋار رەسىمى</h4>
-        <button type="button" class="btn-close-drawer btn-modal-close" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
+  <div class="modal-backdrop" id="productImagePreviewModal" style="z-index: 100050;">
+    <div class="modal-content" style="max-width: 860px; width: 94%; border-radius: 20px; padding: 1.25rem; background: #ffffff; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.35);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.65rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem; min-width: 0;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; border: 1px solid #bfdbfe;">
+            <i class="fas fa-image"></i>
+          </div>
+          <div style="text-align: right; min-width: 0;">
+            <h4 id="previewModalProductTitle" style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 480px;">تاۋار رەسىمى</h4>
+            <span id="previewModalDimensions" class="number-latin" style="font-size: 0.76rem; color: #64748b; font-weight: 700; display: inline-block; margin-top: 2px;"></span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <a id="btnOpenOriginalImage" href="#" target="_blank" rel="noopener noreferrer" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="ئەسلى رەسىمنى يېڭى بەتتە ئېچىش">
+            <i class="fas fa-external-link-alt"></i> <span>ئەسلى سۈرەت</span>
+          </a>
+          <button type="button" class="btn-close-drawer btn-modal-close" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #94a3b8; padding: 4px;"><i class="fas fa-times"></i></button>
+        </div>
       </div>
-      <div style="border-radius: 12px; overflow: hidden; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 280px; max-height: 480px;">
-        <img id="previewModalImg" src="" alt="تاۋار رەسىمى" style="max-width: 100%; max-height: 460px; object-fit: contain; border-radius: 10px;">
+      <div id="previewModalImgContainer" style="position: relative; border-radius: 14px; overflow: auto; background: #0f172a; border: 1px solid #334155; display: flex; justify-content: center; align-items: center; min-height: 320px; max-height: 72vh; padding: 0.5rem; user-select: none;">
+        <img id="previewModalImg" src="" alt="تاۋار رەسىمى" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; transition: transform 0.25s ease; cursor: zoom-in;" title="چوڭايتىش ياكى كىچىكلىتىش ئۈچۈن چېكىڭ">
       </div>
-      <div style="margin-top: 0.85rem; display: flex; justify-content: flex-end;">
-        <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.5rem 1.25rem; font-weight: 700; border-radius: 8px;">تاقاش</button>
+      <div style="margin-top: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.4rem; align-items: center;">
+          <button type="button" id="btnZoomInModalImg" class="btn-secondary" style="padding: 0.38rem 0.7rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="چوڭايتىش">
+            <i class="fas fa-search-plus"></i> چوڭايتىش
+          </button>
+          <button type="button" id="btnZoomOutModalImg" class="btn-secondary" style="padding: 0.38rem 0.7rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="كىچىكلىتىش">
+            <i class="fas fa-search-minus"></i> كىچىكلىتىش
+          </button>
+          <button type="button" id="btnResetZoomModalImg" class="btn-secondary" style="padding: 0.38rem 0.7rem; font-size: 0.8rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;" title="ئەسلى چوڭلۇقىغا قايتۇرۇش">
+            <i class="fas fa-compress"></i> ئەسلىگە قايتۇرۇش
+          </button>
+        </div>
+        <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.45rem 1.4rem; font-weight: 700; border-radius: 8px; background: #2563eb; color: #ffffff; border: none; cursor: pointer;">تاقاش</button>
       </div>
     </div>
   </div>
@@ -2008,8 +2037,11 @@
             <div id="productImagePreviewBox" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem; background: #ffffff; border: 1.5px dashed #3b82f6; border-radius: var(--radius-md); text-align: center;">
               <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
                 <div style="position: relative; display: inline-block;">
-                  <img id="productImagePreviewImg" src="" alt="ئالدىن كۆرۈش" style="max-height: 140px; max-width: 180px; object-fit: contain; background: #ffffff; padding: 4px; box-sizing: border-box; border-radius: 8px; border: 1px solid #cbd5e1;">
-                  <button type="button" id="btnRemoveImagePreview" style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 0.75rem;"><i class="fas fa-times"></i></button>
+                  <img id="productImagePreviewImg" src="" alt="ئالدىن كۆرۈش" style="max-height: 140px; max-width: 180px; object-fit: contain; background: #ffffff; padding: 4px; box-sizing: border-box; border-radius: 8px; border: 1.5px solid #cbd5e1; cursor: zoom-in; transition: transform 0.2s, box-shadow 0.2s;" title="سۈرەتنى تولۇق چوڭ كۆرۈش ئۈچۈن چېكىڭ">
+                  <span id="badgePreviewImgZoom" style="position: absolute; bottom: 6px; left: 6px; background: rgba(15, 23, 42, 0.75); color: #ffffff; border-radius: 4px; padding: 2px 6px; font-size: 0.68rem; font-weight: 700; pointer-events: none; display: flex; align-items: center; gap: 3px; backdrop-filter: blur(2px);">
+                    <i class="fas fa-search-plus"></i> تولۇق كۆرۈش
+                  </span>
+                  <button type="button" id="btnRemoveImagePreview" style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 0.75rem;" title="رەسىمنى چىقىرىۋېتىش"><i class="fas fa-times"></i></button>
                 </div>
                 <div style="text-align: right; flex: 1; min-width: 200px;">
                   <div id="imageSecurityStatus" style="font-size: 0.88rem; font-weight: 700; color: #059669; margin-bottom: 0.35rem;">
@@ -3756,6 +3788,147 @@
     </div>
   </div>
 
+  <!-- ⚡ يەككە ۋاكالەتچىنىڭ كۈندىلىك ئاكتىپلىقى ۋە ئىستىسنا (Exemption) تەڭشەك كۆزنىكى -->
+  <div class="modal-backdrop" id="modalAgentActivityRules">
+    <div class="modal-content" style="max-width: 520px; border-radius: 18px; padding: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 2px solid #0284c7;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 2px solid var(--admin-border); padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; border: 1.5px solid #bae6fd;">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;" id="activityModalAgentName">ۋاكالەتچى نامى</h4>
+            <span style="font-size: 0.8rem; color: #64748b;" id="activityModalAgentSub">AGT-xxx • ئاكتىپلىق باشقۇرۇش</span>
+          </div>
+        </div>
+        <button class="btn-close-drawer btn-modal-close" id="btnCloseAgentActivityModal" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <input type="hidden" id="activityModalAgentId" value="">
+
+      <!-- 🛡️ ئالىي باشقۇرغۇچىنىڭ ئىستىسنا (Exemption) كارتىسى -->
+      <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+          <div>
+            <div style="font-weight: 900; color: #166534; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-shield-alt" style="color: #10b981;"></i> مەجبۇرىي ئاكتىپلىق تۈزۈمىدىن خالىي قىلىش
+            </div>
+            <div style="font-size: 0.78rem; color: #15803d; line-height: 1.45; margin-top: 3px;">
+              بۇنى قوزغاتسىڭىز، بۇ ۋاكالەتچى سۇپىغا ئۇزاق مەزگىل كىرمىسىمۇ ھېساباتى مەڭگۈ <b>ئۇيقۇ ھالىتىگە كىرمەيدۇ</b> ۋە تاۋارلىرى ئۆچمەيدۇ.
+            </div>
+          </div>
+          <input type="checkbox" id="chkAgentExemptDailyRule" style="width: 24px; height: 24px; cursor: pointer; accent-color: #10b981; flex-shrink: 0;">
+        </div>
+      </div>
+
+      <!-- 📈 ئاكتىپلىق سانلىق مەلۇماتلىرى تەھرىرى -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">🔥 ئۇدا كىرگەن كۈن (Streak)</label>
+          <input type="number" id="inputActivityStreak" class="form-control number-latin" min="0" style="padding: 0.55rem; font-weight: 800; font-size: 1rem;">
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">⭐ كۈندىلىك نومۇرى</label>
+          <input type="number" id="inputActivityPoints" class="form-control number-latin" min="0" style="padding: 0.55rem; font-weight: 800; font-size: 1rem;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">📅 ئەڭ ئاخىرقى كىرگەن كۈن</label>
+          <input type="date" id="inputActivityLastDate" class="form-control number-latin" style="padding: 0.55rem; font-size: 0.88rem;">
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">⚡ نۆۋەتتىكى ئاكتىپلىق ھالىتى</label>
+          <select id="selectActivityDormantStatus" class="form-control" style="padding: 0.55rem; font-weight: 800; font-size: 0.88rem;">
+            <option value="active">✅ نورمال ئاكتىپ (Active)</option>
+            <option value="dormant">😴 ئۇيقۇ ھالىتىدە (Dormant)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1.5px solid #e2e8f0; padding-top: 1rem;">
+        <button type="button" class="btn-checkout" id="btnCancelAgentActivityModal" style="background: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; padding: 0.55rem 1.1rem; font-weight: 700;">بىكار قىلىش</button>
+        <button type="button" class="btn-checkout" id="btnSaveAgentActivityModal" style="background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; padding: 0.55rem 1.4rem; font-weight: 800;">
+          <i class="fas fa-save"></i> <span>ساقلاش</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚙️ ئالىي باشقۇرغۇچىنىڭ ئومۇمىي كۈندىلىك ئاكتىپلىق تۈزۈمى تەڭشەك كۆزنىكى -->
+  <div class="modal-backdrop" id="modalAgentDailyRulesConfig">
+    <div class="modal-content" style="max-width: 560px; border-radius: 18px; padding: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 2px solid #0369a1;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 2px solid var(--admin-border); padding-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; border: 1.5px solid #bae6fd;">
+            <i class="fas fa-sliders-h"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">كۈندىلىك ئاكتىپلىق ۋە زىيارەت تۈزۈمى تەڭشىكى</h4>
+            <span style="font-size: 0.8rem; color: #64748b;">ۋاكالەتچىلەرنىڭ كۈندە كىرىش، ئىمزا قويۇش، ئۇيقۇ چېكى ۋە مۇكاپات قائىدىسى</span>
+          </div>
+        </div>
+        <button class="btn-close-drawer btn-modal-close" id="btnCloseDailyRulesConfigModal" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- 1. ئومۇمىي قوزغىتىش ئالماشتۇرغۇچى -->
+      <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <strong style="color: #1e293b; font-size: 0.9rem;">كۈندىلىك ئاكتىپلىق تۈزۈمىنى ئومۇمىي قوزغىتىش</strong>
+          <div style="font-size: 0.78rem; color: #64748b;">تاقاپ قويۇلسا، كۈندىلىك ئىمزا قويۇش ۋە ئۇيقۇ ھالىتى تەتبىقلانمايدۇ.</div>
+        </div>
+        <input type="checkbox" id="cfgDailyRulesEnabled" style="width: 22px; height: 22px; cursor: pointer; accent-color: #0284c7;">
+      </div>
+
+      <!-- 2. پارامېتىرلار -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">
+            📌 كۈندىلىك ئىمزا نومۇرى
+          </label>
+          <input type="number" id="cfgCheckInPoints" class="form-control number-latin" min="1" max="100" style="padding: 0.55rem;">
+          <small style="color: #64748b; font-size: 0.72rem;">سۈكۈتتە: 10 نومۇر</small>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">
+            👑 7 كۈنلۈك قوشۇمچە پايدا (%)
+          </label>
+          <input type="number" id="cfgStreak7Bonus" class="form-control number-latin" min="0" max="10" step="0.5" style="padding: 0.55rem;">
+          <small style="color: #64748b; font-size: 0.72rem;">سۈكۈتتە: +%1 كومىسسىيە</small>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">
+            😴 ئۇيقۇ ھالىتى چېكى (كۈن)
+          </label>
+          <input type="number" id="cfgInactivityDays" class="form-control number-latin" min="1" max="30" style="padding: 0.55rem;">
+          <small style="color: #64748b; font-size: 0.72rem;">سۈكۈتتە: ئۇدا 3 كۈن كىرمىسە</small>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label style="font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 0.35rem; display: block;">
+            🔥 ئالاھىدە پائالىيەت تاۋارلىرى
+          </label>
+          <select id="cfgFlashDealsToggle" class="form-control" style="padding: 0.55rem; font-weight: 700; font-size: 0.85rem;">
+            <option value="true">✅ قوزغىتىلسۇن</option>
+            <option value="false">❌ تاقالسۇن</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1.5px solid #e2e8f0; padding-top: 1rem;">
+        <button type="button" class="btn-checkout" id="btnCancelDailyRulesConfigModal" style="background: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; padding: 0.55rem 1.1rem; font-weight: 700;">بىكار قىلىش</button>
+        <button type="button" class="btn-checkout" id="btnSaveDailyRulesConfigModal" style="background: linear-gradient(135deg, #0369a1, #0284c7) !important; color: #ffffff !important; padding: 0.55rem 1.4rem; font-weight: 800;">
+          <i class="fas fa-check-circle"></i> <span>جەزملەش ۋە ساقلاش</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 📱 قىسقا ئۇچۇر ئەۋەتىش ئۇنىۋېرسال تاللاش كۆزنىكى (SMS & WhatsApp Universal Modal) -->
   <div class="modal-backdrop" id="directSmsModal">
     <div class="modal-content" style="max-width: 620px; border-radius: 20px; padding: 1.75rem; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
@@ -3921,11 +4094,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260927_v96"></script>
-  <script src="js/i18n.js?v=20260927_v96"></script>
-  <script src="js/store.js?v=20260927_v96"></script>
-  <script src="js/push-manager.js?v=20260927_v96"></script>
-  <script src="js/admin.js?v=20260927_v96"></script>
+  <script src="js/supabase.js?v=20260927_v97"></script>
+  <script src="js/i18n.js?v=20260927_v97"></script>
+  <script src="js/store.js?v=20260927_v97"></script>
+  <script src="js/push-manager.js?v=20260927_v97"></script>
+  <script src="js/admin.js?v=20260927_v97"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

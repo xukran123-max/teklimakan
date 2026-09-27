@@ -27,6 +27,11 @@ function initTeklimakanApp() {
 
   window.appI18n.applyDirectionAndTypography();
 
+  // ⚡ ۋاكالەتچىلەرنىڭ كۈندىلىك ئاكتىپلىقى ۋە ئۇيقۇ ھالىتىنى تەكشۈرۈش
+  if (window.appStore && typeof window.appStore.checkAndUpdateAllAgentsInactivity === 'function') {
+    window.appStore.checkAndUpdateAllAgentsInactivity();
+  }
+
   // تاللانغان ئۇسلۇبتىكى فونىتنى مەڭگۈلۈك مۇقىملاشتۇرۇش
   const savedFont = localStorage.getItem('uyghur_font_preference') || 'modern';
   if (savedFont === 'traditional') {
@@ -4102,6 +4107,79 @@ function initTeklimakanApp() {
         if (profitEl) profitEl.textContent = `₺${orderStats.profitCommission.toLocaleString('tr-TR')}`;
         if (rateBadge) rateBadge.textContent = `پايدا: ${orderStats.commissionRate}%`;
       }
+
+      // 📌 كۈندىلىك ئىمزا قويۇش، كۈن تىزىمى ۋە ئاكتىپلىق تەھلىلى
+      if (window.appStore && typeof window.appStore.getAgentDailyAnalytics === 'function') {
+        const analytics = window.appStore.getAgentDailyAnalytics(agent.id);
+        const streakDaysEl = document.getElementById('dashStreakDays');
+        const pointsValEl = document.getElementById('dashPointsVal');
+        const streak7Notice = document.getElementById('dashStreak7Notice');
+        const visitorsEl = document.getElementById('dashDailyVisitors');
+        const ordersEl = document.getElementById('dashDailyOrders');
+        const profitEl = document.getElementById('dashDailyProfit');
+        const checkInBtn = document.getElementById('btnAgentDailyCheckIn');
+        const noticeBox = document.getElementById('dashActivityNoticeBox');
+
+        if (streakDaysEl) streakDaysEl.textContent = analytics.streak || 0;
+        if (pointsValEl) pointsValEl.textContent = analytics.points || 0;
+        if (visitorsEl) visitorsEl.textContent = analytics.todayVisitors || 0;
+        if (ordersEl) ordersEl.textContent = analytics.todayOrders || 0;
+        if (profitEl) profitEl.textContent = `₺${analytics.todayProfit || 0}`;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isCheckedInToday = agent.lastCheckInDate === todayStr;
+
+        if (checkInBtn) {
+          if (isCheckedInToday) {
+            checkInBtn.disabled = true;
+            checkInBtn.style.background = '#059669';
+            checkInBtn.style.opacity = '0.9';
+            checkInBtn.style.cursor = 'default';
+            checkInBtn.innerHTML = '<i class="fas fa-check-circle"></i> <span>✅ بۈگۈن كىردىڭىز (+10 نومۇر)</span>';
+          } else {
+            checkInBtn.disabled = false;
+            checkInBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            checkInBtn.style.opacity = '1';
+            checkInBtn.style.cursor = 'pointer';
+            checkInBtn.innerHTML = '<i class="fas fa-check-circle"></i> <span>📌 بۈگۈن كىردىم (ئىمزا قويۇش)</span>';
+          }
+        }
+
+        if (streak7Notice) {
+          streak7Notice.style.display = (analytics.streak >= 7 && !analytics.isExempt) ? 'block' : 'none';
+        }
+
+        // ئۇيقۇ ياكى ئىستىسنا ئاگاھلاندۇرۇشى
+        if (noticeBox) {
+          if (analytics.isExempt) {
+            noticeBox.style.display = 'block';
+            noticeBox.innerHTML = `
+              <div style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 0.55rem 0.85rem; font-size: 0.8rem; color: #a7f3d0; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-shield-alt" style="color: #34d399; font-size: 1.15rem; flex-shrink: 0;"></i>
+                <div>
+                  <strong>🛡️ مەجبۇرىي ئاكتىپلىق تۈزۈمىدىن خالىي قىلىنغان VIP ۋاكالەتچى:</strong>
+                  <div>سىز ئالىي باشقۇرغۇچى تەرىپىدىن كۈندىلىك مەجبۇرىي كىرىش تۈزۈمىدىن تولۇق خالىي قىلىنغان. تاۋارلىرىڭىز ۋە ھېساباتىڭىز مەڭگۈ كۈچكە ئىگە.</div>
+                </div>
+              </div>
+            `;
+          } else if (analytics.isDormant) {
+            noticeBox.style.display = 'block';
+            noticeBox.innerHTML = `
+              <div style="background: rgba(239, 68, 68, 0.22); border: 2px solid #ef4444; border-radius: 10px; padding: 0.6rem 0.85rem; font-size: 0.82rem; color: #fee2e2; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fas fa-bed" style="color: #f87171; font-size: 1.25rem; flex-shrink: 0;"></i>
+                  <div>
+                    <strong style="color: #ffffff;">⚠️ ھېساباتىڭىز ئۇيقۇ ھالىتىدە (ئۇدا سۇپىغا كىرمىگەن)!</strong>
+                    <div style="font-size: 0.78rem; color: #fecaca; margin-top: 2px;">تاۋارلىرىڭىزنى سۇپىدا ئەسلىگە كەلتۈرۈش ئۈچۈن يۇقىرىدىكى «📌 بۈگۈن كىردىم» كۇنۇپكىسىنى بېسىپ ئويغىتىڭ.</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            noticeBox.style.display = 'none';
+          }
+        }
+      }
     }
 
     function getOrCreateDeviceToken() {
@@ -4725,15 +4803,26 @@ function initTeklimakanApp() {
       });
     }
 
-    // 🧭 كۆرۈنۈش ئالماشتۇرۇش: «مېنىڭ تاۋارلىرىم» ياكى «تاۋار سۇنۇش جەدۋىلى»
+    // 🧭 كۆرۈنۈش ئالماشتۇرۇش: «مېنىڭ تاۋارلىرىم»، «تاۋار سۇنۇش جەدۋىلى» ياكى «🔥 كۈندىلىك ئالاھىدە تاۋارلار»
     function switchAgentPortalView(view = 'products') {
       const btnProducts = document.getElementById('btnSwitchToMyProducts');
       const btnSubmit = document.getElementById('btnSwitchToNewProduct');
+      const btnFlash = document.getElementById('btnSwitchToFlashDeals');
       const switcherWrap = document.getElementById('agentVerifiedViewSwitcher');
       const myProds = document.getElementById('agentMyProductsWrap');
       const submitForm = document.getElementById('formAgentProductSubmit');
+      const flashWrap = document.getElementById('agentFlashDealsWrap');
 
       if (switcherWrap) switcherWrap.style.display = 'grid';
+
+      [btnProducts, btnSubmit, btnFlash].forEach(b => {
+        if (b) {
+          b.style.border = '1.5px solid #cbd5e1';
+          b.style.background = '#ffffff';
+          b.style.color = '#475569';
+          b.style.fontWeight = '700';
+        }
+      });
 
       if (view === 'products') {
         if (btnProducts) {
@@ -4742,14 +4831,20 @@ function initTeklimakanApp() {
           btnProducts.style.color = 'var(--primary-color)';
           btnProducts.style.fontWeight = '800';
         }
-        if (btnSubmit) {
-          btnSubmit.style.border = '1.5px solid #cbd5e1';
-          btnSubmit.style.background = '#ffffff';
-          btnSubmit.style.color = '#475569';
-          btnSubmit.style.fontWeight = '700';
-        }
         if (myProds) myProds.style.display = 'block';
         if (submitForm) submitForm.style.display = 'none';
+        if (flashWrap) flashWrap.style.display = 'none';
+      } else if (view === 'flashDeals') {
+        if (btnFlash) {
+          btnFlash.style.border = '2px solid #f59e0b';
+          btnFlash.style.background = '#fffbeb';
+          btnFlash.style.color = '#b45309';
+          btnFlash.style.fontWeight = '800';
+        }
+        if (myProds) myProds.style.display = 'none';
+        if (submitForm) submitForm.style.display = 'none';
+        if (flashWrap) flashWrap.style.display = 'block';
+        if (currentVerifiedAgent) renderAgentFlashDeals(currentVerifiedAgent);
       } else {
         if (btnSubmit) {
           btnSubmit.style.border = '2px solid var(--primary-color)';
@@ -4757,15 +4852,69 @@ function initTeklimakanApp() {
           btnSubmit.style.color = 'var(--primary-color)';
           btnSubmit.style.fontWeight = '800';
         }
-        if (btnProducts) {
-          btnProducts.style.border = '1.5px solid #cbd5e1';
-          btnProducts.style.background = '#ffffff';
-          btnProducts.style.color = '#475569';
-          btnProducts.style.fontWeight = '700';
-        }
         if (myProds) myProds.style.display = 'none';
         if (submitForm) submitForm.style.display = 'block';
+        if (flashWrap) flashWrap.style.display = 'none';
       }
+    }
+
+    // 🔥 كۈندىلىك ئالاھىدە پائالىيەت تاۋارلىرىنى رېندېرلاش
+    function renderAgentFlashDeals(agent) {
+      const listEl = document.getElementById('agentFlashDealsList');
+      if (!listEl) return;
+
+      const deals = window.appStore ? window.appStore.getAgentDailyFlashDeals() : [];
+      if (!deals || deals.length === 0) {
+        listEl.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b; background: #ffffff; border-radius: 10px; border: 1px dashed #cbd5e1;">
+            بۈگۈنكى ئالاھىدە پائالىيەت تاۋارلىرى تېخى سەپلەنمىدى.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = deals.map(d => {
+        const shareLink = `${window.location.origin}${window.location.pathname}?prod=${d.id}&agent=${agent.id}`;
+        return `
+          <div style="background: #ffffff; border: 1.5px solid #fde68a; border-radius: 12px; padding: 0.75rem; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="position: relative; border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem; height: 140px; background: #f1f5f9;">
+                <img src="${d.image || 'images/default-product.jpg'}" alt="${escapeModalHtml(d.name)}" style="width: 100%; height: 100%; object-fit: cover;">
+                <span style="position: absolute; top: 6px; right: 6px; background: linear-gradient(135deg, #ea580c, #c2410c); color: #ffffff; font-size: 0.7rem; font-weight: 900; padding: 2px 7px; border-radius: 9999px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                  🔥 ${d.flashCommissionRate}% پايدا!
+                </span>
+              </div>
+              <h5 style="margin: 0 0 0.35rem; font-size: 0.88rem; font-weight: 800; color: #1e293b; line-height: 1.4;">
+                ${escapeModalHtml(d.name)}
+              </h5>
+              <div style="display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.45rem;">
+                <span class="number-latin" style="font-size: 1.1rem; font-weight: 900; color: #e11d48;">₺${d.exclusivePrice || d.price}</span>
+                <span class="number-latin" style="font-size: 0.8rem; color: #94a3b8; text-decoration: line-through;">₺${d.price}</span>
+              </div>
+            </div>
+            <div style="margin-top: 0.5rem; border-top: 1px dashed #e2e8f0; padding-top: 0.5rem; display: flex; gap: 0.35rem;">
+              <button type="button" class="btn-copy-flash-link" data-link="${shareLink}" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; border: none; border-radius: 6px; padding: 0.45rem 0.5rem; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">
+                <i class="fas fa-share-alt"></i> <span>ئۇلانما كۆچۈرۈش</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('.btn-copy-flash-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const link = btn.dataset.link;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+              showToast('✅ تاۋارنىڭ مەخسۇس ۋاكالەتچى ئۇلانمىسى كۆچۈرۈلدى! دوستلار چەمبىرىكىگە ھەمبەھىرلەڭ.', 'success');
+            }).catch(() => {
+              showToast('ئۇلانما: ' + link, 'info');
+            });
+          } else {
+            prompt('بۇ ئۇلانمىنى كۆچۈرۈپ ھەمبەھىرلەڭ:', link);
+          }
+        });
+      });
     }
 
     function resetToNewProductMode() {
@@ -4803,10 +4952,12 @@ function initTeklimakanApp() {
     // تېز ئالماشتۇرۇش كۇنۇپكىلىرى
     const btnSwitchProducts = document.getElementById('btnSwitchToMyProducts');
     const btnSwitchSubmit = document.getElementById('btnSwitchToNewProduct');
+    const btnSwitchFlash = document.getElementById('btnSwitchToFlashDeals');
     const btnQuickAdd = document.getElementById('btnAgentQuickAddProd');
     const btnCopyCode = document.getElementById('btnCopyAgentId');
     const btnRefresh = document.getElementById('btnAgentRefreshData');
     const btnQuickContract = document.getElementById('btnAgentQuickViewContract');
+    const btnCheckIn = document.getElementById('btnAgentDailyCheckIn');
 
     if (btnSwitchProducts) {
       btnSwitchProducts.addEventListener('click', () => switchAgentPortalView('products'));
@@ -4815,6 +4966,34 @@ function initTeklimakanApp() {
       btnSwitchSubmit.addEventListener('click', () => {
         resetToNewProductMode();
         switchAgentPortalView('submit');
+      });
+    }
+    if (btnSwitchFlash) {
+      btnSwitchFlash.addEventListener('click', () => switchAgentPortalView('flashDeals'));
+    }
+    if (btnCheckIn) {
+      btnCheckIn.addEventListener('click', () => {
+        if (!currentVerifiedAgent) {
+          showToast('ئالدى بىلەن كىرىڭ!', 'warning');
+          return;
+        }
+        btnCheckIn.disabled = true;
+        btnCheckIn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تەستىقلىنىۋاتىدۇ...';
+
+        try {
+          const res = window.appStore.agentDailyCheckIn(currentVerifiedAgent.id);
+          if (res.success) {
+            currentVerifiedAgent = res.agent;
+            updateAgentDashboard(res.agent);
+            showToast(res.message, 'success');
+          } else {
+            showToast(res.message, res.alreadyCheckedIn ? 'info' : 'error');
+            if (currentVerifiedAgent) updateAgentDashboard(currentVerifiedAgent);
+          }
+        } catch(e) {
+          console.error('Daily check-in error:', e);
+          showToast('ئىمزا قويۇشتا خاتالىق كۆرۈلدى', 'error');
+        }
       });
     }
     if (btnQuickAdd) {

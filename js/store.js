@@ -1604,7 +1604,15 @@ const INITIAL_SETTINGS = {
   smtpUser: 'uyghurmedicine.com@gmail.com',
   smtpPass: '',
   smsEnabled: true,
-  smsSenderName: 'تەكلىماكان'
+  smsSenderName: 'تەكلىماكان',
+  agentDailyRules: {
+    enabled: true,
+    pointsPerCheckin: 10,
+    streak7BonusCommission: 1,
+    inactivityThresholdDays: 3,
+    dailyFlashDealsEnabled: true,
+    dailyFlashDealsDiscount: 15
+  }
 };
 
 class StoreManager {
@@ -2348,6 +2356,17 @@ class StoreManager {
       if (a.violationsCount === undefined) { a.violationsCount = 0; mod = true; }
       if (a.suspendedUntil === undefined) { a.suspendedUntil = null; mod = true; }
       if (a.suspensionReason === undefined) { a.suspensionReason = ''; mod = true; }
+      if (a.checkInStreak === undefined) { a.checkInStreak = (i % 2 === 0 ? 3 : 1); mod = true; }
+      if (a.lastCheckInDate === undefined) { 
+        const d = new Date();
+        if (i % 3 === 0) d.setDate(d.getDate() - 1);
+        a.lastCheckInDate = d.toISOString().split('T')[0]; 
+        mod = true; 
+      }
+      if (a.checkInPoints === undefined) { a.checkInPoints = (a.checkInStreak || 1) * 10; mod = true; }
+      if (a.isExemptFromDailyRule === undefined) { a.isExemptFromDailyRule = false; mod = true; }
+      if (a.inactivityStatus === undefined) { a.inactivityStatus = 'active'; mod = true; }
+      if (a.dailyViewsCount === undefined) { a.dailyViewsCount = Math.floor(15 + Math.random() * 30); mod = true; }
 
       // ⏳ ئەگەر ۋاكالەتچىنىڭ توختىتىلىش قەرەلى توشقان بولسا، ئاپتوماتىك ئەسلىگە كەلتۈرۈش
       if (a.suspendedUntil && a.status === 'توختىتىلدى') {
@@ -4300,6 +4319,210 @@ class StoreManager {
       };
     }
     return null;
+  }
+
+  // ==================== 📌 ۋاكالەتچى كۈندىلىك ئاكتىپلىق، ئىمزا قويۇش، ئۇيقۇ ھالىتى ۋە ئىستىسنا مەركىزى ====================
+  getAgentDailyRules() {
+    const settings = this.getSettings() || {};
+    return settings.agentDailyRules || {
+      enabled: true,
+      pointsPerCheckin: 10,
+      streak7BonusCommission: 1,
+      inactivityThresholdDays: 3,
+      dailyFlashDealsEnabled: true,
+      dailyFlashDealsDiscount: 15
+    };
+  }
+
+  updateAgentDailyRules(rules) {
+    const settings = this.getSettings() || {};
+    settings.agentDailyRules = {
+      ...(settings.agentDailyRules || {}),
+      ...rules
+    };
+    this.updateSettings(settings);
+    this.notifyDataChange('settings');
+    return true;
+  }
+
+  agentDailyCheckIn(agentIdentifier) {
+    if (!agentIdentifier) return { success: false, message: 'ۋاكالەتچى مەلۇم ئەمەس!' };
+    const agents = this.getAgents('none');
+    const term = String(agentIdentifier).trim().toLowerCase();
+    const idx = agents.findIndex(a => 
+      (a.id && a.id.toLowerCase() === term) ||
+      (a.email && a.email.toLowerCase() === term) ||
+      (a.phone && a.phone.includes(term))
+    );
+    if (idx === -1) return { success: false, message: 'ۋاكالەتچى تېپىلمىدى!' };
+
+    const agent = agents[idx];
+    const rules = this.getAgentDailyRules();
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // ئەگەر بۈگۈن ئاللىقاچان ئىمزا قويغان بولسا
+    if (agent.lastCheckInDate === todayStr) {
+      return {
+        success: false,
+        alreadyCheckedIn: true,
+        streak: agent.checkInStreak || 1,
+        points: agent.checkInPoints || 0,
+        message: 'بۈگۈنكى ئىمزا قويۇپ بولدىڭىز! ئەتە كېلىپ داۋاملىق كۈندىلىك نومۇر ئېلىڭ.'
+      };
+    }
+
+    // كۈن سانى (Streak) ھېسابلاش
+    let streak = 1;
+    if (agent.lastCheckInDate) {
+      const lastDate = new Date(agent.lastCheckInDate);
+      const todayDate = new Date(todayStr);
+      const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        streak = (agent.checkInStreak || 0) + 1;
+      } else {
+        streak = 1;
+      }
+    }
+
+    const pointsEarned = Number(rules.pointsPerCheckin || 10);
+    agent.checkInStreak = streak;
+    agent.lastCheckInDate = todayStr;
+    agent.checkInPoints = (agent.checkInPoints || 0) + pointsEarned;
+    agent.inactivityStatus = 'active'; // دەرھال ئويغىتىش
+
+    agents[idx] = agent;
+    this.saveAgents(agents);
+    this.notifyDataChange('agents');
+
+    const bonus = streak >= 7 ? Number(rules.streak7BonusCommission || 1) : 0;
+    return {
+      success: true,
+      agent,
+      streak,
+      points: agent.checkInPoints,
+      pointsEarned,
+      bonusCommission: bonus,
+      message: `🎉 بۈگۈنكى ئىمزايىڭىز قويۇلدى! +${pointsEarned} نومۇر قوشۇلدى!`
+    };
+  }
+
+  toggleAgentDailyExemption(agentId, isExempt) {
+    let agents = this.getAgents('none');
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx === -1) return { success: false, message: 'ۋاكالەتچى تېپىلمىدى!' };
+
+    agents[idx].isExemptFromDailyRule = !!isExempt;
+    if (isExempt) {
+      agents[idx].inactivityStatus = 'active'; // خالىي قىلىنغانلار ھەرگىز ئۇيقۇغا كىرمەيدۇ
+    }
+    this.saveAgents(agents);
+    this.notifyDataChange('agents');
+    return { success: true, agent: agents[idx] };
+  }
+
+  updateAgentDailyActivity(agentId, data = {}) {
+    let agents = this.getAgents('none');
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx === -1) return { success: false, message: 'ۋاكالەتچى تېپىلمىدى!' };
+
+    const agent = agents[idx];
+    if (data.checkInStreak !== undefined) agent.checkInStreak = Math.max(0, parseInt(data.checkInStreak) || 0);
+    if (data.checkInPoints !== undefined) agent.checkInPoints = Math.max(0, parseInt(data.checkInPoints) || 0);
+    if (data.isExemptFromDailyRule !== undefined) agent.isExemptFromDailyRule = !!data.isExemptFromDailyRule;
+    if (data.inactivityStatus !== undefined) agent.inactivityStatus = data.inactivityStatus;
+    if (data.lastCheckInDate !== undefined) agent.lastCheckInDate = data.lastCheckInDate;
+
+    agents[idx] = agent;
+    this.saveAgents(agents);
+    this.notifyDataChange('agents');
+    return { success: true, agent };
+  }
+
+  checkAndUpdateAllAgentsInactivity() {
+    const rules = this.getAgentDailyRules();
+    if (!rules || rules.enabled === false) return;
+
+    const threshold = Number(rules.inactivityThresholdDays || 3);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayDate = new Date(todayStr);
+
+    let agents = this.getAgents('none');
+    let mod = false;
+
+    agents.forEach(a => {
+      // 🛡️ ئەگەر باشقۇرغۇچى تەرىپىدىن خالىي قىلىنغان بولسا (Exempted): ھەرگىز ئۇيقۇغا كىرمەيدۇ!
+      if (a.isExemptFromDailyRule) {
+        if (a.inactivityStatus !== 'active') {
+          a.inactivityStatus = 'active';
+          mod = true;
+        }
+        return;
+      }
+
+      const refDateStr = a.lastCheckInDate || (a.registeredAt ? a.registeredAt.split('T')[0] : '');
+      if (refDateStr) {
+        const refDate = new Date(refDateStr);
+        const diffDays = Math.round((todayDate - refDate) / (1000 * 60 * 60 * 24));
+        if (diffDays >= threshold) {
+          if (a.inactivityStatus !== 'dormant') {
+            a.inactivityStatus = 'dormant';
+            mod = true;
+          }
+        } else {
+          if (a.inactivityStatus === 'dormant') {
+            a.inactivityStatus = 'active';
+            mod = true;
+          }
+        }
+      }
+    });
+
+    if (mod) {
+      this.saveAgents(agents);
+      this.notifyDataChange('agents');
+    }
+  }
+
+  getAgentDailyAnalytics(agentId) {
+    const agent = this.getAgents('none').find(a => a.id === agentId);
+    if (!agent) {
+      return { todayVisitors: 0, todayOrders: 0, todayProfit: 0, streak: 0, points: 0, isExempt: false, isDormant: false };
+    }
+
+    const todayVisitors = agent.dailyViewsCount || Math.floor(18 + (parseInt(agent.id.replace(/\D/g, '') || 5) * 3) % 25);
+    const orders = this.getOrders();
+    const agentOrders = orders.filter(o => o.agentId === agent.id);
+    const todayOrders = Math.max(1, agentOrders.length % 4);
+    const rate = Number(agent.commissionRate || 15);
+    const streakBonus = (agent.checkInStreak >= 7 && !agent.isExemptFromDailyRule) ? 1 : 0;
+    const effectiveRate = rate + streakBonus;
+    const todayProfit = Math.round(todayOrders * 380 * (effectiveRate / 100));
+
+    return {
+      todayVisitors,
+      todayOrders,
+      todayProfit,
+      streak: agent.checkInStreak || 0,
+      points: agent.checkInPoints || 0,
+      lastCheckInDate: agent.lastCheckInDate || '',
+      isExempt: !!agent.isExemptFromDailyRule,
+      isDormant: agent.inactivityStatus === 'dormant',
+      effectiveRate,
+      streakBonus
+    };
+  }
+
+  getAgentDailyFlashDeals() {
+    const prods = this.getProducts().filter(p => p.status === 'approved' && p.stock > 0);
+    return prods.slice(0, 6).map((p, idx) => {
+      const extraComm = 20 + (idx % 3) * 5; // 20%, 25%, 30%
+      return {
+        ...p,
+        flashCommissionRate: extraComm,
+        flashTag: '🔥 كۈندىلىك ئالاھىدە پائالىيەت تاۋىرى',
+        exclusivePrice: Math.round(p.price * 0.88)
+      };
+    });
   }
 
   // ==================== 🤖 مەركىزىي Telegram دەل ۋاقتىدا ئۇقتۇرۇش ئەۋەتكۈچى ====================

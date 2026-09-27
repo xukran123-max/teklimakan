@@ -1562,12 +1562,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const trLang = cat.translations?.tr || '-';
       const enLang = cat.translations?.en || '-';
       const isHidden = (cat.status === 'hidden');
+      const orderNum = cat.order || (index + 1);
 
       tr.innerHTML = `
-        <td style="text-align: center;">
-          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; font-weight: 800; font-size: 0.85rem;">
-            ${index + 1}
-          </span>
+        <td style="text-align: center; white-space: nowrap;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+            <button type="button" class="btn-order-move btn-order-up" data-id="${cat.id}" title="ئۈستىگە يۆتكەش" style="border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #475569; font-size: 0.72rem; transition: all 0.15s;" ${index === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <input type="number" min="1" max="${categories.length}" value="${orderNum}" data-id="${cat.id}" class="category-order-input number-latin" title="تەرتىپ نومۇرىنى بىۋاسىتە يېزىپ Enter نى بېسىڭ" style="width: 44px; height: 26px; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 6px; font-weight: 800; font-size: 0.86rem; color: #1e293b; padding: 0 2px;">
+            <button type="button" class="btn-order-move btn-order-down" data-id="${cat.id}" title="ئاستىغا يۆتكەش" style="border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #475569; font-size: 0.72rem; transition: all 0.15s;" ${index === categories.length - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 0.65rem;">
@@ -1612,6 +1619,52 @@ document.addEventListener('DOMContentLoaded', () => {
       tbody.appendChild(tr);
     });
 
+    // ⬆️ تەرتىپنى ئۈستىگە يۆتكەش
+    tbody.querySelectorAll('.btn-order-up').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        if (window.appStore.reorderCategory(id, 'up')) {
+          renderCategoriesTable();
+          populateCategoryDropdowns();
+          showAdminToast('تۈر تەرتىپى يېڭىلاندى!', 'success');
+        }
+      };
+    });
+
+    // ⬇️ تەرتىپنى ئاستىغا يۆتكەش
+    tbody.querySelectorAll('.btn-order-down').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        if (window.appStore.reorderCategory(id, 'down')) {
+          renderCategoriesTable();
+          populateCategoryDropdowns();
+          showAdminToast('تۈر تەرتىپى يېڭىلاندى!', 'success');
+        }
+      };
+    });
+
+    // 🔢 تەرتىپ نومۇرىنى بىۋاسىتە كىرگۈزۈش
+    tbody.querySelectorAll('.category-order-input').forEach(input => {
+      const applyOrderChange = () => {
+        const id = input.dataset.id;
+        const val = parseInt(input.value, 10);
+        if (!isNaN(val) && val > 0) {
+          if (window.appStore.updateCategoryOrder(id, val)) {
+            renderCategoriesTable();
+            populateCategoryDropdowns();
+            showAdminToast('تۈر تەرتىپى يېڭىلاندى!', 'success');
+          }
+        }
+      };
+      input.addEventListener('change', applyOrderChange);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          input.blur();
+        }
+      });
+    });
+
     // ✏️ تەھرىرلەش كۇنۇپكىلىرىنى ئۇلاش
     tbody.querySelectorAll('.btn-edit-category').forEach(btn => {
       btn.onclick = () => openEditCategoryModal(btn.dataset.id);
@@ -1650,6 +1703,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('editCategoryId').value = cat.id;
+    const nameInput = document.getElementById('editCategoryName');
+    if (nameInput) nameInput.value = cat.name;
+
+    const orderInput = document.getElementById('editCategoryOrder');
+    if (orderInput) orderInput.value = cat.order || 1;
+
     const trVal = (cat.translations && cat.translations.tr) || '';
     const enVal = (cat.translations && cat.translations.en) || '';
     const editTr = document.getElementById('editCategoryTr');
@@ -6402,14 +6461,18 @@ document.addEventListener('DOMContentLoaded', () => {
       addCatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const catName = document.getElementById('newCategoryName').value.trim();
+        const catOrderVal = document.getElementById('newCategoryOrder')?.value ? parseInt(document.getElementById('newCategoryOrder').value, 10) : null;
         const catIcon = document.getElementById('newCategoryIcon').value.trim() || 'fas fa-tag';
         const catTr = document.getElementById('newCategoryTr')?.value.trim() || catName;
         const catEn = document.getElementById('newCategoryEn')?.value.trim() || catName;
 
         if (catName) {
-          const success = window.appStore.addCategory(catName, catIcon, { tr: catTr, en: catEn });
+          const success = window.appStore.addCategory(catName, catIcon, { tr: catTr, en: catEn }, catOrderVal);
           if (success) {
             document.getElementById('newCategoryName').value = '';
+            if (document.getElementById('newCategoryOrder')) {
+              document.getElementById('newCategoryOrder').value = '';
+            }
             const newTr = document.getElementById('newCategoryTr');
             const newEn = document.getElementById('newCategoryEn');
             if (newTr) {
@@ -6439,6 +6502,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const id = document.getElementById('editCategoryId').value;
         const name = document.getElementById('editCategoryName').value.trim();
+        const orderVal = document.getElementById('editCategoryOrder') ? parseInt(document.getElementById('editCategoryOrder').value, 10) : null;
         const tr = document.getElementById('editCategoryTr')?.value.trim() || name;
         const en = document.getElementById('editCategoryEn')?.value.trim() || name;
         const icon = document.getElementById('editCategoryIcon')?.value.trim() || 'fas fa-tag';
@@ -6451,6 +6515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const success = window.appStore.updateCategory(id, {
           name,
+          order: orderVal,
           icon,
           status: isActive ? 'active' : 'hidden',
           translations: { ug: name, tr, en }

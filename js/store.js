@@ -5634,8 +5634,37 @@ class StoreManager {
           name: cat,
           icon: 'fas fa-tag',
           status: 'active',
+          order: categories.length,
           translations: { ug: cat, tr: trName, en: enName }
         });
+      }
+    });
+
+    // 3. تەرتىپ سانلىرىنى كاپالەتلەندۈرۈش ۋە رەتلەش
+    let nextOrder = 1;
+    categories.forEach(c => {
+      if (c.id === 'all') {
+        c.order = 0;
+      } else if (typeof c.order !== 'number' || isNaN(c.order) || c.order <= 0) {
+        c.order = nextOrder;
+      }
+      if (c.id !== 'all') nextOrder++;
+    });
+
+    // 'all' ھەمىشە ئالدىدا بولىدۇ، قالغانلىرى تەرتىپ نومۇرى بويىچە رەتلىنىدۇ
+    categories.sort((a, b) => {
+      if (a.id === 'all') return -1;
+      if (b.id === 'all') return 1;
+      return (a.order || 0) - (b.order || 0);
+    });
+
+    // تەرتىپ نومۇرلىرىنى 1، 2، 3 تەرتىپلىك بويىچە پۇختا نورماللاشتۇرۇش
+    let normOrder = 1;
+    categories.forEach(c => {
+      if (c.id === 'all') {
+        c.order = 0;
+      } else {
+        c.order = normOrder++;
       }
     });
 
@@ -5651,9 +5680,17 @@ class StoreManager {
     });
   }
 
-  addCategory(categoryName, icon = 'fas fa-tag', translations = {}) {
-    const categories = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];
-    if (categories.some(c => c.name === categoryName)) return false;
+  addCategory(categoryName, icon = 'fas fa-tag', translations = {}, order = null) {
+    let categories = this.getCategories('ug');
+    if (categories.some(c => c.name === categoryName || c.id === categoryName)) return false;
+
+    const nonAll = categories.filter(c => c.id !== 'all');
+    let targetOrder = nonAll.length + 1;
+    if (order !== null && order !== undefined && !isNaN(parseInt(order, 10)) && parseInt(order, 10) > 0) {
+      targetOrder = parseInt(order, 10);
+    }
+    if (targetOrder > nonAll.length + 1) targetOrder = nonAll.length + 1;
+
     const newCat = {
       id: categoryName,
       name: categoryName,
@@ -5661,36 +5698,70 @@ class StoreManager {
       status: 'active',
       translations: { ug: categoryName, tr: translations.tr || categoryName, en: translations.en || categoryName }
     };
-    categories.push(newCat);
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+
+    // كۆرسىتىلگەن ئورۇنغا قىستۇرۇش
+    const insertIdx = Math.max(0, Math.min(targetOrder - 1, nonAll.length));
+    nonAll.splice(insertIdx, 0, newCat);
+
+    // تەرتىپ سانلىرىنى يېڭىلاش
+    let ord = 1;
+    nonAll.forEach(c => {
+      c.order = ord++;
+    });
+
+    const allCat = categories.find(c => c.id === 'all') || { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large' };
+    const finalCategories = [allCat, ...nonAll];
+
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(finalCategories));
     this.notifyDataChange('categories');
     return true;
   }
 
   updateCategory(categoryId, updatedData) {
-    let categories = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];
-    const index = categories.findIndex(c => c.id === categoryId || c.name === categoryId);
+    let categories = this.getCategories('ug');
+    const nonAll = categories.filter(c => c.id !== 'all');
+    const index = nonAll.findIndex(c => c.id === categoryId || c.name === categoryId);
     if (index === -1) return false;
 
-    const oldName = categories[index].name;
+    const oldName = nonAll[index].name;
     const newName = updatedData.name || oldName;
 
-    categories[index] = {
-      ...categories[index],
+    // ئاساسىي سانلىق مەلۇماتلارنى يېڭىلاش
+    nonAll[index] = {
+      ...nonAll[index],
       ...updatedData,
       id: newName,
       name: newName,
-      icon: updatedData.icon || categories[index].icon || 'fas fa-tag',
-      status: updatedData.status || categories[index].status || 'active',
+      icon: updatedData.icon || nonAll[index].icon || 'fas fa-tag',
+      status: updatedData.status || nonAll[index].status || 'active',
       translations: {
-        ...(categories[index].translations || {}),
+        ...(nonAll[index].translations || {}),
         ug: newName,
-        tr: (updatedData.translations && updatedData.translations.tr) || (categories[index].translations && categories[index].translations.tr) || newName,
-        en: (updatedData.translations && updatedData.translations.en) || (categories[index].translations && categories[index].translations.en) || newName
+        tr: (updatedData.translations && updatedData.translations.tr) || (nonAll[index].translations && nonAll[index].translations.tr) || newName,
+        en: (updatedData.translations && updatedData.translations.en) || (nonAll[index].translations && nonAll[index].translations.en) || newName
       }
     };
 
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    // ئەگەر تەرتىپ نومۇرى ئۆزگەرگەن بولسا، يېڭى ئورۇنغا يۆتكەش
+    if (updatedData.order !== undefined && updatedData.order !== null && !isNaN(parseInt(updatedData.order, 10))) {
+      let desiredOrder = parseInt(updatedData.order, 10);
+      if (desiredOrder < 1) desiredOrder = 1;
+      if (desiredOrder > nonAll.length) desiredOrder = nonAll.length;
+
+      const targetItem = nonAll.splice(index, 1)[0];
+      nonAll.splice(desiredOrder - 1, 0, targetItem);
+    }
+
+    // تەرتىپ نومۇرلىرىنى قايتا رەتلەپ بېكىتىش
+    let ord = 1;
+    nonAll.forEach(c => {
+      c.order = ord++;
+    });
+
+    const allCat = categories.find(c => c.id === 'all') || { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large' };
+    const finalCategories = [allCat, ...nonAll];
+
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(finalCategories));
 
     if (oldName !== newName) {
       let products = this.getProducts();
@@ -5712,44 +5783,89 @@ class StoreManager {
   }
 
   deleteCategory(categoryId) {
-    let categories = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];
-    const index = categories.findIndex(c => c.id === categoryId || c.name === categoryId);
+    let categories = this.getCategories('ug');
+    const nonAll = categories.filter(c => c.id !== 'all');
+    const index = nonAll.findIndex(c => c.id === categoryId || c.name === categoryId);
     if (index === -1) return { success: false, message: 'تۈر تېپىلمىدى' };
 
-    const catName = categories[index].name;
+    const catName = nonAll[index].name;
     const products = this.getProducts();
     const count = products.filter(p => p.category === catName || p.category === categoryId).length;
     if (count > 0) {
       return { success: false, message: `بۇ تۈردە ${count} دانە تاۋار بار! ئالدى بىلەن تاۋارلارنى باشقا تۈرگە يۆتكەڭ ياكى ئۆچۈرۈڭ.` };
     }
 
-    categories.splice(index, 1);
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    nonAll.splice(index, 1);
+    let ord = 1;
+    nonAll.forEach(c => {
+      c.order = ord++;
+    });
+
+    const allCat = categories.find(c => c.id === 'all') || { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large' };
+    const finalCategories = [allCat, ...nonAll];
+
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(finalCategories));
     this.notifyDataChange('categories');
     return { success: true };
   }
 
   reorderCategory(categoryId, direction) {
-    let categories = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];
-    const index = categories.findIndex(c => c.id === categoryId || c.name === categoryId);
+    let categories = this.getCategories('ug');
+    const nonAll = categories.filter(c => c.id !== 'all');
+    const index = nonAll.findIndex(c => c.id === categoryId || c.name === categoryId);
     if (index === -1) return false;
 
-    if (direction === 'up' && index > 1) { // 0 is 'all'
-      const temp = categories[index];
-      categories[index] = categories[index - 1];
-      categories[index - 1] = temp;
-    } else if (direction === 'down' && index < categories.length - 1 && index > 0) {
-      const temp = categories[index];
-      categories[index] = categories[index + 1];
-      categories[index + 1] = temp;
+    if (direction === 'up' && index > 0) {
+      const temp = nonAll[index];
+      nonAll[index] = nonAll[index - 1];
+      nonAll[index - 1] = temp;
+    } else if (direction === 'down' && index < nonAll.length - 1) {
+      const temp = nonAll[index];
+      nonAll[index] = nonAll[index + 1];
+      nonAll[index + 1] = temp;
     } else {
       return false;
     }
 
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    let ord = 1;
+    nonAll.forEach(c => {
+      c.order = ord++;
+    });
+
+    const allCat = categories.find(c => c.id === 'all') || { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large' };
+    const finalCategories = [allCat, ...nonAll];
+
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(finalCategories));
     this.notifyDataChange('categories');
     return true;
   }
+
+  updateCategoryOrder(categoryId, newOrder) {
+    let categories = this.getCategories('ug');
+    const nonAll = categories.filter(c => c.id !== 'all');
+    const index = nonAll.findIndex(c => c.id === categoryId || c.name === categoryId);
+    if (index === -1) return false;
+
+    let targetOrder = parseInt(newOrder, 10);
+    if (isNaN(targetOrder) || targetOrder < 1) targetOrder = 1;
+    if (targetOrder > nonAll.length) targetOrder = nonAll.length;
+
+    const item = nonAll.splice(index, 1)[0];
+    nonAll.splice(targetOrder - 1, 0, item);
+
+    let ord = 1;
+    nonAll.forEach(c => {
+      c.order = ord++;
+    });
+
+    const allCat = categories.find(c => c.id === 'all') || { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large' };
+    const finalCategories = [allCat, ...nonAll];
+
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(finalCategories));
+    this.notifyDataChange('categories');
+    return true;
+  }
+
 
   toggleCategoryStatus(categoryId) {
     let categories = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES)) || [];

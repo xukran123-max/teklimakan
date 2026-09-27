@@ -777,6 +777,10 @@
                     <span class="icon-pick-btn" data-icon="fas fa-tag" title="بەلگە"><i class="fas fa-tag"></i></span>
                   </div>
                 </div>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.86rem;">تەرتىپ نومۇرى (تاللاشچان)</label>
+                  <input type="number" id="newCategoryOrder" min="1" class="form-control number-latin" placeholder="بوش قالدۇرۇلسا ئەڭ ئاخىرىغا قويۇلىدۇ">
+                </div>
                 <button type="submit" class="btn-add-primary" style="width: 100%; justify-content: center; padding: 0.65rem; font-weight: 800; font-size: 0.9rem;">
                   <i class="fas fa-plus"></i> يېڭى تۈرنى قوشۇش
                 </button>
@@ -3227,6 +3231,14 @@
             <span class="icon-pick-btn" data-icon="fas fa-gift" title="سوۋغات"><i class="fas fa-gift"></i></span>
             <span class="icon-pick-btn" data-icon="fas fa-tag" title="بەلگە"><i class="fas fa-tag"></i></span>
           </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.95rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="font-weight: 700; font-size: 0.88rem; margin: 0;">تەرتىپ نومۇرى <span style="color: var(--danger-color);">*</span></label>
+            <span style="font-size: 0.74rem; color: #64748b;">(1 = ئەڭ ئالدىدا كۆرۈنىدۇ)</span>
+          </div>
+          <input type="number" id="editCategoryOrder" min="1" class="form-control number-latin" required placeholder="مەسىلەن: 1">
         </div>
 
         <div class="form-group" style="margin-bottom: 1.25rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem;">

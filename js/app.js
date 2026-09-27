@@ -997,6 +997,39 @@ function initTeklimakanApp() {
     return `<span class="product-merchant-tag" style="color: ${textColor} !important; background: ${bgColor} !important; border: 1px solid ${borderColor} !important; font-weight: 800;" title="${displayName}"><i class="fas ${icon}" style="color: ${textColor} !important;"></i> <span style="color: ${textColor} !important;">${displayName}</span></span>`;
   }
 
+  // ==================== ۋاكالەتچى ID كودى بەلگىسى (Agent ID Badge) ====================
+  function getAgentBadgeHtml(product, isCompact = false) {
+    if (!product) return '';
+    let agent = null;
+    if (window.appStore && typeof window.appStore.getProductAgent === 'function') {
+      agent = window.appStore.getProductAgent(product);
+    } else if (product.agentId) {
+      agent = { id: product.agentId, name: product.agentName || product.agentId };
+    }
+
+    const i18n = window.appI18n;
+    const labelText = (i18n && typeof i18n.t === 'function' && i18n.t('agentIdLabel')) || 'ۋاكالەتچى ID:';
+
+    if (agent && agent.id) {
+      const agentId = agent.id;
+      const cleanName = agent.name ? String(agent.name).replace(/\s*\(.*?\)/, '').trim() : '';
+      const tooltip = cleanName ? `${cleanName} (${agentId})` : agentId;
+
+      if (isCompact) {
+        return `<span class="product-agent-badge compact" style="background: rgba(30, 58, 138, 0.06); color: #1e40af; border: 1px solid rgba(30, 58, 138, 0.2); padding: 1.5px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 3px;" title="${labelText} ${tooltip}"><i class="fas fa-id-badge" style="color: #2563eb; font-size: 0.75rem;"></i><span class="number-latin" style="color: #1d4ed8; font-weight: 800;">${agentId}</span></span>`;
+      }
+
+      return `<span class="product-agent-badge" style="background: rgba(37, 99, 235, 0.08); color: #1e3a8a; border: 1.2px solid rgba(37, 99, 235, 0.25); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);" title="مەھسۇلاتنى تەمىنلىگۈچى ۋاكالەتچى: ${tooltip}"><i class="fas fa-id-badge" style="color: #2563eb; font-size: 0.85rem;"></i> <span>${labelText}</span> <strong class="number-latin" style="color: #1d4ed8; font-weight: 900; letter-spacing: 0.4px;">${agentId}</strong></span>`;
+    }
+
+    // ئەگەر ۋاكالەتچى باغلانمىغان بولسا، سۇپا رەسمىي دەپ كۆرسىتىش
+    const officialLabel = (i18n && typeof i18n.t === 'function' && i18n.t('platformOfficialLabel')) || 'تەكلىماكان سۇپىسى';
+    if (isCompact) {
+      return `<span class="product-agent-badge compact platform" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; padding: 1.5px 6px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.72rem;"></i><span style="color: #475569;">سۇپا</span></span>`;
+    }
+    return `<span class="product-agent-badge platform" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.82rem;"></i> <span>${officialLabel}</span></span>`;
+  }
+
   // ==================== تاۋار كارتىلىرى ====================
   function renderProducts() {
     const i18n = window.appI18n;
@@ -1083,10 +1116,11 @@ function initTeklimakanApp() {
           <!-- 1. مەھسۇلات نامى ئۈستىدە -->
           <h3 class="product-title" title="${product.name}">${product.name}</h3>
 
-          <!-- 2. تۈرى ئاستىدا ۋە سودىگەر ئىناۋەت بەلگىسى -->
+          <!-- 2. تۈرى ئاستىدا، سودىگەر ئىناۋەت بەلگىسى ۋە ۋاكالەتچى ID كودى -->
           <div class="product-category-row" style="margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
             <span class="product-category-tag">${i18n.getCategoryName(product.category)}</span>
             ${getMerchantBadgeHtml(product)}
+            ${getAgentBadgeHtml(product, true)}
           </div>
           
           <div class="product-rating">
@@ -2035,6 +2069,7 @@ function initTeklimakanApp() {
             <!-- 🏷️ ماركا ئۇچۇرى تەپسىلات كۆزنىكىدە كۆرۈنىدۇ -->
             <span style="background: rgba(37, 99, 235, 0.08); color: var(--primary-color); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(37, 99, 235, 0.22); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-award" style="font-size: 0.72rem;"></i> ${window.appI18n.t('brandLabel') || 'ماركا:'} ${window.appI18n.getBrandName(product.brand) || 'تەكلىماكان'}</span>
             ${getMerchantBadgeHtml(product)}
+            ${getAgentBadgeHtml(product, false)}
           </div>
 
           <h3 style="font-size: 1.25rem; font-weight: 800; line-height: 1.4; margin-bottom: 0.75rem;">${product.name}</h3>

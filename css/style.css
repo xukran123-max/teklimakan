@@ -2334,6 +2334,33 @@ body {
   border: 1px solid #bfdbfe;
 }
 
+.product-agent-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  background: #eff6ff;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  transition: all 0.2s ease;
+}
+
+.product-agent-badge.compact {
+  font-size: 0.72rem;
+  padding: 1.5px 6px;
+  border-radius: 5px;
+}
+
+.product-agent-badge.platform {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
 .merchant-tag-gold {
   background: #fffbeb;
   color: #92400e;

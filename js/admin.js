@@ -1407,6 +1407,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.25rem 0;">
                 <span style="font-size: 0.78rem; color: #475569; font-weight: 700;"><i class="fas fa-award"></i> ${displayBrand}</span>
                 ${getReputationBadgeHtml(window.appStore.getProductMerchantBadge(product))}
+                ${(() => {
+                  const agId = product.agentId || (window.appStore && typeof window.appStore.getProductAgentId === 'function' && window.appStore.getProductAgentId(product));
+                  return agId ? `<span class="badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:0.72rem; font-weight:800; display:inline-flex; align-items:center; gap:3px;" title="ۋاكالەتچى ID كودى"><i class="fas fa-id-badge" style="color:#2563eb;"></i> <span class="number-latin">${agId}</span></span>` : '';
+                })()}
               </div>
               <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light); font-weight: 600;">${product.id}</div>
               ${violationAlertHtml}

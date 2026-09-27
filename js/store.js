@@ -5312,6 +5312,39 @@ class StoreManager {
     return badgeObj;
   }
 
+  // 🆔 مەھسۇلاتنى تەمىنلىگۈچى / يوللىغۇچى ۋاكالەتچىنى ئېلىش
+  getProductAgent(product) {
+    if (!product) return null;
+    const agents = this.getAgents('none');
+    // 1. بىۋاسىتە مەھسۇلاتتا ساقلانغان agentId ئارقىلىق
+    if (product.agentId) {
+      const found = agents.find(a => a.id === product.agentId);
+      if (found) return found;
+      return { id: product.agentId, name: product.agentName || product.agentId };
+    }
+    // 2. ئەگەر agentName ئىچىدە AGT-xxx كودى بار بولسا
+    if (product.agentName) {
+      const match = String(product.agentName).match(/AGT-\d+/i);
+      if (match) {
+        const agentCode = match[0].toUpperCase();
+        const found = agents.find(a => a.id === agentCode);
+        if (found) return found;
+        return { id: agentCode, name: product.agentName };
+      }
+    }
+    // 3. مەھسۇلاتنىڭ ماركىسىغا ھوقۇق بېرىلگەن ۋاكالەتچىنى تېپىش
+    if (product.brand) {
+      const found = agents.find(a => a.authorizedBrands && Array.isArray(a.authorizedBrands) && a.authorizedBrands.includes(product.brand));
+      if (found) return found;
+    }
+    return null;
+  }
+
+  getProductAgentId(product) {
+    const agent = this.getProductAgent(product);
+    return agent ? agent.id : null;
+  }
+
   // 🔍 ۋاكالەتچىلەر مەھسۇلات ئېلان قىلغاندا ئەقلىي ئىزدەش ۋە ئاپتوماتىك تولدۇرۇش تەكلىپلىرى (Autofill Suggestions)
   findProductSuggestions(query, limit = 8) {
     if (!query || typeof query !== 'string') return [];

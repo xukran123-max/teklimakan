@@ -1602,8 +1602,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-user-slash"></i>
               </button>
             ` : `
-              <button type="button" class="btn-action-edit btn-sms-order" onclick="window.openDirectSmsModalForOrder('${order.id}')" data-id="${order.id}" title="خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
-                <i class="fas fa-sms"></i>
+              <button type="button" class="btn-action-edit btn-sms-order" onclick="window.openDirectSmsModalForOrder('${order.id}')" data-id="${order.id}" title="خېرىدارغا WhatsApp تىن يېزىش" style="background: #16a34a !important; border-color: #16a34a !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fab fa-whatsapp"></i>
               </button>
             `}
             <button type="button" class="btn-action-edit btn-view-invoice" onclick="window.openOrderInvoiceModal('${order.id}')" data-id="${order.id}" title="تەپسىلات تالونى" style="cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
@@ -2110,8 +2110,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <button type="button" class="agent-card-btn btn-open-agent-cert" onclick="event.stopPropagation(); if(window.openAgentCertificateModal) window.openAgentCertificateModal('${agent.id}');" data-id="${agent.id}" style="flex: 1.5; background: #d97706; color: white; border-color: #d97706; padding: 0.45rem 0.3rem; font-size: 0.76rem; cursor: pointer;" title="ماركا سېتىش كىنىشكىسىنى كۆرۈش">
               <i class="fas fa-award"></i> كىنىشكا
             </button>
-            <button type="button" class="agent-card-btn btn-sms-agent-slider" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" style="flex: 1; background: #0284c7; color: white; border-color: #0284c7; padding: 0.45rem 0.3rem; font-size: 0.76rem;" title="ۋاكالەتچىگە قىسقا ئۇچۇر ئەۋەتىش">
-              <i class="fas fa-sms"></i> ئۇچۇر
+            <button type="button" class="agent-card-btn btn-sms-agent-slider" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" style="flex: 1; background: #16a34a; color: white; border-color: #16a34a; padding: 0.45rem 0.3rem; font-size: 0.76rem;" title="ۋاكالەتچىگە WhatsApp تىن يېزىش">
+              <i class="fab fa-whatsapp"></i> WhatsApp
             </button>
           </div>
         </div>
@@ -2314,9 +2314,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span style="font-weight: 700; margin-right: 0.15rem;">كىنىشكا</span>
               </button>
               <!-- ئۇچۇر -->
-              <button class="btn-action-edit btn-sms-agent" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" title="ۋاكالەتچىگە قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش" style="background: #059669 !important; border-color: #059669 !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
-                <i class="fas fa-sms"></i>
-                <span style="font-weight: 700; margin-right: 0.15rem;">ئۇچۇر</span>
+              <button class="btn-action-edit btn-sms-agent" onclick="event.stopPropagation(); if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى'});" data-id="${agent.id}" title="ۋاكالەتچىگە WhatsApp تىن يېزىش" style="background: #16a34a !important; border-color: #16a34a !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
+                <i class="fab fa-whatsapp"></i>
+                <span style="font-weight: 700; margin-right: 0.15rem;">WhatsApp</span>
               </button>
               <!-- ماركا تەستىق -->
               <button class="btn-action-edit btn-auth-agent" onclick="event.stopPropagation(); if(window.openAgentBrandAuthModal) window.openAgentBrandAuthModal('${agent.id}');" data-id="${agent.id}" title="${isPending ? 'تەستىقلاش ۋە ماركا رۇخسىتى بېرىش' : 'ماركا تەستىقلاش'}" style="background: ${isPending ? '#059669' : '#2563eb'} !important; border-color: ${isPending ? '#059669' : '#2563eb'} !important; color: #ffffff !important; padding: 0.25rem 0.5rem; font-size: 0.74rem; border-radius: 8px; cursor: pointer;">
@@ -3207,8 +3207,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   <button type="button" class="btn-edit-agent-single-encourage" onclick="if(window.openEditSingleAgentEncouragementModal) window.openEditSingleAgentEncouragementModal('${agent.id}');" style="background: #f59e0b; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="رېغبەتلەندۈرۈش سۆزىنى تەھرىرلەش">
                     <i class="fas fa-edit"></i> تەھرىرلەش
                   </button>
-                  <button type="button" class="btn-sms-agent-slider" onclick="if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى',initialText:'${agent.encouragementMessage.replace(/'/g, "\\'")}'});" style="background: #0284c7; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer;" title="سۆھبەتنى ئېچىش">
-                    <i class="fas fa-sms"></i> سۆھبەت
+                  <button type="button" class="btn-sms-agent-slider" onclick="if(window.openDirectSmsModal) window.openDirectSmsModal({name:'${agent.name.replace(/'/g, "\\'")}',phone:'${agent.phone}',role:'ۋاكالەتچى',initialText:'${agent.encouragementMessage.replace(/'/g, "\\'")}'});" style="background: #16a34a; color: white; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer;" title="WhatsApp ئارقىلىق سۆھبەت">
+                    <i class="fab fa-whatsapp"></i> سۆھبەت
                   </button>
                   <a href="https://wa.me/${agent.phone ? agent.phone.replace(/[^0-9]/g, '') : ''}?text=${encodeURIComponent(agent.encouragementMessage)}" target="_blank" style="background: #16a34a; color: white; border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="WhatsApp تا ئەۋەتىش">
                     <i class="fab fa-whatsapp"></i>
@@ -4460,8 +4460,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--admin-border); display: flex; justify-content: flex-end; gap: 0.75rem;">
         <button type="button" class="btn-secondary btn-modal-close" onclick="window.hideModal('orderInvoiceModal')" style="padding: 0.55rem 1.25rem; font-weight: 700; border-radius: 8px;">تاقاش</button>
-        <button type="button" class="btn-secondary btn-invoice-sms" data-id="${order.id}" style="color: #0284c7; border-color: #0284c7; font-weight: 700; padding: 0.55rem 1.25rem; border-radius: 8px;">
-          <i class="fas fa-sms"></i> خېرىدارغا قىسقا ئۇچۇر (SMS / WhatsApp) ئەۋەتىش
+        <button type="button" class="btn-secondary btn-invoice-sms" data-id="${order.id}" style="color: #16a34a; border-color: #16a34a; font-weight: 700; padding: 0.55rem 1.25rem; border-radius: 8px;">
+          <i class="fab fa-whatsapp"></i> خېرىدارغا WhatsApp ئارقىلىق ئەۋەتىش
         </button>
       </div>
     `;
@@ -8492,8 +8492,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم ھۆرمەتلىك ${c.name}، تەكلىماكان دۇكىنىدىن سىز بىلەن ئالاقىلىشىۋاتىمىز.`)}" target="_blank" class="btn-action-edit" title="WhatsApp تا سۆزلىشىش" style="background: #22c55e !important; border-color: #22c55e !important; color: #ffffff !important;">
               <i class="fab fa-whatsapp"></i>
             </a>
-            <button type="button" class="btn-action-edit btn-crm-sms" data-phone="${c.phone}" data-name="${c.name}" title="SMS / قىسقا ئۇچۇر" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important;">
-              <i class="fas fa-sms"></i>
+            <button type="button" class="btn-action-edit btn-crm-sms" data-phone="${c.phone}" data-name="${c.name}" title="WhatsApp / خاس ئۇچۇر يوللاش" style="background: #0284c7 !important; border-color: #0284c7 !important; color: #ffffff !important;">
+              <i class="fas fa-comment-dots"></i>
             </button>
           </div>
         </td>

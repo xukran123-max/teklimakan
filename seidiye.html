@@ -111,8 +111,8 @@
           <span id="menuPendingAgentsBadge" class="badge-counter" style="display: none; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: #f59e0b; color: white; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px;">0</span>
         </li>
         <li class="menu-item" data-tab="messages" onclick="if(window.switchTab) window.switchTab('messages');" style="position: relative;">
-          <a href="javascript:void(0);"><i class="fas fa-sms"></i> <span>قىسقا ئۇچۇر ۋە خەۋەرلىشىش</span></a>
-          <span id="menuMsgBadge" class="badge-counter" style="display: none; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: #0284c7; color: white; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px;">0</span>
+          <a href="javascript:void(0);"><i class="fab fa-whatsapp" style="color: #22c55e;"></i> <span>خېرىدارلارغا ئالاقىلىشىش (WhatsApp)</span></a>
+          <span id="menuMsgBadge" class="badge-counter" style="display: none; position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: #16a34a; color: white; font-size: 0.72rem; padding: 2px 7px; border-radius: 9999px;">0</span>
         </li>
         <li class="menu-item" data-tab="retention" onclick="if(window.switchTab) window.switchTab('retention');" style="position: relative;">
           <a href="javascript:void(0);"><i class="fas fa-dharmachakra" style="color: #ec4899;"></i> <span>🎡 خېرىدار ئاكتىپلىقى (ئامەت چاقى)</span></a>
@@ -1168,8 +1168,8 @@
             <!-- 1. قىسقا ئۇچۇر يېزىش ۋە يوللاش بۆلىكى -->
             <div class="data-table-container" style="padding: 1.5rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--admin-border); padding-bottom: 0.75rem;">
-                <h4 style="font-size: 1.15rem; font-weight: 800; color: #0284c7; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                  <i class="fas fa-paper-plane"></i> خەۋەرلىشىش مەركىزى (SMS / WhatsApp)
+                <h4 style="font-size: 1.15rem; font-weight: 800; color: #16a34a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fab fa-whatsapp" style="font-size: 1.35rem;"></i> خېرىدارلارغا ئالاقىلىشىش مەركىزى (WhatsApp & سۇپا)
                 </h4>
                 <span style="font-size: 0.78rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 9999px; font-weight: 700;">خالىغانچە تەھرىرلەشكە بولىدۇ</span>
               </div>
@@ -1319,30 +1319,20 @@
                   <i class="fas fa-share-alt" style="color: #0284c7;"></i> ئەۋەتىش ئۇسۇلىنى تاللاڭ:
                 </div>
 
-                <!-- A. يەككە ئەۋەتىش كۇنۇپكىلىرى -->
-                <div id="singleActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                  <!-- SMS كۇنۇپكىسى -->
-                  <button type="button" id="btnSendAsSms" class="btn-checkout" style="background: #0284c7; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);">
-                    <i class="fas fa-sms" style="font-size: 1.15rem;"></i>
-                    <span>📱 تېلېفون SMS ئارقىلىق</span>
-                  </button>
-
+                <!-- A. يەككە ئەۋەتىش كۇنۇپكىسى (WhatsApp) -->
+                <div id="singleActionButtons">
                   <!-- WhatsApp كۇنۇپكىسى -->
-                  <button type="button" id="btnSendAsWhatsapp" class="btn-checkout" style="background: #16a34a; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);">
-                    <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i>
-                    <span>💬 WhatsApp ئارقىلىق</span>
+                  <button type="button" id="btnSendAsWhatsapp" class="btn-checkout" style="width: 100%; background: #16a34a; border: none; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-weight: 800; font-size: 0.95rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);">
+                    <i class="fab fa-whatsapp" style="font-size: 1.35rem;"></i>
+                    <span>💬 WhatsApp ئارقىلىق دەرھال ئەۋەتىش</span>
                   </button>
                 </div>
 
-                <!-- B. توپ ئەۋەتىش كۇنۇپكىلىرى (Bulk Actions) -->
-                <div id="bulkActionButtons" style="display: none; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                  <button type="button" id="btnBulkSendWa" class="btn-checkout" style="background: #16a34a; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);">
-                    <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i>
+                <!-- B. توپ ئەۋەتىش كۇنۇپكىسى (Bulk WhatsApp Action) -->
+                <div id="bulkActionButtons" style="display: none;">
+                  <button type="button" id="btnBulkSendWa" class="btn-checkout" style="width: 100%; background: #16a34a; border: none; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-weight: 800; font-size: 0.95rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);">
+                    <i class="fab fa-whatsapp" style="font-size: 1.35rem;"></i>
                     <span>📢 WhatsApp تا توپ يوللاش</span>
-                  </button>
-                  <button type="button" id="btnBulkSendSms" class="btn-checkout" style="background: #0284c7; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);">
-                    <i class="fas fa-sms" style="font-size: 1.15rem;"></i>
-                    <span>📱 SMS تا توپ تەييارلاش</span>
                   </button>
                 </div>
 
@@ -4085,12 +4075,12 @@
       <!-- كۆزنەك بېشى -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 2px solid var(--admin-border); padding-bottom: 0.75rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-            <i class="fas fa-sms"></i>
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            <i class="fab fa-whatsapp"></i>
           </div>
           <div>
-            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;" id="modalSmsTitle">قىسقا ئۇچۇر ئەۋەتىش</h4>
-            <span style="font-size: 0.82rem; color: #64748b;">SMS ياكى WhatsApp شەكلىدە بىۋاستە يەتكۈزۈش</span>
+            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;" id="modalSmsTitle">خېرىدارغا ئالاقىلىشىش</h4>
+            <span style="font-size: 0.82rem; color: #64748b;">WhatsApp ئارقىلىق بىۋاسىتە ئۇچۇر يەتكۈزۈش</span>
           </div>
         </div>
         <button class="btn-close-drawer btn-modal-close" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8;"><i class="fas fa-times"></i></button>
@@ -4155,28 +4145,22 @@
         <textarea id="modalMsgBody" rows="5" class="form-control" style="font-size: 0.95rem; line-height: 1.7; resize: vertical;" placeholder="بۇ يەرگە خالىغانچە ئۇچۇر يېزىڭ ياكى يۇقىرىدىكى قېلىپلارنى تاللاپ تۈزىتىڭ..."></textarea>
       </div>
 
-      <!-- 📲 تاللاش ئېكرانى: SMS ياكى WhatsApp ئارقىلىق ئەۋەتىش -->
+      <!-- 💬 WhatsApp ئارقىلىق دەرھال ئەۋەتىش -->
       <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 1rem; margin-bottom: 1rem;">
         <div style="font-size: 0.86rem; font-weight: 800; color: #166534; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.4rem;">
-          <i class="fas fa-paper-plane"></i> ئەۋەتىش يولىنى تاللاپ دەرھال ئەۋەتىڭ:
+          <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i> WhatsApp ئارقىلىق ئەۋەتىش:
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <!-- 1. تېلېفون SMS شەكلىدە ئەۋەتىش -->
-          <button type="button" id="modalBtnSendSms" class="btn-checkout" style="background: #0284c7; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.92rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
-            <i class="fas fa-sms" style="font-size: 1.2rem;"></i>
-            <span>📱 تېلېفون SMS</span>
-          </button>
-
-          <!-- 2. WhatsApp شەكلىدە ئەۋەتىش -->
-          <button type="button" id="modalBtnSendWa" class="btn-checkout" style="background: #16a34a; border: none; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.92rem; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
-            <i class="fab fa-whatsapp" style="font-size: 1.25rem;"></i>
-            <span>💬 WhatsApp</span>
+        <div>
+          <!-- WhatsApp كۇنۇپكىسى -->
+          <button type="button" id="modalBtnSendWa" class="btn-checkout" style="width: 100%; background: #16a34a; border: none; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-weight: 800; font-size: 0.98rem; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);">
+            <i class="fab fa-whatsapp" style="font-size: 1.35rem;"></i>
+            <span>💬 WhatsApp ئارقىلىق دەرھال ئەۋەتىش</span>
           </button>
         </div>
 
         <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
           <button type="button" id="modalBtnSendServer" class="btn-secondary" style="flex: 1; padding: 0.55rem; font-size: 0.84rem; font-weight: 700; color: #6d28d9; border-color: #c4b5fd;">
-            <i class="fas fa-server"></i> سۇپىدا خاتىرىلەپ يوللاش
+            <i class="fas fa-server"></i> سۇپىدا خاتىرىلەپ قويۇش
           </button>
           <button type="button" id="modalBtnCopy" class="btn-secondary" style="padding: 0.55rem 1rem; font-size: 0.84rem; font-weight: 700;">
             <i class="fas fa-copy"></i> كۆچۈرۈۋېلىش
@@ -4244,11 +4228,11 @@
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=20260927_v108"></script>
-  <script src="js/i18n.js?v=20260927_v108"></script>
-  <script src="js/store.js?v=20260927_v108"></script>
-  <script src="js/push-manager.js?v=20260927_v108"></script>
-  <script src="js/admin.js?v=20260927_v108"></script>
+  <script src="js/supabase.js?v=20260927_v109"></script>
+  <script src="js/i18n.js?v=20260927_v109"></script>
+  <script src="js/store.js?v=20260927_v109"></script>
+  <script src="js/push-manager.js?v=20260927_v109"></script>
+  <script src="js/admin.js?v=20260927_v109"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>

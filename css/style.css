@@ -5045,24 +5045,117 @@ html[dir="rtl"] .chat-bubble-time {
   flex-shrink: 0;
 }
 
+.chat-identity-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.76rem;
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.25s ease;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.chat-identity-banner.guest-mode {
+  background: #f8fafc;
+  color: #475569;
+  border-bottom-color: #e2e8f0;
+}
+
+.chat-identity-banner.buyer-mode {
+  background: #f0fdf4;
+  color: #15803d;
+  border-bottom-color: #86efac;
+}
+
+.chat-identity-banner.agent-mode {
+  background: #fefce8;
+  color: #a16207;
+  border-bottom-color: #fde047;
+}
+
+.chat-identity-main {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.chat-identity-title {
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.chat-identity-desc {
+  font-size: 0.68rem;
+  opacity: 0.9;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.chat-identity-pill {
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.guest-mode .chat-identity-pill {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.buyer-mode .chat-identity-pill {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.agent-mode .chat-identity-pill {
+  background: #fef08a;
+  color: #854d0e;
+  border: 1px solid #facc15;
+}
+
 .chat-customer-info-bar {
   display: flex;
   gap: 0.4rem;
+  width: 100%;
 }
 
 .chat-small-input {
   flex: 1;
-  padding: 0.3rem 0.55rem;
-  font-size: 0.75rem;
-  border: 1px solid #cbd5e1;
+  min-width: 0;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
   outline: none;
   background: #f8fafc;
+  transition: all 0.2s ease;
 }
 
 .chat-small-input:focus {
   border-color: #059669;
   background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.12);
+}
+
+.chat-small-input.input-error {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
 .chat-input-row {

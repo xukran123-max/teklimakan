@@ -35,7 +35,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260927_v110">
+  <link rel="stylesheet" href="css/style.css?v=20260927_v113">
 </head>
 <body class="font-modern">
 
@@ -1825,14 +1825,23 @@
       <span id="chatPersistentNoticeSpan">پاراڭ خاتىرىسى سىز ئۆزىڭىز «تازىلاش»نى باقمىغۇچە، بىر نەچچە يىلدىن كېيىن كىرسىڭىزمۇ مەڭگۈ ساقلىنىدۇ.</span>
     </div>
 
+    <!-- Identity & Verification Banner -->
+    <div id="chatUserIdentityBadge" class="chat-identity-banner guest-mode">
+      <div class="chat-identity-main">
+        <span class="chat-identity-title" id="chatIdentityTitle"><i class="fas fa-user-circle"></i> مېھمان ھالىتى</span>
+        <span class="chat-identity-desc" id="chatIdentityDesc">ئالىي باشقۇرغۇچىغا يېزىش ئۈچۈن تېلېفون ياكى ئىمائىل كىرگۈزۈڭ</span>
+      </div>
+      <span class="chat-identity-pill" id="chatIdentityPill">مېھمان</span>
+    </div>
+
     <!-- Messages Container -->
     <div id="adminChatMessagesContainer" class="chat-messages-container">
       <!-- Chat bubbles loaded dynamically from localStorage -->
     </div>
 
-    <!-- Quick prompt chips -->
-    <div class="chat-quick-chips">
-      <button type="button" class="chat-chip-btn" id="chatChipTrack" data-action="track" data-msg="زاكاز ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.">📦 زاكاز سۈرۈشتۈرۈش</button>
+    <!-- Quick prompt chips (سېتىۋالغان خېرىدارلار ۋە ۋاكالەتچىلەرگە مەخسۇس) -->
+    <div class="chat-quick-chips" id="chatQuickChipsWrap">
+      <button type="button" class="chat-chip-btn" id="chatChipTrack" data-action="track" data-msg="پوسۇلكا ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.">📦 پوسۇلكا سۈرۈشتۈرۈش</button>
       <button type="button" class="chat-chip-btn" id="chatChipBank" data-action="bank" data-msg="پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.">💳 بانكا ئۇچۇرى</button>
       <button type="button" class="chat-chip-btn" id="chatChipCargo" data-action="cargo" data-msg="مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟">🚚 كارگو ئەھۋالى</button>
     </div>
@@ -1841,18 +1850,18 @@
     <div class="chat-input-area">
       <div class="chat-customer-info-bar">
         <input type="text" id="chatCustomerName" class="chat-small-input" placeholder="ئىسمىڭىز" maxlength="30" title="خېرىدار ئىسمى">
-        <input type="tel" id="chatCustomerPhone" class="chat-small-input number-latin" placeholder="تېلېفون: 05XX XXX XX XX" maxlength="20" title="تېلېفون نومۇرى">
+        <input type="text" id="chatCustomerPhone" class="chat-small-input number-latin" placeholder="تېلېفون ياكى ئىمائىل (تەلەپ قىلىنىدۇ)" maxlength="50" title="تېلېفون نومۇرى ياكى ئېلخەت ئادرېسى">
       </div>
       <div class="chat-input-row">
-        <textarea id="chatMessageInput" class="chat-textarea" placeholder="ئالىي باشقۇرغۇچىغا ئۇچۇر يېزىڭ... (Enter بىلەن ئەۋەتىلىدۇ)" rows="2"></textarea>
+        <textarea id="chatMessageInput" class="chat-textarea" placeholder="ئالىي باشقۇرغۇچىغا ئۇچۇر يېزىڭ..." rows="2"></textarea>
         <button type="button" id="btnSendChatMessage" class="chat-send-btn" title="ئەۋەتىش">
           <i class="fas fa-arrow-left"></i>
         </button>
       </div>
       <div class="chat-bottom-wa-link">
-        <span id="chatUrgentSpan">جىددىي ئۇچۇرلاردا:</span>
+        <span id="chatUrgentSpan">جىددىي ياكى دەسلەپكى سوئاللاردا:</span>
         <a href="https://wa.me/905551609999" target="_blank" class="chat-wa-direct">
-          <i class="fab fa-whatsapp"></i> <span id="chatWaDirectSpan">WhatsApp ئارقىلىق بىۋاسىتە يېزىڭ</span>
+          <i class="fab fa-whatsapp"></i> <span id="chatWaDirectSpan">WhatsApp تىن بىۋاسىتە يېزىڭ</span>
         </a>
       </div>
     </div>
@@ -2068,9 +2077,9 @@
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js?v=20260927_v110"></script>
-  <script src="js/i18n.js?v=20260927_v112"></script>
-  <script src="js/store.js?v=20260927_v112"></script>
-  <script src="js/app.js?v=20260927_v112"></script>
+  <script src="js/i18n.js?v=20260927_v113"></script>
+  <script src="js/store.js?v=20260927_v113"></script>
+  <script src="js/app.js?v=20260927_v113"></script>
   <script src="js/push-manager.js?v=20260927_v110"></script>
 </body>
 </html>

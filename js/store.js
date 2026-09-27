@@ -2867,8 +2867,21 @@ class StoreManager {
 
   // 🚀 يەكشەنبە ئەتىگەنلىك دوكلاتنى ئارقا سۇپا، تېلېگرام ۋە رېغبەتلەندۈرۈش سىستېمىسى ئارقىلىق يوللاش
   async sendWeeklyAgentReportAndEncouragements(options = { notifyTelegram: true, notifySms: true }) {
-    const summary = this.getWeeklyAgentPerformanceSummary();
-    const timestamp = new Date().toLocaleString('ug-CN', { hour12: false });
+    if (this._weeklyReportSendingDirect) {
+      console.warn('Weekly report is already being dispatched. Skipping duplicate call.');
+      return { success: false, reason: 'already_sending' };
+    }
+    this._weeklyReportSendingDirect = true;
+
+    // تەكرارلىنىپ كېتىشنىڭ دەرھال ئالدىنى ئېلىش ئۈچۈن يوللاش ۋاقتىنى بېشىدىلا قۇلۇپلاش
+    const sundayKey = new Date().toISOString().split('T')[0];
+    localStorage.setItem('teklimakan_last_weekly_report_date', sundayKey);
+    localStorage.setItem('teklimakan_last_weekly_report_sent_at', Date.now().toString());
+    localStorage.setItem('teklimakan_weekly_report_cleared', 'false');
+
+    try {
+      const summary = this.getWeeklyAgentPerformanceSummary();
+      const timestamp = new Date().toLocaleString('ug-CN', { hour12: false });
 
     // 1. سېتىش چىقمىغان ۋاكالەتچىلەرگە ئارقا سۇپا ئارقىلىق رېغبەتلەندۈرۈش ئۇچۇرىنى يوللاش ۋە خاتىرىلەش
     const encouragementLogs = [];
@@ -2949,6 +2962,9 @@ class StoreManager {
       encouragedCount: summary.zeroSalesAgents.length,
       activeCount: summary.activeAgents.length
     };
+    } finally {
+      this._weeklyReportSendingDirect = false;
+    }
   }
 
   // 📊 ئايلىق سېتىش خۇلاسە دوكلاتىنى ھاسىللاش ۋە باشقۇرغۇچىغا يوللاش
@@ -3104,6 +3120,14 @@ class StoreManager {
   // ⏰ دەۋرىيلىك دوكلات قوزغىتىش (ھەر يەكشەنبە 08:00 ھەپتىلىك، ھەر ئاينىڭ 1-كۈنى 08:00 ئايلىق)
   checkAndTriggerScheduledReports() {
     try {
+      // 🛡️ پەقەت باشقۇرۇش سۇپىسىدا (seidiye) كىرگەن ھالەتتىلا ئاپتوماتىك قوزغالسۇن
+      // ئادەتتىكى خېرىدارلار دۇكاننى ئاچقاندا تەكرار ئاپتوماتىك ئۇچۇر كېتىپ قېلىشنىڭ 100% ئالدى ئېلىندى
+      const isAdminContext = window.location.pathname.includes('seidiye') ||
+                             !!document.getElementById('adminApp') ||
+                             !!sessionStorage.getItem('teklimakan_admin_auth') ||
+                             localStorage.getItem('teklimakan_admin_logged_in') === 'true';
+      if (!isAdminContext) return;
+
       const now = new Date();
       const hour = now.getHours();
 
@@ -3111,20 +3135,43 @@ class StoreManager {
       if (now.getDay() === 0 && hour >= 8) {
         const todayStr = now.toISOString().split('T')[0];
         const lastSentDate = localStorage.getItem('teklimakan_last_weekly_report_date');
-        if (lastSentDate !== todayStr) {
-          console.log('⏰ Auto-triggering Sunday 08:00 Weekly Agent Performance Report...');
-          this.sendWeeklyAgentReportAndEncouragements({ notifyTelegram: true, notifySms: true });
+        const lastSentAt = parseInt(localStorage.getItem('teklimakan_last_weekly_report_sent_at') || '0', 10);
+
+        // ئەگەر بۈگۈن ياكى يېقىنقى 12 سائەت ئىچىدە ئەۋەتىلگەن بولسا، ياكى نۆۋەتتە ئەۋەتىلىۋاتقان بولسا، قەتئىي توختىتىش
+        if (lastSentDate === todayStr || (Date.now() - lastSentAt < 12 * 60 * 60 * 1000) || this._weeklyReportSending) {
+          return;
         }
+
+        this._weeklyReportSending = true;
+        localStorage.setItem('teklimakan_last_weekly_report_date', todayStr);
+        localStorage.setItem('teklimakan_last_weekly_report_sent_at', Date.now().toString());
+
+        console.log('⏰ Auto-triggering Sunday 08:00 Weekly Agent Performance Report (Admin Context)...');
+        this.sendWeeklyAgentReportAndEncouragements({ notifyTelegram: true, notifySms: true })
+          .finally(() => {
+            this._weeklyReportSending = false;
+          });
       }
 
       // B. ھەر ئاينىڭ 1-كۈنى ئەتىگەن سائەت 08:00 دە ئايلىق خۇلاسە
       if (now.getDate() === 1 && hour >= 8) {
         const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const lastSentMonth = localStorage.getItem('teklimakan_last_monthly_report_month');
-        if (lastSentMonth !== monthKey) {
-          console.log('⏰ Auto-triggering 1st of Month 08:00 Monthly Agent Performance Report...');
-          this.sendMonthlyAgentReport({ notifyTelegram: true, notifyEmail: true });
+        const lastMonthlySentAt = parseInt(localStorage.getItem('teklimakan_last_monthly_report_sent_at') || '0', 10);
+
+        if (lastSentMonth === monthKey || (Date.now() - lastMonthlySentAt < 24 * 60 * 60 * 1000) || this._monthlyReportSending) {
+          return;
         }
+
+        this._monthlyReportSending = true;
+        localStorage.setItem('teklimakan_last_monthly_report_month', monthKey);
+        localStorage.setItem('teklimakan_last_monthly_report_sent_at', Date.now().toString());
+
+        console.log('⏰ Auto-triggering 1st of Month 08:00 Monthly Agent Performance Report (Admin Context)...');
+        this.sendMonthlyAgentReport({ notifyTelegram: true, notifyEmail: true })
+          .finally(() => {
+            this._monthlyReportSending = false;
+          });
       }
     } catch (e) {
       console.warn('checkAndTriggerScheduledReports failed:', e);

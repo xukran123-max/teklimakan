@@ -7378,7 +7378,11 @@ class StoreManager {
     if (!flash.enabled) return [];
 
     const discountPct = Number(flash.discountPercentage) || 20;
-    const allProds = this.getProducts().filter(p => p.status === 'approved' && (Number(p.stock) || 0) > 0);
+    const allProds = this.getProducts().filter(p => {
+      const status = p.approvalStatus || 'تەستىقلاندى';
+      const isApproved = status !== 'ساقلاۋاتىدۇ' && status !== 'رەت قىلىندى' && status !== 'rejected' && status !== 'pending';
+      return isApproved && (Number(p.stock) || 0) > 0;
+    });
 
     let selected = [];
     if (Array.isArray(flash.productIds) && flash.productIds.length > 0) {

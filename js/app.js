@@ -401,20 +401,6 @@ function initTeklimakanApp() {
     const cCityLabel = document.getElementById('checkoutCustCityLabel');
     if (cCityLabel) cCityLabel.innerHTML = `${i18n.t('custCity')} <span style="color: var(--danger-color);">*</span>`;
 
-    // شەھەر تاللىغۇچ تاللانمىلىرى (City dropdown options)
-    const citySelect = document.getElementById('checkoutCustCity');
-    if (citySelect) {
-      Array.from(citySelect.options).forEach(opt => {
-        if (!opt.dataset.ugText) {
-          opt.dataset.ugText = opt.textContent;
-        }
-        if (lang === 'ug') {
-          opt.textContent = opt.dataset.ugText;
-        } else {
-          opt.textContent = opt.value;
-        }
-      });
-    }
 
     const cAddrLabel = document.getElementById('checkoutCustAddressLabel');
     if (cAddrLabel) cAddrLabel.innerHTML = `${i18n.t('custAddress')} <span style="color: var(--danger-color);">*</span>`;
@@ -699,27 +685,11 @@ function initTeklimakanApp() {
       fContactInsta.textContent = instaHandle;
     }
 
-    // 🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى كۆزنىكىنى نۆۋەتتىكى تىلغا ئاساسەن يېڭىلاش
-    const igTitle = document.getElementById('instaGiftTitle');
-    if (igTitle) igTitle.textContent = i18n.t('instaGiftBoxTitle') || '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگەشتىڭىزمۇ؟';
-    const igBadge = document.getElementById('instaGiftBadgeSpan');
-    if (igBadge) igBadge.textContent = i18n.t('instaGiftBadge') || 'ھەقسىز سوۋغات';
-    const igDesc = document.getElementById('instaGiftDesc');
-    if (igDesc) igDesc.textContent = i18n.t('instaGiftDesc') || 'رەسمىي سەھىپىمىزگە ئەگىشىپ قويسىڭىز، بۇ قېتىملىق زاكازىڭىزغا ئالاھىدە سوۋغات قوشۇپ بېرىمىز!';
-    const igPageLabel = document.getElementById('instaGiftPageLabel');
-    if (igPageLabel) igPageLabel.textContent = i18n.t('instaGiftPageLabel') || 'رەسمىي سەھىپە:';
+    // 🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى ھېسابات ۋە ئۇلانمىسى
     const igPageHandle = document.getElementById('instaGiftPageHandle');
     if (igPageHandle) igPageHandle.textContent = instaHandle;
     const igFollowBtn = document.getElementById('instaGiftFollowBtn');
     if (igFollowBtn) igFollowBtn.href = instaUrl;
-    const igFollowBtnText = document.getElementById('instaGiftFollowBtnText');
-    if (igFollowBtnText) igFollowBtnText.textContent = i18n.t('instaGiftFollowBtn') || 'Instagram\'دا ئەگىشىش';
-    const igCheckLabel = document.getElementById('instaGiftCheckLabel');
-    if (igCheckLabel) igCheckLabel.textContent = i18n.t('instaGiftCheckbox') || 'مەن ئىنىستىگېرامغا ئەگەشتىم، پوسۇلكامغا ھەدىيە قوشۇلسۇن!';
-    const igUsername = document.getElementById('instaGiftUsername');
-    if (igUsername) igUsername.placeholder = i18n.t('instaGiftPlaceholder') || 'ئىنىستىگېرام نامىڭىز (مەسىلەن: @ئىسمىڭىز)';
-    const igHint = document.getElementById('instaGiftHint');
-    if (igHint) igHint.innerHTML = `<i class="fas fa-check-circle"></i> ${i18n.t('instaGiftHint') || 'دەلىللەش ئۇچۇرى: پوسۇلكىڭىز چىقىرىلغاندا ھەدىيە ئاپتوماتىك قوشۇلىدۇ.'}`;
 
     // ئۈستۈنكى ئايلانما ئېلان (Marquee) پۈتۈنلەي renderMarqueeTicker ئارقىلىق يېڭىلىنىدۇ
 

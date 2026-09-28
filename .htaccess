@@ -1,4 +1,4 @@
-﻿<IfModule mod_rewrite.c>
+<IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
@@ -12,4 +12,9 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME}\.html -f
   RewriteRule ^(.*)$ $1.html [L]
+
+  # 4. تىل قىسقا ئادرېسلىرى (/tr, /en, /ug)
+  RewriteRule ^tr/?$ /?lang=tr [R=302,L]
+  RewriteRule ^en/?$ /?lang=en [R=302,L]
+  RewriteRule ^ug/?$ /?lang=ug [R=302,L]
 </IfModule>

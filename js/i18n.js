@@ -1379,7 +1379,18 @@ class I18nManager {
       const langParam = urlParams.get('lang');
       const hash = window.location.hash ? window.location.hash.toLowerCase().replace(/[^a-z]/g, '') : '';
 
-      if (langParam && ['ug', 'tr', 'en'].includes(langParam)) {
+      // 🌐 URL دىكى يول (pathname) ئارقىلىق تىلنى ئاپتوماتىك تونۇش: /tr, /en, /ug قاتارلىقلار
+      const pathSegments = (window.location.pathname || '').toLowerCase().split('/').filter(Boolean);
+      const firstSegment = pathSegments[0] || '';
+      let pathLang = '';
+      if (['tr', 'tr.html'].includes(firstSegment)) pathLang = 'tr';
+      else if (['en', 'en.html'].includes(firstSegment)) pathLang = 'en';
+      else if (['ug', 'ug.html'].includes(firstSegment)) pathLang = 'ug';
+
+      if (pathLang) {
+        initialLang = pathLang;
+        localStorage.setItem('teklimakan_language', pathLang);
+      } else if (langParam && ['ug', 'tr', 'en'].includes(langParam)) {
         initialLang = langParam;
         localStorage.setItem('teklimakan_language', langParam);
       } else if (hash && ['ug', 'tr', 'en'].includes(hash)) {

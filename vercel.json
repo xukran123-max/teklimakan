@@ -42,6 +42,36 @@
   ],
   "redirects": [
     {
+      "source": "/tr",
+      "destination": "/?lang=tr",
+      "permanent": false
+    },
+    {
+      "source": "/tr/:path*",
+      "destination": "/?lang=tr",
+      "permanent": false
+    },
+    {
+      "source": "/en",
+      "destination": "/?lang=en",
+      "permanent": false
+    },
+    {
+      "source": "/en/:path*",
+      "destination": "/?lang=en",
+      "permanent": false
+    },
+    {
+      "source": "/ug",
+      "destination": "/?lang=ug",
+      "permanent": false
+    },
+    {
+      "source": "/ug/:path*",
+      "destination": "/?lang=ug",
+      "permanent": false
+    },
+    {
       "source": "/admin.html",
       "destination": "/",
       "permanent": false

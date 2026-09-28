@@ -1264,11 +1264,29 @@ class I18nManager {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const langParam = urlParams.get('lang');
+      const hash = window.location.hash ? window.location.hash.toLowerCase().replace(/[^a-z]/g, '') : '';
+
       if (langParam && ['ug', 'tr', 'en'].includes(langParam)) {
         initialLang = langParam;
         localStorage.setItem('teklimakan_language', langParam);
+      } else if (hash && ['ug', 'tr', 'en'].includes(hash)) {
+        initialLang = hash;
+        localStorage.setItem('teklimakan_language', hash);
       } else {
-        initialLang = localStorage.getItem('teklimakan_language') || 'ug';
+        const saved = localStorage.getItem('teklimakan_language');
+        if (saved && ['ug', 'tr', 'en'].includes(saved)) {
+          initialLang = saved;
+        } else {
+          // ئەگەر زىيارەتچى ئىلگىرى تاللىمىغان يېڭى ئادەم بولسا، تېلېفون ياكى كومپيۇتېرىنىڭ تىلىغا قاراپ ئەقلىي ئېچىش
+          const navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+          if (navLang.startsWith('tr')) {
+            initialLang = 'tr';
+          } else if (navLang.startsWith('en')) {
+            initialLang = 'en';
+          } else {
+            initialLang = 'ug';
+          }
+        }
       }
     } catch (e) {
       initialLang = localStorage.getItem('teklimakan_language') || 'ug';

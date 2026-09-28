@@ -7964,7 +7964,8 @@ class StoreManager {
     return spinRecord;
   }
 
-  getCustomerDailyFlashSaleProducts() {
+  getCustomerDailyFlashSaleProducts(lang = null) {
+    const activeLang = lang || (window.appI18n ? window.appI18n.getLang() : 'ug');
     const ret = this.getCustomerRetentionSettings();
     const flash = ret.flashSale || {};
     if (!flash.enabled) return [];
@@ -7986,10 +7987,11 @@ class StoreManager {
     }
 
     return selected.map(p => {
-      const origPrice = Number(p.price) || 0;
+      const localized = this.getLocalizedProduct(p, activeLang) || p;
+      const origPrice = Number(localized.price) || Number(p.price) || 0;
       const flashPrice = Math.max(1, Math.round(origPrice * (1 - discountPct / 100)));
       return {
-        ...p,
+        ...localized,
         originalPrice: origPrice,
         price: flashPrice,
         flashDiscountPercent: discountPct,

@@ -1033,6 +1033,8 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'موگۇ', tr: 'Mantar', en: 'Mushroom' },
   { ug: 'ئاسپىر مېيى', tr: 'Doğal Soğuk Sıkım Aspir Yağı', en: 'Pure Cold-Pressed Safflower Oil' },
   { ug: 'زېغىر مېيى', tr: 'Doğal Keten Tohumu (Zığır) Yağı', en: 'Pure Flaxseed Oil' },
+  { ug: 'قارا مور', tr: 'Siyah Ağaç Kulak Mantarı (Kara Mor)', en: 'Black Wood Ear Mushroom (Kara Mor)' },
+  { ug: 'مور', tr: 'Ağaç Mantarı', en: 'Wood Ear Mushroom' },
   { ug: 'سۇپا رەسمىي', tr: 'Resmi Platform', en: 'Official Platform' },
   { ug: 'سۇپا', tr: 'Platform', en: 'Platform' },
   // تۈرلەر ۋە تاۋار ناملىرىنىڭ ئەقلىي لۇغىتى (ئۇزۇن بىرىكمىلەر ئاۋۋال ئالماشتۇرۇلىدۇ)

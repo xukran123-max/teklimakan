@@ -288,7 +288,14 @@ function initTeklimakanApp() {
     if (hBtn5) hBtn5.textContent = i18n.t('heroBtn5');
 
     const flashBadge = document.getElementById('flashSaleBadge');
-    if (flashBadge) flashBadge.textContent = i18n.t('flashSaleBadge');
+    if (flashBadge) {
+      if (lang === 'ug') {
+        const retention = window.appStore ? window.appStore.getCustomerRetentionSettings() : {};
+        flashBadge.textContent = retention.flashSale?.title || i18n.t('flashSaleBadge');
+      } else {
+        flashBadge.textContent = i18n.t('flashSaleBadge');
+      }
+    }
     const flashTitle = document.getElementById('flashSaleTitle');
     if (flashTitle) flashTitle.textContent = i18n.t('flashSaleTitle');
     const flashSub = document.getElementById('flashSaleSub');
@@ -306,6 +313,11 @@ function initTeklimakanApp() {
     const weatherHint = document.getElementById('flashWeatherHint');
     if (weatherHint) weatherHint.textContent = i18n.t('flashWeatherHint');
     if (typeof updateFlashWeatherUI === 'function') updateFlashWeatherUI();
+
+    // ⚡ ئالاھىدە ئېتىبارلىق تاۋارلار كارتىلىرىنى ھازىرقى تىلغا ئاساسەن يېڭىلاش
+    if (typeof renderFlashProductsCards === 'function') {
+      renderFlashProductsCards();
+    }
 
     // ماركا سۈزگۈچ تېمىسى
     const fBrandTitle = document.getElementById('filterBrandTitle');
@@ -2412,6 +2424,7 @@ function initTeklimakanApp() {
           renderBrands();
           renderCategories();
           renderProducts();
+          renderFlashProductsCards();
           updateCartUI();
           if (selectedLang === 'ug') {
             showToast('تىل ئۇيغۇرچىغا، پۇل بىرلىكى لىرا (₺ TRY) غا ئالماشتۇرۇلدى!', 'success');
@@ -2429,6 +2442,7 @@ function initTeklimakanApp() {
       renderBrands();
       renderCategories();
       renderProducts();
+      renderFlashProductsCards();
       updateCartUI();
       const quickViewModal = document.getElementById('quickViewModal');
       if (quickViewModal?.classList.contains('active') && quickViewModal.dataset.productId) {
@@ -8420,13 +8434,18 @@ ${text}
     const container = document.getElementById('customerFlashSaleProductsContainer');
     if (!container || !window.appStore) return false;
 
+    const i18n = window.appI18n;
+    const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
     const retention = window.appStore.getCustomerRetentionSettings();
     const flash = retention.flashSale || {};
-    const prods = window.appStore.getCustomerDailyFlashSaleProducts();
+    const prods = window.appStore.getCustomerDailyFlashSaleProducts(lang);
     if (!prods || prods.length === 0) {
-      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.9rem;">ھازىرچە ئالاھىدە ئېتىبارلىق تاۋار تۈگىدى.</div>';
+      const emptyText = lang === 'tr' ? 'Bugün için indirimli ürün bulunamadı.' : (lang === 'en' ? 'No flash sale items available today.' : 'ھازىرچە ئالاھىدە ئېتىبارلىق تاۋار تۈگىدى.');
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 1.5rem; font-size: 0.9rem;">${emptyText}</div>`;
       return false;
     }
+
+    const addToCartText = (i18n && typeof i18n.t === 'function' && i18n.t('addToCart')) || (lang === 'tr' ? 'Sepete Ekle' : (lang === 'en' ? 'Add to Cart' : 'سېۋەتكە سېلىش'));
 
     container.innerHTML = prods.map(p => {
       const origPrice = p.originalPrice || p.price;
@@ -8436,22 +8455,26 @@ ${text}
       return `
         <div class="flash-sale-product-card" data-product-id="${p.id}">
           <span class="flash-sale-badge-corner">-%${discPct}</span>
-          <div class="flash-sale-card-img-wrap" onclick="openProductQuickView('${p.id}')">
+          <div class="flash-sale-card-img-wrap" onclick="openQuickView('${p.id}')">
             <img src="${p.image || 'images/default_product.jpg'}" alt="${p.name}" loading="lazy">
           </div>
-          <h4 class="flash-sale-card-title" onclick="openProductQuickView('${p.id}')" title="${p.name}">${p.name}</h4>
+          <h4 class="flash-sale-card-title" onclick="openQuickView('${p.id}')" title="${p.name}">${p.name}</h4>
           <div class="flash-sale-card-prices">
             <span class="flash-sale-price-current">${window.appStore.formatPrice(flashPrice)}</span>
             <span class="flash-sale-price-old">${window.appStore.formatPrice(origPrice)}</span>
           </div>
           <button type="button" class="flash-sale-btn-add" onclick="handleFlashAddToCart('${p.id}')">
-            <i class="fas fa-cart-plus"></i> <span>سېۋەتكە سېلىش</span>
+            <i class="fas fa-cart-plus"></i> <span>${addToCartText}</span>
           </button>
         </div>
       `;
     }).join('');
     return true;
   }
+
+  window.openProductQuickView = function(productId) {
+    if (typeof openQuickView === 'function') openQuickView(productId);
+  };
 
   window.toggleFlashSaleProducts = function(e) {
     if (e) {
@@ -8512,10 +8535,18 @@ ${text}
     }
     if (flashBar) flashBar.style.display = 'flex';
 
+    const i18n = window.appI18n;
+    const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
     const flashTitleEl = document.getElementById('flashSaleBadge');
-    if (flashTitleEl && flash.title) flashTitleEl.textContent = flash.title;
+    if (flashTitleEl) {
+      if (lang === 'ug') {
+        flashTitleEl.textContent = flash.title || (i18n && i18n.t('flashSaleBadge')) || '⚡ بۈگۈنكى ئېتىبارلىق مەھسۇلاتلار';
+      } else {
+        flashTitleEl.textContent = (i18n && i18n.t('flashSaleBadge')) || (lang === 'tr' ? '⚡ Bugünkü Özel İndirimli Ürünler' : '⚡ Today\'s Special Deals');
+      }
+    }
 
-    // Render cards into container ahead of time
+    // Render cards into container ahead of time with current language
     renderFlashProductsCards();
 
     // Default state: hidden

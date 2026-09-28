@@ -21,7 +21,8 @@ const STORAGE_KEYS = {
   CURRENCY: 'teklimakan_currency_preference',
   SMS_HISTORY: 'teklimakan_ecom_sms_history_v1',
   CUSTOMER_INBOX: 'teklimakan_customer_inbox_v1',
-  COUPONS: 'teklimakan_ecom_coupons_v1'
+  COUPONS: 'teklimakan_ecom_coupons_v1',
+  HERO_SLIDES: 'teklimakan_ecom_hero_slides_v1'
 };
 
 // دەسلەپكى ئېتىبار كۇپونلىرى (Initial Coupons)
@@ -1636,6 +1637,139 @@ const DEFAULT_MARQUEE_ITEMS = [
     translations: {
       tr: { badge: 'Hediye', text: '🎁 Instagram sayfamızı takip edenlere siparişinde sürpriz hediye!' },
       en: { badge: 'Gift', text: '🎁 Follow our Instagram and get a free surprise gift with your order!' }
+    }
+  }
+];
+
+const DEFAULT_HERO_SLIDES = [
+  {
+    id: 'hero_1',
+    order: 1,
+    tag: 'ئەتىيازلىق ئېتىبار',
+    tagColor: '#f59e0b',
+    title: 'ساپ تەبىئىي، ئىشەنچلىك ئېسىل مەھسۇلاتلار',
+    subtitle: 'يەرلىك ئەلا سۈپەتلىك تۇرپان ئۈزۈم مېغىزى، خوتەن قاشتېشى ۋە مىللىي قول سەنئىتى بۇيۇملىرى 20% ئېتىباردا سېتىلماقتا!',
+    btnText: 'ھازىرلا كۆرۈپ سېتىۋېلىش',
+    btnLink: '#catalogSection',
+    image: 'images/hero_dried_fruits.jpg',
+    enabled: true,
+    translations: {
+      tr: {
+        tag: 'Bahar Kampanyası',
+        title: 'Doğal, Güvenilir ve Seçkin Ürünler',
+        subtitle: 'Turpan kurutulmuş üzüm çekirdeği, Hoten yeşim taşı ve geleneksel el sanatları %20 indirimle satışta!',
+        btnText: 'Hemen İncele ve Satın Al'
+      },
+      en: {
+        tag: 'Spring Campaign',
+        title: 'Pure, Natural & Authentic Products',
+        subtitle: 'Premium Turpan raisins, Hotan jade treasures and authentic ethnic handicrafts with 20% discount!',
+        btnText: 'Shop Now'
+      }
+    }
+  },
+  {
+    id: 'hero_2',
+    order: 2,
+    tag: 'يېڭى نۇسخىلار',
+    tagColor: '#10b981',
+    title: 'ئەنئەنىۋى ئەتلەس ۋە نەپىس قول ھۈنەر بۇيۇملىرى',
+    subtitle: 'ساپ تەبىئىي يىپەك، يىپەك توقۇلمىلىرى ۋە ھۆسن تۈزەش گۈزەللىك يۈرۈشلۈكلىرى زاكاز قىلىشىڭىزنى كۈتمەكتە.',
+    btnText: 'مەھسۇلاتلار تىزىملىكى',
+    btnLink: '#catalogSection',
+    image: 'images/hero_atlas_silk.jpg',
+    enabled: true,
+    translations: {
+      tr: {
+        tag: 'Yeni Koleksiyon',
+        title: 'Geleneksel Atlas ve Modern Giyim',
+        subtitle: 'Saf doğal ipek dokumalar, atlas kumaşlar ve doğal güzellik bakım ürünleri sizleri bekliyor.',
+        btnText: 'Ürünleri İncele'
+      },
+      en: {
+        tag: 'New Collection',
+        title: 'Traditional Atlas Silk & Modern Fashion',
+        subtitle: 'Pure natural mulberry silk garments, crafts and skincare essentials available now.',
+        btnText: 'Explore Collection'
+      }
+    }
+  },
+  {
+    id: 'hero_3',
+    order: 3,
+    tag: 'ئۇيغۇر تىبابىتى',
+    tagColor: '#d97706',
+    title: 'خوتەن قاشتېشى ۋە شىپالىق ئۆسۈملۈكلەر خەزىنىسى',
+    subtitle: 'ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تىبابەت مەلھەملىرى تولۇق كاپالەتلىك.',
+    btnText: 'شىپالىق ماللارنى كۆرۈش',
+    btnLink: '#catalogSection',
+    image: 'images/hero_uyghur_medicine.jpg',
+    enabled: true,
+    translations: {
+      tr: {
+        tag: 'Uygur Tıbbı & Şifa',
+        title: 'Hoten Yeşim Taşı ve Doğal Şifalı Bitkiler',
+        subtitle: 'Orijinal yeşim taşı bileklikler, yayla süzme balı ve şifalı bitkisel kürler %100 garantili.',
+        btnText: 'Şifalı Ürünler'
+      },
+      en: {
+        tag: 'Herbal & Healing',
+        title: 'Hotan Jade & Herbal Remedies',
+        subtitle: 'Authentic Hetian nephrite jade bracelets, mountain honey and traditional herbal infusions.',
+        btnText: 'View Remedies'
+      }
+    }
+  },
+  {
+    id: 'hero_4',
+    order: 4,
+    tag: 'ئالىي تەم ۋە ئىچىملىكلەر',
+    tagColor: '#e11d48',
+    title: 'تۈركىيە رىزە قارا چېيى ۋە قەدىمىي مىس چەينەك توپلىمى',
+    subtitle: 'خۇش پۇراق تەبىئىي قارا چاي، نۇسخىلىق قولدا ئىشلەنگەن مىس چەينەك ۋە پىيالە يۈرۈشلۈكلىرى ئېتىبار باھادا.',
+    btnText: 'چايلارنى تاللاش',
+    btnLink: '#catalogSection',
+    image: 'images/hero_turkish_tea.jpg',
+    enabled: true,
+    translations: {
+      tr: {
+        tag: 'Özel Çay & İçecek',
+        title: 'Rize Doğal Çayı ve El İşlemesi Bakır Çaydanlık',
+        subtitle: 'Kokusu ve demiyle ünlü Rize siyah çayı ve el dövmesi bakır demlikler özel fiyatla.',
+        btnText: 'Çay Çeşitleri'
+      },
+      en: {
+        tag: 'Premium Tea & Wares',
+        title: 'Rize Black Tea & Handcrafted Copper Sets',
+        subtitle: 'Aromatic pure black tea, vintage hand-embossed copper teapots and glasses at special prices.',
+        btnText: 'Discover Teas'
+      }
+    }
+  },
+  {
+    id: 'hero_5',
+    order: 5,
+    tag: 'كىتاپ ۋە مەدەنىيەت',
+    tagColor: '#6366f1',
+    title: 'يىپەك يولى مەدەنىيىتى ۋە كىلاسسىك ئەدەبىيات ئەسەرلىرى',
+    subtitle: 'تارىخىي رەسىملىك قامۇسلار، مىللىي ئەتلەس يۆگەلمە كىتابلار ۋە زامانىۋى سىمسىز قۇلاقلىقلار كۆرگەزمىسى.',
+    btnText: 'كىتابلارنى كۆرۈش',
+    btnLink: '#catalogSection',
+    image: 'images/hero_books_culture.jpg',
+    enabled: true,
+    translations: {
+      tr: {
+        tag: 'Kitap & Kültür Mirası',
+        title: 'Tarihi İpek Yolu ve Klasik Kültür Eserleri',
+        subtitle: 'Tarih atlasları, milli kültür kitapları ve seçkin edebiyat eserleri tek bir platformda.',
+        btnText: 'Kitapları Keşfet'
+      },
+      en: {
+        tag: 'Heritage & Books',
+        title: 'Silk Road Heritage & Classic Literature',
+        subtitle: 'Illustrated historical folios, classic cultural writings and literary anthologies.',
+        btnText: 'Browse Books'
+      }
     }
   }
 ];
@@ -6840,6 +6974,7 @@ class StoreManager {
       agents: this.getAgents(),
       coupons: this.getCoupons(),
       settings: this.getSettings(),
+      heroSlides: this.getRawHeroSlides(),
       wishlist: this.getWishlist()
     };
     return JSON.stringify(backup, null, 2);
@@ -6869,6 +7004,9 @@ class StoreManager {
       }
       if (backup.settings) {
         localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(backup.settings));
+      }
+      if (Array.isArray(backup.heroSlides)) {
+        localStorage.setItem(STORAGE_KEYS.HERO_SLIDES, JSON.stringify(backup.heroSlides));
       }
 
       this.notifyDataChange('all');
@@ -7449,6 +7587,79 @@ class StoreManager {
 
   resetMarqueeItems() {
     return this.updateMarqueeItems(JSON.parse(JSON.stringify(DEFAULT_MARQUEE_ITEMS)));
+  }
+
+  // ==================== 🎨 تەشۋىقات تاختىسى (Hero Slider Banner) ====================
+  getHeroSlides(lang = 'ug') {
+    let slides = null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.HERO_SLIDES);
+      if (stored) {
+        slides = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Error reading hero slides:', e);
+    }
+
+    if (!Array.isArray(slides) || slides.length === 0) {
+      slides = JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES));
+    }
+
+    return slides.map((s, idx) => {
+      let tag = s.tag || '';
+      let title = s.title || '';
+      let subtitle = s.subtitle || s.desc || '';
+      let btnText = s.btnText || '';
+
+      if (lang !== 'ug' && s.translations && s.translations[lang]) {
+        if (s.translations[lang].tag) tag = s.translations[lang].tag;
+        if (s.translations[lang].title) title = s.translations[lang].title;
+        if (s.translations[lang].subtitle) subtitle = s.translations[lang].subtitle;
+        if (s.translations[lang].btnText) btnText = s.translations[lang].btnText;
+      }
+
+      return {
+        id: s.id || `hero_${idx + 1}`,
+        order: typeof s.order === 'number' ? s.order : (idx + 1),
+        tag: tag,
+        tagColor: s.tagColor || '#f59e0b',
+        title: title,
+        subtitle: subtitle,
+        desc: subtitle,
+        btnText: btnText,
+        btnLink: s.btnLink || '#catalogSection',
+        image: s.image || 'images/hero_dried_fruits.jpg',
+        enabled: s.enabled !== false,
+        translations: s.translations || {}
+      };
+    });
+  }
+
+  getRawHeroSlides() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.HERO_SLIDES);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES));
+  }
+
+  saveHeroSlides(slides) {
+    if (!Array.isArray(slides)) return false;
+    try {
+      localStorage.setItem(STORAGE_KEYS.HERO_SLIDES, JSON.stringify(slides));
+      this.notifyDataChange('heroSlides');
+      return true;
+    } catch (e) {
+      console.error('Failed to save hero slides:', e);
+      return false;
+    }
+  }
+
+  resetHeroSlides() {
+    return this.saveHeroSlides(JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES)));
   }
 
   getDashboardMetrics() {

@@ -286,6 +286,7 @@ function initTeklimakanApp() {
     if (hDesc5) hDesc5.textContent = i18n.t('heroDesc5');
     const hBtn5 = document.querySelector('#heroBtn5 span');
     if (hBtn5) hBtn5.textContent = i18n.t('heroBtn5');
+    try { initHeroSlider(lang); } catch (e) {}
 
     const flashBadge = document.getElementById('flashSaleBadge');
     if (flashBadge) {
@@ -4105,38 +4106,95 @@ function initTeklimakanApp() {
     modal.classList.add('active');
   }
 
-  function initHeroSlider() {
-    const slides = document.querySelectorAll('.hero-slide');
-    const dots = document.querySelectorAll('.dot-indicator');
+  let heroSliderTimer = null;
+  function initHeroSlider(forcedLang = null) {
+    const container = document.querySelector('.hero-slider-container');
+    if (!container) return;
+
+    if (heroSliderTimer) {
+      clearInterval(heroSliderTimer);
+      heroSliderTimer = null;
+    }
+
+    const currentLang = forcedLang || (window.appI18n ? window.appI18n.getLang() : 'ug');
+
+    if (window.appStore && typeof window.appStore.getHeroSlides === 'function') {
+      const allSlides = window.appStore.getHeroSlides(currentLang);
+      const activeSlides = (allSlides || []).filter(s => s && s.enabled !== false);
+
+      if (activeSlides.length > 0) {
+        // Build dynamic slides HTML
+        const slidesHtml = activeSlides.map((s, idx) => `
+          <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${s.image || "images/hero_dried_fruits.jpg"}');">
+            <div class="hero-slide-overlay"></div>
+            <div class="hero-content">
+              <span class="hero-tag" style="background: ${s.tagColor || '#f59e0b'};">${s.tag || ''}</span>
+              <h1 class="hero-title">${s.title || ''}</h1>
+              <p class="hero-subtitle">${s.subtitle || s.desc || ''}</p>
+              <a href="${s.btnLink || '#catalogSection'}" class="hero-btn" style="background: ${s.tagColor || '#f59e0b'};">
+                <span>${s.btnText || 'ھازىرلا كۆرۈپ سېتىۋېلىش'}</span>
+                <i class="fas fa-arrow-left"></i>
+              </a>
+            </div>
+          </div>
+        `).join('');
+
+        const dotsHtml = `
+          <div class="hero-nav-dots">
+            ${activeSlides.map((_, idx) => `
+              <div class="dot-indicator ${idx === 0 ? 'active' : ''}" title="${idx + 1}-ئېلان"></div>
+            `).join('')}
+          </div>
+        `;
+
+        container.innerHTML = slidesHtml + dotsHtml;
+      }
+    }
+
+    const slides = container.querySelectorAll('.hero-slide');
+    const dots = container.querySelectorAll('.dot-indicator');
     if (slides.length <= 1) return;
 
     let currentSlide = 0;
-    let autoTimer = null;
 
     function activateSlide(index) {
-      slides[currentSlide].classList.remove('active');
+      if (slides[currentSlide]) slides[currentSlide].classList.remove('active');
       if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
       currentSlide = (index + slides.length) % slides.length;
-      slides[currentSlide].classList.add('active');
+      if (slides[currentSlide]) slides[currentSlide].classList.add('active');
       if (dots[currentSlide]) dots[currentSlide].classList.add('active');
     }
 
     function startAutoRotation() {
-      if (autoTimer) clearInterval(autoTimer);
-      autoTimer = setInterval(() => {
+      if (heroSliderTimer) clearInterval(heroSliderTimer);
+      heroSliderTimer = setInterval(() => {
         activateSlide(currentSlide + 1);
       }, 5000);
     }
 
     dots.forEach((dot, idx) => {
-      dot.addEventListener('click', () => {
+      dot.onclick = () => {
         activateSlide(idx);
         startAutoRotation();
-      });
+      };
     });
+
+    container.onmouseenter = () => {
+      if (heroSliderTimer) clearInterval(heroSliderTimer);
+    };
+    container.onmouseleave = () => {
+      startAutoRotation();
+    };
 
     startAutoRotation();
   }
+
+  // تەشۋىقات تاختىسى ماسقەدەملەش تىڭشىغۇچى (Store Sync Listener)
+  window.addEventListener('uyghur_store_sync', (e) => {
+    if (e.detail && (e.detail.type === 'heroSlides' || e.detail.type === 'all')) {
+      try { initHeroSlider(); } catch (err) {}
+    }
+  });
 
   // ==================== 🤝 ۋاكالەتچى ۋە سودىگەرلەر مەركىزى ====================
   function renderAgentPortalModal(lang = 'ug') {

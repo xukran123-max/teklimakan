@@ -117,6 +117,9 @@
         <li class="menu-item" data-tab="retention" onclick="if(window.switchTab) window.switchTab('retention');" style="position: relative;">
           <a href="javascript:void(0);"><i class="fas fa-dharmachakra" style="color: #ec4899;"></i> <span>🎡 خېرىدار ئاكتىپلىقى (ئامەت چاقى)</span></a>
         </li>
+        <li class="menu-item" data-tab="hero-slider" onclick="if(window.switchTab) window.switchTab('hero-slider');" style="position: relative;">
+          <a href="javascript:void(0);"><i class="fas fa-images" style="color: #6366f1;"></i> <span>🖼️ تەشۋىقات تاختىسى (Hero)</span></a>
+        </li>
         <li class="menu-item" data-tab="settings" onclick="if(window.switchTab) window.switchTab('settings');">
           <a href="javascript:void(0);"><i class="fas fa-cogs"></i> <span>دۇكان تەڭشەكلىرى</span></a>
         </li>
@@ -1661,6 +1664,60 @@
             <div style="margin-top: 1.5rem; text-align: left; display: flex; justify-content: flex-end; gap: 0.75rem;">
               <button type="button" id="btnSaveRetentionSettingsBottom" onclick="window.saveCustomerRetentionAdmin()" class="btn-primary" style="background: #2563eb; padding: 0.75rem 2rem; font-size: 1rem; font-weight: 800; border-radius: 10px; cursor: pointer;">
                 <i class="fas fa-save"></i> <span>بارلىق تەڭشەكلەرنى ساقلاش</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ==================== 🖼️ تەشۋىقات تاختىسى (Hero Slider) باشقۇرۇش مەركىزى ==================== -->
+        <div id="tab-hero-slider" class="admin-tab-pane">
+          <div class="data-table-container" style="max-width: 1080px; padding: 1.75rem; margin-bottom: 2rem;">
+            
+            <!-- Header Banner -->
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);">
+                  <i class="fas fa-images"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.35rem; font-weight: 900; color: #0f172a; margin: 0;">🖼️ باش بەت تەشۋىقات تاختىسى (Hero Slider) باشقۇرۇش مەركىزى</h3>
+                  <p style="font-size: 0.88rem; color: #64748b; margin: 0.25rem 0 0;">تور بېكەت باش بېتىدىكى تەشۋىقات رەسىملىرى، كىچىك بېلگە، تېما، تەپسىلات ۋە كۇنۇپكىلارنى بىۋاسىتە تەھرىرلەش</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                <button type="button" id="btnAddNewHeroSlide" onclick="window.addNewHeroSlideAdmin()" class="btn-primary" style="background: #10b981; border-color: #059669; padding: 0.6rem 1.15rem; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-plus-circle"></i> <span>يېڭى ئېلان قوشۇش</span>
+                </button>
+                <button type="button" id="btnResetHeroSlides" onclick="window.resetHeroSlidesAdmin()" class="btn-secondary" style="background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; padding: 0.6rem 1.15rem; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-undo"></i> <span>دەسلەپكى ھالەتكە قايتۇرۇش</span>
+                </button>
+                <button type="button" id="btnSaveHeroSlidesTop" onclick="window.saveHeroSlidesAdmin()" class="btn-primary" style="background: #2563eb; padding: 0.6rem 1.4rem; font-size: 0.92rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-save"></i> <span>بارلىق ئۆزگىرىشلەرنى ساقلاش</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ئەسكەرتىش تاختىسى -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.85rem;">
+              <i class="fas fa-info-circle" style="color: #2563eb; font-size: 1.4rem; flex-shrink: 0;"></i>
+              <div style="font-size: 0.88rem; color: #1e3a8a; line-height: 1.6;">
+                <strong>ياردەم ئەسكەرتىشى:</strong> بۇ يەردىكى تېكىست، بېلگە رەڭگى ياكى رەسىملەرنى ئۆزگەرتىپ <strong>«بارلىق ئۆزگىرىشلەرنى ساقلاش»</strong> كۇنۇپكىسىنى باسسىڭىز، باش بەتتىكى سۈرەتلەر ۋە خەتلەر دەرھال يېڭىلىنىدۇ. سىستېما سۈزۈك، ئادەم سۈرىتى بولمىغان يەرلىك سۈرەتلەرنى ئالدىن تەييارلاپ بەردى. ئۆزىڭىزنىڭ رەسىملىرىنىمۇ بىۋاسىتە كومپيۇتېردىن تاللاپ چىقىرالايسىز ياكى تور ئادرېسى كىرگۈزەلەيسىز.
+              </div>
+            </div>
+
+            <!-- Slides List Container -->
+            <div id="heroSlidesAdminList" style="display: flex; flex-direction: column; gap: 1.75rem;">
+              <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Bottom Save Button -->
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <button type="button" onclick="window.addNewHeroSlideAdmin()" class="btn-secondary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem; cursor: pointer;">
+                <i class="fas fa-plus"></i> <span>يېڭى ئېلان تاختىسى قوشۇش</span>
+              </button>
+              <button type="button" id="btnSaveHeroSlidesBottom" onclick="window.saveHeroSlidesAdmin()" class="btn-primary" style="background: #2563eb; padding: 0.75rem 2.2rem; font-size: 1rem; font-weight: 800; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
+                <i class="fas fa-save"></i> <span>بارلىق ئۆزگىرىشلەرنى ساقلاش</span>
               </button>
             </div>
 

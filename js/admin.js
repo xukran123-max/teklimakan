@@ -423,6 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
     populateCategoryDropdowns();
     renderCustomerRetentionAdmin();
     setupCustomerRetentionListeners();
+    renderHeroSliderAdmin();
+    setupHeroSliderAdminListeners();
     initGlobalAdminSearch();
     initProductImageLightboxControls();
   }
@@ -1009,6 +1011,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderMessagesCenter();
     } else if (tabId === 'retention') {
       renderCustomerRetentionAdmin();
+    } else if (tabId === 'hero-slider') {
+      renderHeroSliderAdmin();
     } else if (tabId === 'settings') {
       loadSettingsForm();
     }
@@ -8986,6 +8990,444 @@ document.addEventListener('DOMContentLoaded', () => {
       modeManual.onchange = () => toggleFlashManualMode('manual');
     }
   }
+
+  // ==================== 🖼️ تەشۋىقات تاختىسى (Hero Slider) باشقۇرۇش سىستېمىسى ====================
+  const PRESET_HERO_IMAGES = [
+    { label: 'تەبىئىي تاۋارلار ۋە قۇرۇق مېۋىلەر (ئۈزۈم، ياڭاق)', value: 'images/hero_dried_fruits.jpg' },
+    { label: 'ئەنئەنىۋى يىپەك ئەتلەس ۋە گۈزەللىك بۇيۇملىرى', value: 'images/hero_atlas_silk.jpg' },
+    { label: 'ئۇيغۇر تىبابىتى ۋە شىپالىق ئۆسۈملۈكلەر (ھەسەل، قاشتېشى)', value: 'images/hero_uyghur_medicine.jpg' },
+    { label: 'تۈركىيە رىزە قارا چېيى ۋە قەدىمىي مىس چەينەك', value: 'images/hero_turkish_tea.jpg' },
+    { label: 'يىپەك يولى مەدەنىيىتى ۋە كىلاسسىك كىتابلار', value: 'images/hero_books_culture.jpg' }
+  ];
+
+  let currentHeroSlidesAdmin = [];
+
+  function renderHeroSliderAdmin() {
+    if (!window.appStore) return;
+    const container = document.getElementById('heroSlidesAdminList');
+    if (!container) return;
+
+    currentHeroSlidesAdmin = window.appStore.getRawHeroSlides();
+    if (!Array.isArray(currentHeroSlidesAdmin) || currentHeroSlidesAdmin.length === 0) {
+      currentHeroSlidesAdmin = [];
+    }
+
+    container.innerHTML = '';
+
+    if (currentHeroSlidesAdmin.length === 0) {
+      container.innerHTML = `
+        <div style="background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 3rem 1.5rem; text-align: center; color: #64748b;">
+          <i class="fas fa-images" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+          <p style="font-size: 1.1rem; font-weight: 700; margin: 0 0 1rem;">ھازىرچە تەشۋىقات تاختىسىدا ئېلان يوق</p>
+          <button type="button" onclick="window.resetHeroSlidesAdmin()" class="btn-primary" style="background: #2563eb; padding: 0.6rem 1.5rem; font-weight: 800; cursor: pointer;">
+            <i class="fas fa-magic"></i> دەسلەپكى 5 چوڭ ئېلاننى قاچىلاش
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    currentHeroSlidesAdmin.forEach((slide, idx) => {
+      const isEnabled = slide.enabled !== false;
+      const tagColor = slide.tagColor || '#f59e0b';
+      const imgSrc = slide.image || 'images/hero_dried_fruits.jpg';
+      const slideTitle = slide.title || '';
+      const slideSubtitle = slide.subtitle || slide.desc || '';
+      const slideTag = slide.tag || '';
+      const slideBtnText = slide.btnText || 'ھازىرلا كۆرۈپ سېتىۋېلىش';
+      const slideBtnLink = slide.btnLink || '#catalogSection';
+      const trData = (slide.translations && slide.translations.tr) || {};
+      const enData = (slide.translations && slide.translations.en) || {};
+
+      const card = document.createElement('div');
+      card.className = 'hero-slide-admin-card';
+      card.id = `heroSlideCard_${idx}`;
+      card.style.cssText = 'background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); position: relative; transition: all 0.25s ease;';
+
+      card.innerHTML = `
+        <!-- Card Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="background: #f1f5f9; color: #334155; font-weight: 900; font-size: 0.95rem; padding: 0.35rem 0.85rem; border-radius: 9999px; border: 1px solid #cbd5e1;">
+              ${idx + 1}-ئېلان تاختىسى
+            </span>
+            <label style="display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; background: ${isEnabled ? '#ecfdf5' : '#f8fafc'}; color: ${isEnabled ? '#047857' : '#64748b'}; padding: 0.3rem 0.75rem; border-radius: 9999px; border: 1px solid ${isEnabled ? '#a7f3d0' : '#e2e8f0'}; font-weight: 800; font-size: 0.85rem;">
+              <input type="checkbox" id="slideEnabled_${idx}" ${isEnabled ? 'checked' : ''} onchange="window.updateSlideField(${idx}, 'enabled', this.checked)" style="accent-color: #10b981; width: 16px; height: 16px;">
+              <span>${isEnabled ? 'ئاكتىپ (كۆرسىتىلىدۇ)' : 'تاقالغان (يوشۇرۇن)'}</span>
+            </label>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <button type="button" onclick="window.moveHeroSlideAdmin(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; cursor: pointer; ${idx === 0 ? 'opacity: 0.4; cursor: not-allowed;' : ''}" title="يۇقىرىغا يۆتكەش">
+              <i class="fas fa-arrow-up"></i>
+            </button>
+            <button type="button" onclick="window.moveHeroSlideAdmin(${idx}, 1)" ${idx === currentHeroSlidesAdmin.length - 1 ? 'disabled' : ''} class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; cursor: pointer; ${idx === currentHeroSlidesAdmin.length - 1 ? 'opacity: 0.4; cursor: not-allowed;' : ''}" title="تۆۋەنگە يۆتكەش">
+              <i class="fas fa-arrow-down"></i>
+            </button>
+            <button type="button" onclick="window.deleteHeroSlideAdmin(${idx})" class="btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.82rem; color: #ef4444; border-color: #fecaca; background: #fff1f2; cursor: pointer;" title="بۇ ئېلاننى ئۆچۈرۈش">
+              <i class="fas fa-trash-alt"></i> <span>ئۆچۈرۈش</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Visual Preview Box -->
+        <div style="margin-bottom: 1.5rem;">
+          <div style="font-size: 0.82rem; font-weight: 800; color: #64748b; margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fas fa-eye" style="color: #6366f1;"></i> <span>بۇ ئېلاننىڭ باش بەتتىكى ئەسلى كۆرۈنۈشى (جانلىق سىناق كۆزنەك):</span>
+          </div>
+          <div id="slideLivePreview_${idx}" style="position: relative; border-radius: 14px; overflow: hidden; height: 180px; background-image: url('${imgSrc}'); background-size: cover; background-position: center; border: 1.5px solid #cbd5e1; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);">
+            <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.15) 100%);"></div>
+            <div style="position: relative; z-index: 2; padding: 1.25rem 1.5rem; max-width: 580px; color: #ffffff; text-align: right; direction: rtl;">
+              <span id="prevTag_${idx}" style="display: inline-block; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 9999px; background: ${tagColor}; color: #ffffff; margin-bottom: 0.45rem;">
+                ${slideTag || 'بېلگە'}
+              </span>
+              <h3 id="prevTitle_${idx}" style="font-size: 1.15rem; font-weight: 900; margin: 0 0 0.35rem; line-height: 1.35; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                ${slideTitle || 'ئېلان ماۋزۇسى كىرگۈزۈلمىگەن'}
+              </h3>
+              <p id="prevDesc_${idx}" style="font-size: 0.82rem; color: #e2e8f0; margin: 0 0 0.65rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${slideSubtitle || 'چۈشەندۈرۈش تېكىستى كىرگۈزۈلمىگەن'}
+              </p>
+              <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; background: ${tagColor}; color: #ffffff;">
+                <span id="prevBtnText_${idx}">${slideBtnText}</span>
+                <i class="fas fa-arrow-left" style="font-size: 0.75rem;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Edit Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          
+          <!-- Column 1: Image Configuration -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.92rem; color: #1e293b; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.45rem;">
+              <i class="fas fa-image" style="color: #6366f1;"></i> <span>1. ئارقا تەگلىك رەسىمى</span>
+            </div>
+
+            <!-- Preset Image Selector -->
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">تەييار سۈزۈك سۈرەتلەردىن تاللاش:</label>
+              <select id="slidePresetSelect_${idx}" class="form-control" style="font-size: 0.84rem;" onchange="window.selectPresetImage(${idx}, this.value)">
+                <option value="">-- ئالدىن تەييارلانغان سۈرەتلەر --</option>
+                ${PRESET_HERO_IMAGES.map(p => `
+                  <option value="${p.value}" ${imgSrc === p.value ? 'selected' : ''}>${p.label}</option>
+                `).join('')}
+                <option value="custom" ${!PRESET_HERO_IMAGES.some(p => p.value === imgSrc) ? 'selected' : ''}>باشقا ئۇلانما / يۈكلەنگەن سۈرەت</option>
+              </select>
+            </div>
+
+            <!-- Custom URL Input -->
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">رەسىم ئۇلانمىسى ياكى ھۆججەت يولى:</label>
+              <input type="text" id="slideImgInput_${idx}" class="form-control number-latin" style="font-size: 0.84rem; direction: ltr;" value="${imgSrc}" oninput="window.updateSlideField(${idx}, 'image', this.value)" placeholder="images/hero_xxx.jpg ياكى https://...">
+            </div>
+
+            <!-- Local File Upload Button -->
+            <div>
+              <label style="display: inline-flex; align-items: center; gap: 0.45rem; background: #ffffff; border: 1.5px solid #cbd5e1; color: #334155; padding: 0.45rem 0.9rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; width: 100%; justify-content: center;">
+                <i class="fas fa-folder-open" style="color: #f59e0b;"></i>
+                <span>📁 كومپيۇتېردىن رەسىم يۈكلەش</span>
+                <input type="file" accept="image/*" style="display: none;" onchange="window.handleSlideFileUpload(${idx}, this)">
+              </label>
+              <span style="display: block; font-size: 0.74rem; color: #94a3b8; margin-top: 4px; text-align: center;">ئەلا سۈپەتلىك، كۆرۈنۈشى تەكشى كەڭ سۈرەتلەر تەۋسىيە قىلىنىدۇ</span>
+            </div>
+          </div>
+
+          <!-- Column 2: Text & Color Configuration -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.92rem; color: #1e293b; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.45rem;">
+              <i class="fas fa-edit" style="color: #10b981;"></i> <span>2. خەت، بېلگە ۋە كۇنۇپكا تەڭشىكى</span>
+            </div>
+
+            <!-- Tag and Color Picker -->
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">كىچىك بېلگە (Tag):</label>
+                <input type="text" id="slideTagInput_${idx}" class="form-control" style="font-size: 0.85rem;" value="${slideTag}" oninput="window.updateSlideField(${idx}, 'tag', this.value)" placeholder="مەسىلەن: ئەتىيازلىق ئېتىبار">
+              </div>
+              <div class="form-group" style="margin: 0; min-width: 80px;">
+                <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">بېلگە رەڭگى:</label>
+                <div style="display: flex; align-items: center; gap: 0.35rem;">
+                  <input type="color" id="slideColorInput_${idx}" value="${tagColor}" onchange="window.updateSlideField(${idx}, 'tagColor', this.value)" style="width: 38px; height: 38px; padding: 0; border: 1.5px solid #cbd5e1; border-radius: 8px; cursor: pointer;">
+                  <span id="slideColorHex_${idx}" class="number-latin" style="font-size: 0.75rem; font-weight: 700; color: #64748b;">${tagColor}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Color Swatches -->
+            <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+              <span style="font-size: 0.74rem; color: #64748b; font-weight: 700;">تېز رەڭ:</span>
+              ${['#f59e0b', '#10b981', '#d97706', '#e11d48', '#6366f1', '#0ea5e9', '#8b5cf6'].map(col => `
+                <span onclick="window.setSlideColor(${idx}, '${col}')" style="width: 22px; height: 22px; border-radius: 50%; background: ${col}; display: inline-block; cursor: pointer; border: 2px solid ${col === tagColor ? '#0f172a' : '#ffffff'}; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="${col}"></span>
+              `).join('')}
+            </div>
+
+            <!-- Main Title -->
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">باش ماۋزۇ (Title):</label>
+              <input type="text" id="slideTitleInput_${idx}" class="form-control" style="font-size: 0.9rem; font-weight: 800;" value="${slideTitle}" oninput="window.updateSlideField(${idx}, 'title', this.value)" placeholder="باش ماۋزۇ كىرگۈزۈڭ">
+            </div>
+
+            <!-- Subtitle / Description -->
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">چۈشەندۈرۈش تېكىستى (Subtitle):</label>
+              <textarea id="slideDescInput_${idx}" class="form-control" rows="2" style="font-size: 0.84rem;" oninput="window.updateSlideField(${idx}, 'subtitle', this.value)" placeholder="قىسقىچە تەشۋىقات تېكىستى">${slideSubtitle}</textarea>
+            </div>
+
+            <!-- Button Text & Link -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">كۇنۇپكا خېتى:</label>
+                <input type="text" id="slideBtnTextInput_${idx}" class="form-control" style="font-size: 0.84rem;" value="${slideBtnText}" oninput="window.updateSlideField(${idx}, 'btnText', this.value)" placeholder="ھازىرلا كۆرۈپ سېتىۋېلىش">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">كۇنۇپكا ئۇلانمىسى:</label>
+                <input type="text" id="slideBtnLinkInput_${idx}" class="form-control number-latin" style="font-size: 0.84rem; direction: ltr;" value="${slideBtnLink}" oninput="window.updateSlideField(${idx}, 'btnLink', this.value)" placeholder="#catalogSection">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Optional Multilingual Accordion -->
+        <details style="margin-top: 1rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem;">
+          <summary style="font-size: 0.84rem; font-weight: 800; color: #475569; cursor: pointer; user-select: none;">
+            🌐 تۈركچە ۋە ئىنگىلىزچە بەتلەر ئۈچۈن خاس تەرجىمە (ئىختىيارىي / Optional Translations)
+          </summary>
+          <div style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; border-top: 1px dashed #e2e8f0; padding-top: 1rem;">
+            <!-- Turkish -->
+            <div style="background: #fafafa; padding: 0.75rem; border-radius: 8px; border: 1px solid #f1f5f9;">
+              <div style="font-weight: 800; font-size: 0.82rem; color: #0f172a; margin-bottom: 0.5rem;">🇹🇷 تۈركچە نۇسخىسى (Türkçe):</div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Etiket (Tag):</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${trData.tag || ''}" oninput="window.updateSlideTranslation(${idx}, 'tr', 'tag', this.value)">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Başlık (Title):</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${trData.title || ''}" oninput="window.updateSlideTranslation(${idx}, 'tr', 'title', this.value)">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Açıklama (Subtitle):</label>
+                <textarea class="form-control" rows="2" style="font-size: 0.82rem;" oninput="window.updateSlideTranslation(${idx}, 'tr', 'subtitle', this.value)">${trData.subtitle || ''}</textarea>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">Buton Metni:</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${trData.btnText || ''}" oninput="window.updateSlideTranslation(${idx}, 'tr', 'btnText', this.value)">
+              </div>
+            </div>
+
+            <!-- English -->
+            <div style="background: #fafafa; padding: 0.75rem; border-radius: 8px; border: 1px solid #f1f5f9;">
+              <div style="font-weight: 800; font-size: 0.82rem; color: #0f172a; margin-bottom: 0.5rem;">🇬🇧 ئىنگىلىزچە نۇسخىسى (English):</div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Tag Label:</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${enData.tag || ''}" oninput="window.updateSlideTranslation(${idx}, 'en', 'tag', this.value)">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Headline (Title):</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${enData.title || ''}" oninput="window.updateSlideTranslation(${idx}, 'en', 'title', this.value)">
+              </div>
+              <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="font-size: 0.78rem;">Subtitle / Description:</label>
+                <textarea class="form-control" rows="2" style="font-size: 0.82rem;" oninput="window.updateSlideTranslation(${idx}, 'en', 'subtitle', this.value)">${enData.subtitle || ''}</textarea>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">Button Text:</label>
+                <input type="text" class="form-control" style="font-size: 0.82rem;" value="${enData.btnText || ''}" oninput="window.updateSlideTranslation(${idx}, 'en', 'btnText', this.value)">
+              </div>
+            </div>
+          </div>
+        </details>
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  function updateSlideLivePreview(idx) {
+    const slide = currentHeroSlidesAdmin[idx];
+    if (!slide) return;
+
+    const prevBox = document.getElementById(`slideLivePreview_${idx}`);
+    const prevTag = document.getElementById(`prevTag_${idx}`);
+    const prevTitle = document.getElementById(`prevTitle_${idx}`);
+    const prevDesc = document.getElementById(`prevDesc_${idx}`);
+    const prevBtnText = document.getElementById(`prevBtnText_${idx}`);
+    const colorHex = document.getElementById(`slideColorHex_${idx}`);
+
+    if (prevBox) {
+      prevBox.style.backgroundImage = `url('${slide.image || "images/hero_dried_fruits.jpg"}')`;
+    }
+    if (prevTag) {
+      prevTag.textContent = slide.tag || 'بېلگە';
+      prevTag.style.background = slide.tagColor || '#f59e0b';
+    }
+    if (prevTitle) {
+      prevTitle.textContent = slide.title || 'ئېلان ماۋزۇسى';
+    }
+    if (prevDesc) {
+      prevDesc.textContent = slide.subtitle || slide.desc || '';
+    }
+    if (prevBtnText) {
+      prevBtnText.textContent = slide.btnText || 'ھازىرلا كۆرۈپ سېتىۋېلىش';
+      if (prevBtnText.parentElement) {
+        prevBtnText.parentElement.style.background = slide.tagColor || '#f59e0b';
+      }
+    }
+    if (colorHex) {
+      colorHex.textContent = slide.tagColor || '#f59e0b';
+    }
+  }
+
+  function updateSlideField(idx, field, value) {
+    if (!currentHeroSlidesAdmin[idx]) return;
+    currentHeroSlidesAdmin[idx][field] = value;
+    if (field === 'subtitle') currentHeroSlidesAdmin[idx].desc = value;
+    updateSlideLivePreview(idx);
+  }
+
+  function updateSlideTranslation(idx, lang, field, value) {
+    if (!currentHeroSlidesAdmin[idx]) return;
+    if (!currentHeroSlidesAdmin[idx].translations) currentHeroSlidesAdmin[idx].translations = {};
+    if (!currentHeroSlidesAdmin[idx].translations[lang]) currentHeroSlidesAdmin[idx].translations[lang] = {};
+    currentHeroSlidesAdmin[idx].translations[lang][field] = value;
+  }
+
+  function selectPresetImage(idx, val) {
+    if (!val || val === 'custom') return;
+    const inp = document.getElementById(`slideImgInput_${idx}`);
+    if (inp) inp.value = val;
+    updateSlideField(idx, 'image', val);
+  }
+
+  function setSlideColor(idx, hex) {
+    const colInp = document.getElementById(`slideColorInput_${idx}`);
+    if (colInp) colInp.value = hex;
+    updateSlideField(idx, 'tagColor', hex);
+  }
+
+  function handleSlideFileUpload(idx, input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      showAdminToast('رەسىم ھۆججىتى بەك چوڭ (5MB دىن كىچىك بولسۇن)', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const dataUrl = e.target.result;
+      const inp = document.getElementById(`slideImgInput_${idx}`);
+      if (inp) inp.value = dataUrl;
+      const presetSelect = document.getElementById(`slidePresetSelect_${idx}`);
+      if (presetSelect) presetSelect.value = 'custom';
+      updateSlideField(idx, 'image', dataUrl);
+      showAdminToast('رەسىم مۇۋەپپەقىيەتلىك تاللاندى ۋە يۈكلەندى', 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function addNewHeroSlideAdmin() {
+    const newSlide = {
+      id: `hero_${Date.now()}`,
+      order: currentHeroSlidesAdmin.length + 1,
+      tag: 'يېڭى ئېلان',
+      tagColor: '#6366f1',
+      title: 'يېڭى تەشۋىقات باش ماۋزۇسى',
+      subtitle: 'بۇ يەرگە تەشۋىقات مەزمۇنىنىڭ قىسقىچە چۈشەندۈرۈشى يېزىلىدۇ.',
+      btnText: 'ھازىرلا كۆرۈش',
+      btnLink: '#catalogSection',
+      image: 'images/hero_dried_fruits.jpg',
+      enabled: true,
+      translations: {
+        tr: { tag: 'Yeni Kampanya', title: 'Yeni Tanıtım Başlığı', subtitle: 'Kampanya detayları burada yer alacaktır.', btnText: 'Hemen İncele' },
+        en: { tag: 'New Promo', title: 'New Promotional Headline', subtitle: 'Short promotional description goes here.', btnText: 'Explore Now' }
+      }
+    };
+
+    currentHeroSlidesAdmin.push(newSlide);
+    renderHeroSliderAdmin();
+    showAdminToast('يېڭى ئېلان تاختىسى قوشۇلدى، مەزمۇنلىرىنى كىرگۈزۈپ ساقلاڭ', 'info');
+
+    // Scroll to bottom of list
+    const container = document.getElementById('heroSlidesAdminList');
+    if (container && container.lastElementChild) {
+      container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function deleteHeroSlideAdmin(idx) {
+    if (!confirm('بۇ ئېلان تاختىسىنى راستلا ئۆچۈرەمسىز؟')) return;
+    currentHeroSlidesAdmin.splice(idx, 1);
+    // Re-index orders
+    currentHeroSlidesAdmin.forEach((s, i) => s.order = i + 1);
+    renderHeroSliderAdmin();
+    showAdminToast('ئېلان تاختىسى ئۆچۈرۈلدى', 'info');
+  }
+
+  function moveHeroSlideAdmin(idx, dir) {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= currentHeroSlidesAdmin.length) return;
+    const temp = currentHeroSlidesAdmin[idx];
+    currentHeroSlidesAdmin[idx] = currentHeroSlidesAdmin[targetIdx];
+    currentHeroSlidesAdmin[targetIdx] = temp;
+    // Re-index orders
+    currentHeroSlidesAdmin.forEach((s, i) => s.order = i + 1);
+    renderHeroSliderAdmin();
+  }
+
+  function saveHeroSlidesAdmin() {
+    if (!window.appStore) {
+      showAdminToast('ساقلاش مەغلۇپ بولدى: appStore بايقالمىدى', 'error');
+      return;
+    }
+
+    // Update order numbers
+    currentHeroSlidesAdmin.forEach((s, i) => s.order = i + 1);
+
+    const success = window.appStore.saveHeroSlides(currentHeroSlidesAdmin);
+    if (success) {
+      showAdminToast('تەشۋىقات تاختىسى مەزمۇنلىرى مۇۋەپپەقىيەتلىك ساقلاندى ۋە باش بەتتە دەرھال كۈچكە ئىگە بولدى!', 'success');
+    } else {
+      showAdminToast('ساقلاشتا خاتالىق كۆرۈلدى', 'error');
+    }
+  }
+
+  function resetHeroSlidesAdmin() {
+    if (!confirm('تەشۋىقات تاختىسىنى سىستېمىنىڭ دەسلەپكى ھالىتىگە قايتۇرامسىز؟ ئۆزىڭىز قوشقان ياكى تەھرىرلىگەن ئېلانلار ئەسلىگە كېلىدۇ.')) return;
+    if (window.appStore) {
+      window.appStore.resetHeroSlides();
+      currentHeroSlidesAdmin = window.appStore.getRawHeroSlides();
+      renderHeroSliderAdmin();
+      showAdminToast('تەشۋىقات تاختىسى دەسلەپكى ھالەتكە قايتۇرۇلدى!', 'success');
+    }
+  }
+
+  function setupHeroSliderAdminListeners() {
+    const btnSaveTop = document.getElementById('btnSaveHeroSlidesTop');
+    const btnSaveBottom = document.getElementById('btnSaveHeroSlidesBottom');
+    if (btnSaveTop) btnSaveTop.onclick = saveHeroSlidesAdmin;
+    if (btnSaveBottom) btnSaveBottom.onclick = saveHeroSlidesAdmin;
+
+    const btnAdd = document.getElementById('btnAddNewHeroSlide');
+    if (btnAdd) btnAdd.onclick = addNewHeroSlideAdmin;
+
+    const btnReset = document.getElementById('btnResetHeroSlides');
+    if (btnReset) btnReset.onclick = resetHeroSlidesAdmin;
+  }
+
+  window.renderHeroSliderAdmin = renderHeroSliderAdmin;
+  window.saveHeroSlidesAdmin = saveHeroSlidesAdmin;
+  window.resetHeroSlidesAdmin = resetHeroSlidesAdmin;
+  window.addNewHeroSlideAdmin = addNewHeroSlideAdmin;
+  window.deleteHeroSlideAdmin = deleteHeroSlideAdmin;
+  window.moveHeroSlideAdmin = moveHeroSlideAdmin;
+  window.updateSlideField = updateSlideField;
+  window.updateSlideTranslation = updateSlideTranslation;
+  window.selectPresetImage = selectPresetImage;
+  window.setSlideColor = setSlideColor;
+  window.handleSlideFileUpload = handleSlideFileUpload;
+  window.setupHeroSliderAdminListeners = setupHeroSliderAdminListeners;
 
   function showAdminToast(message, type = 'info') {
     let container = document.getElementById('toastContainer');

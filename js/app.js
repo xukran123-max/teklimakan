@@ -387,10 +387,12 @@ function initTeklimakanApp() {
 
     const cNoticeBanner = document.getElementById('checkoutTurkishNoticeBanner');
     if (cNoticeBanner) {
-      cNoticeBanner.innerHTML = `<strong>${lang === 'tr' ? '⚠️ Kargo Bilgilendirmesi:' : (lang === 'en' ? '⚠️ Delivery Notice:' : '⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:')}</strong> ${i18n.t('checkoutTurkishNotice') || ''}`;
+      cNoticeBanner.innerHTML = i18n.t('checkoutTurkishNotice') || (lang === 'tr' ? '<strong>⚠️ Kargo Bilgilendirmesi:</strong> Kargo görevlisinin adresinize sorunsuz ulaşabilmesi için <strong>isim, il ve açık adres mutlaka Türkçe/Latin harfleriyle</strong> yazılmalıdır!' : (lang === 'en' ? '<strong>⚠️ Delivery Notice:</strong> For courier delivery within Turkey, <strong>recipient name, city, and full address must be written in Turkish/Latin script</strong>!' : '<strong>⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:</strong> يەتكۈزۈش خادىملىرى مالنى ئۆيىڭىزگە توغرا يەتكۈزۈپ بېرىشى ئۈچۈن، <strong>ئىسىم، شەھەر ۋە تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە)</strong> يېزىلىشى شەرت!'));
     }
     const cNameLabel = document.getElementById('checkoutCustNameLabel');
     if (cNameLabel) cNameLabel.innerHTML = `${i18n.t('custName')} <span style="color: var(--danger-color);">*</span>`;
+    const cNameInput = document.getElementById('checkoutCustName');
+    if (cNameInput) cNameInput.placeholder = i18n.t('custNamePlaceholder') || (lang === 'tr' ? 'Ahmet Yılmaz / Murat Kaya' : (lang === 'en' ? 'Ahmet Yilmaz / Murat Kaya' : 'Ahmet Yılmaz / Murat Kaya (چوقۇم تۈركچە)'));
     const cNameHint = document.getElementById('checkoutCustNameHint');
     if (cNameHint) cNameHint.textContent = i18n.t('custNameHint') || '';
 
@@ -398,23 +400,37 @@ function initTeklimakanApp() {
     if (cPhoneLabel) cPhoneLabel.innerHTML = `${i18n.t('custPhone')} <span style="color: var(--danger-color);">*</span>`;
     const cCityLabel = document.getElementById('checkoutCustCityLabel');
     if (cCityLabel) cCityLabel.innerHTML = `${i18n.t('custCity')} <span style="color: var(--danger-color);">*</span>`;
+
+    // شەھەر تاللىغۇچ تاللانمىلىرى (City dropdown options)
+    const citySelect = document.getElementById('checkoutCustCity');
+    if (citySelect) {
+      Array.from(citySelect.options).forEach(opt => {
+        if (!opt.dataset.ugText) {
+          opt.dataset.ugText = opt.textContent;
+        }
+        if (lang === 'ug') {
+          opt.textContent = opt.dataset.ugText;
+        } else {
+          opt.textContent = opt.value;
+        }
+      });
+    }
+
     const cAddrLabel = document.getElementById('checkoutCustAddressLabel');
     if (cAddrLabel) cAddrLabel.innerHTML = `${i18n.t('custAddress')} <span style="color: var(--danger-color);">*</span>`;
+    const cAddrInput = document.getElementById('checkoutCustAddress');
+    if (cAddrInput) cAddrInput.placeholder = i18n.t('custAddressPlaceholder') || (lang === 'tr' ? 'Örnek: Sümer Mah. 28/2 Sok. No:5 D:3 Zeytinburnu / İstanbul (Mahalle, cadde, kapı no, ilçe)' : (lang === 'en' ? 'Street address, building no, district, city (e.g. Sumer Mah. 28/2 Sok. No:5 Zeytinburnu / Istanbul)' : 'مەھەللە، كوچا، بىنا نومۇرى، ناھىيە (Örnek: Sümer Mah. 28/2 Sok. No:5 D:3 Zeytinburnu / İstanbul)'));
     const cAddrHint = document.getElementById('checkoutCustAddressHint');
     if (cAddrHint) cAddrHint.textContent = i18n.t('custAddressHint') || '';
 
     const cPayLabel = document.getElementById('checkoutPaymentLabel');
     if (cPayLabel) cPayLabel.textContent = i18n.t('paymentMethod');
 
-    const pCard = document.getElementById('payMethodCardSpan');
-    if (pCard) pCard.textContent = i18n.t('payCard');
-    const cDisabled = document.getElementById('cardDisabledBadge');
-    if (cDisabled) {
-      cDisabled.innerHTML = `<i class="fas fa-lock"></i> ${i18n.t('cardDisabledBadge') || (lang === 'tr' ? 'Çok Yakında (Geçici Olarak Kapalı)' : (lang === 'en' ? 'Coming Soon (Inactive)' : 'پات ئارىدا (ھازىرچە پاسسىپ)'))}`;
-    }
-
+    // 1. بانكا ھېساباتى (Havale / FAST)
     const pHavale = document.getElementById('payMethodHavaleSpan');
     if (pHavale) pHavale.textContent = i18n.t('payHavale');
+    const pBadgeFast = document.getElementById('payBadgeFast');
+    if (pBadgeFast) pBadgeFast.textContent = i18n.t('payBadgeFast') || (lang === 'tr' ? '7/24 FAST Anında' : (lang === 'en' ? '24/7 FAST Instant' : 'FAST 7/24 بىۋاسىتە'));
 
     const bOffTitle = document.getElementById('bankOfficialTitle');
     if (bOffTitle) bOffTitle.textContent = i18n.t('bankOfficialTitle') || (lang === 'tr' ? 'Resmi Banka Alıcı Hesabı:' : (lang === 'en' ? 'Official Receiving Bank Account:' : 'رەسمىي بانكا قوبۇللاش ھېساباتى:'));
@@ -426,27 +442,77 @@ function initTeklimakanApp() {
     if (bCopyBtn) bCopyBtn.textContent = i18n.t('bankCopyBtn') || (lang === 'tr' ? 'Kopyala' : (lang === 'en' ? 'Copy' : 'كۆچۈرۈش'));
     const bNotice = document.getElementById('bankNotice');
     if (bNotice) {
-      if (lang === 'tr') {
-        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Not:</strong> Para gönderirken açıklama (açıklama) kısmına <strong>kuruyemiş</strong> yazınız.';
-      } else if (lang === 'en') {
-        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Notice:</strong> Please write <strong>kuruyemiş</strong> in the transfer description field.';
-      } else {
-        bNotice.innerHTML = '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>ئەسكەرتىش:</strong> پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا <strong>kuruyemiş</strong> دەپ يېزىپ قويۇڭ.';
-      }
+      bNotice.innerHTML = i18n.t('bankNotice') || (lang === 'tr' ? '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Not:</strong> Para gönderirken açıklama kısmına <strong>kuruyemiş</strong> yazınız.' : (lang === 'en' ? '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>Notice:</strong> Please write <strong>kuruyemiş</strong> in the transfer description field.' : '<i class="fas fa-info-circle" style="color: #059669;"></i> <strong>ئەسكەرتىش:</strong> پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا <strong>kuruyemiş</strong> دەپ يېزىپ قويۇڭ.'));
     }
 
+    // 2. كارتا (Card)
+    const pCard = document.getElementById('payMethodCardSpan');
+    if (pCard) pCard.textContent = i18n.t('payCard');
+    const cDisabled = document.getElementById('cardDisabledBadge');
+    if (cDisabled) {
+      cDisabled.innerHTML = `<i class="fas fa-lock"></i> ${i18n.t('cardDisabledBadge') || (lang === 'tr' ? 'Çok Yakında (Şu Anda Devre Dışı)' : (lang === 'en' ? 'Coming Soon (Currently Inactive)' : 'پات ئارىدا (ھازىرچە پاسسىپ)'))}`;
+    }
+    const cSecTitle = document.getElementById('cardSecurityTitle');
+    if (cSecTitle) cSecTitle.innerHTML = `<i class="fas fa-lock"></i> ${i18n.t('cardSecurityTitle') || (lang === 'tr' ? '3D Secure 256-Bit Şifreli Güvenli Ödeme' : (lang === 'en' ? '3D Secure 256-Bit Encrypted Secure Payment' : '3D Secure 256-Bit شىفىرلىق بىخەتەر چىقىم'))}`;
+    const cHolderLabel = document.getElementById('checkoutCardHolderLabel');
+    if (cHolderLabel) cHolderLabel.textContent = i18n.t('cardHolderLabel') || (lang === 'tr' ? 'Kart Üzerindeki İsim Soyisim' : (lang === 'en' ? 'Cardholder Full Name' : 'كارتىدىكى ئىسىم-فامىلە'));
+    const cHolderInput = document.getElementById('checkoutCardHolder');
+    if (cHolderInput) cHolderInput.placeholder = i18n.t('cardHolderPlaceholder') || (lang === 'tr' ? 'Örn: AHMET YILMAZ' : (lang === 'en' ? 'e.g. AHMET YILMAZ' : 'مەسىلەن: ALIM TURDI'));
+    const cNumLabel = document.getElementById('checkoutCardNumberLabel');
+    if (cNumLabel) cNumLabel.textContent = i18n.t('cardNumberLabel') || (lang === 'tr' ? 'Kart Numarası (16 Haneli)' : (lang === 'en' ? 'Card Number (16 Digits)' : 'كارتا نومۇرى (16 خانىلىق)'));
+    const cExpLabel = document.getElementById('checkoutCardExpiryLabel');
+    if (cExpLabel) cExpLabel.textContent = i18n.t('cardExpiryLabel') || (lang === 'tr' ? 'Son Kullanma Tarihi (Ay/Yıl)' : (lang === 'en' ? 'Expiry Date (MM/YY)' : 'ۋاقتى (ئاي/يىل)'));
+    const cCvvLabel = document.getElementById('checkoutCardCvvLabel');
+    if (cCvvLabel) cCvvLabel.textContent = i18n.t('cardCvvLabel') || (lang === 'tr' ? 'CVV / CVC (3 Hane)' : (lang === 'en' ? 'CVV / CVC (3 Digits)' : 'CVV / CVC (3 خانا)'));
+    const cPciDss = document.getElementById('cardPciDssSpan');
+    if (cPciDss) cPciDss.textContent = i18n.t('cardPciDss') || (lang === 'tr' ? 'Bu platform uluslararası PCI-DSS güvenlik standartlarına uygundur, kart bilgileriniz saklanmaz.' : (lang === 'en' ? 'This platform complies with PCI-DSS security standards; card details are never stored.' : 'بۇ سۇپا خەلقئارالىق PCI-DSS بىخەتەرلىك ئۆلچىمىگە ئۇيغۇن كارتىڭىز ساقلانمايدۇ.'));
+
+    // 3. ۋاتساپ (WhatsApp)
     const pWhatsapp = document.getElementById('payMethodWhatsappSpan');
     if (pWhatsapp) pWhatsapp.textContent = i18n.t('payWhatsapp');
+    const pBadgeWa = document.getElementById('payBadgeWhatsapp');
+    if (pBadgeWa) pBadgeWa.textContent = i18n.t('payBadgeWhatsapp') || (lang === 'tr' ? 'Hızlı İletişim' : (lang === 'en' ? 'Fast Support' : 'تېز ئالاقە'));
+    const waNoticeTitle = document.getElementById('whatsappPayNoticeTitle');
+    if (waNoticeTitle) waNoticeTitle.textContent = i18n.t('whatsappPayNoticeTitle') || (lang === 'tr' ? 'WhatsApp ile Kolay Sipariş ve Müşteri Hizmetleri Desteği' : (lang === 'en' ? 'Order via WhatsApp & Support Assistance' : 'ۋاتساپ ئارقىلىق زاكاز بېرىش ۋە خېرىدارلار بىلەن پۇل تۆلەش'));
     const pNotice = document.getElementById('whatsappPayNoticeText');
     if (pNotice) pNotice.textContent = i18n.t('whatsappPayNotice');
+
+    // 🎁 ئىنىستىگېرام سوۋغات قۇتىسى (Instagram Gift Box)
+    const igTitle = document.getElementById('instaGiftTitle');
+    if (igTitle) igTitle.textContent = i18n.t('instaGiftTitle') || (lang === 'tr' ? '🎁 Instagram Hesabımızı Takip Ettiniz mi?' : (lang === 'en' ? '🎁 Have you followed our Instagram page?' : '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگەشتىڭىزمۇ؟'));
+    const igBadge = document.getElementById('instaGiftBadgeSpan');
+    if (igBadge) igBadge.textContent = i18n.t('instaGiftBadgeSpan') || (lang === 'tr' ? 'Ücretsiz Hediye' : (lang === 'en' ? 'Free Gift' : 'ھەقسىز سوۋغات'));
+    const igDesc = document.getElementById('instaGiftDesc');
+    if (igDesc) igDesc.textContent = i18n.t('instaGiftDesc') || (lang === 'tr' ? 'Resmi Instagram hesabımızı takip ettiğinizde bu siparişinize özel sürpriz bir hediye ekliyoruz!' : (lang === 'en' ? 'Follow our official Instagram account and receive a special free surprise gift with this order!' : 'رەسمىي سەھىپىمىزگە ئەگىشىپ قويسىڭىز، بۇ قېتىملىق زاكازىڭىزغا ئالاھىدە سوۋغات قوشۇپ بېرىمىز!'));
+    const igPageLbl = document.getElementById('instaGiftPageLabel');
+    if (igPageLbl) igPageLbl.textContent = i18n.t('instaGiftPageLabel') || (lang === 'tr' ? 'Resmi Hesap:' : (lang === 'en' ? 'Official Account:' : 'رەسمىي سەھىپە:'));
+    const igFollowBtnText = document.getElementById('instaGiftFollowBtnText');
+    if (igFollowBtnText) igFollowBtnText.textContent = i18n.t('instaGiftFollowBtnText') || (lang === 'tr' ? "Instagram'da Takip Et" : (lang === 'en' ? 'Follow on Instagram' : "Instagram'دا ئەگىشىش"));
+    const igCheckLbl = document.getElementById('instaGiftCheckLabel');
+    if (igCheckLbl) igCheckLbl.textContent = i18n.t('instaGiftCheckLabel') || (lang === 'tr' ? "Instagram'da takip ettim, siparişime hediye eklensin!" : (lang === 'en' ? 'I followed on Instagram, please include my gift!' : 'مەن ئىنىستىگېرامغا ئەگەشتىم، پوسۇلكامغا ھەدىيە قوشۇلسۇن!'));
+    const igUserInput = document.getElementById('instaGiftUsername');
+    if (igUserInput) igUserInput.placeholder = i18n.t('instaGiftUsernamePlaceholder') || (lang === 'tr' ? 'Instagram kullanıcı adınız (Örn: @kullaniciadi)' : (lang === 'en' ? 'Your Instagram handle (e.g. @username)' : 'ئىنىستىگېرام نامىڭىز (مەسىلەن: @ئىسمىڭىز)'));
+    const igHint = document.getElementById('instaGiftHint');
+    if (igHint) igHint.innerHTML = i18n.t('instaGiftHint') || (lang === 'tr' ? '<i class="fas fa-check-circle"></i> Doğrulama: Paketiniz kargoya verilirken hediyeniz siparişinize eklenecektir.' : (lang === 'en' ? '<i class="fas fa-check-circle"></i> Verification: Your free gift will be included automatically when packing.' : '<i class="fas fa-check-circle"></i> دەلىللەش ئۇچۇرى: پوسۇلكىڭىز چىقىرىلغاندا ھەدىيە ئاپتوماتىك قوشۇلىدۇ.'));
 
     const cNotesLabel = document.getElementById('checkoutCustNotesLabel');
     if (cNotesLabel) cNotesLabel.textContent = i18n.t('custNotes');
     const cNotesInput = document.getElementById('checkoutCustNotes');
     if (cNotesInput) cNotesInput.placeholder = i18n.t('custNotesPlaceholder');
 
-    const submitOrderBtn = document.getElementById('submitOrderBtn');
-    if (submitOrderBtn) submitOrderBtn.querySelector('span').textContent = i18n.t('submitOrderBtn');
+    // زاكاز كۇنۇپكىسى تېكىستى (Submit Button)
+    const submitBtn = document.getElementById('submitOrderBtn');
+    const submitBtnSpan = document.getElementById('submitOrderBtnText') || (submitBtn ? submitBtn.querySelector('span') : null);
+    const checkedPayRadio = document.querySelector('input[name="checkoutPayment"]:checked');
+    if (submitBtnSpan) {
+      if (checkedPayRadio && (checkedPayRadio.value.includes('ۋاتساپ') || checkedPayRadio.value.includes('WhatsApp'))) {
+        submitBtnSpan.textContent = i18n.t('submitOrderBtnWhatsapp');
+      } else if (checkedPayRadio && (checkedPayRadio.value.includes('كارتا') || checkedPayRadio.value.includes('Card'))) {
+        submitBtnSpan.textContent = i18n.t('submitOrderBtnCard');
+      } else {
+        submitBtnSpan.textContent = i18n.t('submitOrderBtnHavale');
+      }
+    }
 
     // لەيلىمە تېلېفون
     const fPhoneBtn = document.getElementById('floatingPhoneBtn');
@@ -2314,25 +2380,35 @@ function initTeklimakanApp() {
 
     if (checkoutTotalEl) checkoutTotalEl.textContent = window.appStore.formatPrice(finalTotalCny);
 
+    // چىقىم كۆزنىكى تەرجىمىلىرىنى تولۇق يېڭىلاش
+    updateStaticTranslations();
+
     const checkedPay = document.querySelector('input[name="checkoutPayment"]:checked');
     const notice = document.getElementById('whatsappPayNotice');
     const havaleDetails = document.getElementById('havalePaymentDetails');
     const cardDetails = document.getElementById('cardPaymentDetails');
     const submitBtn = document.getElementById('submitOrderBtn');
-    const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
+    const submitBtnSpan = document.getElementById('submitOrderBtnText') || (submitBtn ? submitBtn.querySelector('span') : null);
     const submitBtnIcon = submitBtn ? submitBtn.querySelector('i') : null;
+    const i18n = window.appI18n;
 
     if (checkedPay && (checkedPay.value.includes('ۋاتساپ') || checkedPay.value.includes('WhatsApp'))) {
       if (notice) notice.style.display = 'block';
       if (havaleDetails) havaleDetails.style.display = 'none';
       if (cardDetails) cardDetails.style.display = 'none';
-      if (submitBtnSpan) submitBtnSpan.textContent = 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
+      if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnWhatsapp') : 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
       if (submitBtnIcon) submitBtnIcon.className = 'fab fa-whatsapp';
+    } else if (checkedPay && (checkedPay.value.includes('كارتا') || checkedPay.value.includes('Card'))) {
+      if (notice) notice.style.display = 'none';
+      if (havaleDetails) havaleDetails.style.display = 'none';
+      if (cardDetails) cardDetails.style.display = 'block';
+      if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnCard') : 'كارتىدىن بىخەتەر چىقىم قىلىش';
+      if (submitBtnIcon) submitBtnIcon.className = 'fas fa-lock';
     } else {
       if (notice) notice.style.display = 'none';
       if (havaleDetails) havaleDetails.style.display = 'block';
       if (cardDetails) cardDetails.style.display = 'none';
-      if (submitBtnSpan) submitBtnSpan.textContent = 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
+      if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnHavale') : 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
       if (submitBtnIcon) submitBtnIcon.className = 'fas fa-university';
     }
 
@@ -2899,7 +2975,7 @@ function initTeklimakanApp() {
       const labelHavale = document.getElementById('labelPayHavale');
       const labelWhatsapp = document.getElementById('labelPayWhatsapp');
       const submitBtn = document.getElementById('submitOrderBtn');
-      const submitBtnSpan = submitBtn ? submitBtn.querySelector('span') : null;
+      const submitBtnSpan = document.getElementById('submitOrderBtnText') || (submitBtn ? submitBtn.querySelector('span') : null);
       const submitBtnIcon = submitBtn ? submitBtn.querySelector('i') : null;
 
       function updatePaymentMethodUI(method) {
@@ -2907,33 +2983,36 @@ function initTeklimakanApp() {
         if (labelHavale) labelHavale.style.borderColor = 'var(--border-color)';
         if (labelWhatsapp) labelWhatsapp.style.borderColor = 'var(--border-color)';
 
-        if (method.includes('كارتا') || method.includes('Card')) {
+        const i18n = window.appI18n;
+
+        if (method.includes('كارتا') || method.includes('Card') || method.includes('Kart')) {
           if (cardDetails) cardDetails.style.display = 'block';
           if (havaleDetails) havaleDetails.style.display = 'none';
           if (whatsappNotice) whatsappNotice.style.display = 'none';
           if (labelCard) labelCard.style.borderColor = '#6366f1';
-          if (submitBtnSpan) submitBtnSpan.textContent = 'كارتىدىن بىخەتەر چىقىم قىلىش';
+          if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnCard') : 'كارتىدىن بىخەتەر چىقىم قىلىش';
           if (submitBtnIcon) submitBtnIcon.className = 'fas fa-lock';
-        } else if (method.includes('يۆتكەش') || method.includes('Havale')) {
+        } else if (method.includes('يۆتكەش') || method.includes('Havale') || method.includes('Transfer')) {
           if (cardDetails) cardDetails.style.display = 'none';
           if (havaleDetails) havaleDetails.style.display = 'block';
           if (whatsappNotice) whatsappNotice.style.display = 'none';
           if (labelHavale) labelHavale.style.borderColor = '#059669';
-          if (submitBtnSpan) submitBtnSpan.textContent = 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
+          if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnHavale') : 'زاكاز ۋە ھېسابات ئۇچۇرىنى جەزملەش';
           if (submitBtnIcon) submitBtnIcon.className = 'fas fa-university';
         } else if (method.includes('ۋاتساپ') || method.includes('WhatsApp')) {
           if (cardDetails) cardDetails.style.display = 'none';
           if (havaleDetails) havaleDetails.style.display = 'none';
           if (whatsappNotice) whatsappNotice.style.display = 'block';
           if (labelWhatsapp) labelWhatsapp.style.borderColor = '#25D366';
-          if (submitBtnSpan) submitBtnSpan.textContent = 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
+          if (submitBtnSpan) submitBtnSpan.textContent = i18n ? i18n.t('submitOrderBtnWhatsapp') : 'ۋاتساپ ئارقىلىق زاكاز بېرىش';
           if (submitBtnIcon) submitBtnIcon.className = 'fab fa-whatsapp';
         }
       }
 
       if (labelCard) {
         labelCard.addEventListener('click', (e) => {
-          showToast('بانكا ياكى خەلقئارالىق كارتا ئارقىلىق پۇل تۆلەش ھازىرچە پاسسىپ ھالەتتە. بانكا ھېساباتىغا يۆتكەش (Havale) ياكى ۋاتساپ ئارقىلىق پۇل تۆلەڭ.', 'info');
+          const toastMsg = window.appI18n ? window.appI18n.t('cardDisabledToast') : 'بانكا ياكى خەلقئارالىق كارتا ئارقىلىق پۇل تۆلەش ھازىرچە پاسسىپ ھالەتتە. بانكا ھېساباتىغا يۆتكەش (Havale) ياكى ۋاتساپ ئارقىلىق پۇل تۆلەڭ.';
+          showToast(toastMsg, 'info');
         });
       }
 
@@ -3051,32 +3130,32 @@ function initTeklimakanApp() {
         const latinRegex = /[a-zA-ZçğıöşüÇĞİÖŞÜ]/;
 
         if (arabicRegex.test(name)) {
-          showToast('⚠️ كارگو (پوچتا) توغرا يەتكۈزۈشى ئۈچۈن، تاپشۇرۇۋالغۇچىنىڭ ئىسمى چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Ahmet Yılmaz', 'warning');
+          showToast(window.appI18n ? window.appI18n.t('valNameLatin') : '⚠️ كارگو (پوچتا) توغرا يەتكۈزۈشى ئۈچۈن، تاپشۇرۇۋالغۇچىنىڭ ئىسمى چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Ahmet Yılmaz', 'warning');
           document.getElementById('checkoutCustName')?.focus();
           return;
         }
 
         if (!latinRegex.test(name) || name.length < 2) {
-          showToast('⚠️ تاپشۇرۇۋالغۇچىنىڭ ئىسمىنى تۈركچە كىرگۈزۈڭ (مەسىلەن: Ahmet Yılmaz)!', 'warning');
+          showToast(window.appI18n ? window.appI18n.t('valNameEmpty') : '⚠️ تاپشۇرۇۋالغۇچىنىڭ ئىسمىنى تۈركچە كىرگۈزۈڭ (مەسىلەن: Ahmet Yılmaz)!', 'warning');
           document.getElementById('checkoutCustName')?.focus();
           return;
         }
 
         const cleanPhone = phone.replace(/[^\d+]/g, '');
         if (cleanPhone.length < 10) {
-          showToast('⚠️ تېلېفون نومۇرىنى تولۇق كىرگۈزۈڭ (مەسىلەن: 05XX XXX XX XX)!', 'warning');
+          showToast(window.appI18n ? window.appI18n.t('valPhone') : '⚠️ تېلېفون نومۇرىنى تولۇق كىرگۈزۈڭ (مەسىلەن: 05XX XXX XX XX)!', 'warning');
           document.getElementById('checkoutCustPhone')?.focus();
           return;
         }
 
         if (arabicRegex.test(address)) {
-          showToast('⚠️ كارگو شىركىتى ئادرېسنى تېپىشى ئۈچۈن تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Mahalle, Cadde, Sokak, No...', 'warning');
+          showToast(window.appI18n ? window.appI18n.t('valAddressLatin') : '⚠️ كارگو شىركىتى ئادرېسنى تېپىشى ئۈچۈن تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە) يېزىلىشى كېرەك! مەسىلەن: Mahalle, Cadde, Sokak, No...', 'warning');
           document.getElementById('checkoutCustAddress')?.focus();
           return;
         }
 
         if (!latinRegex.test(address) || address.length < 6) {
-          showToast('⚠️ تەپسىلىي تۈركچە ئادرېسنى تولۇق كىرگۈزۈڭ (مەھەللە، كوچا، بىنا نومۇرى، ناھىيە)!', 'warning');
+          showToast(window.appI18n ? window.appI18n.t('valAddressEmpty') : '⚠️ تەپسىلىي تۈركچە ئادرېسنى تولۇق كىرگۈزۈڭ (مەھەللە، كوچا، بىنا نومۇرى، ناھىيە)!', 'warning');
           document.getElementById('checkoutCustAddress')?.focus();
           return;
         }
@@ -3847,39 +3926,57 @@ function initTeklimakanApp() {
     const content = document.getElementById('orderSuccessModalContent');
     if (!modal || !content) return;
 
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
     const isWhatsapp = (order.paymentMethod || '').includes('ۋاتساپ') || (order.paymentMethod || '').includes('WhatsApp');
     const isHavale = (order.paymentMethod || '').includes('يۆتكەش') || (order.paymentMethod || '').includes('Havale');
     const isCard = (order.paymentMethod || '').includes('كارتا') || (order.paymentMethod || '').includes('Card');
-    const waUrl = isWhatsapp ? getWhatsAppOrderUrl(order, window.appI18n.getLang()) : '';
-    const havaleWaUrl = `https://wa.me/905551609999?text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان! زاكاز نومۇرۇم: ${order.id}، بانكىدىن Açıklama غا kuruyemiş دەپ يېزىپ ${order.totalFormatted} پۇلنى ئەۋەتتىم، دەلىل تالونىنى يوللاۋاتىمەن.`)}`;
+    const waUrl = isWhatsapp ? getWhatsAppOrderUrl(order, lang) : '';
+    
+    const havaleWaMsg = lang === 'tr' 
+      ? `Merhaba Teklimakan! Sipariş Numaram: ${order.id}. Banka havalesiyle Açıklama kısmına kuruyemiş yazarak ${order.totalFormatted} tutarını gönderdim, ödeme dekontunu ekte iletiyorum.`
+      : (lang === 'en'
+        ? `Hello Teklimakan! My Order ID: ${order.id}. I sent ${order.totalFormatted} via bank transfer with kuruyemiş in description, here is the payment receipt.`
+        : `ئەسسالامۇئەلەيكۇم تەكلىماكان! زاكاز نومۇرۇم: ${order.id}، بانكىدىن Açıklama غا kuruyemiş دەپ يېزىپ ${order.totalFormatted} پۇلنى ئەۋەتتىم، دەلىل تالونىنى يوللاۋاتىمەن.`);
+    const havaleWaUrl = `https://wa.me/905551609999?text=${encodeURIComponent(havaleWaMsg)}`;
 
     let methodDetailsHtml = '';
 
     if (isCard) {
+      const cardConfirmedTitle = lang === 'tr' ? '3D Secure Kart Ödemesi Onaylandı' : (lang === 'en' ? '3D Secure Card Payment Confirmed' : '3D Secure كارتا چىقىمى تەستىقلاندى');
+      const cardConfirmedDesc = lang === 'tr' ? 'Ödemeniz başarıyla alındı. Resmi e-fatura adresinize gönderildi.' : (lang === 'en' ? 'Payment processed successfully. Official invoice sent to your email.' : 'پۇل بىخەتەر تۇتۇلدى. رەسمىي ئېلېكترونلۇق تالون ئېلخەتكە يوللاندى.');
+      const cardAuthCode = lang === 'tr' ? 'Onay Kodu' : (lang === 'en' ? 'Auth Code' : 'تەستىق كودى');
       methodDetailsHtml = `
-        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: right; font-size: 0.86rem; color: #3730a3;">
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: ${lang === 'ug' ? 'right' : 'left'}; font-size: 0.86rem; color: #3730a3;">
           <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; margin-bottom: 0.35rem; color: #4338ca;">
-            <i class="fas fa-check-circle" style="color: #10b981;"></i> 3D Secure كارتا چىقىمى تەستىقلاندى
+            <i class="fas fa-check-circle" style="color: #10b981;"></i> ${cardConfirmedTitle}
           </div>
-          <div>پۇل بىخەتەر تۇتۇلدى. رەسمىي ئېلېكترونلۇق تالون ئېلخەتكە يوللاندى.</div>
-          <div style="margin-top: 0.4rem; font-family: monospace; font-size: 0.8rem; color: #6366f1;">تەستىق كودى: AUTH-${Math.floor(100000 + Math.random() * 900000)}</div>
+          <div>${cardConfirmedDesc}</div>
+          <div style="margin-top: 0.4rem; font-family: monospace; font-size: 0.8rem; color: #6366f1;">${cardAuthCode}: AUTH-${Math.floor(100000 + Math.random() * 900000)}</div>
         </div>
       `;
     } else if (isHavale) {
+      const havaleTitle = lang === 'tr' ? 'Ödeme Yapılacak Resmi Banka Hesabı:' : (lang === 'en' ? 'Official Receiving Bank Account:' : 'پۇل يۆتكەيدىغان رەسمىي بانكا ھېساباتى:');
+      const havaleCopyText = lang === 'tr' ? 'IBAN Kopyala' : (lang === 'en' ? 'Copy IBAN' : 'IBAN كۆچۈرۈش');
+      const havaleCopiedText = lang === 'tr' ? 'Kopyalandı ✓' : (lang === 'en' ? 'Copied ✓' : 'كۆچۈرۈلدى ✓');
+      const havaleBankLabel = lang === 'tr' ? 'Banka:' : (lang === 'en' ? 'Bank:' : 'بانكا:');
+      const havaleOwnerLabel = lang === 'tr' ? 'Hesap Sahibi:' : (lang === 'en' ? 'Account Holder:' : 'ھېسابات ئىگىسى:');
+      const havaleDescLabel = lang === 'tr' ? 'Açıklama kısmına:' : (lang === 'en' ? 'In Transfer Description:' : 'Açıklama (چۈشەندۈرۈش) قىسمىغا:');
+      const havaleDescSuffix = lang === 'tr' ? 'yazınız.' : (lang === 'en' ? 'please write.' : 'دەپ يېزىپ قويۇڭ.');
+      const havaleWaBtnText = lang === 'tr' ? 'Dekontu WhatsApp ile Gönder' : (lang === 'en' ? 'Send Receipt via WhatsApp' : 'دەلىل / تالوننى ۋاتساپتا ئەۋەتىش');
       methodDetailsHtml = `
-        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: right; font-size: 0.86rem; color: #166534;">
-          <div style="font-weight: 700; margin-bottom: 0.4rem;"><i class="fas fa-building-columns"></i> پۇل يۆتكەيدىغان رەسمىي بانكا ھېساباتى:</div>
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; text-align: ${lang === 'ug' ? 'right' : 'left'}; font-size: 0.86rem; color: #166534;">
+          <div style="font-weight: 700; margin-bottom: 0.4rem;"><i class="fas fa-building-columns"></i> ${havaleTitle}</div>
           <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
             <span style="font-family: monospace; font-weight: 800; font-size: 0.85rem; direction: ltr;">TR65 0015 7000 0000 0095 1544 93</span>
-            <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR650015700000000095154493'); showToast('IBAN كۆچۈرۈلدى!', 'success'); this.innerText='كۆچۈرۈلدى ✓';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">IBAN كۆچۈرۈش</button>
+            <button type="button" class="btn btn-sm" onclick="navigator.clipboard.writeText('TR650015700000000095154493'); showToast('${havaleCopiedText}', 'success'); this.innerText='${havaleCopiedText}';" style="background: #166534; color: #fff; padding: 2px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">${havaleCopyText}</button>
           </div>
           <div style="font-size: 0.82rem; color: #15803d; margin-bottom: 0.6rem; line-height: 1.6;">
-            <strong>بانكا:</strong> QNB Finansbank (Enpara.com)<br>
-            <strong>ھېسابات ئىگىسى:</strong> Abudurusuli tuniyazi<br>
-            <strong>Açıklama (چۈشەندۈرۈش) قىسمىغا:</strong> <span style="background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.95rem;">kuruyemiş</span> دەپ يېزىڭ.
+            <strong>${havaleBankLabel}</strong> QNB Finansbank (Enpara.com)<br>
+            <strong>${havaleOwnerLabel}</strong> Abudurusuli tuniyazi<br>
+            <strong>${havaleDescLabel}</strong> <span style="background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.95rem;">kuruyemiş</span> ${havaleDescSuffix}
           </div>
           <a href="${havaleWaUrl}" target="_blank" class="btn btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: #059669; color: #ffffff; text-decoration: none; padding: 0.55rem; border-radius: 6px; font-weight: 700;">
-            <i class="fab fa-whatsapp"></i> دەلىل / تالوننى ۋاتساپتا ئەۋەتىش
+            <i class="fab fa-whatsapp"></i> ${havaleWaBtnText}
           </a>
         </div>
       `;
@@ -3890,6 +3987,25 @@ function initTeklimakanApp() {
     const custCity = escapeModalHtml(order.customer?.city || '');
     const custAddress = escapeModalHtml(order.customer?.address || '');
     const fullAddressDisplay = (custCity ? custCity + ' ' : '') + custAddress;
+
+    const custViewTitle = lang === 'tr' ? 'Alıcı Bilgileri' : (lang === 'en' ? 'Recipient Details' : 'تاپشۇرۇۋالغۇچى ئۇچۇرلىرى');
+    const custEditBtnText = lang === 'tr' ? 'Bilgileri Düzenle' : (lang === 'en' ? 'Edit Details' : 'ئۇچۇرنى ئۆزگەرتىش');
+    const custEditSectionTitle = lang === 'tr' ? 'Alıcı Bilgilerini Güncelle' : (lang === 'en' ? 'Update Delivery Information' : 'شەخسىي ئۇچۇرلارنى تەھرىرلەش');
+    const custOrderPrefix = lang === 'tr' ? 'Sipariş:' : (lang === 'en' ? 'Order:' : 'زاكاز:');
+    const custEditNote = lang === 'tr' ? 'İsim, telefon veya adreste hata varsa aşağıdan düzenleyip <strong>"Kaydet"</strong>e tıklayınız:' : (lang === 'en' ? 'If there is any error in name, phone, or address, update below and click <strong>"Save"</strong>:' : 'ئىسىم، تېلېفون ياكى ئادرېسىڭىزدا خاتالىق بولسا تۆۋەندە تۈزىتىپ <strong>«ساقلاش»</strong> نى بېسىڭ:');
+    const custEditNameLbl = lang === 'tr' ? 'Ad Soyad' : (lang === 'en' ? 'Full Name' : 'ئىسىم فامىلە');
+    const custEditPhoneLbl = lang === 'tr' ? 'Telefon Numarası' : (lang === 'en' ? 'Phone Number' : 'تېلېفون نومۇرى');
+    const custEditCityLbl = lang === 'tr' ? 'İl / Şehir' : (lang === 'en' ? 'City / District' : 'شەھەر / رايون');
+    const custEditAddrLbl = lang === 'tr' ? 'Açık Teslimat Adresi' : (lang === 'en' ? 'Detailed Street Address' : 'تەپسىلىي يەتكۈزۈش ئادرېسى');
+    const custCancelBtnText = lang === 'tr' ? 'İptal' : (lang === 'en' ? 'Cancel' : 'بىكار قىلىش');
+    const custSaveBtnText = lang === 'tr' ? 'Kaydet' : (lang === 'en' ? 'Save' : 'ساقلاش');
+    const printReceiptText = lang === 'tr' ? 'Siparişi Yazdır' : (lang === 'en' ? 'Print Order' : 'تالوننى بېسىپ چىقىرىش');
+
+    const igGiftMsg = lang === 'tr' 
+      ? `🎁 Tebrikler! Instagram takipçi hediyeniz (${escapeModalHtml(order.instagramUser || '@takipci')}) sipariş paketinize ücretsiz olarak eklendi!`
+      : (lang === 'en'
+        ? `🎁 Congratulations! Your Instagram follower gift (${escapeModalHtml(order.instagramUser || '@follower')}) has been added to your parcel for free!`
+        : `🎁 تەبرىكلەيمىز! ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى (${escapeModalHtml(order.instagramUser || '@ئەگەشكۈچى')}) زاكاز پوسۇلكىڭىزغا ھەقسىز قوشۇلدى!`);
 
     content.innerHTML = `
       <div style="text-align: center; margin-bottom: 1.25rem;">
@@ -3907,11 +4023,11 @@ function initTeklimakanApp() {
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.45rem;">
             <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
               <i class="fas fa-user-check" style="color: var(--primary-color);"></i>
-              <span>تاپشۇرۇۋالغۇچى ئۇچۇرلىرى</span>
+              <span>${custViewTitle}</span>
             </div>
             <button type="button" onclick="window.toggleSuccessOrderEdit(true)" class="btn btn-sm" style="background: var(--bg-surface); border: 1px solid var(--primary-color); color: var(--primary-color); padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: 700; transition: all 0.2s;">
               <i class="fas fa-user-edit"></i>
-              <span>ئۇچۇرنى ئۆزگەرتىش</span>
+              <span>${custEditBtnText}</span>
             </button>
           </div>
           <div><strong>${window.appI18n.t('custName')}:</strong> <span id="succOrderName">${custName}</span></div>
@@ -3922,7 +4038,7 @@ function initTeklimakanApp() {
           ${order.hasInstagramGift ? `
             <div style="margin-top: 0.65rem; padding: 0.6rem 0.85rem; background: linear-gradient(45deg, #fdf2f8, #fce7f3); border: 1px dashed #f472b6; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.86rem; color: #db2777; font-weight: 700;">
               <i class="fab fa-instagram" style="font-size: 1.25rem;"></i>
-              <span>🎁 تەبرىكلەيمىز! ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى (${escapeModalHtml(order.instagramUser || '@ئەگەشكۈچى')}) زاكاز پوسۇلكىڭىزغا ھەقسىز قوشۇلدى!</span>
+              <span>${igGiftMsg}</span>
             </div>
           ` : ''}
         </div>
@@ -3932,44 +4048,44 @@ function initTeklimakanApp() {
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.45rem;">
             <div style="font-weight: 700; color: var(--primary-color); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
               <i class="fas fa-edit"></i>
-              <span>شەخسىي ئۇچۇرلارنى تەھرىرلەش</span>
+              <span>${custEditSectionTitle}</span>
             </div>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">زاكاز: <strong class="number-latin">${order.id}</strong></span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">${custOrderPrefix} <strong class="number-latin">${order.id}</strong></span>
           </div>
 
           <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.65rem; line-height: 1.5;">
-            ئىسىم، تېلېفون ياكى ئادرېسىڭىزدا خاتالىق بولسا تۆۋەندە تۈزىتىپ <strong>«ساقلاش»</strong> نى بېسىڭ:
+            ${custEditNote}
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 0.85rem;">
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">ئىسىم فامىلە <span style="color: var(--danger-color);">*</span></label>
-              <input type="text" id="succEditName" value="${custName}" class="form-input" placeholder="ئىسمىڭىزنى تولۇق كىرگۈزۈڭ" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">${custEditNameLbl} <span style="color: var(--danger-color);">*</span></label>
+              <input type="text" id="succEditName" value="${custName}" class="form-input" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">تېلېفون نومۇرى <span style="color: var(--danger-color);">*</span></label>
-              <input type="tel" id="succEditPhone" value="${custPhone}" class="form-input number-latin" placeholder="05XXXXXXXXX" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; direction: ltr; text-align: right; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">${custEditPhoneLbl} <span style="color: var(--danger-color);">*</span></label>
+              <input type="tel" id="succEditPhone" value="${custPhone}" class="form-input number-latin" placeholder="05XXXXXXXXX" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; direction: ltr; text-align: ${lang === 'ug' ? 'right' : 'left'}; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">شەھەر / رايون</label>
-              <input type="text" id="succEditCity" value="${custCity}" class="form-input" placeholder="مەسىلەن: İstanbul / Fatih" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">${custEditCityLbl}</label>
+              <input type="text" id="succEditCity" value="${custCity}" class="form-input" placeholder="İstanbul / Fatih" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main);">
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">تەپسىلىي يەتكۈزۈش ئادرېسى <span style="color: var(--danger-color);">*</span></label>
-              <textarea id="succEditAddress" class="form-input" rows="2" placeholder="مەھەللە، كوچا، بىنا ۋە ئۆي نومۇرى" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main); resize: vertical;">${custAddress}</textarea>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main);">${custEditAddrLbl} <span style="color: var(--danger-color);">*</span></label>
+              <textarea id="succEditAddress" class="form-input" rows="2" style="width: 100%; box-sizing: border-box; font-size: 0.88rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); color: var(--text-main); resize: vertical;">${custAddress}</textarea>
             </div>
           </div>
 
           <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
             <button type="button" onclick="window.toggleSuccessOrderEdit(false)" class="btn btn-sm" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted); padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-              بىكار قىلىش
+              ${custCancelBtnText}
             </button>
             <button type="button" id="succSaveBtn" onclick="window.saveSuccessOrderCustomer('${order.id}')" class="btn btn-sm" style="background: var(--primary-color); border: none; color: #ffffff; padding: 0.45rem 1.15rem; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;">
               <i class="fas fa-save"></i>
-              <span>ساقلاش</span>
+              <span>${custSaveBtnText}</span>
             </button>
           </div>
         </div>
@@ -4000,7 +4116,7 @@ function initTeklimakanApp() {
 
       <div style="display: flex; gap: 0.6rem;">
         <button type="button" class="btn-checkout" onclick="window.print()" style="flex: 1; margin-top: 0; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color);">
-          <i class="fas fa-print"></i> <span>تالوننى بېسىپ چىقىرىش</span>
+          <i class="fas fa-print"></i> <span>${printReceiptText}</span>
         </button>
         <button type="button" class="btn-checkout" onclick="document.getElementById('orderSuccessModal').classList.remove('active')" style="flex: 1.2; margin-top: 0; background: var(--primary-color); color: #ffffff;">
           ${window.appI18n.t('continueShopping')}

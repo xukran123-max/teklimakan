@@ -4040,17 +4040,18 @@ function initTeklimakanApp() {
     const modal = document.getElementById('agentPortalModal');
     if (!modal) return;
 
+    const i18n = window.appI18n;
     const isUg = lang === 'ug';
     const isTr = lang === 'tr';
 
     const apTitle = document.getElementById('agentPortalTitle');
-    if (apTitle) apTitle.textContent = i18n.t('agentModalTitle') || 'تەكلىماكان سودىگەر ۋە ۋاكالەتچى مەركىزى';
+    if (apTitle) apTitle.textContent = (i18n && typeof i18n.t === 'function' ? i18n.t('agentModalTitle') : '') || 'تەكلىماكان سودىگەر ۋە ۋاكالەتچى مەركىزى';
     const apSub = document.getElementById('agentPortalSubtitle');
-    if (apSub) apSub.textContent = i18n.t('agentModalSubtitle') || 'ھەمكارلاشقۇچى سودىگەرلەرنىڭ تىزىملىتىش، كىرىش ۋە تاۋار سۇنۇش سۇپىسى';
+    if (apSub) apSub.textContent = (i18n && typeof i18n.t === 'function' ? i18n.t('agentModalSubtitle') : '') || 'ھەمكارلاشقۇچى سودىگەرلەرنىڭ تىزىملىتىش، كىرىش ۋە تاۋار سۇنۇش سۇپىسى';
     const tab1 = document.getElementById('agentTab1Text');
-    if (tab1) tab1.textContent = i18n.t('agentTabApply') || '1. سودىگەر بولۇپ تىزىملىتىش';
+    if (tab1) tab1.textContent = (i18n && typeof i18n.t === 'function' ? i18n.t('agentTabApply') : '') || '1. سودىگەر بولۇپ تىزىملىتىش';
     const tab2 = document.getElementById('agentTab2Text');
-    if (tab2) tab2.textContent = i18n.t('agentTabSubmit') || '2. كىرىش ۋە تاۋار سۇنۇش';
+    if (tab2) tab2.textContent = (i18n && typeof i18n.t === 'function' ? i18n.t('agentTabSubmit') : '') || '2. كىرىش ۋە تاۋار سۇنۇش';
 
     const setPlaceholder = (id, text) => {
       const el = document.getElementById(id);
@@ -4184,14 +4185,20 @@ function initTeklimakanApp() {
     const paneSubmit = document.getElementById('agentSubmitPane');
 
     function openModal(defaultTab = 'apply') {
-      const currentL = window.appI18n ? window.appI18n.getLang() : 'ug';
-      renderAgentPortalModal(currentL);
+      try {
+        const currentL = window.appI18n ? window.appI18n.getLang() : 'ug';
+        renderAgentPortalModal(currentL);
+      } catch (err) {
+        console.warn('renderAgentPortalModal error:', err);
+      }
       modal.classList.add('active');
+      modal.style.display = 'flex';
       switchTab(defaultTab);
     }
 
     function closeModal() {
       modal.classList.remove('active');
+      modal.style.display = 'none';
     }
 
     function switchTab(tab) {
@@ -4266,10 +4273,16 @@ function initTeklimakanApp() {
     // 🔗 دوستانە ئۇلىنىشلار كۆزنىكىنى كونترول قىلىش (Friendly Links Modal)
     const friendlyModal = document.getElementById('friendlyLinksModal');
     function openFriendlyModal() {
-      if (friendlyModal) friendlyModal.classList.add('active');
+      if (friendlyModal) {
+        friendlyModal.classList.add('active');
+        friendlyModal.style.display = 'flex';
+      }
     }
     function closeFriendlyModal() {
-      if (friendlyModal) friendlyModal.classList.remove('active');
+      if (friendlyModal) {
+        friendlyModal.classList.remove('active');
+        friendlyModal.style.display = 'none';
+      }
     }
     window.openFriendlyLinksModal = openFriendlyModal;
     window.closeFriendlyLinksModal = closeFriendlyModal;

@@ -657,12 +657,21 @@ function initTeklimakanApp() {
 
     // ئۈستۈنكى ئايلانما ئېلان (Marquee) پۈتۈنلەي renderMarqueeTicker ئارقىلىق يېڭىلىنىدۇ
 
+    // 🌿 ئۇيغۇر تىبابىتى كۇنۇپكىسى تېكىستى ۋە نىشان تور ئادرېسى
+    const medLink = document.getElementById('btnUyghurMedicineFooter');
+    const medSpan = document.getElementById('footerMedicineSpan') || document.getElementById('footerFriendlyLinksSpan') || document.getElementById('footerMerchantSpan');
+    const medUrl = (lang === 'tr' || lang === 'en') ? 'https://www.uyghurmedicine.com/tr' : 'https://www.uyghurmedicine.com';
+    const medTitle = lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تىبابىتى');
+    if (medLink) {
+      medLink.href = medUrl;
+      medLink.title = medTitle;
+    }
+    if (medSpan) {
+      medSpan.textContent = medTitle;
+    }
+
     const flMerch = document.getElementById('fLinkMerchants');
-    if (flMerch) flMerch.textContent = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
-    const fFooterMerchantSpan = document.getElementById('footerMerchantSpan') || document.getElementById('footerFriendlyLinksSpan');
-    if (fFooterMerchantSpan) fFooterMerchantSpan.textContent = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
-    const btnFriendlyFooter = document.getElementById('btnOpenFriendlyLinksFooter') || document.getElementById('btnOpenMerchantApplyFooter');
-    if (btnFriendlyFooter) btnFriendlyFooter.title = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
+    if (flMerch) flMerch.textContent = medTitle;
 
     const flFriendlyTitle = document.getElementById('friendlyLinksModalTitle');
     if (flFriendlyTitle) flFriendlyTitle.textContent = i18n.t('friendlyLinksModalTitle') || 'دوستانە ئۇلىنىشلار';
@@ -4301,6 +4310,17 @@ function initTeklimakanApp() {
     if (friendlyModal) {
       friendlyModal.addEventListener('click', (e) => {
         if (e.target === friendlyModal) closeFriendlyModal();
+      });
+    }
+
+    // 🌿 ئۇيغۇر تىبابىتى ئۇلىنىشى — نۆۋەتتىكى تىلغا ئاساسەن تور بەتكە كىرىش
+    const btnMedFooter = document.getElementById('btnUyghurMedicineFooter');
+    if (btnMedFooter) {
+      btnMedFooter.addEventListener('click', (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const curL = window.appI18n ? window.appI18n.getLang() : 'ug';
+        const targetUrl = (curL === 'tr' || curL === 'en') ? 'https://www.uyghurmedicine.com/tr' : 'https://www.uyghurmedicine.com';
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
       });
     }
 

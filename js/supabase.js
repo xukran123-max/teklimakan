@@ -32,6 +32,29 @@ window.TeklimakanSupabase = {
   _reconnectTimer: null,
   _isConnected: false,
 
+  // 🛡️ ئەقلىي ئېقىم تېجەش كاش بايلىقى (Smart Egress-Saving Cache)
+  _productsCache: null,
+  _productsCacheTime: 0,
+  _ordersCache: null,
+  _ordersCacheTime: 0,
+  _agentsCache: null,
+  _agentsCacheTime: 0,
+
+  invalidateProductsCache() {
+    this._productsCache = null;
+    this._productsCacheTime = 0;
+  },
+
+  invalidateOrdersCache() {
+    this._ordersCache = null;
+    this._ordersCacheTime = 0;
+  },
+
+  invalidateAgentsCache() {
+    this._agentsCache = null;
+    this._agentsCacheTime = 0;
+  },
+
   isRealtimeConnected() {
     return this._isConnected;
   },
@@ -64,13 +87,21 @@ window.TeklimakanSupabase = {
     const channelName = 'teklimakan-store-changes-' + Math.floor(Math.random() * 10000);
     _realtimeChannel = sb.channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
+        this.invalidateProductsCache();
         if (typeof this._realtimeHandler === 'function') {
           this._realtimeHandler({ table: 'products', ...payload });
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+        this.invalidateOrdersCache();
         if (typeof this._realtimeHandler === 'function') {
           this._realtimeHandler({ table: 'orders', ...payload });
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agents' }, payload => {
+        this.invalidateAgentsCache();
+        if (typeof this._realtimeHandler === 'function') {
+          this._realtimeHandler({ table: 'agents', ...payload });
         }
       })
       .subscribe(status => {
@@ -92,20 +123,30 @@ window.TeklimakanSupabase = {
     return true;
   },
 
-  // تاۋارلارنى بۇلۇتتىن ئوقۇش
-  async fetchProducts() {
+  // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي ئېقىم تېجەش ۋە كاش بىلەن)
+  async fetchProducts(force = false) {
+    const now = Date.now();
+    // 🛡️ ئەگەر كاش مەۋجۇت بولۇپ 3 مىنۇت ئىچىدە قايتا چاقىرىلسا، ساندانغا بېرىپ بايلىق ۋە Egress ئىسراپ قىلماسلىق
+    if (!force && this._productsCache && (now - this._productsCacheTime < 3 * 60 * 1000)) {
+      return this._productsCache;
+    }
+
     const sb = getSupabase();
-    if (!sb) return null;
+    if (!sb) return this._productsCache || null;
     try {
       const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
       if (error) {
         console.warn('Supabase fetchProducts خاتالىقى:', error.message);
-        return null;
+        return this._productsCache || null;
+      }
+      if (Array.isArray(data)) {
+        this._productsCache = data;
+        this._productsCacheTime = now;
       }
       return data;
     } catch (e) {
       console.warn('Supabase products ئۇلىنىش خاتالىقى:', e);
-      return null;
+      return this._productsCache || null;
     }
   },
 
@@ -152,6 +193,7 @@ window.TeklimakanSupabase = {
         console.warn('Supabase upsertProduct خاتالىقى:', error.message);
         return false;
       }
+      this.invalidateProductsCache();
       return true;
     } catch (e) {
       console.warn('Supabase product ساقلاش خاتالىقى:', e);
@@ -166,6 +208,7 @@ window.TeklimakanSupabase = {
     try {
       const { error } = await sb.from('products').delete().eq('id', productId);
       if (error) console.warn('Supabase deleteProduct خاتالىقى:', error.message);
+      this.invalidateProductsCache();
       return !error;
     } catch (e) {
       console.warn('Supabase product ئۆچۈرۈش خاتالىقى:', e);
@@ -178,21 +221,31 @@ window.TeklimakanSupabase = {
     try {
       const { error } = await sb.from('orders').delete().eq('id', orderId);
       if (error) console.warn('Supabase deleteOrder error:', error.message);
+      this.invalidateOrdersCache();
       return !error;
     } catch (e) {
       console.warn('Supabase order deletion failed:', e);
       return false;
     }
   },
-  async fetchOrders() {
+  async fetchOrders(force = false) {
+    const now = Date.now();
+    // 🛡️ ئەگەر كاش بار بولۇپ 2 مىنۇت ئىچىدە بولسا، كاشتىن قايتۇرۇپ ئېقىم تېجەش
+    if (!force && this._ordersCache && (now - this._ordersCacheTime < 2 * 60 * 1000)) {
+      return this._ordersCache;
+    }
     const sb = getSupabase();
-    if (!sb) return null;
+    if (!sb) return this._ordersCache || null;
     try {
       const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
-      if (error) return null;
+      if (error) return this._ordersCache || null;
+      if (Array.isArray(data)) {
+        this._ordersCache = data;
+        this._ordersCacheTime = now;
+      }
       return data;
     } catch (e) {
-      return null;
+      return this._ordersCache || null;
     }
   },
 
@@ -221,6 +274,7 @@ window.TeklimakanSupabase = {
         shipped_at: order.shippedAt || null
       };
       const { error } = await sb.from('orders').upsert(row);
+      this.invalidateOrdersCache();
       return !error;
     } catch (e) {
       return false;
@@ -238,6 +292,7 @@ window.TeklimakanSupabase = {
       if (tracking.shippedAt) patch.shipped_at = tracking.shippedAt;
       if (tracking.completedAt) patch.completed_at = tracking.completedAt;
       const { error } = await sb.from('orders').update(patch).eq('id', orderId);
+      this.invalidateOrdersCache();
       return !error;
     } catch (e) {
       return false;
@@ -250,6 +305,7 @@ window.TeklimakanSupabase = {
     if (!sb) return false;
     try {
       const { error } = await sb.from('orders').update({ customer }).eq('id', orderId);
+      this.invalidateOrdersCache();
       return !error;
     } catch (e) {
       return false;
@@ -274,6 +330,7 @@ window.TeklimakanSupabase = {
         notes: '',
         tracking_number: null
       }).eq('id', orderId);
+      this.invalidateOrdersCache();
       return !error;
     } catch (e) {
       console.warn('Supabase anonymizeOrder error:', e);
@@ -289,6 +346,7 @@ window.TeklimakanSupabase = {
       // 1. ئالدى بىلەن مەخسۇس SQL فۇنكسىيەسى (RPC) نى چاقىرىشقا سىناش
       const { data, error } = await sb.rpc('anonymize_expired_orders', { days_threshold: daysThreshold });
       if (!error && typeof data === 'number') {
+        this.invalidateOrdersCache();
         return data;
       }
     } catch (e) {}
@@ -319,22 +377,32 @@ window.TeklimakanSupabase = {
           count++;
         }
       }
+      this.invalidateOrdersCache();
       return count;
     } catch (e) {
       return 0;
     }
   },
 
-  // ۋاكالەتچىلەرنى ئوقۇش
-  async fetchAgents() {
+  // ۋاكالەتچىلەرنى ئوقۇش (ئەقلىي كاش بىلەن)
+  async fetchAgents(force = false) {
+    const now = Date.now();
+    // 🛡️ ئەگەر كاش بار بولۇپ 2 مىنۇت ئىچىدە بولسا، كاشتىن قايتۇرۇپ ئېقىم تېجەش
+    if (!force && this._agentsCache && (now - this._agentsCacheTime < 2 * 60 * 1000)) {
+      return this._agentsCache;
+    }
     const sb = getSupabase();
-    if (!sb) return null;
+    if (!sb) return this._agentsCache || null;
     try {
       const { data, error } = await sb.from('agents').select('*');
-      if (error) return null;
+      if (error) return this._agentsCache || null;
+      if (Array.isArray(data)) {
+        this._agentsCache = data;
+        this._agentsCacheTime = now;
+      }
       return data;
     } catch (e) {
-      return null;
+      return this._agentsCache || null;
     }
   },
 
@@ -386,6 +454,7 @@ window.TeklimakanSupabase = {
         console.warn('Supabase upsertAgent error:', error.message);
         return false;
       }
+      this.invalidateAgentsCache();
       return true;
     } catch (e) {
       console.warn('Supabase agent exception:', e);
@@ -404,6 +473,7 @@ window.TeklimakanSupabase = {
         console.warn('Supabase deleteAgent error:', error.message);
         return false;
       }
+      this.invalidateAgentsCache();
       return true;
     } catch (e) {
       console.warn('Supabase agent deletion failed:', e);

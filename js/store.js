@@ -1892,42 +1892,44 @@ class StoreManager {
     } catch (e) {}
 
     // ☁️ بۇلۇتتىكى يېڭى مەزمۇنلارنى ھەر ئۈسكۈنىگە دەرھال تارقىتىش (Realtime)
+    // ☁️ بۇلۇتتىكى يېڭى مەزمۇنلارنى ھەر ئۈسكۈنىگە دەرھال تارقىتىش (Realtime WebSocket)
     if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.subscribeToChanges === 'function') {
       window.TeklimakanSupabase.subscribeToChanges(change => this.applyCloudChange(change));
     }
 
-    // ☁️ Supabase بۇلۇت ئامبىرى بىلەن دەسلەپكى ۋە دەل ۋاقتىدا ماسلاشتۇرۇش
+    // ☁️ Supabase بۇلۇت ئامبىرى بىلەن دەسلەپكى ماسلاشتۇرۇش (ئەقلىي تېجەشلىك)
     this.syncWithSupabase();
+
+    // 🌐 پەقەت تور ئۈزۈلۈپ قايتا ئۇلانغاندىلا Realtime نى قايتا ئۇلاش
     window.addEventListener('online', () => {
-      this.syncWithSupabase();
-      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
-    });
-    window.addEventListener('focus', () => {
-      this.syncWithSupabase();
-      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
-    });
-    window.addEventListener('pageshow', () => {
-      this.syncWithSupabase();
-      if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        this.syncWithSupabase();
-        if (window.TeklimakanSupabase?.reconnectRealtime) window.TeklimakanSupabase.reconnectRealtime();
+      if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.isRealtimeConnected === 'function') {
+        if (!window.TeklimakanSupabase.isRealtimeConnected()) {
+          window.TeklimakanSupabase.reconnectRealtime?.();
+        }
       }
     });
 
-    // 📲 كۆچمە تېلېفونلاردا دەل ۋاقتىدا يېڭىلىنىش كاپالىتى (Mobile Heartbeat - ھەر 30 سېكۇنتتا قەرەللىك ماسلىشىدۇ)
-    setInterval(() => {
-      if (document.visibilityState !== 'hidden') {
-        this.syncWithSupabase();
+    // 📱 بەتكە قايتقاندا پەقەت Realtime ئۈزۈلگەن بولسىلا قايتا ئۇلاش (سانداننى قايتا-قايتا تولۇق تارتىپ ئېقىم ئىسراپ قىلماسلىق)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
         if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.isRealtimeConnected === 'function') {
           if (!window.TeklimakanSupabase.isRealtimeConnected()) {
             window.TeklimakanSupabase.reconnectRealtime?.();
           }
         }
       }
-    }, 30000);
+    });
+
+    // 📲 قەرەللىك ساغلاملىق تەكشۈرۈش (ھەر 2 مىنۇتتا پەقەت Realtime ئۇلىنىشىنىلا قوغدايدۇ، سانداننى قايتا تارتمايدۇ، ئېقىم تېجەيدۇ)
+    setInterval(() => {
+      if (document.visibilityState !== 'hidden') {
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.isRealtimeConnected === 'function') {
+          if (!window.TeklimakanSupabase.isRealtimeConnected()) {
+            window.TeklimakanSupabase.reconnectRealtime?.();
+          }
+        }
+      }
+    }, 120000);
 
     // 🔄 باشقا بەتلەرنىڭ يېڭىلىنىش پۇلسىنى كۆرۈش
     window.addEventListener('storage', (e) => {
@@ -2056,305 +2058,333 @@ class StoreManager {
     }
   }
 
-  async syncWithSupabase() {
+  async syncWithSupabase(options = {}) {
     if (!window.TeklimakanSupabase) return;
     if (this._isSyncingSupabase) return;
+
+    const isAdminContext = typeof window !== 'undefined' && (
+      window.location.pathname.includes('seidiye') ||
+      !!document.getElementById('adminApp') ||
+      !!document.getElementById('adminLoginForm')
+    );
+
+    const force = options && options.force === true;
+    const now = Date.now();
+    // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش (ئالدىنقى قېتىمدىن 10 مىنۇت ئۆتمىگەن بولسا ۋە مەجبۇرىي بولمىسا قايتا تارتمايدۇ)
+    const shouldSyncProducts = force || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 10 * 60 * 1000);
+
+    // ئەگەر ئالدىنقى بەت (ئادەتتىكى خېرىدار) بولسا ۋە تاۋارلار تېخى يېڭى بولسا، تور ئېقىمىنى تېجەش ئۈچۈن قايتا سۈرۈشتۈرمەيمىز
+    if (!isAdminContext && !shouldSyncProducts) {
+      return;
+    }
+
     this._isSyncingSupabase = true;
     try {
       // 1. مەھسۇلاتلارنى بۇلۇتتىن يېڭىلاش
-      const remoteProducts = await window.TeklimakanSupabase.fetchProducts();
-      if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
-        const localProds = this.getProducts();
-        const userEdits = this.getUserEdits();
-        const deletedIds = this.getDeletedProductIds();
-        const localMap = new Map();
-        localProds.forEach(p => localMap.set(p.id, p));
-        const map = new Map();
-        const rpIds = new Set();
+      if (shouldSyncProducts) {
+        const remoteProducts = await window.TeklimakanSupabase.fetchProducts(force);
+        if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
+          this._lastProductsSyncTime = Date.now();
+          const localProds = this.getProducts();
+          const userEdits = this.getUserEdits();
+          const deletedIds = this.getDeletedProductIds();
+          const localMap = new Map();
+          localProds.forEach(p => localMap.set(p.id, p));
+          const map = new Map();
+          const rpIds = new Set();
 
-        // 2) بۇلۇتتىن كەلگەن تاۋارلارنى بىرلەشتۈرۈش
-        let editsUpdated = false;
-        remoteProducts.forEach(rp => {
-          if (deletedIds.includes(rp.id)) {
-            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteProduct === 'function') {
-              window.TeklimakanSupabase.deleteProduct(rp.id);
-            }
-            return;
-          }
-          rpIds.add(rp.id);
-
-          const localItem = localMap.get(rp.id);
-          const isLocallyEdited = !!(localItem?.isUserEdited || userEdits[rp.id]);
-          const isCloudEdited = !!(rp.translations && rp.translations.isUserEdited);
-
-          const cloudUpdated = rp.updated_at || (rp.translations && rp.translations.updatedAt) || rp.created_at || '';
-          const localUpdated = localItem?.updatedAt || (userEdits[rp.id]?.updatedAt) || '';
-
-          const cloudTime = cloudUpdated ? new Date(cloudUpdated).getTime() : 0;
-          const localTime = localUpdated ? new Date(localUpdated).getTime() : 0;
-
-          const isInvalidLocalImage = !localItem?.image || localItem.image.includes('default_product.jpg');
-          const hasValidCloudImage = rp.image && !rp.image.includes('default_product.jpg');
-
-          // 🛡️ ئەگەر يەرلىك نۇسخا تېخىمۇ يېڭى تەھرىرلەنگەن بولسا، يەرلىك نۇسخا كۈچكە ئىگە، ھەرگىز قاپلانمايدۇ:
-          if (localItem && isLocallyEdited && localTime > cloudTime) {
-            // ئەمما ئەگەر يەرلىكتە رەسىم يوق ياكى default بولۇپ بۇلۇتتا ھەقىقىي رەسىم بار بولسا، بۇلۇتتىكى رەسىمنى يەرلىككە بېرىمىز
-            if (isInvalidLocalImage && hasValidCloudImage) {
-              localItem.image = rp.image;
-              if (userEdits[rp.id]) {
-                userEdits[rp.id].image = rp.image;
-                editsUpdated = true;
+          // 2) بۇلۇتتىن كەلگەن تاۋارلارنى بىرلەشتۈرۈش
+          let editsUpdated = false;
+          remoteProducts.forEach(rp => {
+            if (deletedIds.includes(rp.id)) {
+              if (isAdminContext && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteProduct === 'function') {
+                window.TeklimakanSupabase.deleteProduct(rp.id);
               }
+              return;
             }
-            // بۇلۇتقا يېڭى يەرلىك نۇسخىنى ماس قەدەمدە قايتا ئەۋەتىپ كاپالەتلەندۈرۈش
-            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
-              window.TeklimakanSupabase.upsertProduct(localItem);
+            rpIds.add(rp.id);
+
+            const localItem = localMap.get(rp.id);
+            const isLocallyEdited = !!(localItem?.isUserEdited || userEdits[rp.id]);
+            const isCloudEdited = !!(rp.translations && rp.translations.isUserEdited);
+
+            const cloudUpdated = rp.updated_at || (rp.translations && rp.translations.updatedAt) || rp.created_at || '';
+            const localUpdated = localItem?.updatedAt || (userEdits[rp.id]?.updatedAt) || '';
+
+            const cloudTime = cloudUpdated ? new Date(cloudUpdated).getTime() : 0;
+            const localTime = localUpdated ? new Date(localUpdated).getTime() : 0;
+
+            const isInvalidLocalImage = !localItem?.image || localItem.image.includes('default_product.jpg');
+            const hasValidCloudImage = rp.image && !rp.image.includes('default_product.jpg');
+
+            // 🛡️ ئەگەر يەرلىك نۇسخا تېخىمۇ يېڭى تەھرىرلەنگەن بولسا، يەرلىك نۇسخا كۈچكە ئىگە، ھەرگىز قاپلانمايدۇ:
+            if (localItem && isLocallyEdited && localTime > cloudTime) {
+              // ئەمما ئەگەر يەرلىكتە رەسىم يوق ياكى default بولۇپ بۇلۇتتا ھەقىقىي رەسىم بار بولسا، بۇلۇتتىكى رەسىمنى يەرلىككە بېرىمىز
+              if (isInvalidLocalImage && hasValidCloudImage) {
+                localItem.image = rp.image;
+                if (userEdits[rp.id]) {
+                  userEdits[rp.id].image = rp.image;
+                  editsUpdated = true;
+                }
+              }
+              // بۇلۇتقا يېڭى يەرلىك نۇسخىنى پەقەت باشقۇرغۇچى سۇپىسىدىلا قايتا يوللاپ دەلىللەش
+              if (isAdminContext && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+                window.TeklimakanSupabase.upsertProduct(localItem);
+              }
+              return;
             }
-            return;
-          }
 
-          // 🛡️ ئەگەر بۇلۇتتىكى نۇسخا يېڭى تەھرىرلەنگەن بولسا (تېلېفوندىن ياكى باشقا ئۈسكۈنىدىن)، بۇلۇتتىكى يېڭى مەزمۇن قوبۇل قىلىنىدۇ:
-          const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
-          const normalizeUnit = (u) => {
-            if (!u || typeof u !== 'string') return 'دانە';
-            let s = u.trim();
-            if (!s || isCorrupted(s)) return 'دانە';
-            const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
-            if (midGram) return `${midGram[1]} گرام`;
-            if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
-            if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
-            if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
-            const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
-            if (trailGram) return `${trailGram[2]} گرام`;
-            return s;
-          };
-          window.normalizeProductUnit = normalizeUnit;
-          const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
+            // 🛡️ ئەگەر بۇلۇتتىكى نۇسخا يېڭى تەھرىرلەنگەن بولسا (تېلېفوندىن ياكى باشقا ئۈسكۈنىدىن)، بۇلۇتتىكى يېڭى مەزمۇن قوبۇل قىلىنىدۇ:
+            const isCorrupted = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+            const normalizeUnit = (u) => {
+              if (!u || typeof u !== 'string') return 'دانە';
+              let s = u.trim();
+              if (!s || isCorrupted(s)) return 'دانە';
+              const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+              if (midGram) return `${midGram[1]} گرام`;
+              if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+              if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+              if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+              const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+              if (trailGram) return `${trailGram[2]} گرام`;
+              return s;
+            };
+            window.normalizeProductUnit = normalizeUnit;
+            const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
 
-          const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
-          const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
-          const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
-          const rawUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
-          const safeUnit = normalizeUnit(rawUnit);
-          const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
+            const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
+            const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
+            const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
+            const rawUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
+            const safeUnit = normalizeUnit(rawUnit);
+            const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
 
-          const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
-          safeTranslations.unit = safeUnit;
-          if (safeTranslations.ug) safeTranslations.ug.unit = safeUnit;
+            const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
+            safeTranslations.unit = safeUnit;
+            if (safeTranslations.ug) safeTranslations.ug.unit = safeUnit;
 
-          // رەسىم ئەڭ پۇختا بولغان نۇسخىدىن تاللىنىدۇ
-          let chosenImage = rp.image;
-          // ئەگەر رەسىم ئەسلىدىكى كونا Unsplash ياكى خاتا سۈرەت بولسا، مەخسۇس ھۆججەت ياكى يەرلىك سۈرەتكە يېڭىلاش
-          if (rp.id === 'PRD-420' && (!chosenImage || chosenImage.includes('photo-1509358271058') || chosenImage.length < 500)) {
-            chosenImage = (localItem?.image && !localItem.image.includes('photo-1509358271058') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-420.jpg';
-          } else if (rp.id === 'PRD-398' && (!chosenImage || chosenImage.includes('photo-1584308666744') || chosenImage.length < 500)) {
-            chosenImage = (localItem?.image && !localItem.image.includes('photo-1584308666744') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-398.jpg';
-          } else if (rp.id === 'PRD-113' && (!chosenImage || chosenImage.includes('photo-1595475207225') || (localItem?.image && localItem.image.includes('PRD-103')))) {
-            chosenImage = 'images/products/PRD-113.jpg';
-          } else if (rp.id === 'PRD-103' && (!chosenImage || chosenImage.includes('photo-1563729784474'))) {
-            chosenImage = 'images/products/PRD-103.jpg';
-          } else if (!chosenImage || chosenImage.includes('default_product.jpg')) {
-            chosenImage = (localItem?.image && !localItem.image.includes('default_product.jpg'))
-              ? localItem.image
-              : (initMatch?.image && !initMatch.image.includes('default_product.jpg') ? initMatch.image : (rp.image || localItem?.image || 'images/default_product.jpg'));
-          } else if (localItem?.image && !localItem.image.includes('default_product.jpg') && (localItem.image.startsWith('data:image/') || localItem.image.includes('images/products/')) && typeof rp.image === 'string' && rp.image.includes('unsplash.com')) {
-            // ئەگەر يەرلىكتە مەخسۇس يۈكلەنگەن ياكى تەييارلانغان رەسىم بولۇپ بۇلۇتتا پەقەت كونا unsplash تۇرسا، يەرلىك نۇسخىنى ساقلاپ قېلىش
-            chosenImage = localItem.image;
-          }
+            // رەسىم ئەڭ پۇختا بولغان نۇسخىدىن تاللىنىدۇ
+            let chosenImage = rp.image;
+            // ئەگەر رەسىم ئەسلىدىكى كونا Unsplash ياكى خاتا سۈرەت بولسا، مەخسۇس ھۆججەت ياكى يەرلىك سۈرەتكە يېڭىلاش
+            if (rp.id === 'PRD-420' && (!chosenImage || chosenImage.includes('photo-1509358271058') || chosenImage.length < 500)) {
+              chosenImage = (localItem?.image && !localItem.image.includes('photo-1509358271058') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-420.jpg';
+            } else if (rp.id === 'PRD-398' && (!chosenImage || chosenImage.includes('photo-1584308666744') || chosenImage.length < 500)) {
+              chosenImage = (localItem?.image && !localItem.image.includes('photo-1584308666744') && localItem.image.length > 500) ? localItem.image : 'images/products/PRD-398.jpg';
+            } else if (rp.id === 'PRD-113' && (!chosenImage || chosenImage.includes('photo-1595475207225') || (localItem?.image && localItem.image.includes('PRD-103')))) {
+              chosenImage = 'images/products/PRD-113.jpg';
+            } else if (rp.id === 'PRD-103' && (!chosenImage || chosenImage.includes('photo-1563729784474'))) {
+              chosenImage = 'images/products/PRD-103.jpg';
+            } else if (!chosenImage || chosenImage.includes('default_product.jpg')) {
+              chosenImage = (localItem?.image && !localItem.image.includes('default_product.jpg'))
+                ? localItem.image
+                : (initMatch?.image && !initMatch.image.includes('default_product.jpg') ? initMatch.image : (rp.image || localItem?.image || 'images/default_product.jpg'));
+            } else if (localItem?.image && !localItem.image.includes('default_product.jpg') && (localItem.image.startsWith('data:image/') || localItem.image.includes('images/products/')) && typeof rp.image === 'string' && rp.image.includes('unsplash.com')) {
+              // ئەگەر يەرلىكتە مەخسۇس يۈكلەنگەن ياكى تەييارلانغان رەسىم بولۇپ بۇلۇتتا پەقەت كونا unsplash تۇرسا، يەرلىك نۇسخىنى ساقلاپ قېلىش
+              chosenImage = localItem.image;
+            }
 
-          const safeItem = {
-            id: rp.id,
-            name: safeName,
-            brand: safeBrand,
-            category: safeCat,
-            price: Number(rp.price),
-            oldPrice: rp.old_price ? Number(rp.old_price) : null,
-            stock: rp.stock !== undefined ? Number(rp.stock) : 0,
-            unit: safeUnit,
-            sales: rp.sales || 0,
-            rating: Number(rp.rating || 5.0),
-            ratingCount: rp.rating_count || 1,
-            image: chosenImage,
-            description: safeDesc,
-            badge: rp.badge || '',
-            featured: !!rp.featured,
-            approvalStatus: rp.approval_status || 'تەستىقلاندى',
-            languageScope: rp.language_scope || 'all',
-            merchantBadge: rp.merchant_badge || 'ئىشەنچىلىك سودىگەر',
-            agentId: rp.agent_id || null,
-            agentName: rp.agent_name || null,
-            translations: safeTranslations,
-            isUserEdited: isCloudEdited || isLocallyEdited,
-            updatedAt: cloudUpdated || localUpdated || new Date().toISOString()
-          };
-          safeItem.translations = this.prepareProductTranslations(safeItem, localItem);
+            const safeItem = {
+              id: rp.id,
+              name: safeName,
+              brand: safeBrand,
+              category: safeCat,
+              price: Number(rp.price),
+              oldPrice: rp.old_price ? Number(rp.old_price) : null,
+              stock: rp.stock !== undefined ? Number(rp.stock) : 0,
+              unit: safeUnit,
+              sales: rp.sales || 0,
+              rating: Number(rp.rating || 5.0),
+              ratingCount: rp.rating_count || 1,
+              image: chosenImage,
+              description: safeDesc,
+              badge: rp.badge || '',
+              featured: !!rp.featured,
+              approvalStatus: rp.approval_status || 'تەستىقلاندى',
+              languageScope: rp.language_scope || 'all',
+              merchantBadge: rp.merchant_badge || 'ئىشەنچىلىك سودىگەر',
+              agentId: rp.agent_id || null,
+              agentName: rp.agent_name || null,
+              translations: safeTranslations,
+              isUserEdited: isCloudEdited || isLocallyEdited,
+              updatedAt: cloudUpdated || localUpdated || new Date().toISOString()
+            };
+            safeItem.translations = this.prepareProductTranslations(safeItem, localItem);
 
-          map.set(rp.id, safeItem);
+            map.set(rp.id, safeItem);
 
-          if (isCloudEdited || (hasValidCloudImage && isInvalidLocalImage)) {
-            userEdits[rp.id] = safeItem;
-            editsUpdated = true;
-          }
+            if (isCloudEdited || (hasValidCloudImage && isInvalidLocalImage)) {
+              userEdits[rp.id] = safeItem;
+              editsUpdated = true;
+            }
 
-          // ئەگەر بۇلۇتتىكى مەلۇمات خەت كودلىنىشى جەھەتتە بۇزۇلۇپ قالغان بولسا، دەرھال ساغلام سانلىق مەلۇماتنى بۇلۇتقا قايتا داۋالاپ يوللاش
-          if ((isCorrupted(rp.name) || isCorrupted(rp.category)) && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
-            window.TeklimakanSupabase.upsertProduct(safeItem);
-          }
-        });
-
-        if (editsUpdated) {
-          try {
-            localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(userEdits));
-          } catch(e) {}
-        }
-
-        // پەقەت تېخى بۇلۇتقا يۈكلەنمىگەن يەرلىك كۈتۈۋاتقان يېڭى تاۋارلارلا ساقلىنىدۇ
-        localProds.forEach(p => {
-          if (!rpIds.has(p.id) && !deletedIds.includes(p.id) && p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ') {
-            map.set(p.id, p);
-          }
-        });
-
-        const merged = Array.from(map.values());
-        const mergedStr = JSON.stringify(merged);
-        const currentProductsStr = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-        if (mergedStr !== currentProductsStr) {
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
-          this.notifyDataChange('products');
-        }
-      } else if (Array.isArray(remoteProducts) && remoteProducts.length === 0) {
-        // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا قاچىلاش
-        const currentProds = this.getProducts();
-        currentProds.forEach(p => {
-          if (!this.getDeletedProductIds().includes(p.id)) {
-            window.TeklimakanSupabase.upsertProduct(p);
-          }
-        });
-      }
-
-      // 2. زاكازلارنى بۇلۇتتىن يېڭىلاش
-      const remoteOrders = await window.TeklimakanSupabase.fetchOrders();
-      if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
-        const localOrders = this.getOrders();
-        const oMap = new Map();
-        localOrders.forEach(o => oMap.set(o.id, o));
-        remoteOrders.forEach(ro => {
-          oMap.set(ro.id, {
-            id: ro.id,
-            customer: ro.customer,
-            items: ro.items,
-            subtotalCny: Number(ro.subtotal_cny || 0),
-            discountCny: Number(ro.discount_cny || 0),
-            deliveryFeeCny: Number(ro.delivery_fee_cny || 0),
-            totalCny: Number(ro.total_cny || 0),
-            totalFormatted: ro.total_formatted,
-            paymentMethod: ro.payment_method,
-            status: ro.status,
-            date: ro.date,
-            notes: ro.notes,
-            language: ro.language,
-            currency: ro.currency,
-            trackingCarrier: ro.tracking_carrier,
-            trackingNumber: ro.tracking_number,
-            shippedAt: ro.shipped_at
+            // ئەگەر بۇلۇتتىكى مەلۇمات خەت كودلىنىشى جەھەتتە بۇزۇلۇپ قالغان بولسا، پەقەت باشقۇرغۇچى سۇپىسىدىلا قايتا داۋالاپ يوللاش
+            if (isAdminContext && (isCorrupted(rp.name) || isCorrupted(rp.category)) && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+              window.TeklimakanSupabase.upsertProduct(safeItem);
+            }
           });
-        });
-        const mergedOrders = Array.from(oMap.values());
-        const ordersStr = JSON.stringify(mergedOrders);
-        const currentOrdersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
-        if (ordersStr !== currentOrdersStr) {
-          localStorage.setItem(STORAGE_KEYS.ORDERS, ordersStr);
-          this.notifyDataChange('orders');
+
+          if (editsUpdated) {
+            try {
+              localStorage.setItem(STORAGE_KEYS.USER_EDITS, JSON.stringify(userEdits));
+            } catch(e) {}
+          }
+
+          // پەقەت تېخى بۇلۇتقا يۈكلەنمىگەن يەرلىك كۈتۈۋاتقان يېڭى تاۋارلارلا ساقلىنىدۇ
+          localProds.forEach(p => {
+            if (!rpIds.has(p.id) && !deletedIds.includes(p.id) && p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ') {
+              map.set(p.id, p);
+            }
+          });
+
+          const merged = Array.from(map.values());
+          const mergedStr = JSON.stringify(merged);
+          const currentProductsStr = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+          if (mergedStr !== currentProductsStr) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
+            this.notifyDataChange('products');
+          }
+        } else if (isAdminContext && Array.isArray(remoteProducts) && remoteProducts.length === 0) {
+          // ئەگەر Supabase ئامبىرى يېڭى ھەم قۇرۇق بولسا، دەسلەپكى تاۋارلارنى بۇلۇتقا قاچىلاش (پەقەت باشقۇرغۇچىلا قىلىدۇ)
+          const currentProds = this.getProducts();
+          currentProds.forEach(p => {
+            if (!this.getDeletedProductIds().includes(p.id)) {
+              window.TeklimakanSupabase.upsertProduct(p);
+            }
+          });
         }
       }
 
-      // 3. ۋاكالەتچىلەرنى بۇلۇتتىن يېڭىلاش
-      const remoteAgents = await window.TeklimakanSupabase.fetchAgents();
-      const deletedAgentIds = this.getDeletedAgentIds();
-      if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
-        const localAgents = this.getAgents('none');
-        const localMap = new Map();
-        localAgents.forEach(a => localMap.set(a.id, a));
-        const aMap = new Map();
-        remoteAgents.forEach(ra => {
-          if (deletedAgentIds.includes(ra.id)) {
-            if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteAgent === 'function') {
-              window.TeklimakanSupabase.deleteAgent(ra.id);
-            }
-            return;
-          }
-          let authorizedBrands = [];
-          let password = '';
-          let trustedDevices = [];
-          if (Array.isArray(ra.authorized_brands)) {
-            ra.authorized_brands.forEach(item => {
-              if (typeof item === 'string') {
-                authorizedBrands.push(item);
-              } else if (item && typeof item === 'object') {
-                if (item.password) password = item.password;
-                if (Array.isArray(item.trustedDevices)) trustedDevices = item.trustedDevices;
-                if (item.proposedBrands) proposedBrands = item.proposedBrands;
-                if (item.notes) notes = item.notes;
-                if (item.legalAgreement) legalAgreement = item.legalAgreement;
-                if (item.suspendedUntil) suspendedUntil = item.suspendedUntil;
-                if (item.suspensionReason) suspensionReason = item.suspensionReason;
-              }
+      // 2. زاكازلار ۋە ۋاكالەتچىلەرنى بۇلۇتتىن يېڭىلاش (پەقەت باشقۇرغۇچى سۇپىسى ئۈچۈنلا - ئادەتتىكى بەتكە تارتىلمايدۇ، مەخپىيەتلىك ۋە ئېقىم تېجەيدۇ)
+      if (isAdminContext) {
+        // زاكازلار
+        const remoteOrders = await window.TeklimakanSupabase.fetchOrders(force);
+        if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
+          const localOrders = this.getOrders();
+          const oMap = new Map();
+          localOrders.forEach(o => oMap.set(o.id, o));
+          remoteOrders.forEach(ro => {
+            oMap.set(ro.id, {
+              id: ro.id,
+              customer: ro.customer,
+              items: ro.items,
+              subtotalCny: Number(ro.subtotal_cny || 0),
+              discountCny: Number(ro.discount_cny || 0),
+              deliveryFeeCny: Number(ro.delivery_fee_cny || 0),
+              totalCny: Number(ro.total_cny || 0),
+              totalFormatted: ro.total_formatted,
+              paymentMethod: ro.payment_method,
+              status: ro.status,
+              date: ro.date,
+              notes: ro.notes,
+              language: ro.language,
+              currency: ro.currency,
+              trackingCarrier: ro.tracking_carrier,
+              trackingNumber: ro.tracking_number,
+              shippedAt: ro.shipped_at
             });
-          }
-
-          const existingLocal = localMap.get(ra.id) || {};
-          aMap.set(ra.id, {
-            ...existingLocal,
-            password: password || existingLocal.password || '',
-            trustedDevices: trustedDevices.length > 0 ? trustedDevices : (existingLocal.trustedDevices || []),
-            id: ra.id,
-            name: ra.name,
-            email: ra.email,
-            phone: ra.phone,
-            city: ra.city || existingLocal.city || 'ئىستانبۇل',
-            status: ra.status || existingLocal.status || 'تەستىقلاندى',
-            reputation: ra.reputation || existingLocal.reputation || 'ئىشەنچىلىك سودىگەر',
-            canPublishMultilingual: !!ra.can_publish_multilingual,
-            authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal.authorizedBrands || []),
-            registeredAt: ra.registered_at || existingLocal.registeredAt,
-            authExpireDate: ra.auth_expire_date || existingLocal.authExpireDate,
-            certCode: ra.cert_code || existingLocal.certCode,
-            productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal.productsCount || 0),
-            salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal.salesTotal || 0)),
-            monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal.monthlySales || 0)),
-            monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal.monthlyOrders || 0)),
-            commissionRate: Number(ra.commission_rate || existingLocal.commissionRate || 15),
-            violationsCount: Number(ra.violations_count || existingLocal.violationsCount || 0),
-            suspendedUntil: suspendedUntil || existingLocal.suspendedUntil || null,
-            suspensionReason: suspensionReason || existingLocal.suspensionReason || '',
-            proposedBrands: existingLocal.proposedBrands || proposedBrands,
-            notes: existingLocal.notes || notes,
-            legalAgreement: existingLocal.legalAgreement || legalAgreement || (ra.cert_code ? {
-              contractNumber: ra.cert_code,
-              signedAt: ra.registered_at || new Date().toISOString(),
-              agentName: ra.name,
-              agentEmail: ra.email,
-              agentPhone: ra.phone,
-              liabilityClauseAccepted: true,
-              fiveRulesAccepted: true
-            } : null)
           });
-        });
-        const mergedAgents = Array.from(aMap.values());
-        const agentsStr = JSON.stringify(mergedAgents);
-        const currentAgentsStr = localStorage.getItem(STORAGE_KEYS.AGENTS);
-        if (agentsStr !== currentAgentsStr) {
-          localStorage.setItem(STORAGE_KEYS.AGENTS, agentsStr);
-          this.notifyDataChange('agents');
-        }
-      } else if (Array.isArray(remoteAgents) && remoteAgents.length === 0) {
-        // ئەگەر بۇلۇتتا ۋاكالەتچى بولمىسا، يەرلىكتىكى بار ۋاكالەتچىلەرنى بۇلۇتقا زاپاس يوللاش
-        const localAgents = this.getAgents('none');
-        localAgents.forEach(a => {
-          if (!deletedAgentIds.includes(a.id)) {
-            window.TeklimakanSupabase.upsertAgent(a);
+          const mergedOrders = Array.from(oMap.values());
+          const ordersStr = JSON.stringify(mergedOrders);
+          const currentOrdersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+          if (ordersStr !== currentOrdersStr) {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, ordersStr);
+            this.notifyDataChange('orders');
           }
-        });
+        }
+
+        // ۋاكالەتچىلەر
+        const remoteAgents = await window.TeklimakanSupabase.fetchAgents(force);
+        const deletedAgentIds = this.getDeletedAgentIds();
+        if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
+          const localAgents = this.getAgents('none');
+          const localMap = new Map();
+          localAgents.forEach(a => localMap.set(a.id, a));
+          const aMap = new Map();
+          remoteAgents.forEach(ra => {
+            if (deletedAgentIds.includes(ra.id)) {
+              if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.deleteAgent === 'function') {
+                window.TeklimakanSupabase.deleteAgent(ra.id);
+              }
+              return;
+            }
+            let authorizedBrands = [];
+            let password = '';
+            let trustedDevices = [];
+            let proposedBrands = '';
+            let notes = '';
+            let legalAgreement = null;
+            let suspendedUntil = null;
+            let suspensionReason = '';
+            if (Array.isArray(ra.authorized_brands)) {
+              ra.authorized_brands.forEach(item => {
+                if (typeof item === 'string') {
+                  authorizedBrands.push(item);
+                } else if (item && typeof item === 'object') {
+                  if (item.password) password = item.password;
+                  if (Array.isArray(item.trustedDevices)) trustedDevices = item.trustedDevices;
+                  if (item.proposedBrands) proposedBrands = item.proposedBrands;
+                  if (item.notes) notes = item.notes;
+                  if (item.legalAgreement) legalAgreement = item.legalAgreement;
+                  if (item.suspendedUntil) suspendedUntil = item.suspendedUntil;
+                  if (item.suspensionReason) suspensionReason = item.suspensionReason;
+                }
+              });
+            }
+
+            const existingLocal = localMap.get(ra.id) || {};
+            aMap.set(ra.id, {
+              ...existingLocal,
+              password: password || existingLocal.password || '',
+              trustedDevices: trustedDevices.length > 0 ? trustedDevices : (existingLocal.trustedDevices || []),
+              id: ra.id,
+              name: ra.name,
+              email: ra.email,
+              phone: ra.phone,
+              city: ra.city || existingLocal.city || 'ئىستانبۇل',
+              status: ra.status || existingLocal.status || 'تەستىقلاندى',
+              reputation: ra.reputation || existingLocal.reputation || 'ئىشەنچىلىك سودىگەر',
+              canPublishMultilingual: !!ra.can_publish_multilingual,
+              authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal.authorizedBrands || []),
+              registeredAt: ra.registered_at || existingLocal.registeredAt,
+              authExpireDate: ra.auth_expire_date || existingLocal.authExpireDate,
+              certCode: ra.cert_code || existingLocal.certCode,
+              productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal.productsCount || 0),
+              salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal.salesTotal || 0)),
+              monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal.monthlySales || 0)),
+              monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal.monthlyOrders || 0)),
+              commissionRate: Number(ra.commission_rate || existingLocal.commissionRate || 15),
+              violationsCount: Number(ra.violations_count || existingLocal.violationsCount || 0),
+              suspendedUntil: suspendedUntil || existingLocal.suspendedUntil || null,
+              suspensionReason: suspensionReason || existingLocal.suspensionReason || '',
+              proposedBrands: existingLocal.proposedBrands || proposedBrands,
+              notes: existingLocal.notes || notes,
+              legalAgreement: existingLocal.legalAgreement || legalAgreement || (ra.cert_code ? {
+                contractNumber: ra.cert_code,
+                signedAt: ra.registered_at || new Date().toISOString(),
+                agentName: ra.name,
+                agentEmail: ra.email,
+                agentPhone: ra.phone,
+                liabilityClauseAccepted: true,
+                fiveRulesAccepted: true
+              } : null)
+            });
+          });
+          const mergedAgents = Array.from(aMap.values());
+          const agentsStr = JSON.stringify(mergedAgents);
+          const currentAgentsStr = localStorage.getItem(STORAGE_KEYS.AGENTS);
+          if (agentsStr !== currentAgentsStr) {
+            localStorage.setItem(STORAGE_KEYS.AGENTS, agentsStr);
+            this.notifyDataChange('agents');
+          }
+        } else if (Array.isArray(remoteAgents) && remoteAgents.length === 0) {
+          // ئەگەر بۇلۇتتا ۋاكالەتچى بولمىسا، يەرلىكتىكى بار ۋاكالەتچىلەرنى بۇلۇتقا زاپاس يوللاش (پەقەت باشقۇرغۇچىلا قىلىدۇ)
+          const localAgents = this.getAgents('none');
+          localAgents.forEach(a => {
+            if (!deletedAgentIds.includes(a.id)) {
+              window.TeklimakanSupabase.upsertAgent(a);
+            }
+          });
+        }
       }
     } catch (e) {
       console.warn('Supabase ماسلىشىش خاتالىقى:', e);

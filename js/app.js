@@ -597,6 +597,20 @@ function initTeklimakanApp() {
       chipCargo.dataset.msg = lang === 'tr' ? 'Ürün ne zaman kargoya verilir, kargo takip numarası nedir?' : (lang === 'en' ? 'When will my order be shipped, and what is the cargo code?' : 'مال قاچان يوللىنىدۇ، كارگو كودى نېمە؟');
     }
 
+    const btnSendChat = document.getElementById('btnSendChatMessage');
+    if (btnSendChat) btnSendChat.title = lang === 'tr' ? 'Mesajı Gönder' : (lang === 'en' ? 'Send Message' : 'ئۇچۇر ئەۋەتىش');
+    const btnCloseChat = document.getElementById('btnCloseChatBox');
+    if (btnCloseChat) btnCloseChat.title = lang === 'tr' ? 'Kapat' : (lang === 'en' ? 'Close' : 'تاقاش');
+    const btnClearChat = document.getElementById('btnClearChatHistory');
+    if (btnClearChat) btnClearChat.title = lang === 'tr' ? 'Sohbeti Temizle' : (lang === 'en' ? 'Clear Chat' : 'پاراڭ خاتىرىسىنى ئۆچۈرۈش');
+    if (cCustName) cCustName.title = lang === 'tr' ? 'Müşteri Adı' : (lang === 'en' ? 'Customer Name' : 'خېرىدار ئىسمى');
+    if (cCustPhone) cCustPhone.title = lang === 'tr' ? 'Telefon veya E-posta' : (lang === 'en' ? 'Phone or Email' : 'تېلېفون ياكى ئىمائىل');
+
+    // 💬 نەق مەيدان پاراڭ كۆزنىكىنى (خېرىدار سالاھىيىتى ۋە سالام ئۇچۇرلىرىنى) ھازىرقى تىلغا ئالماشتۇرۇش
+    if (typeof window.updateCustomerLiveChatLocalization === 'function') {
+      window.updateCustomerLiveChatLocalization();
+    }
+
     // Instagram ئۇلانمىلىرىنى تىل بويىچە يېڭىلاش (ئۇيغۇرچە: teklimakancom, تۈركچە/ئىنگلىزچە: teklimakan.online)
     const instaUrl = i18n.t('instagramUrl') || (lang === 'ug' ? 'https://www.instagram.com/teklimakancom' : 'https://www.instagram.com/teklimakan.online');
     const instaHandle = i18n.t('instagramHandle') || (lang === 'ug' ? '@teklimakancom' : '@teklimakan.online');
@@ -7103,12 +7117,28 @@ function initTeklimakanApp() {
         }
       } catch(e) {}
 
+      const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+
       if (isAgent) {
+        let roleTitle = '<i class="fas fa-crown"></i> ھۆرمەتلىك ۋاكالەتچى';
+        let roleDesc = `${agentObj?.name || 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى'} • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`;
+        let pillText = 'ۋاكالەتچى VIP';
+
+        if (lang === 'tr') {
+          roleTitle = '<i class="fas fa-crown"></i> Yetkili Temsilci';
+          roleDesc = `${agentObj?.name || 'Teklimakan Yetkili Temsilcisi'} • Tüm butonlar ve destek sınırsız açık`;
+          pillText = 'Temsilci VIP';
+        } else if (lang === 'en') {
+          roleTitle = '<i class="fas fa-crown"></i> Authorized Agent';
+          roleDesc = `${agentObj?.name || 'Teklimakan Authorized Agent'} • Unlimited buttons and support`;
+          pillText = 'Agent VIP';
+        }
+
         return {
           role: 'agent',
-          roleTitle: '<i class="fas fa-crown"></i> ھۆرمەتلىك ۋاكالەتچى',
-          roleDesc: `${agentObj?.name || 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى'} • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`,
-          pillText: 'ۋاكالەتچى VIP',
+          roleTitle,
+          roleDesc,
+          pillText,
           isAgent: true,
           isVerifiedBuyer: true,
           canUseUnlimited: true,
@@ -7150,11 +7180,25 @@ function initTeklimakanApp() {
       } catch(e) {}
 
       if (ordersCount > 0) {
+        let roleTitle = '<i class="fas fa-bag-shopping"></i> تەستىقلانغان خېرىدار';
+        let roleDesc = `${ordersCount} دانە سېتىۋالغان مېلىڭىز بار • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`;
+        let pillText = 'VIP خېرىدار';
+
+        if (lang === 'tr') {
+          roleTitle = '<i class="fas fa-bag-shopping"></i> Doğrulanmış Müşteri';
+          roleDesc = `${ordersCount} adet kayıtlı siparişiniz mevcut • Tüm butonlar ve destek sınırsız açık`;
+          pillText = 'VIP Müşteri';
+        } else if (lang === 'en') {
+          roleTitle = '<i class="fas fa-bag-shopping"></i> Verified Customer';
+          roleDesc = `${ordersCount} registered order(s) found • Unlimited buttons and support`;
+          pillText = 'VIP Customer';
+        }
+
         return {
           role: 'buyer',
-          roleTitle: '<i class="fas fa-bag-shopping"></i> تەستىقلانغان خېرىدار',
-          roleDesc: `${ordersCount} دانە سېتىۋالغان مېلىڭىز بار • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`,
-          pillText: 'VIP خېرىدار',
+          roleTitle,
+          roleDesc,
+          pillText,
           isAgent: false,
           isVerifiedBuyer: true,
           canUseUnlimited: true,
@@ -7165,13 +7209,35 @@ function initTeklimakanApp() {
 
       // C. تىزىملاتقان ياكى تىزىملاتمىغان مېھمان
       const hasContact = cleanDigits.length >= 7 || clean.includes('@');
+      let title = '';
+      let desc = '';
+      let pill = '';
+
+      if (lang === 'tr') {
+        title = hasContact ? '<i class="fas fa-user-check"></i> Doğrulanmış Misafir' : '<i class="fas fa-user-lock"></i> Doğrulanmamış Misafir';
+        desc = hasContact 
+          ? 'Henüz sipariş kaydı yok • Hızlı butonlar kayıtlı sipariş sahiplerine açıktır' 
+          : 'Yöneticiye yazabilmek için lütfen telefon veya e-posta giriniz';
+        pill = hasContact ? 'Misafir' : 'Kısıtlı';
+      } else if (lang === 'en') {
+        title = hasContact ? '<i class="fas fa-user-check"></i> Verified Guest' : '<i class="fas fa-user-lock"></i> Unverified Guest';
+        desc = hasContact 
+          ? 'No order history yet • Quick buttons are available for active buyers' 
+          : 'Please enter phone or email to message management';
+        pill = hasContact ? 'Guest' : 'Restricted';
+      } else {
+        title = hasContact ? '<i class="fas fa-user-check"></i> تىزىملاتقان مېھمان' : '<i class="fas fa-user-lock"></i> تىزىملاتمىغان مېھمان';
+        desc = hasContact 
+          ? 'تېخى مال زاكاز قىلمىغان • تېز كۇنۇپكىلار پەقەت سېتىۋالغانلارغا ئوچۇق' 
+          : 'ئالىي باشقۇرغۇچىغا يېزىش ئۈچۈن تېلېفون ياكى ئىمائىل كىرگۈزۈڭ';
+        pill = hasContact ? 'مېھمان' : 'چەكلەنگەن';
+      }
+
       return {
         role: 'guest',
-        roleTitle: hasContact ? '<i class="fas fa-user-check"></i> تىزىملاتقان مېھمان' : '<i class="fas fa-user-lock"></i> تىزىملاتمىغان مېھمان',
-        roleDesc: hasContact 
-          ? 'تېخى مال زاكاز قىلمىغان • تېز كۇنۇپكىلار پەقەت سېتىۋالغانلارغا ئوچۇق' 
-          : 'ئالىي باشقۇرغۇچىغا يېزىش ئۈچۈن تېلېفون ياكى ئىمائىل كىرگۈزۈڭ',
-        pillText: hasContact ? 'مېھمان' : 'چەكلەنگەن',
+        roleTitle: title,
+        roleDesc: desc,
+        pillText: pill,
         isAgent: false,
         isVerifiedBuyer: false,
         canUseUnlimited: false,
@@ -7269,6 +7335,10 @@ function initTeklimakanApp() {
 
     const CORRECT_BANK_TEXT = `🏦 تەكلىماكان سۇپىسى بانكا ھېسابات ئۇچۇرى (Havale / EFT / FAST):\n\n🏛️ بانكا نامى: QNB Finansbank (Enpara.com)\n👤 ھېسابات ئىگىسى: Abudurusuli tuniyazi\n💳 IBAN:\nTR65 0015 7000 0000 0095 1544 93\n\n⚠️ مۇھىم ئەسكەرتىش: پۇل ئەۋەتكەندە چۈشەندۈرۈش (Açıklama) قىسمىغا چوقۇم (kuruyemiş) دەپ يېزىپ قويۇڭ!`;
 
+    const CORRECT_BANK_TEXT_TR = `🏦 Teklimakan Pazaryeri Resmi Banka Hesap Bilgisi (Havale / EFT / FAST):\n\n🏛️ Banka Adı: QNB Finansbank (Enpara.com)\n👤 Hesap Sahibi: Abudurusuli tuniyazi\n💳 IBAN:\nTR65 0015 7000 0000 0095 1544 93\n\n⚠️ Önemli Not: Havale / EFT yaparken açıklama kısmına mutlaka (kuruyemiş) yazınız!`;
+
+    const CORRECT_BANK_TEXT_EN = `🏦 Teklimakan Official Bank Account Details (Havale / EFT / FAST):\n\n🏛️ Bank: QNB Finansbank (Enpara.com)\n👤 Account Holder: Abudurusuli tuniyazi\n💳 IBAN:\nTR65 0015 7000 0000 0095 1544 93\n\n⚠️ Notice: Please write (kuruyemiş) in the transfer description field!`;
+
     function getChatHistory() {
       try {
         const raw = localStorage.getItem(CHAT_STORAGE_KEY);
@@ -7288,12 +7358,24 @@ function initTeklimakanApp() {
           return list;
         }
       } catch (e) {}
+
+      const curLang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+      let wName = 'ئالىي باشقۇرغۇچى';
+      let wText = 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خۇش كەپسىز. زاكاز، بانكا ھېساباتى، مەھسۇلات ياكى كېلىشىملىك كارگو ھەققىدە قانداق سوئالىڭىز بولسا، تۆۋەندىكى تېز كۇنۇپكىلارنى چەكسىڭىز ياكى بىۋاسىتە ئۇچۇر يازسىڭىز دەرھال ياردەم بېرىمىز!';
+      if (curLang === 'tr') {
+        wName = 'Canlı Destek & Yönetici';
+        wText = 'Merhaba değerli müşterimiz! Teklimakan Pazaryeri canlı destek ve yönetici hattına hoş geldiniz. Sipariş durumunuz, banka hesaplarımız, ürünlerimiz veya kargo süreci hakkında aklınıza takılan her şeyi aşağıdaki hızlı butonlara tıklayarak ya da doğrudan mesaj yazarak bize iletebilirsiniz. Size yardımcı olmaktan mutluluk duyarız!';
+      } else if (curLang === 'en') {
+        wName = 'Live Support & Management';
+        wText = 'Hello valued customer! Welcome to Teklimakan live customer support and management. If you have any questions regarding your orders, bank details, products, or shipping, feel free to click the quick buttons below or write to us directly. We are always ready to assist you!';
+      }
+
       return [
         {
           id: 'msg-welcome',
           sender: 'admin',
-          name: 'ئالىي باشقۇرغۇچى',
-          text: 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خۇش كەپسىز. زاكاز، بانكا ھېساباتى، مەھسۇلات ياكى كېلىشىملىك كارگو ھەققىدە قانداق سوئالىڭىز بولسا، تۆۋەندىكى تېز كۇنۇپكىلارنى چەكسىڭىز ياكى بىۋاسىتە ئۇچۇر يازسىڭىز دەرھال ياردەم بېرىمىز!',
+          name: wName,
+          text: wText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
           timestamp: Date.now()
@@ -7310,17 +7392,47 @@ function initTeklimakanApp() {
     function renderChatMessages() {
       if (!messagesContainer) return;
       const history = getChatHistory();
+      const curLang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
       messagesContainer.innerHTML = '';
 
       history.forEach(m => {
+        let authorName = m.name;
+        let textContent = m.text;
+
+        // ئەگەر ئالىي باشقۇرغۇچىنىڭ كۈتۈۋېلىش سالامى بولسا، ھازىرقى تىلغا ئاساسەن دەل ۋاقتىدا ماسلاشتۇرۇش
+        if (m.id === 'msg-welcome') {
+          if (curLang === 'tr') {
+            authorName = 'Canlı Destek & Yönetici';
+            textContent = 'Merhaba değerli müşterimiz! Teklimakan Pazaryeri canlı destek ve yönetici hattına hoş geldiniz. Sipariş durumunuz, banka hesaplarımız, ürünlerimiz veya kargo süreci hakkında aklınıza takılan her şeyi aşağıdaki hızlı butonlara tıklayarak ya da doğrudan mesaj yazarak bize iletebilirsiniz. Size yardımcı olmaktan mutluluk duyarız!';
+          } else if (curLang === 'en') {
+            authorName = 'Live Support & Management';
+            textContent = 'Hello valued customer! Welcome to Teklimakan live customer support and management. If you have any questions regarding your orders, bank details, products, or shipping, feel free to click the quick buttons below or write to us directly. We are always ready to assist you!';
+          } else {
+            authorName = 'ئالىي باشقۇرغۇچى';
+            textContent = 'ئەسسالامۇ ئەلەيكۇم ھۆرمەتلىك خېرىدار! تەكلىماكان سۇپىسىنىڭ ئالىي باشقۇرغۇچىسىغا خۇش كەپسىز. زاكاز، بانكا ھېساباتى، مەھسۇلات ياكى كېلىشىملىك كارگو ھەققىدە قانداق سوئالىڭىز بولسا، تۆۋەندىكى تېز كۇنۇپكىلارنى چەكسىڭىز ياكى بىۋاسىتە ئۇچۇر يازسىڭىز دەرھال ياردەم بېرىمىز!';
+          }
+        } else {
+          if (m.sender === 'admin') {
+            if (!authorName || authorName === 'ئالىي باشقۇرغۇچى' || authorName === 'Canlı Destek & Yönetici' || authorName === 'Live Support & Management') {
+              authorName = curLang === 'tr' ? 'Canlı Destek & Yönetici' : (curLang === 'en' ? 'Live Support & Admin' : 'ئالىي باشقۇرغۇچى');
+            } else if (authorName.includes('(سىستېما)') || authorName.includes('(Sistem)') || authorName.includes('(System)')) {
+              authorName = curLang === 'tr' ? 'Canlı Destek (Sistem)' : (curLang === 'en' ? 'Live Support (System)' : 'ئالىي باشقۇرغۇچى (سىستېما)');
+            }
+          } else {
+            if (!authorName || authorName === 'خېرىدار' || authorName === 'سىز' || authorName === 'Siz' || authorName === 'You' || authorName === 'Müşteri') {
+              authorName = curLang === 'tr' ? 'Siz' : (curLang === 'en' ? 'You' : 'سىز');
+            }
+          }
+        }
+
         const bubble = document.createElement('div');
         bubble.className = `chat-bubble ${m.sender === 'customer' ? 'customer' : 'admin'}`;
         bubble.innerHTML = `
           <div class="chat-bubble-author">
             <i class="fas ${m.sender === 'customer' ? 'fa-user' : 'fa-crown'}"></i>
-            <span>${m.name || (m.sender === 'customer' ? 'سىز' : 'ئالىي باشقۇرغۇچى')}</span>
+            <span>${safeEscape(authorName)}</span>
           </div>
-          <div class="chat-bubble-text" style="white-space: pre-wrap;">${safeEscape(m.text)}</div>
+          <div class="chat-bubble-text" style="white-space: pre-wrap;">${safeEscape(textContent)}</div>
           <div class="chat-bubble-time">${m.time || ''}</div>
         `;
         messagesContainer.appendChild(bubble);
@@ -7459,7 +7571,11 @@ function initTeklimakanApp() {
               badge.style.display = 'flex';
             }
             if (typeof showToast === 'function') {
-              showToast('👑 ئالىي باشقۇرغۇچىدىن سىزگە يېڭى ئۇچۇر كەلدى!', 'success');
+              const pollLang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+              const alertMsg = pollLang === 'tr' 
+                ? '👑 Canlı destekten yeni bir mesajınız var!' 
+                : (pollLang === 'en' ? '👑 You have a new message from Live Support!' : '👑 ئالىي باشقۇرغۇچىدىن سىزگە يېڭى ئۇچۇر كەلدى!');
+              showToast(alertMsg, 'success');
             }
           }
         }
@@ -7532,13 +7648,21 @@ function initTeklimakanApp() {
     }
 
     // 🗑️ تارىخنى تازىلاش كۇنۇپكىسى (پەقەت خېرىدار ئۆزى بېسىپ جەزملەشتۈرگەندىلا يۇيۇلىدۇ)
+    // 🗑️ تارىخنى تازىلاش كۇنۇپكىسى (پەقەت خېرىدار ئۆزى بېسىپ جەزملەشتۈرگەندىلا يۇيۇلىدۇ)
     if (btnClear) {
       btnClear.addEventListener('click', () => {
-        const confirmed = confirm('پاراڭ خاتىرىسىنى راستىنلا تازىلىۋېتەمسىز؟\n\nئەسكەرتىش: ئەگەر ئۆچۈرمىسىڭىز، بىر يىلدىن كېيىن كىرسىڭىزمۇ مەزكۇر تور كۆرگۈدە مەڭگۈ ساقلىنىپ تۇرىدۇ.');
+        const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+        const confirmMsg = lang === 'tr'
+          ? 'Sohbet geçmişini silmek istediğinize emin misiniz?\n\nNot: Siz temizlemediğiniz sürece mesajlarınız bu cihazda güvenle saklanmaktadır.'
+          : (lang === 'en'
+             ? 'Are you sure you want to clear your chat history?\n\nNotice: Your chat history is preserved until you clear it.'
+             : 'پاراڭ خاتىرىسىنى راستىنلا تازىلىۋېتەمسىز؟\n\nئەسكەرتىش: ئەگەر ئۆچۈرمىسىڭىز، بىر يىلدىن كېيىن كىرسىڭىزمۇ مەزكۇر تور كۆرگۈدە مەڭگۈ ساقلىنىپ تۇرىدۇ.');
+        const confirmed = confirm(confirmMsg);
         if (confirmed) {
           localStorage.removeItem(CHAT_STORAGE_KEY);
           renderChatMessages();
-          showToast('پاراڭ خاتىرىسى تازىلاندى!', 'info');
+          const clearedToast = lang === 'tr' ? 'Sohbet geçmişi temizlendi!' : (lang === 'en' ? 'Chat history cleared!' : 'پاراڭ خاتىرىسى تازىلاندى!');
+          showToast(clearedToast, 'info');
         }
       });
     }
@@ -7548,6 +7672,7 @@ function initTeklimakanApp() {
       const prof = getCustomerFullProfile();
       const currentContact = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
       const userStatus = detectUserRole(currentContact);
+      const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
 
       // 🔒 سېتىۋالمىغان مېھمانلارغا تېز كۇنۇپكىلارنى چەكلەش
       if (!userStatus.canUseUnlimited) {
@@ -7557,11 +7682,25 @@ function initTeklimakanApp() {
           setTimeout(() => phoneInput.classList.remove('input-error'), 2500);
         }
 
+        let lockAdminName = 'ئالىي باشقۇرغۇچى (سىستېما)';
+        let lockMsgText = `🔒 ھۆرمەتلىك مېھمان!\n\n«${buttonText}» تېز سۈرۈشتۈرۈش كۇنۇپكىسى پەقەتلا **مەھسۇلات سېتىۋالغان خېرىدارلار** ۋە **ۋاكالەتچىلەر** ئۈچۈنلا چەكلىمىسىز ئىشلەيدۇ.\n\n• ئەگەر ئالدىن مال سېتىۋالغان بولسىڭىز، سېتىۋالغاندا كىرگۈزگەن تېلېفون نومۇرىڭىزنى ياكى پوسۇلكا كودىڭىزنى ئاستىغا كىرگۈزسىڭىز، كۇنۇپكىلار دەرھال ئېچىلىدۇ.\n• دەسلەپكى مەسلىھەت ئۈچۈن WhatsApp كۇنۇپكىمىزنى ئىشلەتسىڭىز ياكى تېلېفونىڭىزنى يېزىپ بىۋاسىتە ئۇچۇر يوللىسىڭىز بولىدۇ.`;
+        let toastText = '🔒 بۇ كۇنۇپكا سېتىۋالغان خېرىدارلار ۋە ۋاكالەتچىلەرگىلا ئوچۇق!';
+
+        if (lang === 'tr') {
+          lockAdminName = 'Canlı Destek (Sistem)';
+          lockMsgText = `🔒 Değerli Misafirimiz!\n\n«${buttonText}» hızlı sorgulama butonu yalnızca **sipariş vermiş müşterilerimiz** ve **yetkili temsilcilerimiz** için sınırsız olarak açıktır.\n\n• Daha önce sitemizden alışveriş yaptıysanız, sipariş verirken kullandığınız telefon numaranızı veya kargo kodunuzu aşağıya girerek butonları hemen aktif hale getirebilirsiniz.\n• Doğrudan danışmak için WhatsApp destek hattımızı kullanabilir veya numaranızı yazarak bize mesaj iletebilirsiniz.`;
+          toastText = '🔒 Bu buton yalnızca sipariş vermiş müşterilerimiz ve yetkili temsilcilere açıktır!';
+        } else if (lang === 'en') {
+          lockAdminName = 'Live Support (System)';
+          lockMsgText = `🔒 Dear Guest!\n\n«${buttonText}» quick action button is available for **registered buyers** and **authorized agents** only.\n\n• If you have placed an order before, please enter your contact phone or order ID below to unlock.\n• You can also reach us directly via WhatsApp or submit a direct message.`;
+          toastText = '🔒 This button is only available to buyers and agents!';
+        }
+
         const lockMsg = {
           id: 'admin-lock-' + Date.now(),
           sender: 'admin',
-          name: 'ئالىي باشقۇرغۇچى (سىستېما)',
-          text: `🔒 ھۆرمەتلىك مېھمان!\n\n«${buttonText}» تېز سۈرۈشتۈرۈش كۇنۇپكىسى پەقەتلا **مەھسۇلات سېتىۋالغان خېرىدارلار** ۋە **ۋاكالەتچىلەر** ئۈچۈنلا چەكلىمىسىز ئىشلەيدۇ.\n\n• ئەگەر ئالدىن مال سېتىۋالغان بولسىڭىز، سېتىۋالغاندا كىرگۈزگەن تېلېفون نومۇرىڭىزنى ياكى پوسۇلكا كودىڭىزنى ئاستىغا كىرگۈزسىڭىز، كۇنۇپكىلار دەرھال ئېچىلىدۇ.\n• دەسلەپكى مەسلىھەت ئۈچۈن WhatsApp كۇنۇپكىمىزنى ئىشلەتسىڭىز ياكى تېلېفونىڭىزنى يېزىپ بىۋاسىتە ئۇچۇر يوللىسىڭىز بولىدۇ.`,
+          name: lockAdminName,
+          text: lockMsgText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
           timestamp: Date.now()
@@ -7573,32 +7712,59 @@ function initTeklimakanApp() {
         renderChatMessages();
 
         if (typeof showToast === 'function') {
-          showToast('🔒 بۇ كۇنۇپكا سېتىۋالغان خېرىدارلار ۋە ۋاكالەتچىلەرگىلا ئوچۇق!', 'warning');
+          showToast(toastText, 'warning');
         }
         return;
       }
 
-      const custName = (nameInput && nameInput.value.trim()) || prof.name || 'خېرىدار';
+      const defaultCustName = lang === 'tr' ? 'Müşteri' : (lang === 'en' ? 'Customer' : 'خېرىدار');
+      const custName = (nameInput && nameInput.value.trim()) || prof.name || defaultCustName;
       const custPhone = currentContact;
 
       if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
-      if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
+      if (custName && custName !== 'خېرىدار' && custName !== 'Müşteri' && custName !== 'Customer') localStorage.setItem('teklimakan_customer_name', custName);
 
-      let questionText = buttonText || 'سۈرۈشتۈرۈش';
+      let questionText = buttonText || (lang === 'tr' ? 'Sorgulama' : (lang === 'en' ? 'Inquiry' : 'سۈرۈشتۈرۈش'));
       let answerText = '';
 
-      if (actionKey === 'track' || buttonText.includes('پوسۇلكا') || buttonText.includes('زاكاز')) {
-        questionText = '📦 پوسۇلكا ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.';
-        answerText = `📦 ھۆرمەتلىك خېرىدار! سېتىۋالغان مېلىڭىزنىڭ پوسۇلكا ئەھۋالىنى سۈرۈشتۈرۈش ئۇسۇللىرى:\n\n1. تور بېكىتىمىزنىڭ ئاستى ياكى ئۈستىدىكى «📦 پوسۇلكام» كۇنۇپكىسىنى چەكسىڭىز، تېلېفون نومۇرىڭىز ئارقىلىق مېلىڭىزنىڭ تەپسىلاتى، نەق مەيداندىكى ئورنى ۋە پوچتا ئىز قوغلاش كودىنى دەرھال كۆرەلەيسىز.\n\n2. ياكى پوسۇلكا نومۇرىڭىزنى مۇشۇ يەرگە يېزىپ قالدۇرسىڭىز، بىز تېز ئارىدا جاۋاب قايتۇرىمىز.`;
-      } else if (actionKey === 'bank' || buttonText.includes('بانكا')) {
-        questionText = '💳 پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.';
-        answerText = CORRECT_BANK_TEXT;
-      } else if (actionKey === 'cargo' || buttonText.includes('كارگو')) {
-        questionText = '🚚 مېلىم قاچان يوللىنىدۇ، كارگو ئەھۋالى قانداق؟';
-        answerText = `🚚 ھۆرمەتلىك خېرىدار! بارلىق زاكازلار تەستىقلانغاندىن كېيىن تېز سۈرئەتتە رەتلىنىپ، كېلىشىملىك پوچتا (كارگو) شىركىتىگە تاپشۇرۇلىدۇ.\n\nپوسۇلكىڭىز يوللانغان ھامان سىزگە ئاپتوماتىك كارگو ئىز قوغلاش كودى ئۇچۇرى كېلىدۇ. مېلىڭىز ھەققىدە تېخىمۇ تەپسىلىي بىلگۈڭىز بولسا، پوسۇلكا نومۇرىڭىزنى يېزىپ قويۇڭ.`;
+      if (actionKey === 'track' || buttonText.includes('پوسۇلكا') || buttonText.includes('زاكاز') || buttonText.toLowerCase().includes('kargo') || buttonText.toLowerCase().includes('track') || buttonText.toLowerCase().includes('sipariş')) {
+        if (lang === 'tr') {
+          questionText = '📦 Sipariş ve kargo durumumu sorgulamak istiyorum.';
+          answerText = `📦 Değerli müşterimiz! Siparişinizin kargo durumunu öğrenmek için:\n\n1. Sitemizin üst veya alt kısmında yer alan «📦 Kargo Takibi» butonuna tıklayarak telefon numaranızla kargonuzun canlı durumunu ve takip kodunu hemen görüntüleyebilirsiniz.\n\n2. Dilerseniz sipariş numaranızı buraya yazabilirsiniz, ekibimiz en kısa sürede kontrol edip size bilgi verecektir.`;
+        } else if (lang === 'en') {
+          questionText = '📦 I would like to check my parcel and order status.';
+          answerText = `📦 Valued customer! Here is how to track your parcel:\n\n1. Click the «📦 Track Parcel» button at the top or bottom of our site and enter your phone number to see live status and tracking code.\n\n2. Or leave your order number right here and our team will get back to you shortly.`;
+        } else {
+          questionText = '📦 پوسۇلكا ئەھۋالىمنى سۈرۈشتۈرمەكچىتىم.';
+          answerText = `📦 ھۆرمەتلىك خېرىدار! سېتىۋالغان مېلىڭىزنىڭ پوسۇلكا ئەھۋالىنى سۈرۈشتۈرۈش ئۇسۇللىرى:\n\n1. تور بېكىتىمىزنىڭ ئاستى ياكى ئۈستىدىكى «📦 پوسۇلكام» كۇنۇپكىسىنى چەكسىڭىز، تېلېفون نومۇرىڭىز ئارقىلىق مېلىڭىزنىڭ تەپسىلاتى، نەق مەيداندىكى ئورنى ۋە پوچتا ئىز قوغلاش كودىنى دەرھال كۆرەلەيسىز.\n\n2. ياكى پوسۇلكا نومۇرىڭىزنى مۇشۇ يەرگە يېزىپ قالدۇرسىڭىز، بىز تېز ئارىدا جاۋاب قايتۇرىمىز.`;
+        }
+      } else if (actionKey === 'bank' || buttonText.includes('بانكا') || buttonText.toLowerCase().includes('banka') || buttonText.toLowerCase().includes('bank')) {
+        if (lang === 'tr') {
+          questionText = '💳 Ödeme yapmak için resmi banka IBAN bilgisini alabilir miyim?';
+          answerText = CORRECT_BANK_TEXT_TR;
+        } else if (lang === 'en') {
+          questionText = '💳 Can I have the official bank IBAN information for payment?';
+          answerText = CORRECT_BANK_TEXT_EN;
+        } else {
+          questionText = '💳 پۇل تۆلەش ئۈچۈن بانكا IBAN ئۇچۇرىنى بەرسىڭىز.';
+          answerText = CORRECT_BANK_TEXT;
+        }
+      } else if (actionKey === 'cargo' || buttonText.includes('كارگو') || buttonText.toLowerCase().includes('teslimat') || buttonText.toLowerCase().includes('cargo')) {
+        if (lang === 'tr') {
+          questionText = '🚚 Siparişim ne zaman kargoya verilir, teslimat süreci nasıldır?';
+          answerText = `🚚 Değerli müşterimiz! Tüm siparişler onaylandıktan sonra özenle hazırlanıp en hızlı şekilde anlaşmalı kargo firmasına teslim edilmektedir.\n\nKargonuz yola çıktığında kargo takip numaranız SMS ve sistem üzerinden tarafınıza iletilir. Siparişiniz hakkında detaylı bilgi için sipariş numaranızı yazabilirsiniz.`;
+        } else if (lang === 'en') {
+          questionText = '🚚 When will my order be shipped, and how does delivery work?';
+          answerText = `🚚 Valued customer! All confirmed orders are carefully packed and handed to our partner courier promptly.\n\nAs soon as your shipment departs, you will receive a tracking code via SMS and on site. Feel free to leave your order ID here for specific updates.`;
+        } else {
+          questionText = '🚚 مېلىم قاچان يوللىنىدۇ، كارگو ئەھۋالى قانداق؟';
+          answerText = `🚚 ھۆرمەتلىك خېرىدار! بارلىق زاكازلار تەستىقلانغاندىن كېيىن تېز سۈرئەتتە رەتلىنىپ، كېلىشىملىك پوچتا (كارگو) شىركىتىگە تاپشۇرۇلىدۇ.\n\nپوسۇلكىڭىز يوللانغان ھامان سىزگە ئاپتوماتىك كارگو ئىز قوغلاش كودى ئۇچۇرى كېلىدۇ. مېلىڭىز ھەققىدە تېخىمۇ تەپسىلىي بىلگۈڭىز بولسا، پوسۇلكا نومۇرىڭىزنى يېزىپ قويۇڭ.`;
+        }
       } else {
         questionText = buttonText;
-        answerText = 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق، ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...';
+        answerText = lang === 'tr' 
+          ? 'Merhaba! Mesajınızı başarıyla aldık, en kısa sürede sizinle iletişime geçeceğiz...' 
+          : (lang === 'en' ? 'Hello! We have received your inquiry and will respond promptly...' : 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق، ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...');
       }
 
       // 1. خېرىدار سوئالى كۆزنەككە قوشۇلىدۇ
@@ -7625,7 +7791,7 @@ function initTeklimakanApp() {
         const replyMsg = {
           id: 'admin-auto-' + Date.now(),
           sender: 'admin',
-          name: 'ئالىي باشقۇرغۇچى',
+          name: lang === 'tr' ? 'Canlı Destek & Yönetici' : (lang === 'en' ? 'Live Support & Admin' : 'ئالىي باشقۇرغۇچى'),
           text: answerText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           date: new Date().toLocaleDateString('zh-CN'),
@@ -7705,6 +7871,7 @@ ${answerText}
       const text = msgInput.value.trim();
       if (!text) return;
 
+      const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
       const currentContact = (phoneInput && phoneInput.value.trim()) || localStorage.getItem('teklimakan_customer_phone') || '';
       const cleanDigits = currentContact.replace(/\D/g, '');
       const hasPhone = cleanDigits.length >= 7;
@@ -7718,7 +7885,10 @@ ${answerText}
           setTimeout(() => phoneInput.classList.remove('input-error'), 2500);
         }
         if (typeof showToast === 'function') {
-          showToast('⚠️ ئالىي باشقۇرغۇچىغا ئۇچۇر ئەۋەتىش ئۈچۈن، تېلېفون نومۇرىڭىز ياكى ئىمائىلىڭىزنى كىرگۈزۈڭ!', 'error');
+          const errToast = lang === 'tr'
+            ? '⚠️ Yöneticiye mesaj göndermek için lütfen telefon numaranızı veya e-postanızı giriniz!'
+            : (lang === 'en' ? '⚠️ Please enter your phone number or email to send a message!' : '⚠️ ئالىي باشقۇرغۇچىغا ئۇچۇر ئەۋەتىش ئۈچۈن، تېلېفون نومۇرىڭىز ياكى ئىمائىلىڭىزنى كىرگۈزۈڭ!');
+          showToast(errToast, 'error');
         }
         return;
       }
@@ -7732,7 +7902,10 @@ ${answerText}
       rateTimestamps = rateTimestamps.filter(t => now - t < 60000);
       if (rateTimestamps.length >= 4) {
         if (typeof showToast === 'function') {
-          showToast('⏳ بەك كۆپ ئۇچۇر ئەۋەتتىڭىز! سىستېما قوغدالدى، 30 سېكۇنتتىن كېيىن قايتا سىناڭ.', 'warning');
+          const rateToast = lang === 'tr'
+            ? '⏳ Çok fazla mesaj gönderdiniz! Sistem güvenliği için lütfen 30 saniye sonra tekrar deneyiniz.'
+            : (lang === 'en' ? '⏳ Too many messages! Please try again in 30 seconds.' : '⏳ بەك كۆپ ئۇچۇر ئەۋەتتىڭىز! سىستېما قوغدالدى، 30 سېكۇنتتىن كېيىن قايتا سىناڭ.');
+          showToast(rateToast, 'warning');
         }
         return;
       }
@@ -7743,11 +7916,12 @@ ${answerText}
 
       const prof = getCustomerFullProfile();
       const userRole = detectUserRole(currentContact);
-      const custName = (nameInput && nameInput.value.trim()) || prof.name || 'خېرىدار';
+      const defaultCustName = lang === 'tr' ? 'Müşteri' : (lang === 'en' ? 'Customer' : 'خېرىدار');
+      const custName = (nameInput && nameInput.value.trim()) || prof.name || defaultCustName;
       const custPhone = currentContact;
 
       if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
-      if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
+      if (custName && custName !== 'خېرىدار' && custName !== 'Müşteri' && custName !== 'Customer') localStorage.setItem('teklimakan_customer_name', custName);
 
       const newMsg = {
         id: 'msg-' + Date.now(),
@@ -7767,6 +7941,34 @@ ${answerText}
       msgInput.value = '';
 
       if (typeof playChime === 'function') playChime('click');
+
+      // 🤖 ئاپتوماتىك سىپايە جاۋاب
+      setTimeout(() => {
+        let replyName = 'ئالىي باشقۇرغۇچى';
+        let replyText = 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق، ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...';
+        if (lang === 'tr') {
+          replyName = 'Canlı Destek & Yönetici';
+          replyText = 'Merhaba! Mesajınızı başarıyla aldık, en kısa sürede sizinle iletişime geçeceğiz...';
+        } else if (lang === 'en') {
+          replyName = 'Live Support & Admin';
+          replyText = 'Hello! We have received your message and will get back to you as soon as possible...';
+        }
+
+        const reply = {
+          id: 'admin-auto-reply-' + Date.now(),
+          sender: 'admin',
+          name: replyName,
+          text: replyText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('zh-CN'),
+          timestamp: Date.now()
+        };
+        const updated = getChatHistory();
+        updated.push(reply);
+        saveChatHistory(updated);
+        renderChatMessages();
+        if (typeof playChime === 'function') playChime('success');
+      }, 700);
 
       // 📲 ئالىي باشقۇرغۇچىغا خېرىدارنىڭ سالاھىيىتى ۋە تەپسىلىي ئۇچۇرلىرى بىلەن سىگنال ئەۋەتىش
       if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
@@ -7824,125 +8026,12 @@ ${text}
       // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
       if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
         window.appStore.recordCustomerChatMessage({
-          ...clientMsg,
-          address: prof.address ? `${prof.city ? prof.city + ' - ' : ''}${prof.address}` : '',
-          orderHistory: prof.ordersCount > 0 ? `${prof.ordersCount} زاكاز (${prof.totalSpent}₺)` : '',
-          cartInfo: prof.cartItemsCount > 0 ? `${prof.cartItemsCount} تاۋار` : ''
-        });
-      }
-    }
-
-    // 🚀 ئۇچۇر ئەۋەتىش
-    async function sendMessage() {
-      if (!msgInput) return;
-      const text = msgInput.value.trim();
-      if (!text) return;
-
-      const prof = getCustomerFullProfile();
-      const custName = (nameInput && nameInput.value.trim()) || prof.name || 'خېرىدار';
-      const custPhone = (phoneInput && phoneInput.value.trim()) || prof.phone || '';
-
-      if (custPhone) localStorage.setItem('teklimakan_customer_phone', custPhone);
-      if (custName && custName !== 'خېرىدار') localStorage.setItem('teklimakan_customer_name', custName);
-
-      const newMsg = {
-        id: 'msg-' + Date.now(),
-        sender: 'customer',
-        name: custName,
-        phone: custPhone,
-        text: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toLocaleDateString('zh-CN'),
-        timestamp: Date.now()
-      };
-
-      const history = getChatHistory();
-      history.push(newMsg);
-      saveChatHistory(history);
-      renderChatMessages();
-      msgInput.value = '';
-
-      if (typeof playChime === 'function') playChime('click');
-
-      // 📲 ئالىي باشقۇرغۇچىغا خېرىدارنىڭ بارلىق تەپسىلىي ئۇچۇرلىرى بىلەن سىگنال ئەۋەتىش
-      if (window.appStore && typeof window.appStore.sendTelegramAlert === 'function') {
-        let orderHistoryBlock = 'تېخى زاكاز بەرمىگەن يېڭى خېرىدار';
-        if (prof.ordersCount > 0) {
-          orderHistoryBlock = `${prof.ordersCount} قېتىم زاكاز بەرگەن (جەمئىي: ${prof.totalSpent}₺)\n   • ئاخىرقى زاكاز: #${prof.lastOrderId} (${prof.lastOrderStatus || 'تەستىقلاندى'})`;
-        }
-        let cartBlock = 'سېۋىتى بوش';
-        if (prof.cartItemsCount > 0) {
-          cartBlock = `سېۋەتتە ${prof.cartItemsCount} دانە تاۋار بار (ئومۇمىي: ${prof.cartTotal}₺)`;
-        }
-        let addrBlock = 'تېخى ئادرېس كىرگۈزمىگەن';
-        if (prof.address || prof.city) {
-          addrBlock = `${prof.city ? prof.city + ' - ' : ''}${prof.address}`;
-        }
-
-        const waPhone = custPhone.replace(/[\s\-\+]/g, '');
-        const waLink = waPhone ? `https://wa.me/${waPhone}` : 'https://wa.me/905551609999';
-        const telLink = waPhone ? `tel:${waPhone}` : '#';
-
-        const tgAlertText = 
-`👤 <b>خېرىدار ئىسمى:</b> <b>${custName}</b>
-📱 <b>تېلېفون:</b> <code>${custPhone || 'كىرگۈزمىگەن'}</code>
-📍 <b>ئادرېس / رايونى:</b> ${addrBlock}
-📦 <b>زاكاز تارىخى:</b> ${orderHistoryBlock}
-🛒 <b>نۆۋەتتىكى سېۋىتى:</b> ${cartBlock}
-🌐 <b>ئۈسكۈنە ۋە تىل:</b> ${prof.deviceStr} | ${prof.langInfo}
-🆔 <b>خېرىدار كودى:</b> <code>#${custSessionId}</code>
-⏰ <b>ۋاقتى:</b> ${new Date().toLocaleString()}
-
-📝 <b>ئۇچۇر مەزمۇنى:</b>
-${text}
-
-💬 <b>باشقۇرۇش ئۇسۇلى:</b>
-• مۇشۇ ئۇچۇرغا «Reply» قىلىپ سۆز يازسىڭىز -> خېرىدار كۆزنىكىگە بىۋاسىتە بارىدۇ!
-• «ئۆچۈر» ياكى «/del» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن بۇ ئۇچۇر مەڭگۈ يۇيۇلىدۇ!
-• «/wipe» دەپ جاۋاب قايتۇرسىڭىز -> خېرىداردىن پۈتۈن پاراڭ مەڭگۈ تازىلىنىدۇ!
-
-👉 <a href="${waLink}">WhatsApp ئارقىلىق ئالاقىلىشىش</a> | <a href="${telLink}">تېلېفون ئۇرۇش</a>`;
-
-        window.appStore.sendTelegramAlert({
-          title: `💬 [جانلىق پاراڭ] ${custName} ئالىي باشقۇرغۇچىغا ئۇچۇر يازدى!`,
-          message: tgAlertText,
-          isUrgent: true
-        }).then(res => {
-          if (res && res.data && res.data.result && res.data.result.message_id) {
-            recordMySentTgMsg(res.data.result.message_id);
-          }
-        }).catch(err => {
-          console.warn('Live chat Telegram alert failed:', err);
-        });
-      }
-
-      // ئارقا سۇپىدىكى خېرىدارلار ئۇچۇرىغا ساقلاش
-      if (window.appStore && typeof window.appStore.recordCustomerChatMessage === 'function') {
-        window.appStore.recordCustomerChatMessage({
           ...newMsg,
           address: prof.address ? `${prof.city ? prof.city + ' - ' : ''}${prof.address}` : '',
           orderHistory: prof.ordersCount > 0 ? `${prof.ordersCount} زاكاز (${prof.totalSpent}₺)` : '',
           cartInfo: prof.cartItemsCount > 0 ? `${prof.cartItemsCount} تاۋار` : ''
         });
       }
-
-      // 🤖 ئاپتوماتىك سىپايە جاۋاب
-      setTimeout(() => {
-        const reply = {
-          id: 'admin-auto-reply-' + Date.now(),
-          sender: 'admin',
-          name: 'ئالىي باشقۇرغۇچى',
-          text: 'ئەسسالامۇ ئەلەيكۇم! سىزنىڭ  ئۇچۇرىڭىزنى تاپشۇرۇپ ئالدۇق ئەڭ قىسقا ۋاقىتتا جاۋاب قايتۇرىمىز...',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          date: new Date().toLocaleDateString('zh-CN'),
-          timestamp: Date.now()
-        };
-        const updated = getChatHistory();
-        updated.push(reply);
-        saveChatHistory(updated);
-        renderChatMessages();
-        if (typeof playChime === 'function') playChime('success');
-      }, 900);
     }
 
     if (btnSend) {
@@ -7966,6 +8055,12 @@ ${text}
         handleQuickAction(action, msg);
       });
     });
+
+    // 🌐 كۆپ تىللىق يېڭىلاش ئۈچۈن قوشۇمچە تۇتقۇچ
+    window.updateCustomerLiveChatLocalization = function() {
+      updateIdentityBadge();
+      renderChatMessages();
+    };
   }
 
   // ==================== 📱 يانفون قايتىش كۇنۇپكىسى (Android Back ◄) ۋە خېرىدارنى تۇتۇپ قېلىش قوغدىغۇچىسى ====================

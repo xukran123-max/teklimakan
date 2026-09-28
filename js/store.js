@@ -8099,6 +8099,9 @@ class StoreManager {
     if (!luckyWheel.title || luckyWheel.title === 'بۈگۈنكى بەخت چاقى' || luckyWheel.title === 'بەخت چاقى') {
       luckyWheel.title = 'ئامەت چاقى';
     }
+    if (!Array.isArray(luckyWheel.slices) || luckyWheel.slices.length < 2) {
+      luckyWheel.slices = defaults.luckyWheel.slices;
+    }
     const flashSale = { ...defaults.flashSale, ...(settings.customerRetention.flashSale || {}) };
     if (!flashSale.title || flashSale.title.includes('بۈگۈنكى ئالاھىدە ئېتىبارلىق') || flashSale.title.includes('كۈندىلىك تالاش-تارتىش') || flashSale.title === 'بۈگۈنكى ئېتىبارلارنى كۆرۈش') {
       flashSale.title = '⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار';

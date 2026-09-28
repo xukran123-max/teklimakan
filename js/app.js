@@ -4107,32 +4107,33 @@ function initTeklimakanApp() {
   }
 
   let heroSliderTimer = null;
+  let heroSliderHoverTimeout = null;
+  let _lastHeroSlidesRenderKey = '';
+  let _heroSliderCurrentIdx = 0;
+
   function initHeroSlider(forcedLang = null) {
     const container = document.querySelector('.hero-slider-container');
     if (!container) return;
-
-    if (heroSliderTimer) {
-      clearInterval(heroSliderTimer);
-      heroSliderTimer = null;
-    }
 
     const currentLang = forcedLang || (window.appI18n ? window.appI18n.getLang() : 'ug');
 
     if (window.appStore && typeof window.appStore.getHeroSlides === 'function') {
       const allSlides = window.appStore.getHeroSlides(currentLang);
       const activeSlides = (allSlides || []).filter(s => s && s.enabled !== false);
+      const currentKey = `${currentLang}_${activeSlides.length}_${activeSlides.map(s => s.id + (s.title || '')).join('|')}`;
 
-      if (activeSlides.length > 0) {
-        // Build dynamic slides HTML
+      // Only rebuild DOM if the slides or language actually changed!
+      if (activeSlides.length > 0 && currentKey !== _lastHeroSlidesRenderKey) {
+        _lastHeroSlidesRenderKey = currentKey;
         const slidesHtml = activeSlides.map((s, idx) => `
-          <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${s.image || "images/hero_dried_fruits.jpg"}');">
+          <div class="hero-slide ${idx === _heroSliderCurrentIdx ? 'active' : ''}" style="background-image: url('${s.image || "images/hero_dried_fruits.jpg"}');">
             <div class="hero-slide-overlay"></div>
             <div class="hero-content">
               <span class="hero-tag" style="background: ${s.tagColor || '#f59e0b'};">${s.tag || ''}</span>
               <h1 class="hero-title">${s.title || ''}</h1>
               <p class="hero-subtitle">${s.subtitle || s.desc || ''}</p>
               <a href="${s.btnLink || '#catalogSection'}" class="hero-btn" style="background: ${s.tagColor || '#f59e0b'};">
-                <span>${s.btnText || 'ھازىرلا كۆرۈپ سېتىۋېلىش'}</span>
+                <span>${s.btnText || (currentLang === 'tr' ? 'Hemen İncele ve Satın Al' : (currentLang === 'en' ? 'Shop Now' : 'ھازىرلا كۆرۈپ سېتىۋېلىش'))}</span>
                 <i class="fas fa-arrow-left"></i>
               </a>
             </div>
@@ -4142,7 +4143,7 @@ function initTeklimakanApp() {
         const dotsHtml = `
           <div class="hero-nav-dots">
             ${activeSlides.map((_, idx) => `
-              <div class="dot-indicator ${idx === 0 ? 'active' : ''}" title="${idx + 1}-ئېلان"></div>
+              <div class="dot-indicator ${idx === _heroSliderCurrentIdx ? 'active' : ''}" title="${idx + 1}-ئېلان" onclick="window.goToHeroSlide(${idx})"></div>
             `).join('')}
           </div>
         `;
@@ -4155,34 +4156,73 @@ function initTeklimakanApp() {
     const dots = container.querySelectorAll('.dot-indicator');
     if (slides.length <= 1) return;
 
-    let currentSlide = 0;
+    if (_heroSliderCurrentIdx >= slides.length) _heroSliderCurrentIdx = 0;
 
     function activateSlide(index) {
-      if (slides[currentSlide]) slides[currentSlide].classList.remove('active');
-      if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
-      currentSlide = (index + slides.length) % slides.length;
-      if (slides[currentSlide]) slides[currentSlide].classList.add('active');
-      if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+      const curSlides = container.querySelectorAll('.hero-slide');
+      const curDots = container.querySelectorAll('.dot-indicator');
+      if (curSlides[_heroSliderCurrentIdx]) curSlides[_heroSliderCurrentIdx].classList.remove('active');
+      if (curDots[_heroSliderCurrentIdx]) curDots[_heroSliderCurrentIdx].classList.remove('active');
+      _heroSliderCurrentIdx = (index + curSlides.length) % curSlides.length;
+      if (curSlides[_heroSliderCurrentIdx]) curSlides[_heroSliderCurrentIdx].classList.add('active');
+      if (curDots[_heroSliderCurrentIdx]) curDots[_heroSliderCurrentIdx].classList.add('active');
     }
 
     function startAutoRotation() {
       if (heroSliderTimer) clearInterval(heroSliderTimer);
       heroSliderTimer = setInterval(() => {
-        activateSlide(currentSlide + 1);
-      }, 5000);
+        activateSlide(_heroSliderCurrentIdx + 1);
+      }, 4500);
     }
 
     dots.forEach((dot, idx) => {
-      dot.onclick = () => {
+      dot.onclick = (e) => {
+        if (e) e.stopPropagation();
         activateSlide(idx);
         startAutoRotation();
       };
     });
 
+    window.nextHeroSlide = () => { activateSlide(_heroSliderCurrentIdx + 1); startAutoRotation(); };
+    window.prevHeroSlide = () => { activateSlide(_heroSliderCurrentIdx - 1); startAutoRotation(); };
+    window.goToHeroSlide = (idx) => { activateSlide(idx); startAutoRotation(); };
+
+    // Hover handling with auto-resume so it never freezes
     container.onmouseenter = () => {
       if (heroSliderTimer) clearInterval(heroSliderTimer);
+      if (heroSliderHoverTimeout) clearTimeout(heroSliderHoverTimeout);
+      heroSliderHoverTimeout = setTimeout(() => {
+        startAutoRotation();
+      }, 5000);
     };
     container.onmouseleave = () => {
+      if (heroSliderHoverTimeout) clearTimeout(heroSliderHoverTimeout);
+      startAutoRotation();
+    };
+
+    // Touch swipe support for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    container.ontouchstart = (e) => {
+      if (e.touches && e.touches[0]) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+      if (heroSliderTimer) clearInterval(heroSliderTimer);
+    };
+    container.ontouchend = (e) => {
+      if (e.changedTouches && e.changedTouches[0]) {
+        const diffX = e.changedTouches[0].clientX - touchStartX;
+        const diffY = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
+          const isRtl = window.appI18n ? window.appI18n.isRTL() : true;
+          if (diffX > 0) {
+            isRtl ? window.nextHeroSlide() : window.prevHeroSlide();
+          } else {
+            isRtl ? window.prevHeroSlide() : window.nextHeroSlide();
+          }
+        }
+      }
       startAutoRotation();
     };
 
@@ -4191,7 +4231,7 @@ function initTeklimakanApp() {
 
   // تەشۋىقات تاختىسى ماسقەدەملەش تىڭشىغۇچى (Store Sync Listener)
   window.addEventListener('uyghur_store_sync', (e) => {
-    if (e.detail && (e.detail.type === 'heroSlides' || e.detail.type === 'all')) {
+    if (e.detail && e.detail.type === 'heroSlides') {
       try { initHeroSlider(); } catch (err) {}
     }
   });
@@ -8983,8 +9023,10 @@ ${text}
     if (!modal) return;
     modal.style.display = 'flex';
     modal.classList.add('active');
-    drawLuckyWheel(luckyWheelRotation);
-    updateLuckyWheelStatusCard();
+    setTimeout(() => {
+      drawLuckyWheel(luckyWheelRotation);
+      updateLuckyWheelStatusCard();
+    }, 25);
   }
 
   function closeLuckyWheelModal() {
@@ -8992,6 +9034,25 @@ ${text}
     if (!modal) return;
     modal.style.display = 'none';
     modal.classList.remove('active');
+  }
+
+  const defaultLuckyWheelSlices = [
+    { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
+    { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
+    { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
+    { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
+    { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
+    { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
+  ];
+
+  function getEffectiveLuckyWheelSlices() {
+    if (window.appStore && typeof window.appStore.getCustomerRetentionSettings === 'function') {
+      const retention = window.appStore.getCustomerRetentionSettings();
+      if (retention && retention.luckyWheel && Array.isArray(retention.luckyWheel.slices) && retention.luckyWheel.slices.length >= 2) {
+        return retention.luckyWheel.slices;
+      }
+    }
+    return defaultLuckyWheelSlices;
   }
 
   function drawLuckyWheel(currentAngleRad = 0) {
@@ -9004,10 +9065,7 @@ ${text}
     const centerY = height / 2;
     const radius = width / 2 - 8;
 
-    const retention = window.appStore.getCustomerRetentionSettings();
-    const slices = retention.luckyWheel?.slices || [];
-    if (slices.length === 0) return;
-
+    const slices = getEffectiveLuckyWheelSlices();
     const numSlices = slices.length;
     const sliceAngle = (2 * Math.PI) / numSlices;
 
@@ -9036,7 +9094,7 @@ ${text}
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px "Microsoft YaHei", sans-serif';
+      ctx.font = 'bold 12px "Microsoft YaHei", "ALKATIP Basma Tom", sans-serif';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
       ctx.shadowBlur = 4;
       ctx.fillText(slice.text || '', radius - 22, 0);
@@ -9065,15 +9123,18 @@ ${text}
   function updateLuckyWheelStatusCard() {
     const card = document.getElementById('luckyWheelStatusCard');
     const btnSpin = document.getElementById('btnSpinWheelAction');
-    if (!card || !window.appStore) return;
+    if (!card) return;
 
-    const check = window.appStore.canCustomerSpinToday();
+    const check = (window.appStore && typeof window.appStore.canCustomerSpinToday === 'function')
+      ? window.appStore.canCustomerSpinToday()
+      : { canSpin: true };
 
     if (check.canSpin) {
       if (btnSpin) {
         btnSpin.disabled = false;
         btnSpin.style.opacity = '1';
         btnSpin.style.cursor = 'pointer';
+        btnSpin.style.pointerEvents = 'auto';
       }
       card.innerHTML = `
         <div style="color: #0f172a; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem;">
@@ -9104,13 +9165,29 @@ ${text}
             </div>
           ` : ''}
         </div>
-        <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+        <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
           <i class="fas fa-clock" style="color: #f59e0b;"></i>
           <span>كېيىنكى ھەقسىز پۇرسەتكە قالغان ۋاقىت:</span>
           <strong id="luckyWheelNextCountdown" class="number-latin" style="color: #ef4444; font-weight: 800;">--:--:--</strong>
         </div>
+        <div style="margin-top: 0.75rem; text-align: center;">
+          <button type="button" onclick="window.resetMyDailySpin()" style="background: #eff6ff; color: #1d4ed8; border: 1px dashed #93c5fd; padding: 5px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" title="سىناق مەقسىتىدە پۇرسەتنى يېڭىلاش">
+            <i class="fas fa-redo"></i> قايتا سىناپ كۆرۈش (پۇرسەتنى يېڭىلاش)
+          </button>
+        </div>
       `;
       startLuckyWheelCountdown();
+    }
+  }
+
+  function resetMyDailySpin() {
+    try {
+      localStorage.removeItem('teklimakan_customer_last_spin');
+    } catch (e) {}
+    updateLuckyWheelStatusCard();
+    drawLuckyWheel(luckyWheelRotation);
+    if (typeof showToast === 'function') {
+      showToast('🎉 قايتا ئايلاندۇرۇش پۇرسىتى ئېچىلدى! ئەمدى چاقنى ئايلاندۇرالايسىز.', 'success');
     }
   }
 
@@ -9136,14 +9213,16 @@ ${text}
 
   function handleLuckyWheelSpin() {
     if (isLuckyWheelSpinning) return;
-    const check = window.appStore.canCustomerSpinToday();
+    const check = (window.appStore && typeof window.appStore.canCustomerSpinToday === 'function')
+      ? window.appStore.canCustomerSpinToday()
+      : { canSpin: true };
+
     if (!check.canSpin) {
-      showToast(check.message, 'info');
+      if (typeof showToast === 'function') showToast(check.message, 'info');
       return;
     }
 
-    const retention = window.appStore.getCustomerRetentionSettings();
-    const slices = retention.luckyWheel?.slices || [];
+    const slices = getEffectiveLuckyWheelSlices();
     if (slices.length < 2) return;
 
     const totalWeight = slices.reduce((acc, s) => acc + (Number(s.weight) || 10), 0);
@@ -9210,7 +9289,9 @@ ${text}
         luckyWheelRotation = finalRotation % (2 * Math.PI);
         drawLuckyWheel(luckyWheelRotation);
 
-        window.appStore.recordCustomerSpin(winningSlice);
+        if (window.appStore && typeof window.appStore.recordCustomerSpin === 'function') {
+          window.appStore.recordCustomerSpin(winningSlice);
+        }
         if (typeof playChime === 'function') playChime('success');
 
         showWinningCelebration(winningSlice);
@@ -9260,6 +9341,12 @@ ${text}
   window.doTrackOrder = doTrackOrder;
   window.openQuickView = openQuickView;
   window.checkUrlForProduct = checkUrlForProduct;
+  window.openLuckyWheelModal = openLuckyWheelModal;
+  window.closeLuckyWheelModal = closeLuckyWheelModal;
+  window.handleLuckyWheelSpin = handleLuckyWheelSpin;
+  window.resetMyDailySpin = resetMyDailySpin;
+  window.drawLuckyWheel = drawLuckyWheel;
+  window.updateLuckyWheelStatusCard = updateLuckyWheelStatusCard;
 }
 
 if (document.readyState === 'loading') {

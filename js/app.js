@@ -385,9 +385,17 @@ function initTeklimakanApp() {
     const checkoutTotLabel = document.getElementById('checkoutTotalLabel');
     if (checkoutTotLabel) checkoutTotLabel.textContent = i18n.t('checkoutTotalLabel');
 
+    const cNoticeBox = document.getElementById('checkoutAddressNoticeBox') || (document.getElementById('checkoutTurkishNoticeBanner') ? document.getElementById('checkoutTurkishNoticeBanner').parentElement : null);
     const cNoticeBanner = document.getElementById('checkoutTurkishNoticeBanner');
-    if (cNoticeBanner) {
-      cNoticeBanner.innerHTML = i18n.t('checkoutTurkishNotice') || (lang === 'tr' ? '<strong>⚠️ Kargo Bilgilendirmesi:</strong> Kargo görevlisinin adresinize sorunsuz ulaşabilmesi için <strong>isim, il ve açık adres mutlaka Türkçe/Latin harfleriyle</strong> yazılmalıdır!' : (lang === 'en' ? '<strong>⚠️ Delivery Notice:</strong> For courier delivery within Turkey, <strong>recipient name, city, and full address must be written in Turkish/Latin script</strong>!' : '<strong>⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:</strong> يەتكۈزۈش خادىملىرى مالنى ئۆيىڭىزگە توغرا يەتكۈزۈپ بېرىشى ئۈچۈن، <strong>ئىسىم، شەھەر ۋە تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە)</strong> يېزىلىشى شەرت!'));
+    if (cNoticeBox) {
+      if (lang === 'tr') {
+        cNoticeBox.style.display = 'none';
+      } else {
+        cNoticeBox.style.display = 'flex';
+        if (cNoticeBanner) {
+          cNoticeBanner.innerHTML = i18n.t('checkoutTurkishNotice') || (lang === 'en' ? '<strong>⚠️ Turkey Delivery Notice:</strong> For courier delivery within Turkey, <strong>recipient name, city, and full address must be written in Turkish/Latin characters</strong>!' : '<strong>⚠️ تۈركىيە كارگو (پوچتا) ئەسكەرتىشى:</strong> يەتكۈزۈش خادىملىرى مالنى ئۆيىڭىزگە توغرا يەتكۈزۈپ بېرىشى ئۈچۈن، <strong>ئىسىم، شەھەر ۋە تەپسىلىي ئادرېس چوقۇم تۈركچە (لاتىنچە)</strong> يېزىلىشى شەرت!');
+        }
+      }
     }
     const cNameLabel = document.getElementById('checkoutCustNameLabel');
     if (cNameLabel) cNameLabel.innerHTML = `${i18n.t('custName')} <span style="color: var(--danger-color);">*</span>`;

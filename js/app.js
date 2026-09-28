@@ -658,15 +658,23 @@ function initTeklimakanApp() {
     // ئۈستۈنكى ئايلانما ئېلان (Marquee) پۈتۈنلەي renderMarqueeTicker ئارقىلىق يېڭىلىنىدۇ
 
     const flMerch = document.getElementById('fLinkMerchants');
-    if (flMerch) flMerch.textContent = i18n.t('fLinkMerchants');
-    const fFooterMerchantSpan = document.getElementById('footerMerchantSpan');
-    if (fFooterMerchantSpan) fFooterMerchantSpan.textContent = i18n.t('fLinkMerchants');
+    if (flMerch) flMerch.textContent = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
+    const fFooterMerchantSpan = document.getElementById('footerMerchantSpan') || document.getElementById('footerFriendlyLinksSpan');
+    if (fFooterMerchantSpan) fFooterMerchantSpan.textContent = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
+    const btnFriendlyFooter = document.getElementById('btnOpenFriendlyLinksFooter') || document.getElementById('btnOpenMerchantApplyFooter');
+    if (btnFriendlyFooter) btnFriendlyFooter.title = i18n.t('fLinkFriendlyLinks') || 'دوستانە ئۇلىنىشلار';
+
+    const flFriendlyTitle = document.getElementById('friendlyLinksModalTitle');
+    if (flFriendlyTitle) flFriendlyTitle.textContent = i18n.t('friendlyLinksModalTitle') || 'دوستانە ئۇلىنىشلار';
+    const flFriendlySub = document.getElementById('friendlyLinksModalSubtitle');
+    if (flFriendlySub) flFriendlySub.textContent = i18n.t('friendlyLinksModalSubtitle') || 'تەكلىماكان تور سودا سۇپىسىنىڭ دوستلىرى ۋە ھەمكارلاشقان تور بېكەتلىرى';
+    const flFriendlyNotice = document.getElementById('friendlyLinksNotice');
+    if (flFriendlyNotice) flFriendlyNotice.textContent = i18n.t('friendlyLinksNotice') || 'بۇ سەھىپىگە ئۆزىڭىزنىڭ ياكى ھەمكارلاشقۇچىلارنىڭ تور بېكەت ئۇلىنىشلىرىنى ئاسانلا كىرگۈزۈپ ئىشلىتەلەيسىز.';
+
     const fAgentLink = document.getElementById('footerAgentLinkText');
-    if (fAgentLink) fAgentLink.textContent = i18n.t('topAgent');
+    if (fAgentLink) fAgentLink.textContent = i18n.t('agentFooterLink') || i18n.t('topAgent');
     const fAgentSpan = document.getElementById('footerAgentSpan');
-    if (fAgentSpan) fAgentSpan.textContent = i18n.t('topAgent');
-    const btnMerchFooter = document.getElementById('btnOpenMerchantApplyFooter');
-    if (btnMerchFooter) btnMerchFooter.title = i18n.t('fLinkMerchants');
+    if (fAgentSpan) fAgentSpan.textContent = i18n.t('agentFooterLink') || i18n.t('topAgent');
     const flAdmin = document.getElementById('fLinkAdmin');
     if (flAdmin) flAdmin.textContent = i18n.t('fLinkAdmin');
 
@@ -4035,6 +4043,15 @@ function initTeklimakanApp() {
     const isUg = lang === 'ug';
     const isTr = lang === 'tr';
 
+    const apTitle = document.getElementById('agentPortalTitle');
+    if (apTitle) apTitle.textContent = i18n.t('agentModalTitle') || 'تەكلىماكان سودىگەر ۋە ۋاكالەتچى مەركىزى';
+    const apSub = document.getElementById('agentPortalSubtitle');
+    if (apSub) apSub.textContent = i18n.t('agentModalSubtitle') || 'ھەمكارلاشقۇچى سودىگەرلەرنىڭ تىزىملىتىش، كىرىش ۋە تاۋار سۇنۇش سۇپىسى';
+    const tab1 = document.getElementById('agentTab1Text');
+    if (tab1) tab1.textContent = i18n.t('agentTabApply') || '1. سودىگەر بولۇپ تىزىملىتىش';
+    const tab2 = document.getElementById('agentTab2Text');
+    if (tab2) tab2.textContent = i18n.t('agentTabSubmit') || '2. كىرىش ۋە تاۋار سۇنۇش';
+
     const setPlaceholder = (id, text) => {
       const el = document.getElementById(id);
       if (el) el.placeholder = text;
@@ -4218,13 +4235,22 @@ function initTeklimakanApp() {
       if (e && e.preventDefault) e.preventDefault();
       openModal('submit');
     };
+    const handleOpenCombinedPortal = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      try {
+        const saved = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
+        if (saved && saved.id) {
+          openModal('submit');
+          return;
+        }
+      } catch(err) {}
+      openModal('apply');
+    };
 
     const btnOpenNav = document.getElementById('agentPortalNavBtn');
-    if (btnOpenNav) btnOpenNav.addEventListener('click', handleOpenSubmit);
-    if (btnOpenFooter) btnOpenFooter.addEventListener('click', handleOpenModal);
-    if (btnOpenMerchantFooter) btnOpenMerchantFooter.addEventListener('click', handleOpenModal);
-    if (fLinkAgentPortal) fLinkAgentPortal.addEventListener('click', handleOpenSubmit);
-    if (fLinkMerch) fLinkMerch.addEventListener('click', handleOpenModal);
+    if (btnOpenNav) btnOpenNav.addEventListener('click', handleOpenCombinedPortal);
+    if (btnOpenFooter) btnOpenFooter.addEventListener('click', handleOpenCombinedPortal);
+    if (fLinkAgentPortal) fLinkAgentPortal.addEventListener('click', handleOpenCombinedPortal);
     if (btnClose) btnClose.addEventListener('click', closeModal);
 
     window.openAgentPortalModal = openModal;
@@ -4236,6 +4262,34 @@ function initTeklimakanApp() {
 
     if (tabBtnApply) tabBtnApply.addEventListener('click', () => switchTab('apply'));
     if (tabBtnSubmit) tabBtnSubmit.addEventListener('click', () => switchTab('submit'));
+
+    // 🔗 دوستانە ئۇلىنىشلار كۆزنىكىنى كونترول قىلىش (Friendly Links Modal)
+    const friendlyModal = document.getElementById('friendlyLinksModal');
+    function openFriendlyModal() {
+      if (friendlyModal) friendlyModal.classList.add('active');
+    }
+    function closeFriendlyModal() {
+      if (friendlyModal) friendlyModal.classList.remove('active');
+    }
+    window.openFriendlyLinksModal = openFriendlyModal;
+    window.closeFriendlyLinksModal = closeFriendlyModal;
+
+    const btnOpenFriendlyFooter = document.getElementById('btnOpenFriendlyLinksFooter');
+    if (btnOpenFriendlyFooter) {
+      btnOpenFriendlyFooter.addEventListener('click', (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        openFriendlyModal();
+      });
+    }
+    const btnCloseFriendly = document.getElementById('btnCloseFriendlyLinksModal');
+    if (btnCloseFriendly) {
+      btnCloseFriendly.addEventListener('click', closeFriendlyModal);
+    }
+    if (friendlyModal) {
+      friendlyModal.addEventListener('click', (e) => {
+        if (e.target === friendlyModal) closeFriendlyModal();
+      });
+    }
 
     // 1. ۋاكالەتچى بولۇش ئىلتىماسى سۇنۇش جەدۋىلى
     const applyForm = document.getElementById('agentApplyForm');

@@ -876,143 +876,39 @@ html[dir="rtl"] .floating-contact-wrap {
   cursor: pointer;
 }
 
-/* ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە ۋە ئاستىغا سۈرۈش تېز ساندۇقى (Quick Scroll Dock) ==================== */
-.quick-scroll-dock {
-  position: fixed;
-  bottom: 9.6rem;
-  right: 1.25rem;
-  z-index: 997;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  border-radius: 9999px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
-  padding: 5px 4px;
-  gap: 3px;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, box-shadow 0.25s ease;
-  user-select: none;
+/* ==================== 💎 ئېكراننىڭ سول قىردىكى نېپىز سۈرۈش تاياقچىسى (Sleek Modern Unified Scrollbar) ==================== */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.45) transparent;
+  scroll-behavior: smooth;
 }
 
-html[dir="rtl"] .quick-scroll-dock {
-  right: 1.25rem;
-  left: auto;
+/* Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-html[dir="ltr"] .quick-scroll-dock {
-  right: 1.25rem;
-  left: auto;
-}
-
-.quick-scroll-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
+::-webkit-scrollbar-track {
   background: transparent;
-  color: #38bdf8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  position: relative;
-  text-decoration: none;
 }
 
-.quick-scroll-btn i {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
 }
 
-.quick-scroll-btn:hover {
-  background: rgba(56, 189, 248, 0.2);
-  color: #ffffff;
-  transform: scale(1.08);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.85);
 }
 
-.quick-scroll-btn.btn-scroll-top:hover i {
-  transform: translateY(-2px);
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
 }
 
-.quick-scroll-btn.btn-scroll-bottom:hover i {
-  transform: translateY(2px);
-}
-
-.quick-scroll-btn:active {
-  transform: scale(0.92);
-}
-
-.quick-scroll-tip {
-  font-size: 0.62rem;
-  font-weight: 800;
-  line-height: 1;
-  margin-top: 2px;
-  color: #94a3b8;
-  letter-spacing: 0.3px;
-  pointer-events: none;
-}
-
-.quick-scroll-btn:hover .quick-scroll-tip {
-  color: #ffffff;
-}
-
-.quick-scroll-divider {
-  width: 24px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.16);
-  margin: 1px 0;
-}
-
-/* State highlights */
-.quick-scroll-dock.at-top .btn-scroll-top {
-  opacity: 0.4;
-}
-
-.quick-scroll-dock.at-top .btn-scroll-bottom {
-  color: #34d399;
-}
-
-.quick-scroll-dock.at-bottom .btn-scroll-bottom {
-  opacity: 0.4;
-}
-
-.quick-scroll-dock.at-bottom .btn-scroll-top {
-  color: #fbbf24;
-}
-
-/* Hide when modals or drawers are open */
-body.cart-drawer-open .quick-scroll-dock,
-body:has(.cart-overlay.active) .quick-scroll-dock,
-body:has(.modal-backdrop[style*="display: flex"]) .quick-scroll-dock,
-body:has(.modal-backdrop[style*="display: block"]) .quick-scroll-dock,
-body:has(#adminLiveChatBox[style*="display: flex"]) .quick-scroll-dock,
-body:has(#adminLiveChatBox[style*="display: block"]) .quick-scroll-dock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  transform: scale(0.8) !important;
-}
-
-@media (max-width: 768px) {
-  .quick-scroll-dock {
-    bottom: 8.2rem;
-    right: 10px;
-    padding: 3px;
-    gap: 1px;
-  }
-  .quick-scroll-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 1rem;
-  }
-  .quick-scroll-tip {
-    font-size: 0.56rem;
-  }
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.8);
 }
 
 

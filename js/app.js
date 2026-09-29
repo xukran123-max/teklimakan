@@ -4456,97 +4456,15 @@ function initTeklimakanApp() {
     }
   }
 
-  // ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە / ئەڭ ئاستىغا سۈرۈش (Smart Scroll Dock: Top & Bottom) ====================
+  // ==================== 🚀 راۋان سۈرۈش ئىقتىدارى (Smooth Scroll Helpers) ====================
   function initSmartScrollToggle() {
-    const dock = document.getElementById('quickScrollDock');
-    const topBtn = document.getElementById('btnScrollToTop');
-    const bottomBtn = document.getElementById('btnScrollToBottom');
-    let savedScrollPosition = 0;
-
-    function getLang() {
-      return (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
-    }
-
-    function updateDockTexts() {
-      const lang = getLang();
-      const topTip = topBtn ? topBtn.querySelector('.quick-scroll-tip') : null;
-      const bottomTip = bottomBtn ? bottomBtn.querySelector('.quick-scroll-tip') : null;
-
-      if (lang === 'tr') {
-        if (topBtn) topBtn.title = 'En Üste Çık (1 Tık)';
-        if (topTip) topTip.textContent = 'Üst';
-        if (bottomBtn) bottomBtn.title = 'En Alta İn (1 Tık)';
-        if (bottomTip) bottomTip.textContent = 'Alt';
-      } else if (lang === 'en') {
-        if (topBtn) topBtn.title = 'Back to Top (1 Click)';
-        if (topTip) topTip.textContent = 'Top';
-        if (bottomBtn) bottomBtn.title = 'Scroll to Bottom (1 Click)';
-        if (bottomTip) bottomTip.textContent = 'Bottom';
-      } else {
-        if (topBtn) topBtn.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
-        if (topTip) topTip.textContent = 'ئۈستىگە';
-        if (bottomBtn) bottomBtn.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
-        if (bottomTip) bottomTip.textContent = 'ئاستىغا';
-      }
-    }
-
-    function checkDockState() {
-      if (!dock) return;
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-      const winHeight = window.innerHeight;
-
-      if (scrollY <= 140) {
-        dock.classList.add('at-top');
-        dock.classList.remove('at-bottom');
-      } else if (scrollY + winHeight >= docHeight - 140) {
-        dock.classList.add('at-bottom');
-        dock.classList.remove('at-top');
-      } else {
-        dock.classList.remove('at-top', 'at-bottom');
-      }
-    }
-
+    // ئايرىم لەيلىمە كۇنۇپكا تولۇق چىقىرىۋېتىلدى، تور كۆرگۈنىڭ سول قىردىكى نېپىز سۈرۈش تاياقچىسى بىلەن بىر گەۋدە قىلىندى
     window.scrollToTop = function() {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      if (scrollY > 150) {
-        savedScrollPosition = scrollY;
-      }
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
     window.scrollToBottom = function() {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-      const winHeight = window.innerHeight;
-
-      // ئەگەر ئۈستىگە چىقىشتىن بۇرۇن تاۋارلارنى كۆرۈۋاتقان بولسا شۇ يەرگە قايتىش، بولمىسا ئەڭ ئاستىغا راۋان چۈشۈش
-      let targetY = docHeight - winHeight;
-      if (scrollY < 180 && savedScrollPosition > 300) {
-        targetY = savedScrollPosition;
-        savedScrollPosition = 0; // reset
-      }
-      window.scrollTo({
-        top: Math.max(0, targetY),
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     };
-
-    window.toggleSmartScroll = function() {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      if (scrollY > 250) {
-        window.scrollToTop();
-      } else {
-        window.scrollToBottom();
-      }
-    };
-
-    window.addEventListener('scroll', checkDockState, { passive: true });
-    updateDockTexts();
-    checkDockState();
   }
 
 

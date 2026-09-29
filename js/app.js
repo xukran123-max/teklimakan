@@ -1265,6 +1265,8 @@ function initTeklimakanApp() {
 
   // ==================== سودىگەر ئىناۋەت بەلگىسى (Trust / Reputation Badge) ====================
   function getMerchantBadgeHtml(product) {
+    const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    if (lang !== 'ug') return ''; // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنىدۇ، باشقا تىللاردا كۆرۈنمەيدۇ
     let badge = null;
     if (window.appStore && window.appStore.getProductMerchantBadge) {
       badge = window.appStore.getProductMerchantBadge(product);
@@ -1296,6 +1298,8 @@ function initTeklimakanApp() {
 
   // ==================== ۋاكالەتچى ID كودى بەلگىسى (Agent ID Badge) ====================
   function getAgentBadgeHtml(product, isCompact = false) {
+    const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    if (lang !== 'ug') return ''; // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنىدۇ، باشقا تىللاردا كۆرۈنمەيدۇ
     if (!product) return '';
     let agent = null;
     if (window.appStore && typeof window.appStore.getProductAgent === 'function') {

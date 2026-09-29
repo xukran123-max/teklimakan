@@ -876,42 +876,143 @@ html[dir="rtl"] .floating-contact-wrap {
   cursor: pointer;
 }
 
-/* 🚀 ئەقىللىق يۇقىرى-تۆۋەن سۈرۈش تېز كۇنۇپكىسى (Smart Scroll Toggle Button) */
-.floating-btn-scroll {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+/* ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە ۋە ئاستىغا سۈرۈش تېز ساندۇقى (Quick Scroll Dock) ==================== */
+.quick-scroll-dock {
+  position: fixed;
+  bottom: 9.6rem;
+  right: 1.25rem;
+  z-index: 997;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1.5px solid rgba(255, 255, 255, 0.22);
-  color: #38bdf8 !important;
-  font-size: 1.25rem !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  padding: 5px 4px;
+  gap: 3px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, box-shadow 0.25s ease;
+  user-select: none;
+}
+
+html[dir="rtl"] .quick-scroll-dock {
+  right: 1.25rem;
+  left: auto;
+}
+
+html[dir="ltr"] .quick-scroll-dock {
+  right: 1.25rem;
+  left: auto;
+}
+
+.quick-scroll-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #38bdf8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.22s ease;
+  position: relative;
+  text-decoration: none;
 }
 
-.floating-btn-scroll:hover {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  color: #ffffff !important;
-  box-shadow: 0 10px 24px rgba(2, 132, 199, 0.45);
+.quick-scroll-btn i {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.floating-btn-scroll #smartScrollIcon {
-  display: inline-block;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+.quick-scroll-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
+  transform: scale(1.08);
 }
 
-.floating-btn-scroll.scroll-target-bottom {
-  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-  color: #5eead4 !important;
-  border-color: rgba(94, 234, 212, 0.3);
+.quick-scroll-btn.btn-scroll-top:hover i {
+  transform: translateY(-2px);
 }
 
-.floating-btn-scroll.scroll-target-bottom:hover {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-  color: #ffffff !important;
-  box-shadow: 0 10px 24px rgba(13, 148, 136, 0.45);
+.quick-scroll-btn.btn-scroll-bottom:hover i {
+  transform: translateY(2px);
 }
 
-.floating-btn-scroll.scroll-target-bottom #smartScrollIcon {
-  transform: rotate(180deg);
+.quick-scroll-btn:active {
+  transform: scale(0.92);
+}
+
+.quick-scroll-tip {
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-top: 2px;
+  color: #94a3b8;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+.quick-scroll-btn:hover .quick-scroll-tip {
+  color: #ffffff;
+}
+
+.quick-scroll-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 1px 0;
+}
+
+/* State highlights */
+.quick-scroll-dock.at-top .btn-scroll-top {
+  opacity: 0.4;
+}
+
+.quick-scroll-dock.at-top .btn-scroll-bottom {
+  color: #34d399;
+}
+
+.quick-scroll-dock.at-bottom .btn-scroll-bottom {
+  opacity: 0.4;
+}
+
+.quick-scroll-dock.at-bottom .btn-scroll-top {
+  color: #fbbf24;
+}
+
+/* Hide when modals or drawers are open */
+body.cart-drawer-open .quick-scroll-dock,
+body:has(.cart-overlay.active) .quick-scroll-dock,
+body:has(.modal-backdrop[style*="display: flex"]) .quick-scroll-dock,
+body:has(.modal-backdrop[style*="display: block"]) .quick-scroll-dock,
+body:has(#adminLiveChatBox[style*="display: flex"]) .quick-scroll-dock,
+body:has(#adminLiveChatBox[style*="display: block"]) .quick-scroll-dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.8) !important;
+}
+
+@media (max-width: 768px) {
+  .quick-scroll-dock {
+    bottom: 8.2rem;
+    right: 10px;
+    padding: 3px;
+    gap: 1px;
+  }
+  .quick-scroll-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+  .quick-scroll-tip {
+    font-size: 0.56rem;
+  }
 }
 
 

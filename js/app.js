@@ -4456,66 +4456,97 @@ function initTeklimakanApp() {
     }
   }
 
-  // ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە / ئەڭ ئاستىغا سۈرۈش (Smart Scroll Toggle) ====================
+  // ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە / ئەڭ ئاستىغا سۈرۈش (Smart Scroll Dock: Top & Bottom) ====================
   function initSmartScrollToggle() {
-    const btn = document.getElementById('smartScrollToggleBtn');
-    const icon = document.getElementById('smartScrollIcon');
-    const tooltip = document.getElementById('smartScrollTooltip');
-    if (!btn) return;
-
-    let targetIsTop = false; // When at top -> target is bottom. When scrolled down -> target is top.
+    const dock = document.getElementById('quickScrollDock');
+    const topBtn = document.getElementById('btnScrollToTop');
+    const bottomBtn = document.getElementById('btnScrollToBottom');
     let savedScrollPosition = 0;
 
     function getLang() {
       return (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
     }
 
-    function updateTooltipText(toTop) {
+    function updateDockTexts() {
       const lang = getLang();
-      let text = '';
-      if (toTop) {
-        text = lang === 'tr' ? 'En Üste Çık' : (lang === 'en' ? 'Back to Top' : 'ئەڭ ئۈستىگە چىقىش');
-      } else {
-        text = lang === 'tr' ? 'En Alta İn' : (lang === 'en' ? 'Scroll to Bottom' : 'ئەڭ ئاستىغا چۈشۈش');
-      }
-      btn.title = text;
-      if (tooltip) tooltip.textContent = text;
-    }
+      const topTip = topBtn ? topBtn.querySelector('.quick-scroll-tip') : null;
+      const bottomTip = bottomBtn ? bottomBtn.querySelector('.quick-scroll-tip') : null;
 
-    function checkScrollState() {
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      
-      // If user is within top 200px -> pointing to bottom (En Alta İn)
-      if (scrollY <= 200) {
-        targetIsTop = false;
-        btn.classList.add('scroll-target-bottom');
-        updateTooltipText(false);
+      if (lang === 'tr') {
+        if (topBtn) topBtn.title = 'En Üste Çık (1 Tık)';
+        if (topTip) topTip.textContent = 'Üst';
+        if (bottomBtn) bottomBtn.title = 'En Alta İn (1 Tık)';
+        if (bottomTip) bottomTip.textContent = 'Alt';
+      } else if (lang === 'en') {
+        if (topBtn) topBtn.title = 'Back to Top (1 Click)';
+        if (topTip) topTip.textContent = 'Top';
+        if (bottomBtn) bottomBtn.title = 'Scroll to Bottom (1 Click)';
+        if (bottomTip) bottomTip.textContent = 'Bottom';
       } else {
-        // If user is scrolled down -> pointing to top (En Üste Çık)
-        targetIsTop = true;
-        btn.classList.remove('scroll-target-bottom');
-        updateTooltipText(true);
+        if (topBtn) topBtn.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
+        if (topTip) topTip.textContent = 'ئۈستىگە';
+        if (bottomBtn) bottomBtn.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
+        if (bottomTip) bottomTip.textContent = 'ئاستىغا';
       }
     }
 
-    window.toggleSmartScroll = function() {
+    function checkDockState() {
+      if (!dock) return;
       const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
       const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
       const winHeight = window.innerHeight;
 
-      if (targetIsTop) {
-        // ئەڭ ئۈستىگە چىقىشتىن بۇرۇن، نۆۋەتتىكى ئورۇننى ئەستە ساقلاش
-        savedScrollPosition = scrollY;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (scrollY <= 140) {
+        dock.classList.add('at-top');
+        dock.classList.remove('at-bottom');
+      } else if (scrollY + winHeight >= docHeight - 140) {
+        dock.classList.add('at-bottom');
+        dock.classList.remove('at-top');
       } else {
-        // ئەگەر ئىلگىرى سۈرگەن ئورۇن بولسا شۇ يەرگە، بولمىسا ئەڭ ئاستىغا راۋان چۈشۈش
-        const targetY = (savedScrollPosition > 350) ? savedScrollPosition : (docHeight - winHeight);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        dock.classList.remove('at-top', 'at-bottom');
+      }
+    }
+
+    window.scrollToTop = function() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      if (scrollY > 150) {
+        savedScrollPosition = scrollY;
+      }
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    };
+
+    window.scrollToBottom = function() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      const winHeight = window.innerHeight;
+
+      // ئەگەر ئۈستىگە چىقىشتىن بۇرۇن تاۋارلارنى كۆرۈۋاتقان بولسا شۇ يەرگە قايتىش، بولمىسا ئەڭ ئاستىغا راۋان چۈشۈش
+      let targetY = docHeight - winHeight;
+      if (scrollY < 180 && savedScrollPosition > 300) {
+        targetY = savedScrollPosition;
+        savedScrollPosition = 0; // reset
+      }
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: 'smooth'
+      });
+    };
+
+    window.toggleSmartScroll = function() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      if (scrollY > 250) {
+        window.scrollToTop();
+      } else {
+        window.scrollToBottom();
       }
     };
 
-    window.addEventListener('scroll', checkScrollState, { passive: true });
-    checkScrollState();
+    window.addEventListener('scroll', checkDockState, { passive: true });
+    updateDockTexts();
+    checkDockState();
   }
 
 
@@ -9760,6 +9791,9 @@ ${text}
   window.openLanguageModal = openLanguageModal;
   window.closeLanguageModal = closeLanguageModal;
   window.selectSiteLanguage = selectSiteLanguage;
+  window.scrollToTop = window.scrollToTop || function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  window.scrollToBottom = window.scrollToBottom || function() { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); };
+  window.toggleSmartScroll = window.toggleSmartScroll || function() { ((window.scrollY || 0) > 250) ? window.scrollToTop() : window.scrollToBottom(); };
 }
 
 if (document.readyState === 'loading') {

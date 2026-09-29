@@ -5960,13 +5960,13 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* ==================== 🚀 ئۈستىگە يېپىشىپ تۇرىدىغان ئىخچام ئايلانما ئېلان تاختىسى (Sticky Mini Hero) ==================== */
+/* ==================== 🚀 يۇقىرىغا سۈرگەندە سىلىق لەيلەپ چىقىدىغان ئايلانما ئېلان تاختىسى (Scroll-Up Floating Reveal Hero) ==================== */
 .hero-section-spacer {
   display: none;
   width: 100%;
 }
 
-.hero-section.sticky-mini-hero {
+.hero-section.smart-floating-hero {
   position: fixed !important;
   top: var(--navbar-sticky-top, 58px) !important;
   left: 0;
@@ -5977,28 +5977,33 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-  animation: stickyMiniSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+  pointer-events: none;
+  transform: translateY(-130%);
+  opacity: 0;
 }
 
-body.dark-mode .hero-section.sticky-mini-hero {
+body.dark-mode .hero-section.smart-floating-hero {
   background: rgba(15, 23, 42, 0.96);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
-@keyframes stickyMiniSlideDown {
-  from {
-    transform: translateY(-40px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* 🌟 سىلىق لەيلەپ چىقىش (Smooth Floating Reveal) */
+.hero-section.smart-floating-hero.reveal-active {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
-.hero-section.sticky-mini-hero .hero-slider-container {
+/* 🌟 سىلىق يوشۇرۇنۇش (Smooth Retract) */
+.hero-section.smart-floating-hero.reveal-hidden {
+  transform: translateY(-130%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.hero-section.smart-floating-hero .hero-slider-container {
   height: 95px !important;
   border-radius: 12px;
   max-width: 1200px;
@@ -6007,7 +6012,7 @@ body.dark-mode .hero-section.sticky-mini-hero {
   transition: height 0.3s ease;
 }
 
-.hero-section.sticky-mini-hero .hero-content {
+.hero-section.smart-floating-hero .hero-content {
   padding: 0.6rem 1.25rem;
   display: flex;
   align-items: center;
@@ -6017,14 +6022,14 @@ body.dark-mode .hero-section.sticky-mini-hero {
   gap: 1rem;
 }
 
-.hero-section.sticky-mini-hero .hero-tag {
+.hero-section.smart-floating-hero .hero-tag {
   font-size: 0.72rem;
   padding: 2px 8px;
   margin-bottom: 0;
   flex-shrink: 0;
 }
 
-.hero-section.sticky-mini-hero .hero-title {
+.hero-section.smart-floating-hero .hero-title {
   font-size: 1.12rem !important;
   line-height: 1.3;
   margin: 0;
@@ -6034,11 +6039,11 @@ body.dark-mode .hero-section.sticky-mini-hero {
   flex: 1;
 }
 
-.hero-section.sticky-mini-hero .hero-subtitle {
+.hero-section.smart-floating-hero .hero-subtitle {
   display: none !important;
 }
 
-.hero-section.sticky-mini-hero .hero-btn {
+.hero-section.smart-floating-hero .hero-btn {
   padding: 0.35rem 0.9rem;
   font-size: 0.8rem;
   white-space: nowrap;
@@ -6046,104 +6051,63 @@ body.dark-mode .hero-section.sticky-mini-hero {
   border-radius: 8px;
 }
 
-.hero-section.sticky-mini-hero .hero-nav-dots {
+.hero-section.smart-floating-hero .hero-nav-dots {
   bottom: 5px;
   gap: 4px;
 }
 
-.hero-section.sticky-mini-hero .dot-indicator {
+.hero-section.smart-floating-hero .dot-indicator {
   width: 6px;
   height: 6px;
 }
 
-.hero-section.sticky-mini-hero .dot-indicator.active {
+.hero-section.smart-floating-hero .dot-indicator.active {
   width: 16px;
 }
 
-/* Close/minimize button for sticky hero */
 .hero-sticky-close-btn {
-  display: none;
-  position: absolute;
-  top: 8px;
-  left: 14px;
-  z-index: 30;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  align-items: center;
-  justify-content: center;
-  font-size: 0.72rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-html[dir="ltr"] .hero-sticky-close-btn {
-  left: auto;
-  right: 14px;
-}
-
-.hero-sticky-close-btn:hover {
-  background: rgba(220, 38, 38, 0.85);
-  transform: scale(1.1);
-}
-
-.hero-section.sticky-mini-hero .hero-sticky-close-btn {
-  display: flex;
+  display: none !important;
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .hero-section.sticky-mini-hero {
+  .hero-section.smart-floating-hero {
     padding: 0.22rem 0.4rem;
   }
-  .hero-section.sticky-mini-hero .hero-slider-container {
+  .hero-section.smart-floating-hero .hero-slider-container {
     height: 64px !important;
     border-radius: 10px;
   }
-  .hero-section.sticky-mini-hero .hero-content {
+  .hero-section.smart-floating-hero .hero-content {
     padding: 0.3rem 0.6rem;
     gap: 0.4rem;
   }
-  .hero-section.sticky-mini-hero .hero-tag {
+  .hero-section.smart-floating-hero .hero-tag {
     display: none;
   }
-  .hero-section.sticky-mini-hero .hero-title {
+  .hero-section.smart-floating-hero .hero-title {
     font-size: 0.84rem !important;
     margin: 0;
     line-height: 1.25;
   }
-  .hero-section.sticky-mini-hero .hero-btn {
+  .hero-section.smart-floating-hero .hero-btn {
     padding: 0.22rem 0.6rem;
     font-size: 0.72rem;
     gap: 0.25rem;
   }
-  .hero-section.sticky-mini-hero .hero-btn span {
+  .hero-section.smart-floating-hero .hero-btn span {
     font-size: 0.72rem;
   }
-  .hero-section.sticky-mini-hero .hero-nav-dots {
+  .hero-section.smart-floating-hero .hero-nav-dots {
     bottom: 3px;
     gap: 3px;
   }
-  .hero-section.sticky-mini-hero .dot-indicator {
+  .hero-section.smart-floating-hero .dot-indicator {
     width: 5px;
     height: 5px;
   }
-  .hero-section.sticky-mini-hero .dot-indicator.active {
+  .hero-section.smart-floating-hero .dot-indicator.active {
     width: 12px;
-  }
-  .hero-sticky-close-btn {
-    top: 5px;
-    left: 8px;
-    width: 20px;
-    height: 20px;
-    font-size: 0.65rem;
-  }
-  html[dir="ltr"] .hero-sticky-close-btn {
-    left: auto;
-    right: 8px;
   }
 }
 

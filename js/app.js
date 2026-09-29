@@ -4440,91 +4440,16 @@ function initTeklimakanApp() {
     }
   });
 
-  // ==================== 🚀 يۇقىرىغا سۈرگەندە دەرھال سىلىق لەيلەپ چىقىش (Scroll-Up Floating Reveal Hero) ====================
+  // ==================== 🚀 ئايلانما ئېلان تاختىسى سۈكۈتتىكى تەبىئىي ھالىتى (Default Natural Flow) ====================
   function initSmartHeroScroll() {
     const heroSection = document.querySelector('.hero-section');
-    const navbar = document.querySelector('.main-navbar');
-    if (!heroSection) return;
-
-    // Spacer قۇرۇپ بەت سىلكىنىشنىڭ ئالدىنى ئېلىش
-    let spacer = document.getElementById('heroSectionSpacer');
-    if (!spacer) {
-      spacer = document.createElement('div');
-      spacer.id = 'heroSectionSpacer';
-      spacer.className = 'hero-section-spacer';
-      heroSection.parentNode.insertBefore(spacer, heroSection.nextSibling);
+    if (heroSection) {
+      heroSection.classList.remove('smart-floating-hero', 'sticky-mini-hero', 'reveal-active', 'reveal-hidden');
     }
-
-    // ئارتۇق تاقاش كۇنۇپكىسى بولسا چىقىرىۋېتىش
-    const oldCloseBtn = heroSection.querySelector('.hero-sticky-close-btn');
-    if (oldCloseBtn) oldCloseBtn.remove();
-
-    let lastScrollY = window.scrollY || 0;
-    let accumulatedUp = 0;
-    let accumulatedDown = 0;
-    let isTicking = false;
-
-    function updateStickyTop() {
-      const navH = navbar ? navbar.offsetHeight : 58;
-      document.documentElement.style.setProperty('--navbar-sticky-top', navH + 'px');
-    }
-
-    updateStickyTop();
-    window.addEventListener('resize', updateStickyTop, { passive: true });
-
-    function onScroll() {
-      const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const delta = currentScrollY - lastScrollY;
-
-      // 1. ئەگەر بەتنىڭ ئەڭ ئۈستىدە تۇرغان بولسا (scrollY <= 80px): ئەسلى ئورنىدا تەبىئىي تۇرۇش
-      if (currentScrollY <= 80) {
-        heroSection.classList.remove('smart-floating-hero', 'reveal-active', 'reveal-hidden');
-        spacer.style.display = 'none';
-        accumulatedUp = 0;
-        accumulatedDown = 0;
-      } 
-      // 2. ئەگەر ئاستىغا سۈرۈلسە (Scroll DOWN): تاۋار كۆرۈشكە توسالغۇ قىلماي دەرھال سىلىق قايتىش
-      else if (delta > 4) {
-        accumulatedDown += delta;
-        accumulatedUp = 0;
-        if (accumulatedDown > 10) {
-          if (heroSection.classList.contains('smart-floating-hero')) {
-            heroSection.classList.remove('reveal-active');
-            heroSection.classList.add('reveal-hidden');
-          }
-        }
-      } 
-      // 3. بەتنىڭ قايسى يېرىدە بولۇشىدىن قەتئىينەزەر، بىر ئازلا يۇقىرىغا سۈرۈلسە (Scroll UP): دەرھال سىلىق لەيلەپ چىقىش!
-      else if (delta < -4) {
-        accumulatedUp += Math.abs(delta);
-        accumulatedDown = 0;
-        if (accumulatedUp > 10) {
-          updateStickyTop();
-          if (!heroSection.classList.contains('smart-floating-hero')) {
-            const naturalHeight = heroSection.offsetHeight;
-            if (naturalHeight > 100) {
-              spacer.style.height = naturalHeight + 'px';
-              spacer.style.display = 'block';
-            }
-            heroSection.classList.add('smart-floating-hero');
-          }
-          heroSection.classList.remove('reveal-hidden');
-          heroSection.classList.add('reveal-active');
-        }
-      }
-
-      lastScrollY = currentScrollY;
-      isTicking = false;
-    }
-
-    window.addEventListener('scroll', () => {
-      if (!isTicking) {
-        window.requestAnimationFrame(onScroll);
-        isTicking = true;
-      }
-    }, { passive: true });
-
-    onScroll();
+    const spacer = document.getElementById('heroSectionSpacer');
+    if (spacer) spacer.remove();
+    const closeBtn = document.querySelector('.hero-sticky-close-btn');
+    if (closeBtn) closeBtn.remove();
   }
 
   // ==================== 💎 سۈرۈش تاياقچىسى بىلەن بىر گەۋدە ئەقىللىق تېز سۈرۈش (Integrated Smart Edge Scrollbar) ====================

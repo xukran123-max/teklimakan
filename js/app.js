@@ -5128,10 +5128,10 @@ function initTeklimakanApp() {
         return;
       }
 
-      // ئەگەر يەرلىك سىستېمىدا بولمىسا، دەرھال بۇلۇتتىن سىناپ تەكشۈرۈش ۋە ماسلاشتۇرۇش
+      // ئەگەر يەرلىك سىستېمىدا بولمىسا ياكى ھالەت يېڭىلانغان بولسا، دەرھال بۇلۇتتىن سىناپ تەكشۈرۈش ۋە ماسلاشتۇرۇش
       if (window.appStore && typeof window.appStore.findAgentAsync === 'function') {
         try {
-          await window.appStore.findAgentAsync(val);
+          await window.appStore.findAgentAsync(val, true);
         } catch(e) {}
       }
 
@@ -5149,6 +5149,27 @@ function initTeklimakanApp() {
       if (res.requirePassword) {
         if (pwGroup) pwGroup.style.display = 'block';
         if (pwInput) pwInput.focus();
+        if (isStatusCheckOnly) {
+          if (verifyMsg) {
+            verifyMsg.className = 'agent-verify-success';
+            verifyMsg.style.color = '#065f46';
+            verifyMsg.style.background = '#ecfdf5';
+            verifyMsg.style.padding = '0.85rem';
+            verifyMsg.style.borderRadius = '8px';
+            verifyMsg.style.border = '1.5px solid #a7f3d0';
+            verifyMsg.innerHTML = `
+              <div style="font-weight: 800; font-size: 0.98rem; margin-bottom: 0.4rem; color: #065f46; display: flex; align-items: center; gap: 0.45rem;">
+                <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.25rem;"></i> 🎉 تەبرىكلەيمىز! ئىلتىماسىڭىز تەستىقلاندى!
+              </div>
+              <div style="font-size: 0.85rem; color: #047857; line-height: 1.5;">
+                ۋاكالەتچى: <strong>${res.agentName || ''}</strong> (ID: <strong>${res.agentId || ''}</strong>)<br>
+                سۇپىغا كىرىش ئۈچۈن تۆۋەندىكى كۆزنەككە پارولىڭىزنى كىرگۈزۈپ، «دەلىللەش ۋە كىرىش» نى بېسىڭ.
+              </div>
+            `;
+          }
+          showToast('🎉 تەبرىكلەيمىز! ئىلتىماسىڭىز تەستىقلاندى!', 'success');
+          return;
+        }
         if (verifyMsg) {
           verifyMsg.className = 'agent-verify-pending';
           verifyMsg.style.color = '#b45309';
@@ -5328,10 +5349,21 @@ function initTeklimakanApp() {
           if (verifyMsg) {
             verifyMsg.style.color = '#92400e';
             verifyMsg.style.background = '#fffbeb';
-            verifyMsg.style.padding = '0.75rem';
+            verifyMsg.style.padding = '0.85rem';
             verifyMsg.style.borderRadius = '8px';
             verifyMsg.style.border = '1.5px solid #fde68a';
-            verifyMsg.innerHTML = `<i class="fas fa-hourglass-half" style="color: #d97706;"></i> <strong>ئىلتىماس ھالىتى:</strong> ${res.message}`;
+            const checkTime = new Date().toLocaleTimeString('ug-CN', { hour12: false });
+            verifyMsg.innerHTML = `
+              <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 0.35rem; color: #92400e; display: flex; align-items: center; gap: 0.45rem;">
+                <i class="fas fa-hourglass-half" style="color: #d97706;"></i> <strong>ئىلتىماس ھالىتى: تەكشۈرۈلۈۋاتىدۇ</strong>
+              </div>
+              <div style="font-size: 0.84rem; color: #78350f; line-height: 1.5;">
+                ${res.message || 'ئىلتىماسىڭىز تېخى «تەستىق كۈتۈۋاتىدۇ» ھالىتىدە. سۇپا باشقۇرغۇچىسى پات يېقىندا تەكشۈرۈپ تەستىقلايدۇ.'}
+              </div>
+              <div style="font-size: 0.75rem; color: #b45309; margin-top: 0.4rem;">
+                🔄 ئەڭ يېڭى بۇلۇت تەكشۈرۈش ۋاقتى: ${checkTime}
+              </div>
+            `;
           }
         } else {
           if (violCard) violCard.style.display = 'none';
@@ -5401,7 +5433,15 @@ function initTeklimakanApp() {
           loginInput.focus();
           return;
         }
-        await performAgentVerification(val, '', true);
+        btnCheckStatus.disabled = true;
+        const origHtml = btnCheckStatus.innerHTML;
+        btnCheckStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تەكشۈرۈۋاتىدۇ...';
+        try {
+          await performAgentVerification(val, '', true);
+        } finally {
+          btnCheckStatus.disabled = false;
+          btnCheckStatus.innerHTML = origHtml;
+        }
       });
     }
 

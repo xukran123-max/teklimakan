@@ -2517,6 +2517,17 @@ class StoreManager {
               } : null)
             });
           });
+
+          // 🛡️ يەرلىكتە بار، لېكىن تېخى بۇلۇتقا چىقمىغان ۋاكالەتچىلەرنى قوغداش ۋە بۇلۇتقا يوللاش
+          localMap.forEach((la, id) => {
+            if (!aMap.has(id) && !deletedAgentIds.includes(id)) {
+              aMap.set(id, la);
+              if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+                window.TeklimakanSupabase.upsertAgent(la).catch(() => {});
+              }
+            }
+          });
+
           const mergedAgents = Array.from(aMap.values());
           const agentsStr = JSON.stringify(mergedAgents);
           const currentAgentsStr = localStorage.getItem(STORAGE_KEYS.AGENTS);
@@ -3664,9 +3675,14 @@ class StoreManager {
     this.notifyDataChange('agents');
 
     // ☁️ Supabase بۇلۇتقا ۋاكالەتچىنى يۈكلەش
-    if (window.TeklimakanSupabase) {
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
       const currentAgent = this.getAgentById(agentData.id) || agents[0];
-      if (currentAgent) window.TeklimakanSupabase.upsertAgent(currentAgent);
+      if (currentAgent) {
+        window.TeklimakanSupabase.upsertAgent(currentAgent).catch(e => console.warn('Supabase saveAgent error:', e));
+        if (typeof window.TeklimakanSupabase.invalidateAgentsCache === 'function') {
+          window.TeklimakanSupabase.invalidateAgentsCache();
+        }
+      }
     }
 
     return { success: true };
@@ -3846,7 +3862,7 @@ class StoreManager {
     return false;
   }
 
-  updateAgentStatus(agentId, newStatus) {
+  async updateAgentStatus(agentId, newStatus) {
     let agents = this.getAgents('none');
     const agent = agents.find(a => a.id === agentId);
     if (agent) {
@@ -3854,7 +3870,14 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
       this.notifyDataChange('agents');
       if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
-        window.TeklimakanSupabase.upsertAgent(agent).catch(e => console.warn('Supabase agent status sync error:', e));
+        try {
+          await window.TeklimakanSupabase.upsertAgent(agent);
+          if (typeof window.TeklimakanSupabase.invalidateAgentsCache === 'function') {
+            window.TeklimakanSupabase.invalidateAgentsCache();
+          }
+        } catch (e) {
+          console.warn('Supabase agent status sync error:', e);
+        }
       }
       return true;
     }
@@ -4317,16 +4340,15 @@ class StoreManager {
   }
 
   // 🔍 ۋاكالەتچىنى تېلېفون، ئېلخەت ياكى ID ئارقىلىق ئىزدەش (يەرلىك ۋە Supabase بۇلۇتتىن تولۇق ئىزدىنىدۇ)
-  async findAgentAsync(identifier) {
+  async findAgentAsync(identifier, forceCloud = false) {
     if (!identifier) return null;
     const raw = String(identifier).trim();
     const term = raw.toLowerCase();
     const normPhone = this.normalizePhoneNumber(term);
     const cleanDigits = raw.replace(/\D/g, '');
 
-    // 1. ئالدى بىلەن يەرلىك ساقلىغۇچ (localStorage) دىن ئىزدەش
-    let agents = this.getAgents('none');
-    let agent = agents.find(a => {
+    const matchAgent = (a) => {
+      if (!a) return false;
       if (a.id && a.id.toLowerCase() === term) return true;
       if (a.email && this.normalizeEmail(a.email) === term) return true;
       if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
@@ -4337,14 +4359,19 @@ class StoreManager {
         if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
       }
       return false;
-    });
+    };
 
-    if (agent) return agent;
+    // 1. ئالدى بىلەن يەرلىك ساقلىغۇچ (localStorage) دىن ئىزدەش
+    let agents = this.getAgents('none');
+    let agent = agents.find(matchAgent);
 
-    // 2. ئەگەر يەرلىكتە تېپىلمىسا، دەرھال Supabase بۇلۇت ئامبىرىدىن تەكشۈرۈش ۋە يەرلىككە بىرىكتۈرۈش
-    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.fetchAgents === 'function') {
+    // 2. ئەگەر agent تېپىلمىسا، ياكى forceCloud=true بولسا، ياكى agent ھالىتى تېخى «تەستىق كۈتۈۋاتىدۇ» بولسا،
+    // دەرھال Supabase بۇلۇت ئامبىرىدىن تەكشۈرۈپ تەستىقلانغان ئەڭ يېڭى ھالەتنى مەجبۇرىي ئوقۇپ يەرلىككە قاچىلاش
+    const shouldFetchCloud = forceCloud || !agent || (agent && agent.status === 'تەستىق كۈتۈۋاتىدۇ');
+
+    if (shouldFetchCloud && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.fetchAgents === 'function') {
       try {
-        const remoteAgents = await window.TeklimakanSupabase.fetchAgents();
+        const remoteAgents = await window.TeklimakanSupabase.fetchAgents(true);
         if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
           const localMap = new Map();
           agents.forEach(a => localMap.set(a.id, a));
@@ -4409,27 +4436,14 @@ class StoreManager {
           agents = Array.from(localMap.values());
           this.saveAgents(agents);
 
-          // قايتىدىن بىرىكتۈرۈلگەن سىستېمىدىن ئىزدەش
-          agent = agents.find(a => {
-            if (a.id && a.id.toLowerCase() === term) return true;
-            if (a.email && this.normalizeEmail(a.email) === term) return true;
-            if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
-            const aDigits = (a.phone || '').replace(/\D/g, '');
-            if (cleanDigits && aDigits) {
-              if (aDigits === cleanDigits) return true;
-              if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
-              if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
-            }
-            return false;
-          });
-          if (agent) return agent;
+          agent = agents.find(matchAgent);
         }
       } catch (sbErr) {
         console.warn('findAgentAsync Supabase fetch error:', sbErr);
       }
     }
 
-    return null;
+    return agent || null;
   }
 
   // ⚡ ۋاكالەتچى مەخپىي شىفىرىنى شەرتسىز، بىۋاسىتە يېڭىلاش (Direct Unconditional Password Reset)

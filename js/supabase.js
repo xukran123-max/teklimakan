@@ -446,7 +446,9 @@ window.TeklimakanSupabase = {
         monthly_sales: Number(agent.monthlySales || 0),
         monthly_orders: Number(agent.monthlyOrders || 0),
         commission_rate: Number(agent.commissionRate || 15),
-        violations_count: Number(agent.violationsCount || 0)
+        violations_count: Number(agent.violationsCount || 0),
+        suspended_until: agent.suspendedUntil || null,
+        suspension_reason: agent.suspensionReason || null
       };
 
       const { error } = await sb.from('agents').upsert(row);

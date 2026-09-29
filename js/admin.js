@@ -417,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { renderProductsTable(); } catch(e){}
         try { renderDashboardMetrics(); } catch(e){}
         try { renderOrdersTable(); } catch(e){}
+        try { renderAgentsView(); } catch(e){}
       }).catch(err => console.warn('Supabase sync error in initAdmin:', err));
     }
     loadSettingsForm();
@@ -2006,7 +2007,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
-        await window.appStore.syncWithSupabase();
+        await window.appStore.syncWithSupabase(true);
       }
       renderAgentsView();
       renderDashboardMetrics();
@@ -2383,11 +2384,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // جەدۋەلدىكى ھالەت تاللاش
     tbody.querySelectorAll('.agent-table-status-select').forEach(sel => {
-      sel.addEventListener('change', (e) => {
+      sel.addEventListener('change', async (e) => {
         const id = sel.dataset.id;
-        window.appStore.updateAgentStatus(id, e.target.value);
-        renderAgentsSlider();
-        showAdminToast('ۋاكالەتچى ھالىتى يېڭىلاندى!', 'success');
+        const newStatus = e.target.value;
+        sel.disabled = true;
+        try {
+          await window.appStore.updateAgentStatus(id, newStatus);
+          renderAgentsSlider();
+          showAdminToast(`«${id}» نىڭ ھالىتى «${newStatus}» غا يېڭىلاندى ۋە بۇلۇتقا ساقلاندى!`, 'success');
+        } catch (err) {
+          showAdminToast('ھالەت ساقلاش مەغلۇپ بولدى', 'error');
+        } finally {
+          sel.disabled = false;
+        }
       });
     });
 

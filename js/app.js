@@ -232,8 +232,9 @@ function initTeklimakanApp() {
     try { renderCategories(); } catch (e) { console.error('renderCategories error:', e); }
     try { renderProducts(); } catch (e) { console.error('renderProducts error:', e); }
     try { updateCartUI(); } catch (e) { console.error('updateCartUI error:', e); }
-    try { updateWishlistUI(); } catch (e) { console.error('updateWishlistUI error:', e); }
     try { initHeroSlider(); } catch (e) { console.error('initHeroSlider error:', e); }
+    try { initSmartHeroScroll(); } catch (e) { console.error('initSmartHeroScroll error:', e); }
+    try { initSmartScrollToggle(); } catch (e) { console.error('initSmartScrollToggle error:', e); }
 
     if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
       window.appStore.syncWithSupabase().then(() => {
@@ -4438,6 +4439,86 @@ function initTeklimakanApp() {
       try { initHeroSlider(); } catch (err) {}
     }
   });
+
+  // ==================== 🚀 ئايلانما ئېلان تاختىسىنىڭ تەبىئىي ئورنى (Natural Hero Flow) ====================
+  function initSmartHeroScroll() {
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+      heroSection.classList.remove('smart-sticky-active', 'smart-sticky-visible', 'smart-sticky-hidden');
+    }
+    const spacer = document.getElementById('heroSectionSpacer');
+    if (spacer) {
+      spacer.remove();
+    }
+    const closeBtn = document.querySelector('.hero-sticky-close-btn');
+    if (closeBtn) {
+      closeBtn.remove();
+    }
+  }
+
+  // ==================== 🚀 بىر چېكىپ ئەڭ ئۈستىگە / ئەڭ ئاستىغا سۈرۈش (Smart Scroll Toggle) ====================
+  function initSmartScrollToggle() {
+    const btn = document.getElementById('smartScrollToggleBtn');
+    const icon = document.getElementById('smartScrollIcon');
+    const tooltip = document.getElementById('smartScrollTooltip');
+    if (!btn) return;
+
+    let targetIsTop = false; // When at top -> target is bottom. When scrolled down -> target is top.
+    let savedScrollPosition = 0;
+
+    function getLang() {
+      return (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    }
+
+    function updateTooltipText(toTop) {
+      const lang = getLang();
+      let text = '';
+      if (toTop) {
+        text = lang === 'tr' ? 'En Üste Çık' : (lang === 'en' ? 'Back to Top' : 'ئەڭ ئۈستىگە چىقىش');
+      } else {
+        text = lang === 'tr' ? 'En Alta İn' : (lang === 'en' ? 'Scroll to Bottom' : 'ئەڭ ئاستىغا چۈشۈش');
+      }
+      btn.title = text;
+      if (tooltip) tooltip.textContent = text;
+    }
+
+    function checkScrollState() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      
+      // If user is within top 200px -> pointing to bottom (En Alta İn)
+      if (scrollY <= 200) {
+        targetIsTop = false;
+        btn.classList.add('scroll-target-bottom');
+        updateTooltipText(false);
+      } else {
+        // If user is scrolled down -> pointing to top (En Üste Çık)
+        targetIsTop = true;
+        btn.classList.remove('scroll-target-bottom');
+        updateTooltipText(true);
+      }
+    }
+
+    window.toggleSmartScroll = function() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      const winHeight = window.innerHeight;
+
+      if (targetIsTop) {
+        // ئەڭ ئۈستىگە چىقىشتىن بۇرۇن، نۆۋەتتىكى ئورۇننى ئەستە ساقلاش
+        savedScrollPosition = scrollY;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // ئەگەر ئىلگىرى سۈرگەن ئورۇن بولسا شۇ يەرگە، بولمىسا ئەڭ ئاستىغا راۋان چۈشۈش
+        const targetY = (savedScrollPosition > 350) ? savedScrollPosition : (docHeight - winHeight);
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('scroll', checkScrollState, { passive: true });
+    checkScrollState();
+  }
+
+
 
   // ==================== 🤝 ۋاكالەتچى ۋە سودىگەرلەر مەركىزى ====================
   function renderAgentPortalModal(lang = 'ug') {

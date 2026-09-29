@@ -104,13 +104,7 @@ function initTeklimakanApp() {
     try { updateDateDisplay(); } catch (e) {}
     try { if (typeof applyWheelTexts === 'function') applyWheelTexts(); } catch (e) {}
 
-    if (lang === 'ug') {
-      if (typeof showToast === 'function') showToast('تىل ئۇيغۇرچىغا، پۇل بىرلىكى لىرا (₺ TRY) غا ئالماشتۇرۇلدى!', 'success');
-    } else if (lang === 'tr') {
-      if (typeof showToast === 'function') showToast('Dil Türkçe, para birimi Türk Lirası (₺ TRY) olarak ayarlandı!', 'success');
-    } else {
-      if (typeof showToast === 'function') showToast('Language switched to English, currency set to US Dollar ($ USD)!', 'success');
-    }
+    // تىل ئالماشقاندا بەت دەرھال پاكىز ئۆزگىرىدۇ، ئارتۇقچە قاڭقىش ئەسكەرتىشى چىقىرىلمايدۇ
   }
 
   function openAgentPortalModal(initialTab = 'apply') {
@@ -2695,20 +2689,8 @@ function initTeklimakanApp() {
       document.querySelectorAll('.lang-option-row').forEach(row => {
         row.addEventListener('click', () => {
           const selectedLang = row.dataset.lang;
-          window.appI18n.setLang(selectedLang);
-          langModal.classList.remove('active');
-          updateStaticTranslations();
-          renderBrands();
-          renderCategories();
-          renderProducts();
-          renderFlashProductsCards();
-          updateCartUI();
-          if (selectedLang === 'ug') {
-            showToast('تىل ئۇيغۇرچىغا، پۇل بىرلىكى لىرا (₺ TRY) غا ئالماشتۇرۇلدى!', 'success');
-          } else if (selectedLang === 'tr') {
-            showToast('Dil Türkçe, para birimi Türk Lirası (₺ TRY) olarak ayarlandı!', 'success');
-          } else {
-            showToast('Language switched to English, currency set to US Dollar ($ USD)!', 'success');
+          if (selectedLang) {
+            selectSiteLanguage(selectedLang);
           }
         });
       });
@@ -9621,6 +9603,9 @@ ${text}
   window.resetMyDailySpin = resetMyDailySpin;
   window.drawLuckyWheel = drawLuckyWheel;
   window.updateLuckyWheelStatusCard = updateLuckyWheelStatusCard;
+  window.openLanguageModal = openLanguageModal;
+  window.closeLanguageModal = closeLanguageModal;
+  window.selectSiteLanguage = selectSiteLanguage;
 }
 
 if (document.readyState === 'loading') {

@@ -4540,10 +4540,8 @@ function initTeklimakanApp() {
 
     const track = document.getElementById('smartEdgeScrollTrack');
     const thumb = document.getElementById('smartEdgeScrollThumb');
-    const trackLeft = document.getElementById('smartEdgeScrollTrackLeft');
-    const thumbLeft = document.getElementById('smartEdgeScrollThumbLeft');
 
-    if (!track && !trackLeft) return;
+    if (!track || !thumb) return;
 
     let isTicking = false;
 
@@ -4555,36 +4553,18 @@ function initTeklimakanApp() {
 
       const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
 
-      if (track && thumb) {
-        const trackHeight = track.offsetHeight;
-        const thumbHeight = thumb.offsetHeight;
-        const maxTranslate = Math.max(0, trackHeight - thumbHeight);
-        const translateY = progress * maxTranslate;
-        thumb.style.transform = `translateY(${translateY}px)`;
+      const trackHeight = track.offsetHeight;
+      const thumbHeight = thumb.offsetHeight;
+      const maxTranslate = Math.max(0, trackHeight - thumbHeight);
+      const translateY = progress * maxTranslate;
+      thumb.style.transform = `translateY(${translateY}px)`;
 
-        if (scrollY <= 180) {
-          track.classList.add('at-top');
-          track.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
-        } else {
-          track.classList.remove('at-top');
-          track.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
-        }
-      }
-
-      if (trackLeft && thumbLeft) {
-        const trackHeight = trackLeft.offsetHeight;
-        const thumbHeight = thumbLeft.offsetHeight;
-        const maxTranslate = Math.max(0, trackHeight - thumbHeight);
-        const translateY = progress * maxTranslate;
-        thumbLeft.style.transform = `translateY(${translateY}px)`;
-
-        if (scrollY <= 180) {
-          trackLeft.classList.add('at-top');
-          trackLeft.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
-        } else {
-          trackLeft.classList.remove('at-top');
-          trackLeft.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
-        }
+      if (scrollY <= 180) {
+        track.classList.add('at-top');
+        track.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
+      } else {
+        track.classList.remove('at-top');
+        track.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
       }
 
       isTicking = false;
@@ -4600,8 +4580,7 @@ function initTeklimakanApp() {
       }
     }
 
-    if (track) track.addEventListener('click', handleEdgeClick);
-    if (trackLeft) trackLeft.addEventListener('click', handleEdgeClick);
+    track.addEventListener('click', handleEdgeClick);
 
     window.addEventListener('scroll', () => {
       if (!isTicking) {

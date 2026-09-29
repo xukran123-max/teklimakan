@@ -4507,7 +4507,14 @@ function initTeklimakanApp() {
 
     track.addEventListener('click', handleEdgeClick);
 
+    let scrollTimeout = null;
     window.addEventListener('scroll', () => {
+      track.classList.add('is-scrolling');
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        track.classList.remove('is-scrolling');
+      }, 1200);
+
       if (!isTicking) {
         window.requestAnimationFrame(updateEdgeScroll);
         isTicking = true;

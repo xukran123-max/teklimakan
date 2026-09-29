@@ -108,6 +108,8 @@ function initTeklimakanApp() {
   }
 
   function openAgentPortalModal(initialTab = 'apply') {
+    const currentLang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    if (currentLang !== 'ug') return; // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنىدۇ
     const modal = document.getElementById('agentPortalModal');
     if (!modal) return;
     modal.classList.add('active');
@@ -741,10 +743,24 @@ function initTeklimakanApp() {
     const flAboutSub = document.getElementById('fLinkAboutSub');
     if (flAboutSub) flAboutSub.textContent = i18n.t('fLinkAboutSub') || (lang === 'tr' ? 'Platform hakkında ve bilgiler' : (lang === 'en' ? 'Platform introduction & info' : 'سۇپا تونۇشتۇرۇشى ۋە ئۇچۇرلىرى'));
 
-    const fAgentPortalSpan = document.getElementById('fLinkAgentPortalSpan');
-    if (fAgentPortalSpan) fAgentPortalSpan.textContent = i18n.t('agentFooterLink') || i18n.t('topAgent');
-    const fAgentPortalSub = document.getElementById('fLinkAgentPortalSub');
-    if (fAgentPortalSub) fAgentPortalSub.textContent = i18n.t('fLinkAgentPortalSub') || (lang === 'tr' ? 'İş birliği ve temsilcilik' : (lang === 'en' ? 'Partnership & Agent portal' : 'ھەمكارلىق ۋە ۋاكالەتچىلىك'));
+    // 🤝 سودىگەر ۋە ۋاكالەتچى مەركىزى ئۇلانمىسى (پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن، باشقا تىلدا يوشۇرۇلسۇن)
+    const flAgentPortal = document.getElementById('fLinkAgentPortal');
+    if (flAgentPortal) {
+      if (lang === 'ug') {
+        flAgentPortal.style.display = 'flex';
+        const fAgentPortalSpan = document.getElementById('fLinkAgentPortalSpan');
+        if (fAgentPortalSpan) fAgentPortalSpan.textContent = i18n.t('agentFooterLink') || 'سودىگەر ۋە ۋاكالەتچى مەركىزى';
+        const fAgentPortalSub = document.getElementById('fLinkAgentPortalSub');
+        if (fAgentPortalSub) fAgentPortalSub.textContent = i18n.t('fLinkAgentPortalSub') || 'ئىلتىماس قىلىش، كىرىش ۋە تاۋار سۇنۇش';
+      } else {
+        flAgentPortal.style.display = 'none';
+        const modal = document.getElementById('agentPortalModal');
+        if (modal) {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        }
+      }
+    }
 
     const flTrackOrderSpan = document.getElementById('fLinkTrackOrderSpan');
     if (flTrackOrderSpan) flTrackOrderSpan.textContent = i18n.t('fLinkTrackOrder') || (lang === 'tr' ? 'Kargo Durumu Sorgula' : (lang === 'en' ? 'Track Order & Cargo' : 'كارگو ئەھۋالىنى تەكشۈرۈش'));
@@ -4557,8 +4573,9 @@ function initTeklimakanApp() {
     const paneSubmit = document.getElementById('agentSubmitPane');
 
     function openModal(defaultTab = 'apply') {
+      const currentL = window.appI18n ? window.appI18n.getLang() : 'ug';
+      if (currentL !== 'ug') return; // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن
       try {
-        const currentL = window.appI18n ? window.appI18n.getLang() : 'ug';
         renderAgentPortalModal(currentL);
       } catch (err) {
         console.warn('renderAgentPortalModal error:', err);

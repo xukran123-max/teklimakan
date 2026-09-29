@@ -1870,6 +1870,17 @@ class StoreManager {
       if (prods.length !== origLen) updated = true;
     }
 
+    // يېڭى قوشۇلغان رەسمىي تاۋارلارنى (ئۆچۈرۈلمىگەن بولسا) ئاپتوماتىك قوشۇپ تولۇقلاش
+    if (Array.isArray(INITIAL_PRODUCTS)) {
+      INITIAL_PRODUCTS.forEach(ip => {
+        const exists = prods.some(p => p.id === ip.id);
+        if (!exists && !deletedIds.includes(ip.id)) {
+          prods.push(JSON.parse(JSON.stringify(ip)));
+          updated = true;
+        }
+      });
+    }
+
     // 🛡️ تاۋارلاردىكى «???» ياكى ھەرپ كودلاش بۇزۇلۇشلىرىنى ئاپتوماتىك داۋالاش ۋە ئەسلىگە كەلتۈرۈش (Self-Healing Anti-Corruption Shield)
     const healProductRecord = (p) => {
       if (!p || typeof p !== 'object') return false;
@@ -2363,10 +2374,13 @@ class StoreManager {
             } catch(e) {}
           }
 
-          // پەقەت تېخى بۇلۇتقا يۈكلەنمىگەن يەرلىك كۈتۈۋاتقان يېڭى تاۋارلارلا ساقلىنىدۇ
+          // رەسمىي تاۋارلارنى ۋە يەرلىك تەستىقلانغان/كۈتۈۋاتقان تاۋارلارنى ئەتراپلىق ساقلاپ قېلىش
           localProds.forEach(p => {
-            if (!rpIds.has(p.id) && !deletedIds.includes(p.id) && p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ') {
-              map.set(p.id, p);
+            if (!rpIds.has(p.id) && !deletedIds.includes(p.id)) {
+              const isInitial = INITIAL_PRODUCTS.some(ip => ip.id === p.id);
+              if (isInitial || p.approvalStatus === 'تەستىق كۈتۈۋاتىدۇ' || p.approvalStatus === 'تەستىقلاندى') {
+                map.set(p.id, p);
+              }
             }
           });
 
@@ -8270,3 +8284,6 @@ class StoreManager {
 }
 
 window.appStore = new StoreManager();
+window.INITIAL_CATEGORIES = INITIAL_CATEGORIES;
+window.DEFAULT_HERO_SLIDES = DEFAULT_HERO_SLIDES;
+window.INITIAL_PRODUCTS = INITIAL_PRODUCTS;

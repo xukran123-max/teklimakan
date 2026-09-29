@@ -14,6 +14,156 @@ function initTeklimakanApp() {
   let sortBy = 'popular';
   let appliedCoupon = null;
 
+  // ⚡ تەشۋىقات بۆلىكى ئۆزگەرگۈچىلىرى (Hero Slider Variables)
+  let heroSliderTimer = null;
+  let heroSliderHoverTimeout = null;
+  let _lastHeroSlidesRenderKey = '';
+  let _heroSliderCurrentIdx = 0;
+
+  // ⚡ چەكلىك ئېتىبار رېشاتكىسى ۋاقتى (Flash Sale Shelf Timestamp)
+  let lastFlashToggleTime = 0;
+
+  // ⚡ ئامەت چاقى ئۆزگەرگۈچىلىرى ۋە دەسلەپكى ئېتىبار پارچىلىرى (Lucky Wheel)
+  let luckyWheelRotation = 0;
+  let isLuckyWheelSpinning = false;
+  let luckyWheelAnimFrame = null;
+  let wheelCountdownInterval = null;
+
+  const defaultLuckyWheelSlices = [
+    { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
+    { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
+    { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
+    { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
+    { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
+    { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
+  ];
+
+  // ⚡ سۇپا ئىچىدىكى زاكاز ئۇقتۇرۇش ئۆزگەرگۈچىلىرى (Tracking Inbox)
+  let currentInboxTab = 'notifs';
+  let currentInboxQuery = '';
+  let cachedInboxData = { orders: [], notifications: [] };
+
+  // ⚡ نەق مەيدان پېرېۋوت سانلىق مەلۇماتى (Live Exchange Rates)
+  let lastRatesData = {
+    usd: 38.50,
+    eur: 41.80,
+    updatedAt: null
+  };
+
+  function openLanguageModal(e) {
+    if (e) {
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+    }
+    const modal = document.getElementById('languageModal');
+    if (modal) {
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    }
+  }
+
+  function closeLanguageModal() {
+    const modal = document.getElementById('languageModal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
+  }
+
+  function selectSiteLanguage(lang) {
+    if (!lang || !['ug', 'tr', 'en'].includes(lang)) return;
+    if (window.appI18n && typeof window.appI18n.setLang === 'function') {
+      window.appI18n.setLang(lang);
+    }
+    try {
+      localStorage.setItem('teklimakan_language', lang);
+    } catch (e) {}
+
+    if (window.appStore && typeof window.appStore.setCurrency === 'function') {
+      const aligned = lang === 'en' ? 'USD' : 'TRY';
+      window.appStore.setCurrency(aligned);
+    }
+
+    closeLanguageModal();
+
+    document.querySelectorAll('.lang-option-row').forEach(row => {
+      const rowLang = row.dataset.lang;
+      const isSelected = rowLang === lang;
+      row.classList.toggle('active', isSelected);
+      const radio = row.querySelector('.lang-radio-indicator');
+      if (radio) radio.classList.toggle('checked', isSelected);
+    });
+
+    try { updateStaticTranslations(); } catch (e) {}
+    try { renderBrands(); } catch (e) {}
+    try { renderCategories(); } catch (e) {}
+    try { renderProducts(); } catch (e) {}
+    try { renderFlashProductsCards(); } catch (e) {}
+    try { updateCartUI(); } catch (e) {}
+    try { initHeroSlider(lang); } catch (e) {}
+    try { updateDateDisplay(); } catch (e) {}
+    try { if (typeof applyWheelTexts === 'function') applyWheelTexts(); } catch (e) {}
+
+    if (lang === 'ug') {
+      if (typeof showToast === 'function') showToast('تىل ئۇيغۇرچىغا، پۇل بىرلىكى لىرا (₺ TRY) غا ئالماشتۇرۇلدى!', 'success');
+    } else if (lang === 'tr') {
+      if (typeof showToast === 'function') showToast('Dil Türkçe, para birimi Türk Lirası (₺ TRY) olarak ayarlandı!', 'success');
+    } else {
+      if (typeof showToast === 'function') showToast('Language switched to English, currency set to US Dollar ($ USD)!', 'success');
+    }
+  }
+
+  function openAgentPortalModal(initialTab = 'apply') {
+    const modal = document.getElementById('agentPortalModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    const tabApply = document.getElementById('tabAgentApply');
+    const tabSubmit = document.getElementById('tabAgentSubmit');
+    const paneApply = document.getElementById('agentApplyPane');
+    const paneSubmit = document.getElementById('agentSubmitPane');
+    if (initialTab === 'submit' && tabSubmit && paneSubmit) {
+      if (tabApply) tabApply.classList.remove('active');
+      tabSubmit.classList.add('active');
+      if (paneApply) paneApply.style.display = 'none';
+      paneSubmit.style.display = 'block';
+    } else if (tabApply && paneApply) {
+      if (tabSubmit) tabSubmit.classList.remove('active');
+      tabApply.classList.add('active');
+      paneApply.style.display = 'block';
+      if (paneSubmit) paneSubmit.style.display = 'none';
+    }
+  }
+
+  function closeAgentPortalModal() {
+    const modal = document.getElementById('agentPortalModal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
+  }
+
+  // ⚡ فۇنكسىيەلەرنى دەرھال window غا ئۇلاش (كۇنۇپكىلارنىڭ ھەرگىز بوش قېلىپ قالماسلىقى ئۈچۈن)
+  window.toggleFlashSaleProducts = toggleFlashSaleProducts;
+  window.openLuckyWheelModal = openLuckyWheelModal;
+  window.closeLuckyWheelModal = closeLuckyWheelModal;
+  window.handleLuckyWheelSpin = handleLuckyWheelSpin;
+  window.resetMyDailySpin = resetMyDailySpin;
+  window.drawLuckyWheel = drawLuckyWheel;
+  window.updateLuckyWheelStatusCard = updateLuckyWheelStatusCard;
+  window.openLanguageModal = openLanguageModal;
+  window.closeLanguageModal = closeLanguageModal;
+  window.selectSiteLanguage = selectSiteLanguage;
+  window.openAgentPortalModal = openAgentPortalModal;
+  window.closeAgentPortalModal = closeAgentPortalModal;
+  window.renderProducts = renderProducts;
+  window.renderCategories = renderCategories;
+  window.renderBrands = renderBrands;
+  window.updateStaticTranslations = updateStaticTranslations;
+  window.updateCartUI = updateCartUI;
+  window.updateWishlistUI = updateWishlistUI;
+  window.initHeroSlider = initHeroSlider;
+
   // 🌤️ چەكلىك ئېتىبار رامكىسىدىكى ھاۋارايى شەھەرلىرى
   const FLASH_WEATHER_CITIES = [
     { name: { ug: 'قەشقەر', tr: 'Kaşgar', en: 'Kashgar' }, temp: '24°C', condition: { ug: 'ئوچۇق ھاۋا', tr: 'Açık Güneşli', en: 'Clear & Sunny' }, icon: 'fa-sun', color: '#f59e0b' },
@@ -965,7 +1115,10 @@ function initTeklimakanApp() {
     const lang = window.appI18n.getLang();
     let categories = window.appStore.getCategories(lang);
     if (!categories || !Array.isArray(categories) || categories.length <= 1) {
-      categories = INITIAL_CATEGORIES.map(c => ({
+      const fallbackCats = (typeof window !== 'undefined' && window.INITIAL_CATEGORIES)
+        ? window.INITIAL_CATEGORIES
+        : (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []);
+      categories = fallbackCats.map(c => ({
         ...c,
         displayName: (c.translations && c.translations[lang]) ? c.translations[lang] : c.name
       }));
@@ -1550,9 +1703,6 @@ function initTeklimakanApp() {
   }
 
   // ==================== 📬 سۇپا ئىچىدىكى خېرىدار زاكاز ۋە ئۇقتۇرۇش ساندۇقى (Customer Order Tracking Inbox UI) ====================
-  let currentInboxTab = 'notifs';
-  let currentInboxQuery = '';
-  let cachedInboxData = { orders: [], notifications: [] };
 
   function updateCustomerInboxBadges() {
     const phone = localStorage.getItem('teklimakan_customer_phone') || '';
@@ -4105,11 +4255,6 @@ function initTeklimakanApp() {
 
     modal.classList.add('active');
   }
-
-  let heroSliderTimer = null;
-  let heroSliderHoverTimeout = null;
-  let _lastHeroSlidesRenderKey = '';
-  let _heroSliderCurrentIdx = 0;
 
   function initHeroSlider(forcedLang = null) {
     const container = document.querySelector('.hero-slider-container');
@@ -7096,11 +7241,6 @@ function initTeklimakanApp() {
   }
 
   // ==================== نەق مەيدان پېرېۋوت باھاسى (Live USD & EUR Market Rates) ====================
-  let lastRatesData = {
-    usd: 38.50,
-    eur: 41.80,
-    updatedAt: null
-  };
 
   async function fetchLiveExchangeRates() {
     const usdEl = document.getElementById('liveRateUsd');
@@ -8802,7 +8942,6 @@ ${text}
   }, { capture: true });
 
   // ==================== ⚡ ئالاھىدە ئېتىبارلىق مەھسۇلاتلار رېشاتكىسى (Daily Flash Sale Shelf) ====================
-  let lastFlashToggleTime = 0;
 
   function renderFlashProductsCards() {
     const container = document.getElementById('customerFlashSaleProductsContainer');
@@ -8850,7 +8989,7 @@ ${text}
     if (typeof openQuickView === 'function') openQuickView(productId);
   };
 
-  window.toggleFlashSaleProducts = function(e) {
+  function toggleFlashSaleProducts(e) {
     if (e) {
       if (typeof e.preventDefault === 'function') e.preventDefault();
       if (typeof e.stopPropagation === 'function') e.stopPropagation();
@@ -8939,9 +9078,6 @@ ${text}
   };
 
   // ==================== 🎡 كۈندىلىك ئامەت چاقى لوگىكىسى (Customer Daily Lucky Wheel) ====================
-  let luckyWheelRotation = 0;
-  let isLuckyWheelSpinning = false;
-  let luckyWheelAnimFrame = null;
 
   function initCustomerLuckyWheel() {
     const btnOpen = document.getElementById('btnOpenLuckyWheel');
@@ -9035,15 +9171,6 @@ ${text}
     modal.style.display = 'none';
     modal.classList.remove('active');
   }
-
-  const defaultLuckyWheelSlices = [
-    { id: 'sw1', text: '₺10 ئېتىبار', couponCode: 'LUCKY10', type: 'fixed', value: 10, minSpend: 100, color: '#f59e0b', weight: 30 },
-    { id: 'sw2', text: '₺20 ئېتىبار', couponCode: 'LUCKY20', type: 'fixed', value: 20, minSpend: 200, color: '#10b981', weight: 25 },
-    { id: 'sw3', text: '₺50 ئېتىبار', couponCode: 'LUCKY50', type: 'fixed', value: 50, minSpend: 400, color: '#ef4444', weight: 10 },
-    { id: 'sw4', text: 'ھەقسىز يەتكۈزۈش', couponCode: 'LUCKYFREE', type: 'free_shipping', value: 35, minSpend: 150, color: '#8b5cf6', weight: 20 },
-    { id: 'sw5', text: '%5 ئېتىبار', couponCode: 'LUCKY5PCT', type: 'percentage', value: 5, minSpend: 50, color: '#3b82f6', weight: 25 },
-    { id: 'sw6', text: 'تەلەيلىك بولۇڭ', couponCode: '', type: 'none', value: 0, minSpend: 0, color: '#64748b', weight: 10 }
-  ];
 
   function getEffectiveLuckyWheelSlices() {
     if (window.appStore && typeof window.appStore.getCustomerRetentionSettings === 'function') {
@@ -9190,8 +9317,6 @@ ${text}
       showToast('🎉 قايتا ئايلاندۇرۇش پۇرسىتى ئېچىلدى! ئەمدى چاقنى ئايلاندۇرالايسىز.', 'success');
     }
   }
-
-  let wheelCountdownInterval = null;
   function startLuckyWheelCountdown() {
     if (wheelCountdownInterval) clearInterval(wheelCountdownInterval);
 

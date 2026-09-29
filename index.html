@@ -140,7 +140,7 @@
       <!-- 3. سول تەرەپ مەشغۇلات كۇنۇپكىلىرى: تىل تاللاش + تۈن ھالىتى (يانداش، بوشلۇقى دەل تەكشى) -->
       <div class="nav-actions-minimal">
         <div class="lang-selector-wrap">
-          <button type="button" id="languagePickerBtn" class="lang-select-dropdown" title="تىل تاللاش / Dil / Language">
+          <button type="button" id="languagePickerBtn" onclick="window.openLanguageModal && window.openLanguageModal(event)" class="lang-select-dropdown" title="تىل تاللاش / Dil / Language">
             <img id="navLangFlag" src="images/flag_uyghur.png" alt="ئۇيغۇرچە" class="lang-flag-img">
             <span id="navLangLabel" class="nav-lang-text">ئۇيغۇرچە</span>
             <i class="fas fa-chevron-down nav-lang-arrow"></i>
@@ -1616,7 +1616,7 @@
     <div class="modal-content" style="max-width: 380px; border-radius: 24px; padding: 0.5rem 0; overflow: hidden; background: #ffffff; color: #1e293b; box-shadow: 0 20px 45px rgba(0,0,0,0.3);">
       
       <!-- ئۇيغۇرچە تاللانمىسى (Kökbayraq) -->
-      <div class="lang-option-row active" data-lang="ug" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+      <div class="lang-option-row active" data-lang="ug" onclick="window.selectSiteLanguage && window.selectSiteLanguage('ug')" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
         <div style="display: flex; align-items: center; gap: 0.9rem;">
           <img src="images/flag_uyghur.png" alt="ئۇيغۇرچە" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
           <div>
@@ -1630,7 +1630,7 @@
       <div style="height: 1px; background: #e2e8f0; margin: 0 1.25rem;"></div>
 
       <!-- تۈركچە تاللانمىسى -->
-      <div class="lang-option-row" data-lang="tr" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+      <div class="lang-option-row" data-lang="tr" onclick="window.selectSiteLanguage && window.selectSiteLanguage('tr')" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
         <div style="display: flex; align-items: center; gap: 0.9rem;">
           <img src="images/flag_tr.png" alt="Türkçe" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
           <div>
@@ -1644,7 +1644,7 @@
       <div style="height: 1px; background: #e2e8f0; margin: 0 1.25rem;"></div>
 
       <!-- ئىنگلىزچە تاللانمىسى -->
-      <div class="lang-option-row" data-lang="en" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
+      <div class="lang-option-row" data-lang="en" onclick="window.selectSiteLanguage && window.selectSiteLanguage('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem; cursor: pointer;">
         <div style="display: flex; align-items: center; gap: 0.9rem;">
           <img src="images/flag_en.png" alt="English" style="width: 36px; height: 24px; border-radius: 4px; object-fit: cover; box-shadow: 0 1px 4px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.08);">
           <div>
@@ -2113,9 +2113,9 @@
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js?v=20260928_v124"></script>
-  <script src="js/i18n.js?v=20260928_v126"></script>
-  <script src="js/store.js?v=20260928_v127"></script>
-  <script src="js/app.js?v=20260928_v127"></script>
+  <script src="js/i18n.js?v=20260929_v128"></script>
+  <script src="js/store.js?v=20260929_v128"></script>
+  <script src="js/app.js?v=20260929_v128"></script>
   <script src="js/push-manager.js?v=20260928_v124"></script>
 </body>
 </html>

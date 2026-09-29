@@ -833,6 +833,31 @@ function initTeklimakanApp() {
     if (cCustName) cCustName.title = lang === 'tr' ? 'Müşteri Adı' : (lang === 'en' ? 'Customer Name' : 'خېرىدار ئىسمى');
     if (cCustPhone) cCustPhone.title = lang === 'tr' ? 'Telefon veya E-posta' : (lang === 'en' ? 'Phone or Email' : 'تېلېفون ياكى ئىمائىل');
 
+    // 📱 لەيلىمە پاراڭ كۇنۇپكىسى ۋە ئۇچۇر ئەسكەرتكۈچى (Floating Chat Button & Tooltip)
+    const liveChatBtn = document.getElementById('adminLiveChatToggleBtn');
+    if (liveChatBtn) {
+      liveChatBtn.title = i18n.t('floatingChatTitle') || (lang === 'tr' ? 'Yönetici ile Doğrudan Canlı Sohbet' : (lang === 'en' ? 'Direct Live Chat with Admin' : 'ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش'));
+    }
+    const liveChatTooltip = document.querySelector('.floating-contact-tooltip');
+    if (liveChatTooltip) {
+      liveChatTooltip.textContent = i18n.t('floatingChatTooltip') || (lang === 'tr' ? 'Yönetici ile Canlı Sohbet' : (lang === 'en' ? 'Chat with Live Support' : 'ئالىي باشقۇرغۇچى بىلەن پاراڭلىشىش'));
+    }
+    const onlineDot = document.querySelector('.chat-online-dot');
+    if (onlineDot) {
+      onlineDot.title = lang === 'tr' ? 'Şimdi Çevrimiçi' : (lang === 'en' ? 'Online Now' : 'ھازىر توردا');
+    }
+
+    // 🎡 ئامەت چاقى يېپىش كۇنۇپكىسى (Lucky Wheel Close Button)
+    const btnCloseWheel = document.getElementById('btnCloseLuckyWheel');
+    if (btnCloseWheel) {
+      btnCloseWheel.title = lang === 'tr' ? 'Kapat' : (lang === 'en' ? 'Close' : 'تاقاش');
+    }
+
+    // 🎡 ئامەت چاقى تېكىستلىرى ۋە كارتىنى تىلغا ماس ھالدا دەل ۋاقتىدا يېڭىلاش
+    if (typeof window.updateLuckyWheelLocalization === 'function') {
+      window.updateLuckyWheelLocalization();
+    }
+
     // 💬 نەق مەيدان پاراڭ كۆزنىكىنى (خېرىدار سالاھىيىتى ۋە سالام ئۇچۇرلىرىنى) ھازىرقى تىلغا ئالماشتۇرۇش
     if (typeof window.updateCustomerLiveChatLocalization === 'function') {
       window.updateCustomerLiveChatLocalization();
@@ -3095,8 +3120,11 @@ function initTeklimakanApp() {
         appliedCoupon = { code: code, discount: 20 };
         const coupInp = document.getElementById('couponCodeInput');
         if (coupInp) coupInp.value = code;
-        updateCartUI();
-        showToast(`🎉 كۇپون (${code}) سېۋەتكە كۈچكە ئىگە قىلىندى!`, 'success');
+        const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+        const msg = lang === 'tr' 
+          ? `🎉 Kupon (${code}) sepete başarıyla uygulandı!` 
+          : (lang === 'en' ? `🎉 Coupon (${code}) applied to cart!` : `🎉 كۇپون (${code}) سېۋەتكە كۈچكە ئىگە قىلىندى!`);
+        showToast(msg, 'success');
       }
       // سېۋەت رامكىسىنى ئېچىش
       const cartDrawer = document.getElementById('cartDrawer');
@@ -7555,17 +7583,32 @@ function initTeklimakanApp() {
       const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
 
       if (isAgent) {
+        let rawAgentName = (agentObj && agentObj.name) ? String(agentObj.name).trim() : '';
         let roleTitle = '<i class="fas fa-crown"></i> ھۆرمەتلىك ۋاكالەتچى';
-        let roleDesc = `${agentObj?.name || 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى'} • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`;
+        let roleDesc = `${rawAgentName || 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى'} • كۇنۇپكىلار ۋە چات چەكلىمىسىز ئوچۇق`;
         let pillText = 'ۋاكالەتچى VIP';
 
         if (lang === 'tr') {
+          let trAgentName = rawAgentName;
+          if (trAgentName && window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+            trAgentName = window.appI18n.autoTranslateUyghur(trAgentName, 'tr');
+          }
+          if (!trAgentName || trAgentName === 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى') {
+            trAgentName = 'Teklimakan Yetkili Temsilcisi';
+          }
           roleTitle = '<i class="fas fa-crown"></i> Yetkili Temsilci';
-          roleDesc = `${agentObj?.name || 'Teklimakan Yetkili Temsilcisi'} • Tüm butonlar ve destek sınırsız açık`;
+          roleDesc = `${trAgentName} • Tüm butonlar ve destek sınırsız açık`;
           pillText = 'Temsilci VIP';
         } else if (lang === 'en') {
+          let enAgentName = rawAgentName;
+          if (enAgentName && window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+            enAgentName = window.appI18n.autoTranslateUyghur(enAgentName, 'en');
+          }
+          if (!enAgentName || enAgentName === 'تەكلىماكان كېلىشىملىك ۋاكالەتچىسى') {
+            enAgentName = 'Teklimakan Authorized Agent';
+          }
           roleTitle = '<i class="fas fa-crown"></i> Authorized Agent';
-          roleDesc = `${agentObj?.name || 'Teklimakan Authorized Agent'} • Unlimited buttons and support`;
+          roleDesc = `${enAgentName} • Unlimited buttons and support`;
           pillText = 'Agent VIP';
         }
 
@@ -9114,6 +9157,7 @@ ${text}
 
     const applyWheelTexts = () => {
       const i18n = window.appI18n;
+      const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
       const wheelTitle = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelTitle')) || wheelCfg.title || 'ئامەت چاقى';
       const wheelSub = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSub')) || wheelCfg.subtitle || 'كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!';
       const wheelBtnSub = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelBtnSub')) || '1 قېتىم ھەقسىز!';
@@ -9129,8 +9173,11 @@ ${text}
       btnOpen.setAttribute('title', `${wheelTitle} — ${wheelSub}`);
 
       if (btnSpin && !isLuckyWheelSpinning) {
-        btnSpin.innerHTML = `<i class="fas fa-play-circle"></i> ${(i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSpinBtn')) || 'ئايلاندۇرۇش'}`;
+        const spinText = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSpinBtn')) || (lang === 'tr' ? 'Çarkı Çevir' : (lang === 'en' ? 'Spin Now' : 'ئايلاندۇرۇش'));
+        btnSpin.innerHTML = `<i class="fas fa-play-circle"></i> ${spinText}`;
       }
+      drawLuckyWheel(luckyWheelRotation);
+      updateLuckyWheelStatusCard();
     };
     window.updateLuckyWheelLocalization = applyWheelTexts;
     applyWheelTexts();
@@ -9189,13 +9236,42 @@ ${text}
   }
 
   function getEffectiveLuckyWheelSlices() {
+    let rawSlices = defaultLuckyWheelSlices;
     if (window.appStore && typeof window.appStore.getCustomerRetentionSettings === 'function') {
       const retention = window.appStore.getCustomerRetentionSettings();
       if (retention && retention.luckyWheel && Array.isArray(retention.luckyWheel.slices) && retention.luckyWheel.slices.length >= 2) {
-        return retention.luckyWheel.slices;
+        rawSlices = retention.luckyWheel.slices;
       }
     }
-    return defaultLuckyWheelSlices;
+    const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    if (lang === 'ug') return rawSlices;
+
+    return rawSlices.map(slice => {
+      let locText = slice.text || '';
+      const cCode = String(slice.couponCode || '').toUpperCase();
+      const sType = slice.type || '';
+      if (lang === 'tr') {
+        if (cCode === 'LUCKY10' || slice.id === 'sw1' || locText.includes('10')) locText = '₺10 İndirim';
+        else if (cCode === 'LUCKY20' || slice.id === 'sw2' || locText.includes('20')) locText = '₺20 İndirim';
+        else if (cCode === 'LUCKY50' || slice.id === 'sw3' || locText.includes('50')) locText = '₺50 İndirim';
+        else if (cCode === 'LUCKYFREE' || slice.id === 'sw4' || sType === 'free_shipping' || locText.includes('ھەقسىز')) locText = 'Ücretsiz Kargo';
+        else if (cCode === 'LUCKY5PCT' || slice.id === 'sw5' || sType === 'percentage' || locText.includes('%5') || locText.includes('5%')) locText = '%5 İndirim';
+        else if (slice.id === 'sw6' || sType === 'none' || locText.includes('تەلەيلىك')) locText = 'Şansınızı Deneyin';
+        else if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') locText = window.appI18n.autoTranslateUyghur(locText, 'tr');
+      } else if (lang === 'en') {
+        if (cCode === 'LUCKY10' || slice.id === 'sw1' || locText.includes('10')) locText = '10₺ Discount';
+        else if (cCode === 'LUCKY20' || slice.id === 'sw2' || locText.includes('20')) locText = '20₺ Discount';
+        else if (cCode === 'LUCKY50' || slice.id === 'sw3' || locText.includes('50')) locText = '50₺ Discount';
+        else if (cCode === 'LUCKYFREE' || slice.id === 'sw4' || sType === 'free_shipping' || locText.includes('ھەقسىز')) locText = 'Free Shipping';
+        else if (cCode === 'LUCKY5PCT' || slice.id === 'sw5' || sType === 'percentage' || locText.includes('%5') || locText.includes('5%')) locText = '5% Off';
+        else if (slice.id === 'sw6' || sType === 'none' || locText.includes('تەلەيلىك')) locText = 'Better Luck';
+        else if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') locText = window.appI18n.autoTranslateUyghur(locText, 'en');
+      }
+      return {
+        ...slice,
+        text: locText
+      };
+    });
   }
 
   function drawLuckyWheel(currentAngleRad = 0) {
@@ -9211,6 +9287,7 @@ ${text}
     const slices = getEffectiveLuckyWheelSlices();
     const numSlices = slices.length;
     const sliceAngle = (2 * Math.PI) / numSlices;
+    const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
 
     ctx.clearRect(0, 0, width, height);
 
@@ -9237,7 +9314,7 @@ ${text}
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px "Microsoft YaHei", "ALKATIP Basma Tom", sans-serif';
+      ctx.font = lang === 'ug' ? 'bold 12px "Microsoft YaHei", "ALKATIP Basma Tom", sans-serif' : 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
       ctx.shadowBlur = 4;
       ctx.fillText(slice.text || '', radius - 22, 0);
@@ -9268,6 +9345,9 @@ ${text}
     const btnSpin = document.getElementById('btnSpinWheelAction');
     if (!card) return;
 
+    const i18n = window.appI18n;
+    const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
+
     const check = (window.appStore && typeof window.appStore.canCustomerSpinToday === 'function')
       ? window.appStore.canCustomerSpinToday()
       : { canSpin: true };
@@ -9278,12 +9358,19 @@ ${text}
         btnSpin.style.opacity = '1';
         btnSpin.style.cursor = 'pointer';
         btnSpin.style.pointerEvents = 'auto';
+        if (!isLuckyWheelSpinning) {
+          const spinLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSpinBtn')) || (lang === 'tr' ? 'Çarkı Çevir' : (lang === 'en' ? 'Spin Now' : 'ئايلاندۇرۇش'));
+          btnSpin.innerHTML = `<i class="fas fa-play-circle"></i> ${spinLabel}`;
+        }
       }
+      const availTitle = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelAvailableTitle')) || (lang === 'tr' ? '🎁 Bugün <span style="color: #ef4444;">1 defa ücretsiz</span> çevirme hakkınız var!' : (lang === 'en' ? '🎁 You have <span style="color: #ef4444;">1 free spin</span> today!' : '🎁 سىزنىڭ بۈگۈنكى <span style="color: #ef4444;">1 قېتىملىق ھەقسىز</span> پۇرسىتىڭىز بار!'));
+      const availDesc = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelAvailableDesc')) || (lang === 'tr' ? 'Ortadaki "Çarkı Çevir" butonuna basarak anında kupon kazanın.' : (lang === 'en' ? 'Click the "Spin Now" button in the center to win your reward.' : 'ئوتتۇرىدىكى «ئايلاندۇر» كۇنۇپكىسىنى بېسىپ مۇكاپات ئۇتۇۋېلىڭ.'));
+
       card.innerHTML = `
         <div style="color: #0f172a; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem;">
-          🎁 سىزنىڭ بۈگۈنكى <span style="color: #ef4444;">1 قېتىملىق ھەقسىز</span> پۇرسىتىڭىز بار!
+          ${availTitle}
         </div>
-        <p style="font-size: 0.8rem; color: #64748b; margin: 0;">ئوتتۇرىدىكى «ئايلاندۇر» كۇنۇپكىسىنى بېسىپ مۇكاپات ئۇتۇۋېلىڭ.</p>
+        <p style="font-size: 0.8rem; color: #64748b; margin: 0;">${availDesc}</p>
       `;
     } else {
       if (btnSpin) {
@@ -9294,28 +9381,53 @@ ${text}
       const last = check.lastSpin || {};
       const hasCoupon = last.couponCode && last.type !== 'none';
 
+      let winText = last.text || '';
+      if (lang === 'tr') {
+        if (winText.includes('10') || last.couponCode === 'LUCKY10') winText = '₺10 İndirim';
+        else if (winText.includes('20') || last.couponCode === 'LUCKY20') winText = '₺20 İndirim';
+        else if (winText.includes('50') || last.couponCode === 'LUCKY50') winText = '₺50 İndirim';
+        else if (winText.includes('ھەقسىز') || last.type === 'free_shipping') winText = 'Ücretsiz Kargo';
+        else if (winText.includes('%5') || winText.includes('5%') || last.type === 'percentage') winText = '%5 İndirim';
+        else if (winText.includes('تەلەيلىك') || last.type === 'none') winText = 'Şansınızı Deneyin';
+        else if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') winText = window.appI18n.autoTranslateUyghur(winText, 'tr');
+      } else if (lang === 'en') {
+        if (winText.includes('10') || last.couponCode === 'LUCKY10') winText = '10₺ Discount';
+        else if (winText.includes('20') || last.couponCode === 'LUCKY20') winText = '20₺ Discount';
+        else if (winText.includes('50') || last.couponCode === 'LUCKY50') winText = '50₺ Discount';
+        else if (winText.includes('ھەقسىز') || last.type === 'free_shipping') winText = 'Free Shipping';
+        else if (winText.includes('%5') || winText.includes('5%') || last.type === 'percentage') winText = '5% Off';
+        else if (winText.includes('تەلەيلىك') || last.type === 'none') winText = 'Better Luck Next Time';
+        else if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') winText = window.appI18n.autoTranslateUyghur(winText, 'en');
+      }
+
+      const wonPrefix = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelWonPrefix')) || (lang === 'tr' ? '✅ Bugünkü Ödülünüz:' : (lang === 'en' ? "✅ Today's Prize:" : '✅ بۈگۈنكى ئۇتۇقىڭىز:'));
+      const useCartLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelUseInCartBtn')) || (lang === 'tr' ? 'Sepette Kullan' : (lang === 'en' ? 'Apply to Cart' : 'سېۋەتكە ئىشلىتىش'));
+      const cdLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelNextCountdownLabel')) || (lang === 'tr' ? 'Sonraki ücretsiz hakka kalan süre:' : (lang === 'en' ? 'Time until next free spin:' : 'كېيىنكى ھەقسىز پۇرسەتكە قالغان ۋاقىت:'));
+      const resetLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelResetBtn')) || (lang === 'tr' ? 'Tekrar Dene (Hakkı Sıfırla)' : (lang === 'en' ? 'Test Again (Reset Spin)' : 'قايتا سىناپ كۆرۈش (پۇرسەتنى يېڭىلاش)'));
+      const resetTitle = lang === 'tr' ? 'Test amacıyla çevirme hakkını sıfırlar' : (lang === 'en' ? 'Reset spin for testing purposes' : 'سىناق مەقسىتىدە پۇرسەتنى يېڭىلاش');
+
       card.innerHTML = `
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 0.75rem; margin-bottom: 0.65rem;">
           <div style="color: #166534; font-weight: 800; font-size: 0.9rem;">
-            ✅ بۈگۈنكى ئۇتۇقىڭىز: <span style="color: #047857;">${last.text || 'تەلەيلىك بولۇڭ'}</span>
+            ${wonPrefix} <span style="color: #047857;">${winText || (lang === 'tr' ? 'Şansınızı Deneyin' : (lang === 'en' ? 'Better Luck' : 'تەلەيلىك بولۇڭ'))}</span>
           </div>
           ${hasCoupon ? `
             <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
               <code class="number-latin" style="background: #ffffff; border: 1px dashed #10b981; color: #047857; font-weight: 800; font-size: 0.95rem; padding: 3px 10px; border-radius: 6px;">${last.couponCode}</code>
               <button type="button" class="btn-primary" onclick="window.applyCustomerCouponToCart('${last.couponCode}')" style="background: #059669; padding: 4px 12px; font-size: 0.8rem; font-weight: 800; border-radius: 6px;">
-                <i class="fas fa-shopping-cart"></i> سېۋەتكە ئىشلىتىش
+                <i class="fas fa-shopping-cart"></i> ${useCartLabel}
               </button>
             </div>
           ` : ''}
         </div>
         <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
           <i class="fas fa-clock" style="color: #f59e0b;"></i>
-          <span>كېيىنكى ھەقسىز پۇرسەتكە قالغان ۋاقىت:</span>
+          <span>${cdLabel}</span>
           <strong id="luckyWheelNextCountdown" class="number-latin" style="color: #ef4444; font-weight: 800;">--:--:--</strong>
         </div>
         <div style="margin-top: 0.75rem; text-align: center;">
-          <button type="button" onclick="window.resetMyDailySpin()" style="background: #eff6ff; color: #1d4ed8; border: 1px dashed #93c5fd; padding: 5px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" title="سىناق مەقسىتىدە پۇرسەتنى يېڭىلاش">
-            <i class="fas fa-redo"></i> قايتا سىناپ كۆرۈش (پۇرسەتنى يېڭىلاش)
+          <button type="button" onclick="window.resetMyDailySpin()" style="background: #eff6ff; color: #1d4ed8; border: 1px dashed #93c5fd; padding: 5px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" title="${resetTitle}">
+            <i class="fas fa-redo"></i> ${resetLabel}
           </button>
         </div>
       `;
@@ -9329,8 +9441,12 @@ ${text}
     } catch (e) {}
     updateLuckyWheelStatusCard();
     drawLuckyWheel(luckyWheelRotation);
+    const lang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    const msg = lang === 'tr'
+      ? '🎉 Yeniden çevirme hakkınız açıldı! Şimdi çarkı çevirebilirsiniz.'
+      : (lang === 'en' ? '🎉 Spin reset! You can now spin the wheel again.' : '🎉 قايتا ئايلاندۇرۇش پۇرسىتى ئېچىلدى! ئەمدى چاقنى ئايلاندۇرالايسىز.');
     if (typeof showToast === 'function') {
-      showToast('🎉 قايتا ئايلاندۇرۇش پۇرسىتى ئېچىلدى! ئەمدى چاقنى ئايلاندۇرالايسىز.', 'success');
+      showToast(msg, 'success');
     }
   }
   function startLuckyWheelCountdown() {
@@ -9397,11 +9513,16 @@ ${text}
     }
 
     const card = document.getElementById('luckyWheelStatusCard');
+    const i18n = window.appI18n;
+    const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
+    const spinHint = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelSpinningHint'))
+      || (lang === 'tr' ? 'Çark dönüyor... Bol şanslar!' : (lang === 'en' ? 'Spinning fast... Good luck!' : 'چاق تېز ئايلانماقتا... تەلەيلىك بولۇڭ!'));
+
     if (card) {
       card.innerHTML = `
         <div style="color: #f59e0b; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
           <i class="fas fa-spinner fa-spin"></i>
-          <span>چاق تېز ئايلانماقتا... تەلەيلىك بولۇڭ!</span>
+          <span>${spinHint}</span>
         </div>
       `;
     }
@@ -9446,35 +9567,47 @@ ${text}
     const card = document.getElementById('luckyWheelStatusCard');
     if (!card) return;
 
+    const i18n = window.appI18n;
+    const lang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
     const hasCoupon = slice.couponCode && slice.type !== 'none';
+
+    const congratsTitle = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelCongratsTitle')) || (lang === 'tr' ? '🎉 Tebrikler!' : (lang === 'en' ? '🎉 Congratulations!' : '🎉 مۇبارەك بولسۇن!'));
+    const youWonHtml = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelYouWon', { prize: slice.text })) || (lang === 'tr' ? `Tebrikler, «<span style="color: #ef4444;">${slice.text}</span>» kazandınız!` : (lang === 'en' ? `You won «<span style="color: #ef4444;">${slice.text}</span>»!` : `سىز «<span style="color: #ef4444;">${slice.text}</span>» ئۇتتىڭىز!`));
+    const copyLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelCopyCode')) || (lang === 'tr' ? 'Kopyala' : (lang === 'en' ? 'Copy' : 'كۆچۈرۈش'));
+    const useNowLabel = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelUseNowBtn')) || (lang === 'tr' ? 'Hemen Sepette Kullan' : (lang === 'en' ? 'Apply to Cart Now' : 'دەرھال سېۋەتكە ئىشلىتىش'));
+    const betterLuckMsg = (i18n && typeof i18n.t === 'function' && i18n.t('luckyWheelBetterLuck')) || (lang === 'tr' ? 'Bugün şansınız yaver gitmedi, yarın mutlaka tekrar deneyin!' : (lang === 'en' ? 'Better luck next time, come back tomorrow!' : 'بۈگۈن پۇرسىتىڭىز ئوڭدىن كەلمىدى، ئەتىگە چوقۇم يەنە كۆرۈشەيلى!'));
+    const copiedToast = lang === 'tr' ? '📋 Kupon kodu kopyalandı!' : (lang === 'en' ? '📋 Coupon code copied!' : '📋 كۇپون كودى كۆچۈرۈلدى!');
 
     card.innerHTML = `
       <div style="background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%); border: 2px solid #f59e0b; border-radius: 14px; padding: 1rem; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);">
         <div style="font-size: 1.25rem; font-weight: 900; color: #b45309; margin-bottom: 0.35rem;">
-          🎉 مۇبارەك بولسۇن!
+          ${congratsTitle}
         </div>
         <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 0.65rem;">
-          سىز «<span style="color: #ef4444;">${slice.text}</span>» ئۇتتىڭىز!
+          ${youWonHtml}
         </div>
         ${hasCoupon ? `
           <div style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-top: 0.5rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <code class="number-latin" style="background: #ffffff; border: 1.5px dashed #f59e0b; color: #b45309; font-weight: 900; font-size: 1.15rem; padding: 4px 14px; border-radius: 8px; letter-spacing: 1px;">${slice.couponCode}</code>
-              <button type="button" class="btn-primary" onclick="navigator.clipboard?.writeText('${slice.couponCode}'); showToast('📋 كۇپون كودى كۆچۈرۈلدى!', 'success');" style="background: #64748b; padding: 5px 10px; font-size: 0.8rem;">
-                <i class="fas fa-copy"></i> كۆچۈرۈش
+              <button type="button" class="btn-primary" onclick="navigator.clipboard?.writeText('${slice.couponCode}'); showToast('${copiedToast}', 'success');" style="background: #64748b; padding: 5px 10px; font-size: 0.8rem;">
+                <i class="fas fa-copy"></i> ${copyLabel}
               </button>
             </div>
             <button type="button" class="btn-primary" onclick="window.applyCustomerCouponToCart('${slice.couponCode}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; padding: 0.65rem; font-weight: 900; font-size: 0.95rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-              <i class="fas fa-cart-arrow-down"></i> دەرھال سېۋەتكە ئىشلىتىش (Use in Cart)
+              <i class="fas fa-cart-arrow-down"></i> ${useNowLabel}
             </button>
           </div>
         ` : `
-          <p style="font-size: 0.85rem; color: #64748b; margin: 0;">بۈگۈن پۇرسىتىڭىز ئوڭدىن كەلمىدى، ئەتىگە چوقۇم يەنە كۆرۈشەيلى!</p>
+          <p style="font-size: 0.85rem; color: #64748b; margin: 0;">${betterLuckMsg}</p>
         `}
       </div>
     `;
 
-    showToast(`🎉 ئامەت چاقى: سىز ${slice.text} ئۇتتىڭىز!`, 'success');
+    const winToast = lang === 'tr'
+      ? `🎉 Şans Çarkı: ${slice.text} kazandınız!`
+      : (lang === 'en' ? `🎉 Lucky Wheel: You won ${slice.text}!` : `🎉 ئامەت چاقى: سىز ${slice.text} ئۇتتىڭىز!`);
+    showToast(winToast, 'success');
   }
 
   window.showToast = showToast;

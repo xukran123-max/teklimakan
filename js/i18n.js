@@ -304,7 +304,21 @@ const I18N_TRANSLATIONS = {
     luckyWheelBtnSub: '1 قېتىم ھەقسىز!',
     luckyWheelSpinBtn: 'ئايلاندۇرۇش',
     luckyWheelSpinning: 'ئايلىنىۋاتىدۇ...',
-    luckyWheelAlreadySpun: 'بۈگۈنكى ھەقسىز پۇرسەت ئىشلىتىلدى!'
+    luckyWheelAlreadySpun: 'بۈگۈنكى ھەقسىز پۇرسەت ئىشلىتىلدى!',
+    luckyWheelAvailableTitle: '🎁 سىزنىڭ بۈگۈنكى <span style="color: #ef4444;">1 قېتىملىق ھەقسىز</span> پۇرسىتىڭىز بار!',
+    luckyWheelAvailableDesc: 'ئوتتۇرىدىكى «ئايلاندۇر» كۇنۇپكىسىنى بېسىپ مۇكاپات ئۇتۇۋېلىڭ.',
+    luckyWheelWonPrefix: '✅ بۈگۈنكى ئۇتۇقىڭىز:',
+    luckyWheelUseInCartBtn: 'سېۋەتكە ئىشلىتىش',
+    luckyWheelNextCountdownLabel: 'كېيىنكى ھەقسىز پۇرسەتكە قالغان ۋاقىت:',
+    luckyWheelResetBtn: 'قايتا سىناپ كۆرۈش (پۇرسەتنى يېڭىلاش)',
+    luckyWheelSpinningHint: 'چاق تېز ئايلانماقتا... تەلەيلىك بولۇڭ!',
+    luckyWheelCongratsTitle: '🎉 مۇبارەك بولسۇن!',
+    luckyWheelYouWon: 'سىز «<span style="color: #ef4444;">{prize}</span>» ئۇتتىڭىز!',
+    luckyWheelCopyCode: 'كۆچۈرۈش',
+    luckyWheelUseNowBtn: 'دەرھال سېۋەتكە ئىشلىتىش',
+    luckyWheelBetterLuck: 'بۈگۈن پۇرسىتىڭىز ئوڭدىن كەلمىدى، ئەتىگە چوقۇم يەنە كۆرۈشەيلى!',
+    floatingChatTooltip: 'ئالىي باشقۇرغۇچى بىلەن پاراڭلىشىش',
+    floatingChatTitle: 'ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش'
   },
 
   tr: {
@@ -606,7 +620,21 @@ const I18N_TRANSLATIONS = {
     luckyWheelBtnSub: '1 Hak Ücretsiz!',
     luckyWheelSpinBtn: 'Çarkı Çevir',
     luckyWheelSpinning: 'Çevriliyor...',
-    luckyWheelAlreadySpun: 'Bugünkü ücretsiz hakkınızı kullandınız!'
+    luckyWheelAlreadySpun: 'Bugünkü ücretsiz hakkınızı kullandınız!',
+    luckyWheelAvailableTitle: '🎁 Bugün <span style="color: #ef4444;">1 defa ücretsiz</span> çevirme hakkınız var!',
+    luckyWheelAvailableDesc: 'Ortadaki "Çarkı Çevir" butonuna basarak anında kupon kazanın.',
+    luckyWheelWonPrefix: '✅ Bugünkü Ödülünüz:',
+    luckyWheelUseInCartBtn: 'Sepette Kullan',
+    luckyWheelNextCountdownLabel: 'Sonraki ücretsiz hakka kalan süre:',
+    luckyWheelResetBtn: 'Tekrar Dene (Hakkı Sıfırla)',
+    luckyWheelSpinningHint: 'Çark dönüyor... Bol şanslar!',
+    luckyWheelCongratsTitle: '🎉 Tebrikler!',
+    luckyWheelYouWon: 'Tebrikler, «<span style="color: #ef4444;">{prize}</span>» kazandınız!',
+    luckyWheelCopyCode: 'Kopyala',
+    luckyWheelUseNowBtn: 'Hemen Sepette Kullan',
+    luckyWheelBetterLuck: 'Bugün şansınız yaver gitmedi, yarın mutlaka tekrar deneyin!',
+    floatingChatTooltip: 'Yönetici ile Canlı Sohbet',
+    floatingChatTitle: 'Yönetici ile Doğrudan Canlı Sohbet'
   },
 
   en: {
@@ -908,7 +936,21 @@ const I18N_TRANSLATIONS = {
     luckyWheelBtnSub: '1 Free Spin!',
     luckyWheelSpinBtn: 'Spin Now',
     luckyWheelSpinning: 'Spinning...',
-    luckyWheelAlreadySpun: "Today's free spin has already been used!"
+    luckyWheelAlreadySpun: "Today's free spin has already been used!",
+    luckyWheelAvailableTitle: '🎁 You have <span style="color: #ef4444;">1 free spin</span> today!',
+    luckyWheelAvailableDesc: 'Click the "Spin Now" button in the center to win your reward.',
+    luckyWheelWonPrefix: "✅ Today's Prize:",
+    luckyWheelUseInCartBtn: 'Apply to Cart',
+    luckyWheelNextCountdownLabel: 'Time until next free spin:',
+    luckyWheelResetBtn: 'Test Again (Reset Spin)',
+    luckyWheelSpinningHint: 'Spinning fast... Good luck!',
+    luckyWheelCongratsTitle: '🎉 Congratulations!',
+    luckyWheelYouWon: 'You won «<span style="color: #ef4444;">{prize}</span>»!',
+    luckyWheelCopyCode: 'Copy',
+    luckyWheelUseNowBtn: 'Apply to Cart Now',
+    luckyWheelBetterLuck: 'Better luck next time, come back tomorrow!',
+    floatingChatTooltip: 'Chat with Live Support',
+    floatingChatTitle: 'Direct Live Chat with Admin'
   }
 };
 

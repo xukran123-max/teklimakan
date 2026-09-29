@@ -4440,20 +4440,90 @@ function initTeklimakanApp() {
     }
   });
 
-  // ==================== 🚀 ئايلانما ئېلان تاختىسىنىڭ تەبىئىي ئورنى (Natural Hero Flow) ====================
+  // ==================== 🚀 ئۈستىگە يېپىشىپ تۇرىدىغان ئىخچام ئايلانما ئېلان تاختىسى (Sticky Mini Hero Banner) ====================
   function initSmartHeroScroll() {
     const heroSection = document.querySelector('.hero-section');
-    if (heroSection) {
-      heroSection.classList.remove('smart-sticky-active', 'smart-sticky-visible', 'smart-sticky-hidden');
+    const navbar = document.querySelector('.main-navbar');
+    if (!heroSection) return;
+
+    // Spacer قۇرۇپ بەت سىلكىنىشنىڭ ئالدىنى ئېلىش
+    let spacer = document.getElementById('heroSectionSpacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.id = 'heroSectionSpacer';
+      spacer.className = 'hero-section-spacer';
+      heroSection.parentNode.insertBefore(spacer, heroSection.nextSibling);
     }
-    const spacer = document.getElementById('heroSectionSpacer');
-    if (spacer) {
-      spacer.remove();
+
+    // تاقاش / كىچىكلىتىش كۇنۇپكىسى
+    let closeBtn = heroSection.querySelector('.hero-sticky-close-btn');
+    if (!closeBtn) {
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'hero-sticky-close-btn';
+      closeBtn.title = 'ئېلان تاختىسىنى ۋاقىتلىق يوشۇرۇش';
+      closeBtn.setAttribute('aria-label', 'Close mini hero banner');
+      closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        userDismissedSticky = true;
+        heroSection.classList.remove('sticky-mini-hero');
+        spacer.style.display = 'none';
+      };
+      heroSection.appendChild(closeBtn);
     }
-    const closeBtn = document.querySelector('.hero-sticky-close-btn');
-    if (closeBtn) {
-      closeBtn.remove();
+
+    let userDismissedSticky = false;
+    let isTicking = false;
+
+    function updateStickyTop() {
+      const navH = navbar ? navbar.offsetHeight : 58;
+      document.documentElement.style.setProperty('--navbar-sticky-top', navH + 'px');
     }
+
+    updateStickyTop();
+    window.addEventListener('resize', updateStickyTop, { passive: true });
+
+    function onScroll() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const threshold = 180;
+
+      if (scrollY <= threshold) {
+        userDismissedSticky = false;
+        if (heroSection.classList.contains('sticky-mini-hero')) {
+          heroSection.classList.remove('sticky-mini-hero');
+          spacer.style.display = 'none';
+        }
+      } else {
+        if (!userDismissedSticky && !heroSection.classList.contains('sticky-mini-hero')) {
+          updateStickyTop();
+          const naturalHeight = heroSection.offsetHeight;
+          if (naturalHeight > 100) {
+            spacer.style.height = naturalHeight + 'px';
+            spacer.style.display = 'block';
+          }
+          heroSection.classList.add('sticky-mini-hero');
+        }
+      }
+      isTicking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!isTicking) {
+        window.requestAnimationFrame(onScroll);
+        isTicking = true;
+      }
+    }, { passive: true });
+
+    window.toggleStickyHero = function(forceShow) {
+      if (typeof forceShow === 'boolean') {
+        userDismissedSticky = !forceShow;
+      } else {
+        userDismissedSticky = !userDismissedSticky;
+      }
+      onScroll();
+    };
+
+    onScroll();
   }
 
   // ==================== 🚀 راۋان سۈرۈش ئىقتىدارى (Smooth Scroll Helpers) ====================

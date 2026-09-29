@@ -175,30 +175,46 @@ function initTeklimakanApp() {
   let currentFlashWeatherIndex = 0;
   let currentRoseProductIndex = -1;
 
-  window.appI18n.applyDirectionAndTypography();
+  try {
+    if (window.appI18n && typeof window.appI18n.applyDirectionAndTypography === 'function') {
+      window.appI18n.applyDirectionAndTypography();
+    }
+  } catch (e) {
+    console.warn('applyDirectionAndTypography error:', e);
+  }
 
   // ⚡ ۋاكالەتچىلەرنىڭ كۈندىلىك ئاكتىپلىقى ۋە ئۇيقۇ ھالىتىنى تەكشۈرۈش
-  if (window.appStore && typeof window.appStore.checkAndUpdateAllAgentsInactivity === 'function') {
-    window.appStore.checkAndUpdateAllAgentsInactivity();
+  try {
+    if (window.appStore && typeof window.appStore.checkAndUpdateAllAgentsInactivity === 'function') {
+      window.appStore.checkAndUpdateAllAgentsInactivity();
+    }
+  } catch (e) {
+    console.warn('checkAndUpdateAllAgentsInactivity error:', e);
   }
 
   // تاللانغان ئۇسلۇبتىكى فونىتنى مەڭگۈلۈك مۇقىملاشتۇرۇش
-  const savedFont = localStorage.getItem('uyghur_font_preference') || 'modern';
-  if (savedFont === 'traditional') {
-    document.body.classList.remove('font-modern');
-    document.body.classList.add('font-traditional');
-  } else {
-    document.body.classList.add('font-modern');
-    document.body.classList.remove('font-traditional');
-  }
+  try {
+    const savedFont = localStorage.getItem('uyghur_font_preference') || 'modern';
+    if (savedFont === 'traditional') {
+      document.body.classList.remove('font-modern');
+      document.body.classList.add('font-traditional');
+    } else {
+      document.body.classList.add('font-modern');
+      document.body.classList.remove('font-traditional');
+    }
+  } catch (e) {}
 
   // دەسلەپكى ئېچىلغاندا تىل بىلەن پۇل بىرلىكىنىڭ تەبىئىي ماس قەدەملىشىشى:
   // ug / tr -> TRY (₺), en -> USD ($)
-  const currentInitialLang = window.appI18n.getLang();
-  const alignedCurrency = currentInitialLang === 'en' ? 'USD' : 'TRY';
-  if (window.appStore.getCurrency() !== alignedCurrency) {
-    window.appStore.setCurrency(alignedCurrency);
-  }
+  try {
+    const currentInitialLang = (window.appI18n && typeof window.appI18n.getLang === 'function') ? window.appI18n.getLang() : 'ug';
+    const alignedCurrency = currentInitialLang === 'en' ? 'USD' : 'TRY';
+    if (window.appStore && typeof window.appStore.getCurrency === 'function') {
+      if (window.appStore.getCurrency() !== alignedCurrency && typeof window.appStore.setCurrency === 'function') {
+        window.appStore.setCurrency(alignedCurrency);
+      }
+    }
+  } catch (e) {}
 
   try { initStore(); } catch (e) { console.error('initStore error:', e); }
   try { setupEventListeners(); } catch (e) { console.error('setupEventListeners error:', e); }

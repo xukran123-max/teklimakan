@@ -911,6 +911,128 @@ body.dark-mode ::-webkit-scrollbar-thumb:hover {
   background: rgba(56, 189, 248, 0.8);
 }
 
+/* ==================== 💎 سۈرۈش تاياقچىسى بىلەن بىر گەۋدە ئەقىللىق تېز سۈرۈش (Integrated Smart Edge Scrollbar) ==================== */
+.smart-edge-scroll-track {
+  position: fixed;
+  top: 64px;
+  bottom: 68px;
+  right: 0;
+  width: 14px;
+  z-index: 1045;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  touch-action: pan-y;
+  background: transparent;
+  transition: opacity 0.2s ease;
+}
+
+.smart-edge-scroll-thumb {
+  width: 7px;
+  min-height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+  margin-right: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.smart-edge-scroll-track:hover .smart-edge-scroll-thumb,
+.smart-edge-scroll-track:active .smart-edge-scroll-thumb {
+  width: 12px;
+  margin-right: 1px;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.7);
+}
+
+#smartEdgeScrollIcon {
+  font-size: 0.5rem;
+  color: #ffffff;
+  opacity: 0.9;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.smart-edge-scroll-track.at-top #smartEdgeScrollIcon {
+  transform: rotate(180deg);
+}
+
+/* سول تەرەپ ئۈچۈن قوشۇمچە تۇتاشتۇرۇش (Dual-Edge Access) */
+.smart-edge-scroll-track-left {
+  position: fixed;
+  top: 64px;
+  bottom: 68px;
+  left: 0;
+  width: 14px;
+  z-index: 1045;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  touch-action: pan-y;
+  background: transparent;
+  transition: opacity 0.2s ease;
+}
+
+.smart-edge-scroll-thumb-left {
+  width: 7px;
+  min-height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+  margin-left: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.smart-edge-scroll-track-left:hover .smart-edge-scroll-thumb-left,
+.smart-edge-scroll-track-left:active .smart-edge-scroll-thumb-left {
+  width: 12px;
+  margin-left: 1px;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.7);
+}
+
+#smartEdgeScrollIconLeft {
+  font-size: 0.5rem;
+  color: #ffffff;
+  opacity: 0.9;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.smart-edge-scroll-track-left.at-top #smartEdgeScrollIconLeft {
+  transform: rotate(180deg);
+}
+
+/* باشقا كۆزنەكلەر ئوچۇق ۋاقىتتا پۈتۈنلەي يوشۇرۇش */
+body.cart-drawer-open .smart-edge-scroll-track,
+body.cart-drawer-open .smart-edge-scroll-track-left,
+body:has(.cart-overlay.active) .smart-edge-scroll-track,
+body:has(.cart-overlay.active) .smart-edge-scroll-track-left,
+body:has(.modal-backdrop[style*="display: flex"]) .smart-edge-scroll-track,
+body:has(.modal-backdrop[style*="display: flex"]) .smart-edge-scroll-track-left,
+body:has(.modal-backdrop[style*="display: block"]) .smart-edge-scroll-track,
+body:has(.modal-backdrop[style*="display: block"]) .smart-edge-scroll-track-left,
+body:has(#adminLiveChatBox[style*="display: flex"]) .smart-edge-scroll-track,
+body:has(#adminLiveChatBox[style*="display: flex"]) .smart-edge-scroll-track-left,
+body:has(#adminLiveChatBox[style*="display: block"]) .smart-edge-scroll-track,
+body:has(#adminLiveChatBox[style*="display: block"]) .smart-edge-scroll-track-left {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 
 .chat-online-dot {
   position: absolute;

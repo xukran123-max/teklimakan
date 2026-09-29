@@ -4526,15 +4526,91 @@ function initTeklimakanApp() {
     onScroll();
   }
 
-  // ==================== 🚀 راۋان سۈرۈش ئىقتىدارى (Smooth Scroll Helpers) ====================
+  // ==================== 💎 سۈرۈش تاياقچىسى بىلەن بىر گەۋدە ئەقىللىق تېز سۈرۈش (Integrated Smart Edge Scrollbar) ====================
   function initSmartScrollToggle() {
-    // ئايرىم لەيلىمە كۇنۇپكا تولۇق چىقىرىۋېتىلدى، تور كۆرگۈنىڭ سول قىردىكى نېپىز سۈرۈش تاياقچىسى بىلەن بىر گەۋدە قىلىندى
     window.scrollToTop = function() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     window.scrollToBottom = function() {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      const winHeight = window.innerHeight;
+      window.scrollTo({ top: docHeight - winHeight, behavior: 'smooth' });
     };
+
+    const track = document.getElementById('smartEdgeScrollTrack');
+    const thumb = document.getElementById('smartEdgeScrollThumb');
+    const trackLeft = document.getElementById('smartEdgeScrollTrackLeft');
+    const thumbLeft = document.getElementById('smartEdgeScrollThumbLeft');
+
+    if (!track && !trackLeft) return;
+
+    let isTicking = false;
+
+    function updateEdgeScroll() {
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      const winHeight = window.innerHeight;
+      const maxScroll = Math.max(1, docHeight - winHeight);
+
+      const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+
+      if (track && thumb) {
+        const trackHeight = track.offsetHeight;
+        const thumbHeight = thumb.offsetHeight;
+        const maxTranslate = Math.max(0, trackHeight - thumbHeight);
+        const translateY = progress * maxTranslate;
+        thumb.style.transform = `translateY(${translateY}px)`;
+
+        if (scrollY <= 180) {
+          track.classList.add('at-top');
+          track.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
+        } else {
+          track.classList.remove('at-top');
+          track.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
+        }
+      }
+
+      if (trackLeft && thumbLeft) {
+        const trackHeight = trackLeft.offsetHeight;
+        const thumbHeight = thumbLeft.offsetHeight;
+        const maxTranslate = Math.max(0, trackHeight - thumbHeight);
+        const translateY = progress * maxTranslate;
+        thumbLeft.style.transform = `translateY(${translateY}px)`;
+
+        if (scrollY <= 180) {
+          trackLeft.classList.add('at-top');
+          trackLeft.title = 'بىر چېكىپ ئەڭ ئاستىغا چۈشۈش';
+        } else {
+          trackLeft.classList.remove('at-top');
+          trackLeft.title = 'بىر چېكىپ ئەڭ ئۈستىگە چىقىش';
+        }
+      }
+
+      isTicking = false;
+    }
+
+    function handleEdgeClick(e) {
+      e.stopPropagation();
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      if (scrollY > 200) {
+        window.scrollToTop();
+      } else {
+        window.scrollToBottom();
+      }
+    }
+
+    if (track) track.addEventListener('click', handleEdgeClick);
+    if (trackLeft) trackLeft.addEventListener('click', handleEdgeClick);
+
+    window.addEventListener('scroll', () => {
+      if (!isTicking) {
+        window.requestAnimationFrame(updateEdgeScroll);
+        isTicking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', updateEdgeScroll, { passive: true });
+    updateEdgeScroll();
   }
 
 

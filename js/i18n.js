@@ -318,7 +318,20 @@ const I18N_TRANSLATIONS = {
     luckyWheelUseNowBtn: 'دەرھال سېۋەتكە ئىشلىتىش',
     luckyWheelBetterLuck: 'بۈگۈن پۇرسىتىڭىز ئوڭدىن كەلمىدى، ئەتىگە چوقۇم يەنە كۆرۈشەيلى!',
     floatingChatTooltip: 'ئالىي باشقۇرغۇچى بىلەن پاراڭلىشىش',
-    floatingChatTitle: 'ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش'
+    floatingChatTitle: 'ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش',
+    instantBuyWhatsApp: '💬 دەرھال WhatsApp تا ئېلىش',
+    shareProductLink: '🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش',
+    shareCopiedSuccess: '🔗 مەھسۇلات ئۇلانمىسى كۆچۈرۈلدى! خالىغان كىشىگە ھەمبەھىرلىيەلەيسىز.',
+    shareLinkNotice: '🔗 ئۇلانما: ',
+    waOrderGreeting: 'ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:',
+    waProductLabel: '📦 مەھسۇلات:',
+    waPriceLabel: '💰 باھاسى:',
+    waCategoryLabel: '🏷️ تۈرى:',
+    waLinkLabel: '🔗 مەھسۇلات ئۇلانمىسى:',
+    waOrderClosing: 'زاكازنى تەستىقلاپ، ھېسابات ئۇچۇرىنى بەرسىڭىز، رەھمەت!',
+    shareModalTitle: 'تەكلىماكان سودا سۇپىسى',
+    shareProductHighlight: '🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:',
+    shareViewLink: '🔗 كۆرۈش ئۇلانمىسى:'
   },
 
   tr: {
@@ -634,7 +647,20 @@ const I18N_TRANSLATIONS = {
     luckyWheelUseNowBtn: 'Hemen Sepette Kullan',
     luckyWheelBetterLuck: 'Bugün şansınız yaver gitmedi, yarın mutlaka tekrar deneyin!',
     floatingChatTooltip: 'Yönetici ile Canlı Sohbet',
-    floatingChatTitle: 'Yönetici ile Doğrudan Canlı Sohbet'
+    floatingChatTitle: 'Yönetici ile Doğrudan Canlı Sohbet',
+    instantBuyWhatsApp: '💬 WhatsApp ile Hemen Al',
+    shareProductLink: '🔗 Ürün Bağlantısını Paylaş',
+    shareCopiedSuccess: '🔗 Ürün bağlantısı panoya kopyalandı! İstediğiniz kişiyle paylaşabilirsiniz.',
+    shareLinkNotice: '🔗 Bağlantı: ',
+    waOrderGreeting: 'Merhaba Teklimakan, bu ürünü doğrudan sipariş vermek istiyorum:',
+    waProductLabel: '📦 Ürün:',
+    waPriceLabel: '💰 Fiyat:',
+    waCategoryLabel: '🏷️ Kategori:',
+    waLinkLabel: '🔗 Ürün Bağlantısı:',
+    waOrderClosing: 'Siparişi onaylayıp ödeme ve hesap bilgilerini iletebilir misiniz? Teşekkürler!',
+    shareModalTitle: 'Teklimakan Pazaryeri',
+    shareProductHighlight: '🌟 Teklimakan Pazaryeri Ürünü:',
+    shareViewLink: '🔗 İnceleme Bağlantısı:'
   },
 
   en: {
@@ -950,7 +976,20 @@ const I18N_TRANSLATIONS = {
     luckyWheelUseNowBtn: 'Apply to Cart Now',
     luckyWheelBetterLuck: 'Better luck next time, come back tomorrow!',
     floatingChatTooltip: 'Chat with Live Support',
-    floatingChatTitle: 'Direct Live Chat with Admin'
+    floatingChatTitle: 'Direct Live Chat with Admin',
+    instantBuyWhatsApp: '💬 Buy Now via WhatsApp',
+    shareProductLink: '🔗 Share Product Link',
+    shareCopiedSuccess: '🔗 Product link copied to clipboard! You can share it anywhere.',
+    shareLinkNotice: '🔗 Link: ',
+    waOrderGreeting: 'Hello Teklimakan, I would like to order this product directly:',
+    waProductLabel: '📦 Product:',
+    waPriceLabel: '💰 Price:',
+    waCategoryLabel: '🏷️ Category:',
+    waLinkLabel: '🔗 Product Link:',
+    waOrderClosing: 'Please confirm the order and provide payment details. Thank you!',
+    shareModalTitle: 'Teklimakan E-Commerce',
+    shareProductHighlight: '🌟 Teklimakan E-Commerce Product:',
+    shareViewLink: '🔗 View Product Link:'
   }
 };
 

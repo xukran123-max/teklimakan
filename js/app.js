@@ -2404,13 +2404,13 @@ function initTeklimakanApp() {
           <!-- 💬 1-چېكىش بىلەن دەرھال WhatsApp تا ئېلىش كۇنۇپكىسى -->
           <button type="button" id="modalInstantBuyWaBtn" class="btn-whatsapp-instant" style="width: 100%; min-height: 44px; margin-top: 0.75rem; background: #25D366; color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.28);">
             <i class="fab fa-whatsapp" style="font-size: 1.3rem;"></i>
-            <span>💬 دەرھال WhatsApp تا ئېلىش</span>
+            <span>${window.appI18n.t('instantBuyWhatsApp') || '💬 دەرھال WhatsApp تا ئېلىش'}</span>
           </button>
 
           <!-- 🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش كۇنۇپكىسى -->
           <button type="button" id="modalShareProductBtn" class="btn-share-product">
             <i class="fas fa-share-alt"></i>
-            <span>🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش</span>
+            <span>${window.appI18n.t('shareProductLink') || '🔗 مەھسۇلات ئۇلانمىسىنى ھەمبەھىرلەش'}</span>
           </button>
         </div>
       </div>
@@ -2459,13 +2459,23 @@ function initTeklimakanApp() {
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
         const itemUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
+        
+        const greeting = window.appI18n.t('waOrderGreeting');
+        const prodLabel = window.appI18n.t('waProductLabel');
+        const priceLabel = window.appI18n.t('waPriceLabel');
+        const catLabel = window.appI18n.t('waCategoryLabel');
+        const linkLabel = window.appI18n.t('waLinkLabel');
+        const closing = window.appI18n.t('waOrderClosing');
+        const unitText = product.unit ? ` (${currentQty} ${product.unit})` : ` (${currentQty})`;
+        const catName = window.appI18n.getCategoryName(product.category);
+
         const msg = encodeURIComponent(
-          `ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مەن بۇ مەھسۇلاتنى بىۋاسىتە سېتىۋالماقچىتىم:\n\n` +
-          `📦 مەھسۇلات: ${product.name}\n` +
-          `💰 باھاسى: ${formattedPrice} (${currentQty} دانە)\n` +
-          `🏷️ تۈرى: ${product.category}\n\n` +
-          `🔗 مەھسۇلات ئۇلانمىسى:\n${itemUrl}\n\n` +
-          `زاكازنى تەستىقلاپ، ھېسابات ئۇچۇرىنى بەرسىڭىز، رەھمەت!`
+          `${greeting}\n\n` +
+          `${prodLabel} ${product.name}\n` +
+          `${priceLabel} ${formattedPrice}${unitText}\n` +
+          `${catLabel} ${catName}\n\n` +
+          `${linkLabel}\n${itemUrl}\n\n` +
+          `${closing}`
         );
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
       });
@@ -2477,13 +2487,15 @@ function initTeklimakanApp() {
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
         const shareUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
-        const shareTitle = `${product.name} - تەكلىماكان سودا سۇپىسى`;
-        const shareDesc = `🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:\n📦 ${product.name}\n💰 باھاسى: ${formattedPrice}\n📝 ${product.description || ''}`;
-        const fullShareMessage = `${shareDesc}\n\n🔗 كۆرۈش ئۇلانمىسى:\n${shareUrl}`;
+        const platformTitle = window.appI18n.t('shareModalTitle') || 'تەكلىماكان';
+        const shareTitle = `${product.name} - ${platformTitle}`;
+        const highlightText = window.appI18n.t('shareProductHighlight') || '🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:';
+        const priceLabel = window.appI18n.t('waPriceLabel') || '💰 باھاسى:';
+        const viewLinkText = window.appI18n.t('shareViewLink') || '🔗 كۆرۈش ئۇلانمىسى:';
+        const shareDesc = `${highlightText}\n📦 ${product.name}\n${priceLabel} ${formattedPrice}\n📝 ${product.description || ''}`;
+        const fullShareMessage = `${shareDesc}\n\n${viewLinkText}\n${shareUrl}`;
 
         // 1. يانفون سىستېمىلىق ھەمبەھىرلەش:
-        // ئارتۇق رەسىم ھۆججىتى كۆپەيتىلمەيدۇ؛ ئۇلانما شۇ مەھسۇلاتنىڭ مەخسۇس ئالدىن كۆرۈنۈش بېتىگە ئۇلىنىدۇ.
-        // WhatsApp ۋە باشقا ئەپلەر مەزكۇر بەتتىكى og:image ئارقىلىق دەل شۇ مەھسۇلاتنىڭ ئۆز رەسىمىنى قۇتىدا كۆرسىتىدۇ.
         if (navigator.share) {
           try {
             await navigator.share({
@@ -2510,9 +2522,9 @@ function initTeklimakanApp() {
             document.body.removeChild(ta);
           }
           if (typeof playChime === 'function') playChime('click');
-          showToast('🔗 مەھسۇلات ئۇلانمىسى كۆچۈرۈلدى! خالىغان كىشىگە ھەمبەھىرلىيەلەيسىز.', 'success');
+          showToast(window.appI18n.t('shareCopiedSuccess') || '🔗 مەھسۇلات ئۇلانمىسى كۆچۈرۈلدى! خالىغان كىشىگە ھەمبەھىرلىيەلەيسىز.', 'success');
         } catch (err) {
-          showToast('🔗 ئۇلانما: ' + shareUrl, 'info');
+          showToast((window.appI18n.t('shareLinkNotice') || '🔗 ') + shareUrl, 'info');
         }
       });
     }

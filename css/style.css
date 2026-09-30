@@ -5905,19 +5905,20 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 .showcase-shelves-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin: 1.25rem auto 1.5rem;
+  gap: 1.75rem;
+  margin: 1.25rem 0 2rem;
   width: 100%;
-  max-width: 1280px;
-  padding: 0 1rem;
+  max-width: 100%;
+  padding: 0;
 }
 
 .showcase-shelf {
-  background: var(--bg-card, #ffffff);
-  border-radius: 18px;
-  padding: 1.15rem 1rem 0.85rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--border-color, #e2e8f0);
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .showcase-shelf-header {
@@ -5925,7 +5926,7 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.85rem;
-  padding: 0 0.35rem;
+  padding: 0;
   gap: 0.75rem;
   flex-wrap: nowrap;
 }
@@ -5973,7 +5974,7 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 0.35rem 0.25rem 0.85rem;
+  padding: 0.25rem 0 0.85rem;
   scrollbar-width: none;
 }
 
@@ -6226,9 +6227,9 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 /* Dark Mode Adjustments */
 body.dark-mode .showcase-shelf {
-  background: #1e293b;
-  border-color: #334155;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 body.dark-mode .shelf-product-card {

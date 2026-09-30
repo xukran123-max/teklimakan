@@ -6522,15 +6522,21 @@ function initTeklimakanApp() {
           const res = window.appStore.agentDailyCheckIn(currentVerifiedAgent.id);
           if (res.success) {
             currentVerifiedAgent = res.agent;
-            updateAgentDashboard(res.agent);
             showToast(res.message, 'success');
           } else {
             showToast(res.message, res.alreadyCheckedIn ? 'info' : 'error');
-            if (currentVerifiedAgent) updateAgentDashboard(currentVerifiedAgent);
+            if (res.agent) currentVerifiedAgent = res.agent;
           }
         } catch(e) {
           console.error('Daily check-in error:', e);
           showToast('ئىمزا قويۇشتا خاتالىق كۆرۈلدى', 'error');
+        } finally {
+          if (currentVerifiedAgent) {
+            updateAgentDashboard(currentVerifiedAgent);
+          } else {
+            btnCheckIn.disabled = false;
+            btnCheckIn.innerHTML = '<i class="fas fa-check-circle"></i> <span>📌 بۈگۈن كىردىم (ئىمزا قويۇش)</span>';
+          }
         }
       });
     }
@@ -6579,30 +6585,134 @@ function initTeklimakanApp() {
       btnRefresh.addEventListener('click', async () => {
         const icon = document.getElementById('iconAgentRefresh');
         if (icon) icon.classList.add('fa-spin');
-        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.syncProductsFromCloud === 'function') {
-          try { await window.TeklimakanSupabase.syncProductsFromCloud(); } catch(e){}
+        try {
+          if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.syncProductsFromCloud === 'function') {
+            try { await window.TeklimakanSupabase.syncProductsFromCloud(); } catch(e){}
+          }
+          if (currentVerifiedAgent) {
+            if (window.appStore && typeof window.appStore.findAgentAsync === 'function') {
+              try {
+                const fresh = await window.appStore.findAgentAsync(currentVerifiedAgent.id, true);
+                if (fresh) currentVerifiedAgent = fresh;
+              } catch(e) {}
+            }
+            updateAgentDashboard(currentVerifiedAgent);
+            renderAgentProductsList(currentVerifiedAgent.id);
+          }
+        } finally {
+          setTimeout(() => {
+            if (icon) icon.classList.remove('fa-spin');
+            showToast('سانلىق مەلۇماتلار بۇلۇتتىن يېڭىلاندى!', 'success');
+          }, 400);
         }
-        if (currentVerifiedAgent) {
-          updateAgentDashboard(currentVerifiedAgent);
-          renderAgentProductsList(currentVerifiedAgent.id);
-        }
-        setTimeout(() => {
-          if (icon) icon.classList.remove('fa-spin');
-          showToast('سانلىق مەلۇماتلار بۇلۇتتىن يېڭىلاندى!', 'success');
-        }, 500);
       });
     }
 
     if (btnQuickContract) {
       btnQuickContract.addEventListener('click', () => {
-        const btnDownload = document.getElementById('btnDownloadContractBeforeApply');
-        if (btnDownload) {
-          btnDownload.click();
+        if (currentVerifiedAgent && window.appStore && typeof window.appStore.downloadAgentContract === 'function') {
+          window.appStore.downloadAgentContract(currentVerifiedAgent);
+          showToast('📥 كېلىشىمنامىڭىز تېلېفوندىن چۈشۈرۈلدى!', 'success');
         } else {
-          switchTab('apply');
-          const termsBox = document.getElementById('agentContractTermsBox');
-          if (termsBox) termsBox.scrollIntoView({ behavior: 'smooth' });
+          const btnDownload = document.getElementById('btnDownloadContractBeforeApply');
+          if (btnDownload) {
+            btnDownload.click();
+          } else {
+            switchTab('apply');
+            const termsBox = document.getElementById('agentContractTermsBox');
+            if (termsBox) termsBox.scrollIntoView({ behavior: 'smooth' });
+          }
         }
+      });
+    }
+
+    // 📊 تاۋار ستاتىستىكا كارتلىرىنى چەككەندە بىۋاسىتە سۈزۈپ كۆرسىتىش (Interactive Dashboard Metric Cards)
+    function filterAgentProductsBy(status) {
+      if (!currentVerifiedAgent) return;
+      switchAgentPortalView('products');
+      const q = myProductsSearchInput ? myProductsSearchInput.value.trim() : '';
+      renderAgentProductsList(currentVerifiedAgent.id, q, status);
+      const wrap = document.getElementById('agentMyProductsWrap');
+      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    const cardTotal = document.getElementById('dashCardTotal');
+    const cardApproved = document.getElementById('dashCardApproved');
+    const cardPending = document.getElementById('dashCardPending');
+    const cardNeedsImg = document.getElementById('dashNeedsImgBox');
+
+    if (cardTotal) cardTotal.addEventListener('click', () => filterAgentProductsBy('all'));
+    if (cardApproved) cardApproved.addEventListener('click', () => filterAgentProductsBy('approved'));
+    if (cardPending) cardPending.addEventListener('click', () => filterAgentProductsBy('pending'));
+    if (cardNeedsImg) cardNeedsImg.addEventListener('click', () => filterAgentProductsBy('needs_image'));
+
+    // 📈 كۈندىلىك تەھلىل كارتلىرىنى چەككەندە ئەسكەرتىش بېرىش
+    const cardDailyVis = document.getElementById('dashCardDailyVisitors');
+    const cardDailyOrd = document.getElementById('dashCardDailyOrders');
+    const cardDailyProf = document.getElementById('dashCardDailyProfit');
+
+    if (cardDailyVis) {
+      cardDailyVis.addEventListener('click', () => {
+        const v = document.getElementById('dashDailyVisitors')?.textContent || '0';
+        showToast(`👁️ بۈگۈن مەھسۇلاتلىرىڭىزنى ${v} قېتىم خېرىدارلار كۆردى.`, 'info');
+      });
+    }
+    if (cardDailyOrd) {
+      cardDailyOrd.addEventListener('click', () => {
+        const o = document.getElementById('dashDailyOrders')?.textContent || '0';
+        showToast(`🛍️ بۈگۈن خېرىدارلاردىن ${o} دانە زاكاز تاپشۇرۇۋېلىندى.`, 'info');
+      });
+    }
+    if (cardDailyProf) {
+      cardDailyProf.addEventListener('click', () => {
+        const p = document.getElementById('dashDailyProfit')?.textContent || '₺0';
+        showToast(`💵 بۈگۈنكى تاپقان پايدىڭىز: ${p}`, 'success');
+      });
+    }
+
+    // 💰 زاكاز ۋە پايدا نەتىجىلىرى كارتلىرىنى چەككەندە ئەسكەرتىش بېرىش
+    const cardSold = document.getElementById('dashCardSold');
+    const cardShipped = document.getElementById('dashCardShipped');
+    const cardCompleted = document.getElementById('dashCardCompleted');
+    const cardCancelled = document.getElementById('dashCardCancelled');
+    const cardReturned = document.getElementById('dashCardReturned');
+    const cardProfit = document.getElementById('dashCardProfit');
+
+    if (cardSold) {
+      cardSold.addEventListener('click', () => {
+        const s = document.getElementById('dashCountSold')?.textContent || '0';
+        showToast(`🛒 جەمئىي سېتىلغان زاكاز سانى: ${s} دانە`, 'info');
+      });
+    }
+    if (cardShipped) {
+      cardShipped.addEventListener('click', () => {
+        const sh = document.getElementById('dashCountShipped')?.textContent || '0';
+        showToast(`🚚 يولغا چىققان ۋە يەتكۈزۈلۈۋاتقان تاۋارلار: ${sh} دانە`, 'info');
+      });
+    }
+    if (cardCompleted) {
+      cardCompleted.addEventListener('click', () => {
+        const c = document.getElementById('dashCountCompleted')?.textContent || '0';
+        showToast(`✅ خېرىدار تاپشۇرۇۋالغان ۋە تاماملانغان زاكازلار: ${c} دانە`, 'success');
+      });
+    }
+    if (cardCancelled) {
+      cardCancelled.addEventListener('click', () => {
+        const ca = document.getElementById('dashCountCancelled')?.textContent || '0';
+        showToast(`❌ خېرىدار بىكار قىلغان زاكازلار سانى: ${ca} دانە`, 'warning');
+      });
+    }
+    if (cardReturned) {
+      cardReturned.addEventListener('click', () => {
+        const r = document.getElementById('dashCountReturned')?.textContent || '0';
+        showToast(`↩️ قايتۇرۇلغان تاۋارلار سانى: ${r} دانە`, 'warning');
+      });
+    }
+    if (cardProfit) {
+      cardProfit.addEventListener('click', () => {
+        const pr = document.getElementById('dashAmountProfit')?.textContent || '₺0';
+        const rate = document.getElementById('dashCommissionRateBadge')?.textContent || '';
+        showToast(`💰 ھېساباتىڭىزغا كىرىدىغان ئومۇمىي پايدا سوممىسى: ${pr} (${rate})`, 'success');
       });
     }
 

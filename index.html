@@ -58,11 +58,22 @@
     })();
   </script>
 
-  <!-- 🛡️ بەت قاڭقىش ۋە ئۇيغۇرچىدىن تۈركچە/ئىنگلىزچىگە سەكرەش كۆرۈنۈشىنى پۈتۈنلەي توسۇش ئۇسلۇبى -->
   <style id="langAntiFlickerStyle">
     html[data-lang-pending="true"] body {
       opacity: 0 !important;
       visibility: hidden !important;
+    }
+    .agent-dash-metric-card {
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease !important;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .agent-dash-metric-card:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.12);
+    }
+    .agent-dash-metric-card:active {
+      transform: scale(0.95);
     }
   </style>
 
@@ -101,7 +112,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260930_v157">
+  <link rel="stylesheet" href="css/style.css?v=20260930_v158">
 
   <!-- 🎯 Meta (Facebook & Instagram) Pixel Code -->
   <script>
@@ -1207,15 +1218,15 @@
 
               <!-- 📊 كۈندىلىك نەتىجە ۋە زىيارەتچى كۆرسەتكۈچلىرى (Daily Analytics) -->
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; text-align: center;">
-                <div style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem;">
+                <div id="dashCardDailyVisitors" class="agent-dash-metric-card" role="button" tabindex="0" title="بۈگۈنكى مەھسۇلات كۆرۈلۈش سانى" style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #bfdbfe;"><i class="fas fa-eye"></i> بۈگۈنكى كۆرگۈچى</div>
                   <div id="dashDailyVisitors" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #60a5fa; margin-top: 1px;">0</div>
                 </div>
-                <div style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem;">
+                <div id="dashCardDailyOrders" class="agent-dash-metric-card" role="button" tabindex="0" title="بۈگۈنكى تاپشۇرۇلغان زاكازلار" style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #a7f3d0;"><i class="fas fa-shopping-bag"></i> بۈگۈنكى زاكاز</div>
                   <div id="dashDailyOrders" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #34d399; margin-top: 1px;">0</div>
                 </div>
-                <div style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem;">
+                <div id="dashCardDailyProfit" class="agent-dash-metric-card" role="button" tabindex="0" title="بۈگۈنكى تاپقان پايدىڭىز" style="background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.4rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #fde68a;"><i class="fas fa-lira-sign"></i> بۈگۈنكى كىرىم</div>
                   <div id="dashDailyProfit" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #fde68a; margin-top: 1px;">₺0</div>
                 </div>
@@ -1227,19 +1238,19 @@
 
             <!-- 📊 ستاتىستىكا كارتلىرى (4 كۆرسەتكۈچ) -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; text-align: center; margin-bottom: 0.75rem;">
-              <div style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(255, 255, 255, 0.12);">
+              <div id="dashCardTotal" class="agent-dash-metric-card" role="button" tabindex="0" title="بارلىق تاۋارلىرىمنى كۆرۈش ۋە تەھرىرلەش" style="background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(255, 255, 255, 0.12); cursor: pointer; user-select: none;">
                 <div style="font-size: 0.72rem; color: #bfdbfe;">📦 تاۋارلىرىم</div>
                 <div id="dashCountTotal" style="font-size: 1.25rem; font-weight: 900; color: #ffffff;">0</div>
               </div>
-              <div style="background: rgba(16, 185, 129, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(52, 211, 153, 0.25);">
+              <div id="dashCardApproved" class="agent-dash-metric-card" role="button" tabindex="0" title="دۇكاندا سېتىلىۋاتقان تاۋارلارنى سۈزۈپ كۆرۈش" style="background: rgba(16, 185, 129, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(52, 211, 153, 0.25); cursor: pointer; user-select: none;">
                 <div style="font-size: 0.72rem; color: #a7f3d0;">✅ دۇكاندا</div>
                 <div id="dashCountApproved" style="font-size: 1.25rem; font-weight: 900; color: #34d399;">0</div>
               </div>
-              <div style="background: rgba(245, 158, 11, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(251, 191, 36, 0.25);">
+              <div id="dashCardPending" class="agent-dash-metric-card" role="button" tabindex="0" title="تەكشۈرۈش كۈتۈۋاتقان تاۋارلارنى سۈزۈپ كۆرۈش" style="background: rgba(245, 158, 11, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(251, 191, 36, 0.25); cursor: pointer; user-select: none;">
                 <div style="font-size: 0.72rem; color: #fde68a;">⏳ تەكشۈرۈشتە</div>
                 <div id="dashCountPending" style="font-size: 1.25rem; font-weight: 900; color: #fbbf24;">0</div>
               </div>
-              <div id="dashNeedsImgBox" style="background: rgba(239, 68, 68, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(248, 113, 113, 0.25);">
+              <div id="dashNeedsImgBox" class="agent-dash-metric-card" role="button" tabindex="0" title="سۈرەت تولۇقلاش كۈتۈۋاتقان تاۋارلارنى سۈزۈپ كۆرۈش" style="background: rgba(239, 68, 68, 0.12); border-radius: 10px; padding: 0.55rem 0.2rem; border: 1px solid rgba(248, 113, 113, 0.25); cursor: pointer; user-select: none;">
                 <div style="font-size: 0.72rem; color: #fecaca;">📷 سۈرەت كۈتۈۋاتىدۇ</div>
                 <div id="dashCountNeedsImg" class="number-latin" style="font-size: 1.25rem; font-weight: 900; color: #f87171;">0</div>
               </div>
@@ -1258,21 +1269,21 @@
 
               <!-- 1-قۇر: سېتىلغانلار، يوللانغانلار، تاماملانغانلار -->
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; text-align: center; margin-bottom: 0.45rem;">
-                <div style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                <div id="dashCardSold" class="agent-dash-metric-card" role="button" tabindex="0" title="جەمئىي سېتىلغان زاكازلارنى تەپسىلىي كۆرۈش" style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #bae6fd; display: flex; align-items: center; justify-content: center; gap: 0.2rem;">
                     <i class="fas fa-shopping-cart" style="font-size: 0.68rem;"></i> سېتىلغانلار
                   </div>
                   <div id="dashCountSold" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #38bdf8; margin-top: 1px;">0</div>
                 </div>
 
-                <div style="background: rgba(96, 165, 250, 0.12); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                <div id="dashCardShipped" class="agent-dash-metric-card" role="button" tabindex="0" title="يوللانغان زاكازلار تەپسىلاتى" style="background: rgba(96, 165, 250, 0.12); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #bfdbfe; display: flex; align-items: center; justify-content: center; gap: 0.2rem;">
                     <i class="fas fa-truck" style="font-size: 0.68rem;"></i> يوللانغانلار
                   </div>
                   <div id="dashCountShipped" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #60a5fa; margin-top: 1px;">0</div>
                 </div>
 
-                <div style="background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                <div id="dashCardCompleted" class="agent-dash-metric-card" role="button" tabindex="0" title="خېرىدار تاپشۇرۇۋالغان تاماملانغان زاكازلار" style="background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #a7f3d0; display: flex; align-items: center; justify-content: center; gap: 0.2rem;">
                     <i class="fas fa-check-double" style="font-size: 0.68rem;"></i> تاماملانغانلار
                   </div>
@@ -1282,21 +1293,21 @@
 
               <!-- 2-قۇر: بىكار قىلىنغانلار، قايتىپ كەلگەنلەر، پايدا سوممىسى -->
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; text-align: center;">
-                <div style="background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                <div id="dashCardCancelled" class="agent-dash-metric-card" role="button" tabindex="0" title="بىكار قىلىنغان زاكازلار" style="background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #fecaca; display: flex; align-items: center; justify-content: center; gap: 0.2rem;">
                     <i class="fas fa-ban" style="font-size: 0.68rem;"></i> بىكار قىلىنغان
                   </div>
                   <div id="dashCountCancelled" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #f87171; margin-top: 1px;">0</div>
                 </div>
 
-                <div style="background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                <div id="dashCardReturned" class="agent-dash-metric-card" role="button" tabindex="0" title="خېرىدار قايتۇرغان تاۋارلار" style="background: rgba(251, 146, 60, 0.12); border: 1px solid rgba(251, 146, 60, 0.25); border-radius: 8px; padding: 0.45rem 0.2rem; cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #fed7aa; display: flex; align-items: center; justify-content: center; gap: 0.2rem;">
                     <i class="fas fa-undo-alt" style="font-size: 0.68rem;"></i> قايتىپ كەلگەن
                   </div>
                   <div id="dashCountReturned" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #fb923c; margin-top: 1px;">0</div>
                 </div>
 
-                <div style="background: rgba(245, 158, 11, 0.18); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 0.45rem 0.2rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);">
+                <div id="dashCardProfit" class="agent-dash-metric-card" role="button" tabindex="0" title="سىزگە بېرىلىدىغان ئومۇمىي پايدا سوممىسى" style="background: rgba(245, 158, 11, 0.18); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 0.45rem 0.2rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15); cursor: pointer; user-select: none;">
                   <div style="font-size: 0.7rem; color: #fde68a; display: flex; align-items: center; justify-content: center; gap: 0.2rem; font-weight: 800;">
                     <i class="fas fa-coins" style="font-size: 0.68rem;"></i> پايدا سوممىسى
                   </div>
@@ -2263,12 +2274,12 @@
   </a>
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى (Local Fast Bundle) -->
-  <script src="js/supabase.js.v2.min.js?v=20260930_v157"></script>
-  <script src="js/supabase.js?v=20260930_v157"></script>
+  <script src="js/supabase.js.v2.min.js?v=20260930_v158"></script>
+  <script src="js/supabase.js?v=20260930_v158"></script>
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
-  <script src="js/store.js?v=20260930_v157"></script>
-  <script src="js/app.js?v=20260930_v157"></script>
-  <script src="js/push-manager.js?v=20260930_v157"></script>
+  <script src="js/store.js?v=20260930_v158"></script>
+  <script src="js/app.js?v=20260930_v158"></script>
+  <script src="js/push-manager.js?v=20260930_v158"></script>
 </body>
 </html>

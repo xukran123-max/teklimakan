@@ -4533,13 +4533,25 @@ class StoreManager {
 
   agentDailyCheckIn(agentIdentifier) {
     if (!agentIdentifier) return { success: false, message: 'ۋاكالەتچى مەلۇم ئەمەس!' };
-    const agents = this.getAgents('none');
-    const term = String(agentIdentifier).trim().toLowerCase();
-    const idx = agents.findIndex(a => 
-      (a.id && a.id.toLowerCase() === term) ||
-      (a.email && a.email.toLowerCase() === term) ||
-      (a.phone && a.phone.includes(term))
-    );
+    let agents = this.getAgents('none');
+    const raw = String(agentIdentifier).trim();
+    const term = raw.toLowerCase();
+    const normPhone = this.normalizePhoneNumber(term);
+    const cleanDigits = raw.replace(/\D/g, '');
+
+    const idx = agents.findIndex(a => {
+      if (!a) return false;
+      if (a.id && a.id.toLowerCase() === term) return true;
+      if (a.email && this.normalizeEmail(a.email) === term) return true;
+      if (normPhone && this.normalizePhoneNumber(a.phone) === normPhone) return true;
+      const aDigits = (a.phone || '').replace(/\D/g, '');
+      if (cleanDigits && aDigits) {
+        if (aDigits === cleanDigits) return true;
+        if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
+        if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
+      }
+      return false;
+    });
     if (idx === -1) return { success: false, message: 'ۋاكالەتچى تېپىلمىدى!' };
 
     const agent = agents[idx];
@@ -4551,6 +4563,7 @@ class StoreManager {
       return {
         success: false,
         alreadyCheckedIn: true,
+        agent: agent,
         streak: agent.checkInStreak || 1,
         points: agent.checkInPoints || 0,
         message: 'بۈگۈنكى ئىمزا قويۇپ بولدىڭىز! ئەتە كېلىپ داۋاملىق كۈندىلىك نومۇر ئېلىڭ.'
@@ -4579,6 +4592,13 @@ class StoreManager {
     agents[idx] = agent;
     this.saveAgents(agents);
     this.notifyDataChange('agents');
+
+    // 🌐 Supabase غا دەرھال ئۇلاش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+      try {
+        window.TeklimakanSupabase.upsertAgent(agent);
+      } catch (sbErr) {}
+    }
 
     const bonus = streak >= 7 ? Number(rules.streak7BonusCommission || 1) : 0;
     return {

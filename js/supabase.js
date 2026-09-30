@@ -392,10 +392,46 @@ window.TeklimakanSupabase = {
       return this._agentsCache;
     }
     const sb = getSupabase();
-    if (!sb) return this._agentsCache || null;
+    if (!sb) {
+      try {
+        const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/agents?select=*`, {
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            this._agentsCache = data;
+            this._agentsCacheTime = now;
+            return data;
+          }
+        }
+      } catch (err) {}
+      return this._agentsCache || null;
+    }
     try {
       const { data, error } = await sb.from('agents').select('*');
-      if (error) return this._agentsCache || null;
+      if (error) {
+        try {
+          const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/agents?select=*`, {
+            headers: {
+              'apikey': SUPABASE_CONFIG.anonKey,
+              'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+            }
+          });
+          if (res.ok) {
+            const rData = await res.json();
+            if (Array.isArray(rData)) {
+              this._agentsCache = rData;
+              this._agentsCacheTime = now;
+              return rData;
+            }
+          }
+        } catch (rErr) {}
+        return this._agentsCache || null;
+      }
       if (Array.isArray(data)) {
         this._agentsCache = data;
         this._agentsCacheTime = now;

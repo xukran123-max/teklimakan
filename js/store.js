@@ -2319,6 +2319,17 @@ class StoreManager {
     return agents;
   }
 
+  // 💾 بارلىق ۋاكالەتچىلەر سانلىق مەلۇماتىنى يەرلىككە ساقلاش ۋە ئۆزگىرىشنى ئۇقتۇرۇش
+  saveAgents(agents) {
+    if (!Array.isArray(agents)) return;
+    try {
+      localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    } catch (e) {
+      console.warn('saveAgents localStorage error:', e);
+    }
+    this.notifyDataChange('agents');
+  }
+
   getAgentById(id) {
     const agents = this.getAgents();
     return agents.find(a => a.id === id) || null;
@@ -4025,12 +4036,35 @@ class StoreManager {
     // دەرھال Supabase بۇلۇت ئامبىرىدىن تەكشۈرۈپ تەستىقلانغان ئەڭ يېڭى ھالەتنى مەجبۇرىي ئوقۇپ يەرلىككە قاچىلاش
     const shouldFetchCloud = forceCloud || !agent || (agent && agent.status === 'تەستىق كۈتۈۋاتىدۇ');
 
-    if (shouldFetchCloud && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.fetchAgents === 'function') {
+    if (shouldFetchCloud) {
       try {
-        const remoteAgents = await window.TeklimakanSupabase.fetchAgents(true);
+        let remoteAgents = null;
+        if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.fetchAgents === 'function') {
+          remoteAgents = await window.TeklimakanSupabase.fetchAgents(true);
+        }
+
+        // 🛡️ ئەگەر SDK ئارقىلىق ئوقۇش بوش ياكى تېخى ئۇلانمىغان بولسا، بىۋاسىتە REST ئارقىلىق چاقىرىش (تولۇق كاپالەت)
+        if (!Array.isArray(remoteAgents) || remoteAgents.length === 0) {
+          try {
+            const resp = await fetch('https://hvvxnnnpukgpmwexcniq.supabase.co/rest/v1/agents?select=*', {
+              headers: {
+                'apikey': 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp',
+                'Authorization': 'Bearer sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp'
+              }
+            });
+            if (resp.ok) {
+              remoteAgents = await resp.json();
+            }
+          } catch(fetchErr) {
+            console.warn('findAgentAsync direct REST fallback error:', fetchErr);
+          }
+        }
+
         if (Array.isArray(remoteAgents) && remoteAgents.length > 0) {
           const localMap = new Map();
-          agents.forEach(a => localMap.set(a.id, a));
+          agents.forEach(a => {
+            if (a && a.id) localMap.set(a.id, a);
+          });
 
           remoteAgents.forEach(ra => {
             let authorizedBrands = [];
@@ -4058,34 +4092,47 @@ class StoreManager {
               });
             }
 
-            const existingLocal = localMap.get(ra.id) || {};
+            // يەرلىكتىكى كونىراپ قالغان تىزىملاتمىلارنى ئېلخەت ياكى تېلېفون ئارقىلىق تونۇپ، ھالىتىنى يېڭىلاش
+            let existingLocal = localMap.get(ra.id);
+            if (!existingLocal) {
+              for (const [locId, locAgent] of localMap.entries()) {
+                const sameEmail = ra.email && locAgent.email && this.normalizeEmail(ra.email) === this.normalizeEmail(locAgent.email);
+                const samePhone = ra.phone && locAgent.phone && this.normalizePhoneNumber(ra.phone) === this.normalizePhoneNumber(locAgent.phone);
+                if (sameEmail || samePhone) {
+                  existingLocal = locAgent;
+                  localMap.delete(locId); // كونا تەستىقلانمىغان قالدۇق نۇسخىنى چىقىرىپ تاشلاش
+                  break;
+                }
+              }
+            }
+
             localMap.set(ra.id, {
-              ...existingLocal,
-              password: password || existingLocal.password || '',
-              trustedDevices: trustedDevices.length > 0 ? trustedDevices : (existingLocal.trustedDevices || []),
+              ...(existingLocal || {}),
+              password: password || existingLocal?.password || '',
+              trustedDevices: trustedDevices.length > 0 ? trustedDevices : (existingLocal?.trustedDevices || []),
               id: ra.id,
               name: ra.name,
               email: ra.email,
               phone: ra.phone,
-              city: ra.city || existingLocal.city || 'ئىستانبۇل',
-              status: ra.status || existingLocal.status || 'تەستىقلاندى',
-              reputation: ra.reputation || existingLocal.reputation || 'ئىشەنچىلىك سودىگەر',
+              city: ra.city || existingLocal?.city || 'ئىستانبۇل',
+              status: ra.status || 'تەستىقلاندى',
+              reputation: ra.reputation || existingLocal?.reputation || 'ئىشەنچىلىك سودىگەر',
               canPublishMultilingual: !!ra.can_publish_multilingual,
-              authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal.authorizedBrands || []),
-              registeredAt: ra.registered_at || existingLocal.registeredAt,
-              authExpireDate: ra.auth_expire_date || existingLocal.authExpireDate,
-              certCode: ra.cert_code || existingLocal.certCode,
-              productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal.productsCount || 0),
-              salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal.salesTotal || 0)),
-              monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal.monthlySales || 0)),
-              monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal.monthlyOrders || 0)),
-              commissionRate: Number(ra.commission_rate !== undefined ? ra.commission_rate : (existingLocal.commissionRate || 15)),
-              violationsCount: Number(ra.violations_count !== undefined ? ra.violations_count : (existingLocal.violationsCount || 0)),
-              proposedBrands: proposedBrands || existingLocal.proposedBrands || '',
-              notes: notes || existingLocal.notes || '',
-              legalAgreement: legalAgreement || existingLocal.legalAgreement || null,
-              suspendedUntil: suspendedUntil || existingLocal.suspendedUntil || null,
-              suspensionReason: suspensionReason || existingLocal.suspensionReason || ''
+              authorizedBrands: authorizedBrands.length > 0 ? authorizedBrands : (existingLocal?.authorizedBrands || []),
+              registeredAt: ra.registered_at || existingLocal?.registeredAt,
+              authExpireDate: ra.auth_expire_date || existingLocal?.authExpireDate,
+              certCode: ra.cert_code || existingLocal?.certCode,
+              productsCount: ra.products_count !== undefined ? ra.products_count : (existingLocal?.productsCount || 0),
+              salesTotal: Number(ra.sales_total !== undefined ? ra.sales_total : (existingLocal?.salesTotal || 0)),
+              monthlySales: Number(ra.monthly_sales !== undefined ? ra.monthly_sales : (existingLocal?.monthlySales || 0)),
+              monthlyOrders: Number(ra.monthly_orders !== undefined ? ra.monthly_orders : (existingLocal?.monthlyOrders || 0)),
+              commissionRate: Number(ra.commission_rate !== undefined ? ra.commission_rate : (existingLocal?.commissionRate || 15)),
+              violationsCount: Number(ra.violations_count !== undefined ? ra.violations_count : (existingLocal?.violationsCount || 0)),
+              proposedBrands: proposedBrands || existingLocal?.proposedBrands || '',
+              notes: notes || existingLocal?.notes || '',
+              legalAgreement: legalAgreement || existingLocal?.legalAgreement || null,
+              suspendedUntil: suspendedUntil || existingLocal?.suspendedUntil || null,
+              suspensionReason: suspensionReason || existingLocal?.suspensionReason || ''
             });
           });
 

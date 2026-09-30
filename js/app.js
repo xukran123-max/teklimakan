@@ -86,6 +86,13 @@ function initTeklimakanApp() {
 
     closeLanguageModal();
 
+    try {
+      const newPath = lang === 'ug' ? '/' : '/' + lang;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', newPath);
+      }
+    } catch (e) {}
+
     document.querySelectorAll('.lang-option-row').forEach(row => {
       const rowLang = row.dataset.lang;
       const isSelected = rowLang === lang;
@@ -337,6 +344,9 @@ function initTeklimakanApp() {
 
   // ==================== تىل ۋە تېكىستلەر ====================
   function updateStaticTranslations() {
+    if (window.appI18n && typeof window.appI18n.translateStaticElements === 'function') {
+      window.appI18n.translateStaticElements();
+    }
     const i18n = window.appI18n;
     const lang = (i18n && i18n.getLang()) || 'ug';
     // بەت ماۋزۇسى پەقەت دۇكان نامى بولىدۇ، تىل ئالماشقاندا ئاپتوماتىك ئۆزگىرىدۇ

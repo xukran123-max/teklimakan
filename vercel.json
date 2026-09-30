@@ -32,6 +32,38 @@
       "destination": "/api/product-share"
     },
     {
+      "source": "/tr",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/tr/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/tr.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/en",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/en/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/en.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ug/(.*)",
+      "destination": "/index.html"
+    },
+    {
       "source": "/seidiye",
       "destination": "/seidiye.html"
     },
@@ -41,36 +73,6 @@
     }
   ],
   "redirects": [
-    {
-      "source": "/tr",
-      "destination": "/?lang=tr",
-      "permanent": false
-    },
-    {
-      "source": "/tr/:path*",
-      "destination": "/?lang=tr",
-      "permanent": false
-    },
-    {
-      "source": "/en",
-      "destination": "/?lang=en",
-      "permanent": false
-    },
-    {
-      "source": "/en/:path*",
-      "destination": "/?lang=en",
-      "permanent": false
-    },
-    {
-      "source": "/ug",
-      "destination": "/?lang=ug",
-      "permanent": false
-    },
-    {
-      "source": "/ug/:path*",
-      "destination": "/?lang=ug",
-      "permanent": false
-    },
     {
       "source": "/admin.html",
       "destination": "/",

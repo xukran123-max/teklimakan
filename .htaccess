@@ -13,8 +13,10 @@
   RewriteCond %{REQUEST_FILENAME}\.html -f
   RewriteRule ^(.*)$ $1.html [L]
 
-  # 4. تىل قىسقا ئادرېسلىرى (/tr, /en, /ug)
-  RewriteRule ^tr/?$ /?lang=tr [R=302,L]
-  RewriteRule ^en/?$ /?lang=en [R=302,L]
-  RewriteRule ^ug/?$ /?lang=ug [R=302,L]
+  # 4. تىل قىسقا ئادرېسلىرى (/tr, /en, /ug) - قايتا يۆتكەلمەي بىۋاسىتە كۆرسىتىش (Internal Rewrite)
+  RewriteRule ^tr/?$ index.html [L,QSA]
+  RewriteRule ^tr\.html$ index.html [L,QSA]
+  RewriteRule ^en/?$ index.html [L,QSA]
+  RewriteRule ^en\.html$ index.html [L,QSA]
+  RewriteRule ^ug/?$ index.html [L,QSA]
 </IfModule>

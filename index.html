@@ -2,6 +2,72 @@
 <html lang="ug" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  
+  <!-- ⚡ دەرھال تىلنى تونۇش ۋە يۆنىلىشنى توغرىلاش (Zero-Flash Instant i18n & Direction Resolver) -->
+  <script>
+    (function() {
+      try {
+        var path = (window.location.pathname || '').toLowerCase();
+        var search = (window.location.search || '').toLowerCase();
+        var hash = (window.location.hash || '').toLowerCase();
+        var lang = 'ug';
+
+        if (path === '/tr' || path.startsWith('/tr/') || search.indexOf('lang=tr') !== -1 || hash.indexOf('tr') !== -1) {
+          lang = 'tr';
+        } else if (path === '/en' || path.startsWith('/en/') || search.indexOf('lang=en') !== -1 || hash.indexOf('en') !== -1) {
+          lang = 'en';
+        } else {
+          var saved = localStorage.getItem('teklimakan_language');
+          if (saved && (saved === 'tr' || saved === 'en' || saved === 'ug')) {
+            lang = saved;
+          } else {
+            var nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
+            if (nav.startsWith('tr')) lang = 'tr';
+            else if (nav.startsWith('en')) lang = 'en';
+          }
+        }
+
+        try { localStorage.setItem('teklimakan_language', lang); } catch (e) {}
+
+        var doc = document.documentElement;
+        doc.setAttribute('lang', lang);
+        if (lang === 'ug') {
+          doc.setAttribute('dir', 'rtl');
+          doc.classList.add('rtl-layout');
+          doc.classList.remove('ltr-layout');
+        } else {
+          doc.setAttribute('dir', 'ltr');
+          doc.classList.add('ltr-layout');
+          doc.classList.remove('rtl-layout');
+          doc.setAttribute('data-lang-pending', 'true');
+        }
+
+        if (lang === 'tr') {
+          document.title = 'Teklimakan Online Alışveriş';
+        } else if (lang === 'en') {
+          document.title = 'Teklimakan E-Commerce';
+        }
+
+        // كۈتۈلمىگەن ھادىسە سەۋەبىدىن بەت قاراڭغۇ قېلىپ قالماسلىقى ئۈچۈن بىخەتەرلىك چەك ۋاقتى
+        if (lang !== 'ug') {
+          setTimeout(function() {
+            doc.removeAttribute('data-lang-pending');
+          }, 1200);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- 🛡️ بەت قاڭقىش ۋە ئۇيغۇرچىدىن تۈركچە/ئىنگلىزچىگە سەكرەش كۆرۈنۈشىنى پۈتۈنلەي توسۇش ئۇسلۇبى -->
+  <style id="langAntiFlickerStyle">
+    html[data-lang-pending="true"] body {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+  </style>
+
+  <!-- 🌐 كۆپ تىللىق يادرولۇق لۇغەت ۋە ماتور (باش قىسىمدا دەسلەپ يۈكلىنىدۇ) -->
+  <script src="js/i18n.js?v=20260930_v151"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تەكلىماكان سودا تورى</title>
   
@@ -2154,9 +2220,8 @@
   </a>
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
-  <script src="js/i18n.js?v=20260929_v136"></script>
   <script src="js/store.js?v=20260930_v151"></script>
-  <script src="js/app.js?v=20260930_v150"></script>
+  <script src="js/app.js?v=20260930_v151"></script>
   <script src="js/push-manager.js?v=20260929_v136"></script>
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى (Local Fast Bundle) -->

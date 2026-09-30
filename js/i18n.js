@@ -1900,13 +1900,116 @@ class I18nManager {
     html.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
     html.setAttribute('lang', this.currentLang);
 
-    if (isRtl) {
-      document.body.classList.add('rtl-layout');
-      document.body.classList.remove('ltr-layout');
-    } else {
-      document.body.classList.add('ltr-layout');
-      document.body.classList.remove('rtl-layout');
+    if (document.body) {
+      if (isRtl) {
+        document.body.classList.add('rtl-layout');
+        document.body.classList.remove('ltr-layout');
+      } else {
+        document.body.classList.add('ltr-layout');
+        document.body.classList.remove('rtl-layout');
+      }
     }
+  }
+
+  // ⚡ تىل ئۆزگەرگەندە ياكى بەت دەسلەپ ئېچىلغاندا بارلىق تۇراقلىق ئېلېمېنتلارنى دەل جايىدا تەرجىمە قىلىش (Zero-Flash Translation)
+  translateStaticElements(root = document) {
+    if (!root) return;
+    const lang = this.currentLang;
+    this.applyDirectionAndTypography();
+
+    // 1. بەت ماۋزۇسى
+    document.title = this.t('storeName');
+
+    const setText = (id, text) => {
+      const el = root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
+      if (el && text !== undefined) el.textContent = text;
+    };
+
+    // 2. ئۈستۈنكى ئېلان ۋە ئايلانما خەۋەرلەر (Marquee Ticker)
+    setText('topAnnouncementText', this.t('announcement'));
+    for (let i = 1; i <= 5; i++) {
+      root.querySelectorAll(`[data-marquee-badge="${i}"]`).forEach(el => el.textContent = this.t(`marqueeBadge${i}`));
+      root.querySelectorAll(`[data-marquee-text="${i}"]`).forEach(el => el.textContent = this.t(`marqueeText${i}`));
+    }
+
+    // 3. ئۈستۈنكى بالداق ئۇچۇرلىرى
+    setText('topWhatsappSpan', this.t('topWhatsapp'));
+    setText('topWorkingHours', this.t('topHours'));
+    setText('topAdminLinkSpan', this.t('topAdmin'));
+    setText('topAgentSpan', this.t('topAgent'));
+
+    const agentNavBtn = root.querySelector ? root.querySelector('#agentPortalNavBtn span') : null;
+    if (agentNavBtn) agentNavBtn.textContent = this.t('agentNavBtn') || (lang === 'tr' ? 'Temsilci Girişi' : (lang === 'en' ? 'Vendor Portal' : 'ۋاكالەتچى كىرىش'));
+
+    const adminSecretNavBtn = root.querySelector ? root.querySelector('#adminSecretNavBtn span') : null;
+    if (adminSecretNavBtn) adminSecretNavBtn.textContent = this.t('adminNavBtn') || (lang === 'tr' ? 'Yönetim' : (lang === 'en' ? 'Admin' : 'ئارقا سۇپا'));
+
+    const searchInput = root.getElementById ? root.getElementById('mainSearchInput') : root.querySelector('#mainSearchInput');
+    if (searchInput) searchInput.placeholder = this.t('searchPlaceholder');
+
+    root.querySelectorAll('.brand-store-name').forEach(el => el.textContent = this.t('storeName'));
+    root.querySelectorAll('.brand-store-sub').forEach(el => el.textContent = this.t('storeSubtitle'));
+
+    // 4. يېتەكلىگۈچ كۇنۇپكىلىرى (Desktop & Mobile)
+    setText('navCartText', this.t('cartBtn') || 'سېۋەت');
+    setText('navWishlistText', this.t('wishlistBtn') || 'ياقتۇرغانلىرىم');
+    setText('navOrdersText', this.t('navOrdersText') || 'سېتىۋالغىنىم');
+
+    // 5. تەشۋىقات بۆلىكى (Hero Section Slides 1-5)
+    for (let s = 1; s <= 5; s++) {
+      setText(`heroTag${s}`, this.t(`heroTag${s}`));
+      setText(`heroTitle${s}`, this.t(`heroTitle${s}`));
+      setText(`heroDesc${s}`, this.t(`heroDesc${s}`));
+      const btn = root.querySelector ? root.querySelector(`#heroBtn${s} span`) : null;
+      if (btn) btn.textContent = this.t(`heroBtn${s}`);
+    }
+
+    // 6. ئالاھىدىلىك كارتىلىرى (Features)
+    setText('featShippingTitle', this.t('featShippingTitle'));
+    setText('featShippingDesc', this.t('featShippingDesc'));
+    setText('featQualityTitle', this.t('featQualityTitle'));
+    setText('featQualityDesc', this.t('featQualityDesc'));
+    setText('featReturnTitle', this.t('featReturnTitle'));
+    setText('featReturnDesc', this.t('featReturnDesc'));
+    setText('featServiceTitle', this.t('featServiceTitle'));
+    setText('featServiceDesc', this.t('featServiceDesc'));
+
+    // 7. تۈرلەر ۋە تاۋار بايرىقى ماۋزۇلىرى
+    setText('categoriesSectionTitle', this.t('categoriesTitle'));
+    setText('categoriesTitle', this.t('categoriesTitle'));
+    setText('flashSaleBadge', this.t('flashSaleBadge'));
+    setText('flashSaleTitle', this.t('flashSaleTitle'));
+    setText('flashSaleSub', this.t('flashSaleSub'));
+    setText('flashCountdownLabel', this.t('remainingTime') || (lang === 'tr' ? 'Kalan Süre' : (lang === 'en' ? 'Time Left' : 'قالغان ۋاقىت:')));
+    setText('flashSaleBtnText', this.t('flashSaleBtn'));
+    setText('clockHoursLabel', this.t('clockHours'));
+    setText('clockMinutesLabel', this.t('clockMinutes'));
+    setText('clockSecondsLabel', this.t('clockSeconds'));
+    setText('flashWeatherHint', this.t('flashWeatherHint'));
+
+    // 8. سۈزگۈچ تېمىلىرى
+    setText('filterBrandTitle', this.t('filterBrandTitle'));
+    setText('mobileFilterToggleTitle', this.t('filterMobileTitle'));
+    setText('filterStockTitle', this.t('filterStockTitle'));
+    setText('filterPriceTitle', this.t('filterPriceTitle'));
+    setText('filterCouponTitle', this.t('filterCouponTitle'));
+
+    // 9. ئاستى قىسىم (Footer)
+    root.querySelectorAll('.footer-col').forEach(col => {
+      const h4 = col.querySelector('h4');
+      if (!h4) return;
+      const h4Text = h4.textContent.trim();
+      if (h4Text.includes('ھەققىدە') || h4Text.includes('دۇكان') || h4Text.includes('Hakkımızda') || h4Text.includes('About')) {
+        h4.textContent = lang === 'tr' ? 'Hakkımızda' : (lang === 'en' ? 'About Us' : 'دۇكان ھەققىدە');
+      } else if (h4Text.includes('مۇلازىمەت') || h4Text.includes('خېرىدار') || h4Text.includes('Müşteri') || h4Text.includes('Customer')) {
+        h4.textContent = lang === 'tr' ? 'Müşteri Hizmetleri' : (lang === 'en' ? 'Customer Care' : 'خېرىدار مۇلازىمىتى');
+      } else if (h4Text.includes('ئالاقە') || h4Text.includes('ئادرېس') || h4Text.includes('İletişim') || h4Text.includes('Contact')) {
+        h4.textContent = lang === 'tr' ? 'İletişim & Destek' : (lang === 'en' ? 'Contact & Support' : 'ئالاقىلىشىڭ');
+      }
+    });
+
+    // 10. بەت تولۇق تەرجىمە قىلىنغاندىن كېيىن يوشۇرۇش پەردىسىنى دەرھال ئېچىش
+    document.documentElement.removeAttribute('data-lang-pending');
   }
 }
 
@@ -1915,3 +2018,18 @@ function brandKeyClean(str) {
 }
 
 window.appI18n = new I18nManager();
+
+// ⚡ DOM تەييار بولغان ھامان دەرھال تۇراقلىق مەزمۇنلارنى تەرجىمە قىلىش (FOUC نى يوقىتىش)
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.appI18n) {
+        window.appI18n.translateStaticElements();
+      }
+    });
+  } else {
+    if (window.appI18n) {
+      window.appI18n.translateStaticElements();
+    }
+  }
+}

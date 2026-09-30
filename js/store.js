@@ -1340,7 +1340,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
     enabled: true,
     title: 'سىزگە تەۋسىيە',
     subtitle: 'تاللانغان تەبىئىي، ساپ يەرلىك نېئمەتلەر',
-    linkText: 'بارلىقىنى كۆرۈش ›',
+    linkText: '',
     linkUrl: '#catalogSection',
     productSource: 'featured',
     manualProductIds: ['PRD-100', 'PRD-119', 'PRD-103', 'PRD-120', 'PRD-754', 'PRD-420'],
@@ -1353,19 +1353,19 @@ const DEFAULT_SHOWCASE_SHELVES = [
       ug: {
         title: 'سىزگە تەۋسىيە',
         subtitle: 'تاللانغان تەبىئىي، ساپ يەرلىك نېئمەتلەر',
-        linkText: 'بارلىقىنى كۆرۈش ›',
+        linkText: '',
         badgeStripText: '🚚 ئەتە بوسۇغىڭىزدا'
       },
       tr: {
         title: 'Keşfetmen İçin Öneriler',
         subtitle: 'Sizin için seçilen özel doğal ürünler',
-        linkText: 'Tümünü Gör >',
+        linkText: '',
         badgeStripText: 'Cuma Kapında'
       },
       en: {
         title: 'Recommended for You',
         subtitle: 'Curated premium organic products',
-        linkText: 'See All >',
+        linkText: '',
         badgeStripText: 'Fast Delivery'
       }
     }
@@ -1376,7 +1376,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
     enabled: true,
     title: 'ئالاھىدە باھالىق مەھسۇلاتلار',
     subtitle: 'چەكلىك ۋاقىتلىق ئېتىبار ۋە قىزىق نۇقتىدىكى تاللانمىلار',
-    linkText: 'بارلىقىنى كۆرۈش ›',
+    linkText: '',
     linkUrl: '#catalogSection',
     productSource: 'bestseller',
     manualProductIds: ['PRD-128', 'PRD-759', 'PRD-132', 'PRD-341', 'PRD-114', 'PRD-292'],
@@ -1389,19 +1389,19 @@ const DEFAULT_SHOWCASE_SHELVES = [
       ug: {
         title: 'ئالاھىدە باھالىق مەھسۇلاتلار',
         subtitle: 'چەكلىك ۋاقىتلىق ئېتىبار ۋە قىزىق نۇقتىدىكى تاللانمىلار',
-        linkText: 'بارلىقىنى كۆرۈش ›',
-        badgeStripText: '🎁 75 لىرا تالون'
+        linkText: '',
+        badgeStripText: '🎁 75 لىرا'
       },
       tr: {
         title: "Trendyol Plus'a Özel Fiyatlı Ürünler",
         subtitle: 'Özel fiyatlar ve popüler indirimli fırsatlar',
-        linkText: 'Tümünü Gör >',
+        linkText: '',
         badgeStripText: '75 TL Kupon'
       },
       en: {
         title: 'Special Price Products',
         subtitle: 'Exclusive discounts and hot deals',
-        linkText: 'See All >',
+        linkText: '',
         badgeStripText: '75 TL Coupon'
       }
     }
@@ -7366,7 +7366,7 @@ class StoreManager {
       .map((s, idx) => {
         let title = s.title || '';
         let subtitle = s.subtitle || '';
-        let linkText = s.linkText || 'بارلىقىنى كۆرۈش ›';
+        let linkText = s.linkText || '';
         let badgeStripText = s.badgeStripText || '';
 
         if (s.translations && s.translations[lang]) {
@@ -7374,6 +7374,13 @@ class StoreManager {
           if (s.translations[lang].subtitle) subtitle = s.translations[lang].subtitle;
           if (s.translations[lang].linkText) linkText = s.translations[lang].linkText;
           if (s.translations[lang].badgeStripText) badgeStripText = s.translations[lang].badgeStripText;
+        }
+
+        if (badgeStripText && badgeStripText.includes('تالون')) {
+          badgeStripText = badgeStripText.replace(/تالون/g, '').trim();
+        }
+        if (linkText && (linkText.includes('بارلىقىنى كۆرۈش') || linkText.includes('Tümünü') || linkText.includes('See All'))) {
+          linkText = '';
         }
 
         // تاۋار مەنبەسى بويىچە تاۋارلارنى يىغىش (Resolve products)

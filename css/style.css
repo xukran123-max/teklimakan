@@ -5988,53 +5988,104 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   width: 100%;
 }
 
-/* تاۋار راكى ئۈستەل كومپيۇتېر يۆنىلىش كۇنۇپكىلىرى */
+/* 🛍️ تاۋار سىيرىلما راكى ئىككى تەرەپ لەيلىمە سىيرىلغۇچلىرى (Floating Carousel Nav - Non Blocking) */
 .shelf-nav-btn {
   position: absolute;
-  top: 50%;
+  top: 38%;
   transform: translateY(-50%);
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
   color: #1e293b;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 5;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.showcase-shelf-track-wrapper:hover .shelf-nav-btn {
+  z-index: 10;
+  transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.2s ease,
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+  user-select: none;
+  touch-action: manipulation;
   opacity: 1;
   pointer-events: auto;
 }
 
 .shelf-nav-btn:hover {
   background: #ffffff;
-  color: #f97316;
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  color: #ea580c;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08);
   border-color: #fdba74;
 }
 
+.shelf-nav-btn:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.shelf-nav-btn.nav-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 .shelf-nav-prev {
-  right: -12px;
+  right: -16px;
 }
 
 .shelf-nav-next {
-  left: -12px;
+  left: -16px;
 }
 
 @media (max-width: 768px) {
   .shelf-nav-btn {
-    display: none !important;
+    width: 32px;
+    height: 32px;
+    font-size: 0.78rem;
+    top: 36%;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   }
+  .shelf-nav-prev {
+    right: -6px;
+  }
+  .shelf-nav-next {
+    left: -6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .shelf-nav-btn {
+    width: 29px;
+    height: 29px;
+    font-size: 0.72rem;
+    top: 35%;
+  }
+  .shelf-nav-prev {
+    right: -4px;
+  }
+  .shelf-nav-next {
+    left: -4px;
+  }
+}
+
+body.dark-mode .shelf-nav-btn {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: rgba(51, 65, 85, 0.85);
+  color: #f1f5f9;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .shelf-nav-btn:hover {
+  background: #334155;
+  color: #fb923c;
+  border-color: #f97316;
 }
 
 .showcase-shelf-track {

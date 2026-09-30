@@ -1443,22 +1443,23 @@ function initTeklimakanApp() {
     shelfEl.className = 'showcase-shelf';
     shelfEl.dataset.shelfId = shelf.id;
 
-    // Header: Title on right (RTL), Link on left
+    // Header: Title on right (RTL), Link on left (only if not 'بارلىقىنى كۆرۈش' and not empty)
     const headerEl = document.createElement('div');
     headerEl.className = 'showcase-shelf-header';
 
     const titleEl = document.createElement('h3');
     titleEl.className = 'showcase-shelf-title';
     titleEl.innerHTML = shelf.title;
-
-    const linkEl = document.createElement('a');
-    linkEl.className = 'showcase-shelf-link';
-    linkEl.href = shelf.linkUrl || '#catalogSection';
-    const cleanLinkText = (shelf.linkText || 'بارلىقىنى كۆرۈش').replace(/[›>‹<]/g, '').trim();
-    linkEl.innerHTML = `<span>${cleanLinkText}</span> <i class="fas fa-chevron-left" style="font-size: 0.72rem;"></i>`;
-
     headerEl.appendChild(titleEl);
-    headerEl.appendChild(linkEl);
+
+    const cleanLinkText = (shelf.linkText || '').replace(/[›>‹<]/g, '').trim();
+    if (cleanLinkText && !cleanLinkText.includes('بارلىقىنى كۆرۈش') && !cleanLinkText.includes('Tümünü') && !cleanLinkText.includes('See All')) {
+      const linkEl = document.createElement('a');
+      linkEl.className = 'showcase-shelf-link';
+      linkEl.href = shelf.linkUrl || '#catalogSection';
+      linkEl.innerHTML = `<span>${cleanLinkText}</span> <i class="fas fa-chevron-left" style="font-size: 0.72rem;"></i>`;
+      headerEl.appendChild(linkEl);
+    }
     shelfEl.appendChild(headerEl);
 
     // Track wrapper & track
@@ -1485,6 +1486,9 @@ function initTeklimakanApp() {
       let stripText = shelf.badgeStripText || '';
       if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
         stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
+      }
+      if (stripText && stripText.includes('تالون')) {
+        stripText = stripText.replace(/تالون/g, '').trim();
       }
 
       // Verified badge:
@@ -1574,25 +1578,68 @@ function initTeklimakanApp() {
       track.appendChild(card);
     });
 
-    // 🖥️ ئۈستەل كومپيۇتېرلار ئۈچۈن قولايلىق چەككۈچ كۇنۇپكىلار
+    // 🛍️ ئىككى تەرەپ لەيلىمە سىيرىلغۇچ كۇنۇپكىلار (Responsive Floating Carousel Arrows)
     const navPrev = document.createElement('button');
     navPrev.type = 'button';
     navPrev.className = 'shelf-nav-btn shelf-nav-prev';
     navPrev.setAttribute('aria-label', 'Previous');
     navPrev.innerHTML = '<i class="fas fa-chevron-right"></i>';
-    navPrev.addEventListener('click', (e) => {
-      e.stopPropagation();
-      track.scrollBy({ left: 320, behavior: 'smooth' });
-    });
 
     const navNext = document.createElement('button');
     navNext.type = 'button';
     navNext.className = 'shelf-nav-btn shelf-nav-next';
     navNext.setAttribute('aria-label', 'Next');
     navNext.innerHTML = '<i class="fas fa-chevron-left"></i>';
+
+    const getScrollStep = () => Math.max(track.clientWidth * 0.75, 260);
+
+    navPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const step = getScrollStep();
+      const isRtl = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+      track.scrollBy({ left: isRtl ? step : -step, behavior: 'smooth' });
+    });
+
     navNext.addEventListener('click', (e) => {
       e.stopPropagation();
-      track.scrollBy({ left: -320, behavior: 'smooth' });
+      const step = getScrollStep();
+      const isRtl = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+      track.scrollBy({ left: isRtl ? -step : step, behavior: 'smooth' });
+    });
+
+    // ئەقىللىق تەڭشەش: چېتىگە يەتكەندە كۇنۇپكىنى يوشۇرۇپ مەھسۇلاتنى توسماسلىقنى كاپالەتلەندۈرۈش
+    const updateNavState = () => {
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= 8) {
+        navPrev.style.display = 'none';
+        navNext.style.display = 'none';
+        return;
+      }
+      navPrev.style.display = 'inline-flex';
+      navNext.style.display = 'inline-flex';
+
+      const absScroll = Math.abs(track.scrollLeft);
+      const isAtStart = absScroll <= 6;
+      const isAtEnd = absScroll >= (maxScroll - 10);
+
+      // In RTL: start is on the right, navPrev is on the right
+      // Hide button at boundary so it NEVER covers any product!
+      if (isAtStart) {
+        navPrev.classList.add('nav-hidden');
+      } else {
+        navPrev.classList.remove('nav-hidden');
+      }
+
+      if (isAtEnd) {
+        navNext.classList.add('nav-hidden');
+      } else {
+        navNext.classList.remove('nav-hidden');
+      }
+    };
+
+    track.addEventListener('scroll', updateNavState, { passive: true });
+    requestAnimationFrame(() => {
+      setTimeout(updateNavState, 80);
     });
 
     trackWrap.appendChild(navPrev);

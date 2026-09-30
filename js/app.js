@@ -97,10 +97,8 @@ function initTeklimakanApp() {
     try { updateStaticTranslations(); } catch (e) {}
     try { renderBrands(); } catch (e) {}
     try { renderCategories(); } catch (e) {}
-    try { renderProducts();
-    try { initSmartInstagramFollowPrompt(); } catch (e) {}
+    try { renderProducts(); } catch (e) {}
     try { bindInstagramSmartLinks(); } catch (e) {}
- } catch (e) {}
     try { renderFlashProductsCards(); } catch (e) {}
     try { updateCartUI(); } catch (e) {}
     try { initHeroSlider(lang); } catch (e) {}
@@ -4832,65 +4830,6 @@ function initTeklimakanApp() {
     }
   }
   window.openInstagramProfile = openInstagramProfile;
-
-  // 📸 ئەقلىي Instagram ئەگىشىش ئەسكەرتىش بالدىقى (Smart Non-Intrusive Prompt)
-  function initSmartInstagramFollowPrompt() {
-    try {
-      const dismissedUntil = localStorage.getItem('teklimakan_insta_prompt_dismissed');
-      if (dismissedUntil && Number(dismissedUntil) > Date.now()) return;
-    } catch (e) {}
-
-    setTimeout(() => {
-      if (document.querySelector('.modal-backdrop.active') || document.querySelector('.cart-overlay.active')) return;
-      if (document.getElementById('smartInstaFollowBar')) return;
-
-      const bar = document.createElement('div');
-      bar.id = 'smartInstaFollowBar';
-      bar.className = 'smart-insta-follow-bar';
-      bar.innerHTML = `
-        <div class="insta-bar-content">
-          <div class="insta-bar-icon">
-            <i class="fab fa-instagram"></i>
-          </div>
-          <div class="insta-bar-text">
-            <div class="insta-bar-title">
-              <span>تەكلىماكان Instagram</span>
-              <i class="fas fa-check-circle" style="color: #38bdf8; font-size: 0.72rem;"></i>
-            </div>
-            <div class="insta-bar-desc">سەھىپىمىزگە ئەگىشىپ يېڭى تەبىئىي مەھسۇلاتلاردىن خەۋەردار بولۇڭ!</div>
-          </div>
-          <button type="button" class="insta-bar-btn" title="ئەپتە ئېچىش ۋە ئەگىشىش">
-            <span>ئەگىشىش</span>
-            <i class="fas fa-external-link-alt" style="font-size: 0.65rem;"></i>
-          </button>
-          <button type="button" class="insta-bar-close" title="تاقاش">&times;</button>
-        </div>
-      `;
-
-      bar.querySelector('.insta-bar-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openInstagramProfile(window.location.href, 'smart_bar');
-        bar.remove();
-      });
-
-      bar.addEventListener('click', () => {
-        openInstagramProfile(window.location.href, 'smart_bar_card');
-        bar.remove();
-      });
-
-      bar.querySelector('.insta-bar-close').addEventListener('click', (e) => {
-        e.stopPropagation();
-        try {
-          localStorage.setItem('teklimakan_insta_prompt_dismissed', String(Date.now() + 7 * 86400000));
-        } catch (err) {}
-        bar.classList.add('hide');
-        setTimeout(() => bar.remove(), 300);
-      });
-
-      document.body.appendChild(bar);
-      requestAnimationFrame(() => bar.classList.add('visible'));
-    }, 8500);
-  }
 
   // بارلىق بېكەت ئىچىدىكى Instagram ئۇلانمىلىرىنى ئەقلىي قوزغاتقۇچ بىلەن تۇتاشتۇرۇش
   function bindInstagramSmartLinks() {

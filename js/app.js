@@ -6590,20 +6590,45 @@ function initTeklimakanApp() {
 
       // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش
       const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
+      const bannerIcon = document.getElementById('agentDailyLimitNoticeIcon');
+      const bannerTitle = document.getElementById('agentDailyLimitNoticeTitle');
+      const bannerDesc = document.getElementById('agentDailyLimitNoticeDesc');
       const submitBtn = document.getElementById('btnAgentSubmitProductAction');
+
+      if (submitBtn) {
+        submitBtn.removeAttribute('data-quota-blocked');
+        submitBtn.disabled = false;
+      }
+
       if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
         const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
         if (!quota.allowed) {
           if (dailyLimitBanner) dailyLimitBanner.style.display = 'block';
+          if (quota.isPending) {
+            if (bannerIcon) bannerIcon.textContent = '⏳';
+            if (bannerTitle) bannerTitle.textContent = 'ۋاكالەتچىلىك سالاھىيىتىڭىز تەكشۈرۈلۈۋاتىدۇ';
+            if (bannerDesc) bannerDesc.innerHTML = 'ھۆرمەتلىك ئىلتىماس قىلغۇچى، سۇپا باشقۇرغۇچىسى ئىلتىماسىڭىزنى تەكشۈرۈپ تەستىقلىغاندىن كېيىن، كۈنىگە 1 تالدىن يېڭى تاۋار سۇنالايسىز.';
+          } else if (quota.isSuspended) {
+            if (bannerIcon) bannerIcon.textContent = '🚫';
+            if (bannerTitle) bannerTitle.textContent = 'ھېساباتىڭىز ۋاقىتلىق توختىتىلغان';
+            if (bannerDesc) bannerDesc.innerHTML = quota.message || 'بەلگىلىمىگە خىلاپلىق سەۋەبىدىن ھېساباتىڭىز توختىتىلغان.';
+          } else {
+            if (bannerIcon) bannerIcon.textContent = '⚠️';
+            if (bannerTitle) bannerTitle.textContent = `بۈگۈنكى يېڭى تاۋار يوللاش پۇرسىتىڭىز توشتى (${quota.countToday}/${quota.limit})`;
+            if (bannerDesc) bannerDesc.innerHTML = `ھۆرمەتلىك سېتىش ۋاكالەتچىسى، باشقۇرغۇچىنىڭ تەكشۈرۈپ تەستىقلاپ يېتىشەلىشى ئۈچۈن، كۈنىگە پەقەت <strong>1 تال يېڭى مەھسۇلات</strong> يوللاشقا رۇخسەت قىلىنىدۇ. سىز بۈگۈن ${quota.countToday} تال مەھسۇلات يوللاپ بولدىڭىز، كېيىنكى مەھسۇلاتنى ئەتە يوللىيالايسىز.`;
+          }
           if (submitBtn) {
-            submitBtn.style.opacity = '0.65';
-            submitBtn.disabled = true;
+            submitBtn.setAttribute('data-daily-blocked', 'true');
+            submitBtn.style.opacity = '0.7';
+            submitBtn.style.cursor = 'not-allowed';
             submitBtn.title = quota.message || 'بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.';
           }
         } else {
           if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
           if (submitBtn) {
+            submitBtn.removeAttribute('data-daily-blocked');
             submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
             submitBtn.disabled = false;
             submitBtn.title = '';
           }
@@ -6611,7 +6636,9 @@ function initTeklimakanApp() {
       } else {
         if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
         if (submitBtn) {
+          submitBtn.removeAttribute('data-daily-blocked');
           submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
           submitBtn.disabled = false;
           submitBtn.title = '';
         }
@@ -6631,7 +6658,12 @@ function initTeklimakanApp() {
     const btnGoBackLimit = document.getElementById('btnGoBackToMyProductsFromLimit');
 
     if (btnGoBackLimit) {
-      btnGoBackLimit.addEventListener('click', () => switchAgentPortalView('products'));
+      btnGoBackLimit.addEventListener('click', () => {
+        switchAgentPortalView('products');
+        if (currentVerifiedAgent) {
+          renderAgentProductsList(currentVerifiedAgent.id);
+        }
+      });
     }
 
     if (btnSwitchProducts) {
@@ -7133,7 +7165,11 @@ function initTeklimakanApp() {
           if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
           const submitBtn = document.getElementById('btnAgentSubmitProductAction');
           if (submitBtn) {
+            submitBtn.removeAttribute('data-daily-blocked');
+            submitBtn.removeAttribute('data-quota-blocked');
+            submitBtn.disabled = false;
             submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
             submitBtn.title = '';
           }
 
@@ -7423,7 +7459,9 @@ function initTeklimakanApp() {
         badge.style.border = '1px solid #fca5a5';
 
         if (submitBtn && !editId) {
+          submitBtn.setAttribute('data-quota-blocked', 'true');
           submitBtn.style.opacity = '0.65';
+          submitBtn.style.cursor = 'not-allowed';
           submitBtn.title = 'بۇ تاۋارنى ئاللىقاچان 3 ۋاكالەتچى ئېلان قىلىپ بولغان (چەك تولغان). سىز باشقا تاۋار سۇنۇڭ.';
         }
       } else {
@@ -7456,8 +7494,14 @@ function initTeklimakanApp() {
         }
 
         if (submitBtn) {
-          submitBtn.style.opacity = '1';
-          submitBtn.title = '';
+          submitBtn.removeAttribute('data-quota-blocked');
+          const isDailyBlocked = submitBtn.getAttribute('data-daily-blocked') === 'true';
+          if (!isDailyBlocked || editId) {
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.disabled = false;
+            submitBtn.title = '';
+          }
         }
       }
     }
@@ -7814,6 +7858,13 @@ function initTeklimakanApp() {
         if (!editId && currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
           const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
           if (!quota.allowed) {
+            const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
+            if (dailyLimitBanner) {
+              dailyLimitBanner.style.display = 'block';
+              dailyLimitBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              dailyLimitBanner.style.boxShadow = '0 0 0 3px #f43f5e';
+              setTimeout(() => { if (dailyLimitBanner) dailyLimitBanner.style.boxShadow = ''; }, 2000);
+            }
             alert(quota.message);
             showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'error');
             return;
@@ -7990,6 +8041,37 @@ function initTeklimakanApp() {
           showToast(res.message, 'error');
         }
       });
+
+      const btnSubmitProductAction = document.getElementById('btnAgentSubmitProductAction');
+      if (btnSubmitProductAction) {
+        btnSubmitProductAction.addEventListener('click', (e) => {
+          const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+          if (!editId && currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
+            const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
+            if (!quota.allowed) {
+              e.preventDefault();
+              const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
+              if (dailyLimitBanner) {
+                dailyLimitBanner.style.display = 'block';
+                dailyLimitBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                dailyLimitBanner.style.boxShadow = '0 0 0 3px #f43f5e';
+                setTimeout(() => { if (dailyLimitBanner) dailyLimitBanner.style.boxShadow = ''; }, 2000);
+              }
+              showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز (1 تال) توشتى.', 'warning');
+              return;
+            }
+          }
+          if (btnSubmitProductAction.getAttribute('data-quota-blocked') === 'true' && !editId) {
+            e.preventDefault();
+            const nameEl = document.getElementById('agentProdName');
+            showToast('⚠️ بۇ تاۋارنى ئاللىقاچان 3 نەپەر باشقا ۋاكالەتچى ئېلان قىلىپ بولغان (چەك تولغان). باشقا تاۋار سۇنۇڭ!', 'warning');
+            if (nameEl) {
+              nameEl.focus();
+              nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        });
+      }
     }
 
     // تاشقى ئۇلىنىش ئاگاھلاندۇرۇش كۆزنىكىنى تاقاش

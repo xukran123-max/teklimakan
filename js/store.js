@@ -4899,10 +4899,11 @@ class StoreManager {
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // سىستېمىدىكى تاۋارلاردىن بۈگۈن بۇ ۋاكالەتچى قوشقان يېڭى تاۋارلارنى ساناش
+    // سىستېمىدىكى تاۋارلاردىن بۈگۈن بۇ ۋاكالەتچى قوشقان يېڭى تاۋارلارنى ساناش (رەت قىلىنغان ياكى ئۆچۈرۈلگەنلەر ھېسابلانمايدۇ)
     const allProducts = this.getProducts();
     const uploadedToday = allProducts.filter(p => {
       if (!p || !p.isAgentSubmitted || String(p.agentId) !== String(agent.id)) return false;
+      if (p.approvalStatus === 'رەت قىلىندى' || p.isDeleted === true) return false;
       if (!p.createdAt) return false;
       const d = new Date(p.createdAt);
       if (isNaN(d.getTime())) return false;

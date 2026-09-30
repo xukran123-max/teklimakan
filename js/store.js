@@ -7297,7 +7297,7 @@ class StoreManager {
       ? settings.marqueeItems
       : DEFAULT_MARQUEE_ITEMS;
 
-    return items
+    const list = items
       .filter(item => item && item.enabled !== false)
       .map((item, idx) => {
         let badge = item.badge || '';
@@ -7311,9 +7311,27 @@ class StoreManager {
           badge: badge,
           text: text,
           badgeStyle: item.badgeStyle || 'badge-sale',
-          linkType: item.linkType || ''
+          linkType: item.linkType || '',
+          url: item.url || ''
         };
       });
+
+    // 🤝 پەقەت ئۇيغۇرچىدا كۆرۈنسۇن: قېرىنداشلار فوندى 5% ساخاۋەت ئۈلۈشىنى ئايلانما ئېلان تاختىسىغا كەسپىي قوشۇش
+    if (lang === 'ug') {
+      const charityCfg = (typeof this.getCharityFundConfig === 'function') ? this.getCharityFundConfig() : null;
+      if (charityCfg && charityCfg.enabled !== false) {
+        list.push({
+          id: 'charity_fund_marquee',
+          badge: `ساخاۋەت %${charityCfg.percentage || 5}`,
+          text: `🤝 ${charityCfg.name || 'قېرىنداشلار فوندى'}: مەزكۇر سۇپىدىكى ھەربىر مالنىڭ %${charityCfg.percentage || 5} قىممىتى مۇھتاج قېرىنداشلارغا ئاتىلىدۇ`,
+          badgeStyle: 'badge-charity',
+          linkType: 'charity',
+          url: charityCfg.url || 'https://www.seidiye.com/category/mihri/'
+        });
+      }
+    }
+
+    return list;
   }
 
   updateMarqueeItems(items) {

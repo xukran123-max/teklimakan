@@ -329,7 +329,14 @@ function initTeklimakanApp() {
     items.forEach((it, idx) => {
       const badgeStyle = it.badgeStyle || 'badge-sale';
       const isInsta = badgeStyle === 'badge-insta' || it.linkType === 'instagram';
-      const customAttrs = isInsta ? 'style="cursor: pointer;" onclick="document.getElementById(\'footerBrandInstaLink\')?.click()"' : '';
+      const isCharity = badgeStyle === 'badge-charity' || it.linkType === 'charity';
+      let customAttrs = '';
+      if (isInsta) {
+        customAttrs = 'style="cursor: pointer;" onclick="document.getElementById(\'footerBrandInstaLink\')?.click()"';
+      } else if (isCharity) {
+        const url = it.url || 'https://www.seidiye.com/category/mihri/';
+        customAttrs = `style="cursor: pointer;" onclick="window.open('${url}', '_blank')" title="«قېرىنداشلار فوندى» سەھىپىسىنى يېڭى بەتتە كۆرۈش"`;
+      }
       itemsHtml += `
         <div class="marquee-item" ${customAttrs}>
           <span class="marquee-badge ${escapeMarqueeHtml(badgeStyle)}" data-marquee-badge="${it.id || (idx + 1)}">${escapeMarqueeHtml(it.badge)}</span>
@@ -4868,6 +4875,7 @@ function initTeklimakanApp() {
     }
     if (e.detail && (e.detail.type === 'charityFund' || e.detail.type === 'settings' || e.detail.type === 'all')) {
       try { renderCharityTrustBanner(); } catch (err) {}
+      try { renderMarqueeTicker(); } catch (err) {}
     }
   });
 

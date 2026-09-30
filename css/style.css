@@ -339,6 +339,12 @@ html[dir="ltr"] .marquee-item {
   background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
 }
 
+.marquee-badge.badge-charity {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+}
+
 /* پۇل بىرلىكى تاللىغۇچ (Currency Selector) */
 .currency-select-dropdown {
   background: var(--bg-main);
@@ -6402,6 +6408,10 @@ body.dark-mode .shelf-card-add-btn:hover {
   max-width: 1200px;
   margin: 1.25rem auto 1.5rem;
   padding: 0 1rem;
+}
+
+.charity-trust-container-bottom {
+  margin: 3rem auto 2.5rem;
 }
 
 .charity-trust-inner {

@@ -6566,6 +6566,7 @@ function initTeklimakanApp() {
 
       const autofillNotice = document.getElementById('agentAutofillNotice');
       if (autofillNotice) autofillNotice.style.display = 'none';
+      if (typeof updateSameProductQuotaNotice === 'function') updateSameProductQuotaNotice('');
       const autocompleteList = document.getElementById('agentProdAutocompleteList');
       if (autocompleteList) {
         autocompleteList.style.display = 'none';
@@ -7380,6 +7381,87 @@ function initTeklimakanApp() {
       }, 1500);
     }
 
+    // 👥 ئوخشاش مەھسۇلاتنىڭ 3 ۋاكالەتچى سېتىش چېكى ئەسكەرتمىسىنى يېڭىلاش
+    function updateSameProductQuotaNotice(prodName) {
+      const noticeBox = document.getElementById('agentSameProdQuotaNotice');
+      const icon = document.getElementById('agentSameProdQuotaIcon');
+      const text = document.getElementById('agentSameProdQuotaText');
+      const badge = document.getElementById('agentSameProdQuotaBadge');
+      const submitBtn = document.getElementById('btnAgentSubmitProductAction');
+      if (!noticeBox || !text || !badge) return;
+
+      const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+      const name = (prodName || '').trim();
+
+      if (!name || name.length < 2) {
+        noticeBox.style.display = 'none';
+        return;
+      }
+
+      if (!window.appStore || typeof window.appStore.checkProductAgentQuota !== 'function') {
+        noticeBox.style.display = 'none';
+        return;
+      }
+
+      const agentId = currentVerifiedAgent ? currentVerifiedAgent.id : null;
+      const res = window.appStore.checkProductAgentQuota(name, editId, agentId, 3);
+
+      noticeBox.style.display = 'flex';
+
+      if (!res.allowed) {
+        noticeBox.style.background = '#fff1f2';
+        noticeBox.style.border = '1.5px solid #fecdd3';
+        noticeBox.style.color = '#9f1239';
+        if (icon) {
+          icon.className = 'fas fa-exclamation-triangle';
+          icon.style.color = '#e11d48';
+        }
+        text.innerHTML = `⚠️ <strong>«${escapeModalHtml(name)}»</strong> ناملىق مەھسۇلاتنى ئاللىقاچان <strong>3 نەپەر باشقا ۋاكالەتچى</strong> ئېلان قىلىپ بولغان (چەك تولغان). باشقا تاۋار تاللاڭ!`;
+        badge.textContent = `3/3 تولدى`;
+        badge.style.background = '#fee2e2';
+        badge.style.color = '#b91c1c';
+        badge.style.border = '1px solid #fca5a5';
+
+        if (submitBtn && !editId) {
+          submitBtn.style.opacity = '0.65';
+          submitBtn.title = 'بۇ تاۋارنى ئاللىقاچان 3 ۋاكالەتچى ئېلان قىلىپ بولغان (چەك تولغان). سىز باشقا تاۋار سۇنۇڭ.';
+        }
+      } else {
+        if (res.count > 0) {
+          noticeBox.style.background = '#eff6ff';
+          noticeBox.style.border = '1.5px solid #bfdbfe';
+          noticeBox.style.color = '#1e40af';
+          if (icon) {
+            icon.className = 'fas fa-users';
+            icon.style.color = '#2563eb';
+          }
+          text.innerHTML = `ℹ️ بۇ مەھسۇلاتنى ھازىر <strong>${res.count} ۋاكالەتچى</strong> سېتىۋاتىدۇ (سىستېما بەلگىلىمىسى بويىچە يەنە <strong>${res.remaining} نەپەر</strong> ئېلان قىلالايدۇ).`;
+          badge.textContent = `${res.count}/3 ئورۇن`;
+          badge.style.background = '#dbeafe';
+          badge.style.color = '#1d4ed8';
+          badge.style.border = '1px solid #93c5fd';
+        } else {
+          noticeBox.style.background = '#ecfdf5';
+          noticeBox.style.border = '1.5px solid #a7f3d0';
+          noticeBox.style.color = '#065f46';
+          if (icon) {
+            icon.className = 'fas fa-check-circle';
+            icon.style.color = '#10b981';
+          }
+          text.innerHTML = `✅ بۇ مەھسۇلاتنى تېخى ھېچكىم يوللىمىغان، <strong>تۇنجى بولۇپ سېتىش پۇرسىتى سىزدە</strong>!`;
+          badge.textContent = `0/3 ئەركىن`;
+          badge.style.background = '#dcfce7';
+          badge.style.color = '#15803d';
+          badge.style.border = '1px solid #86efac';
+        }
+
+        if (submitBtn) {
+          submitBtn.style.opacity = '1';
+          submitBtn.title = '';
+        }
+      }
+    }
+
     function autofillAgentProduct(p, showToastMsg = true) {
       if (!p) return;
 
@@ -7490,6 +7572,7 @@ function initTeklimakanApp() {
         if (autofillNoticeTitle) autofillNoticeTitle.textContent = `«${p.name}»`;
       }
 
+      updateSameProductQuotaNotice(p.name);
       hideSuggestions();
 
       if (showToastMsg && typeof showToast === 'function') {
@@ -7525,11 +7608,27 @@ function initTeklimakanApp() {
 
       suggestions.forEach((p, idx) => {
         const pImg = p.image || 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=400&q=80';
+        let quotaBadgeHtml = '';
+        let isQuotaFull = false;
+        if (window.appStore && typeof window.appStore.checkProductAgentQuota === 'function') {
+          const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+          const aId = currentVerifiedAgent ? currentVerifiedAgent.id : null;
+          const qCheck = window.appStore.checkProductAgentQuota(p.name, editId, aId, 3);
+          if (!qCheck.allowed) {
+            isQuotaFull = true;
+            quotaBadgeHtml = '<span style="background: #fee2e2; color: #b91c1c; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; border: 1px solid #fca5a5;">⚠️ 3/3 تولغان</span>';
+          } else {
+            quotaBadgeHtml = `<span style="background: #ecfdf5; color: #047857; font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #a7f3d0;">ۋاكالەتچى: ${qCheck.count}/3</span>`;
+          }
+        }
         html += `
-          <div class="agent-suggest-item" data-index="${idx}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.65rem; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; border-bottom: 1px solid #f1f5f9; user-select: none;">
+          <div class="agent-suggest-item" data-index="${idx}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.65rem; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; border-bottom: 1px solid #f1f5f9; user-select: none; ${isQuotaFull ? 'opacity: 0.85;' : ''}">
             <img src="${pImg}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1.5px solid #e2e8f0; flex-shrink: 0;" onerror="this.src='images/default_product.jpg'">
             <div style="flex: 1; min-width: 0;">
-              <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;">
+                <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                ${quotaBadgeHtml}
+              </div>
               <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.76rem; color: #64748b; margin-top: 2px;">
                 <span style="background: #f1f5f9; padding: 1px 7px; border-radius: 5px; font-weight: 700; color: #334155;">🏷️ ${p.category}</span>
                 <span>•</span>
@@ -7538,7 +7637,7 @@ function initTeklimakanApp() {
                 <span style="color: #059669; font-weight: 700;">ماركا: ${p.brand || 'تەكلىماكان'}</span>
               </div>
             </div>
-            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 4px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+            <div style="background: ${isQuotaFull ? '#94a3b8' : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'}; color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 4px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
               <i class="fas fa-magic"></i> <span>تولدۇرۇش</span>
             </div>
           </div>
@@ -7569,6 +7668,7 @@ function initTeklimakanApp() {
     if (prodNameInput) {
       prodNameInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
+        updateSameProductQuotaNotice(val);
         clearTimeout(autofillDebounceTimer);
 
         if (!val || val.length < 1) {
@@ -7597,8 +7697,9 @@ function initTeklimakanApp() {
 
       // كىرگۈزۈش رامكىسىنى بوش قىلىپ ئايرىلغاندا (Blur) ئەڭ ياخشى ماس كەلگىنىنى ئاپتوماتىك تولدۇرۇش
       prodNameInput.addEventListener('blur', () => {
+        const val = prodNameInput.value.trim();
+        updateSameProductQuotaNotice(val);
         setTimeout(() => {
-          const val = prodNameInput.value.trim();
           const priceInput = document.getElementById('agentProdPrice');
           if (val && (!priceInput || !priceInput.value.trim())) {
             if (window.appStore && typeof window.appStore.findProductSuggestions === 'function') {
@@ -7715,6 +7816,23 @@ function initTeklimakanApp() {
           if (!quota.allowed) {
             alert(quota.message);
             showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'error');
+            return;
+          }
+        }
+
+        // 👥 ئوخشاش مەھسۇلاتنى كۆپ بولغاندا 3 نەپەر ۋاكالەتچى سېتىش چېكىنى تەكشۈرۈش
+        if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkProductAgentQuota === 'function') {
+          const sameQuotaCheck = window.appStore.checkProductAgentQuota(name, editId, currentVerifiedAgent.id, 3);
+          if (!sameQuotaCheck.allowed) {
+            alert(sameQuotaCheck.message);
+            showToast(sameQuotaCheck.message, 'error');
+            const nameEl = document.getElementById('agentProdName');
+            if (nameEl) {
+              nameEl.focus();
+              nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              nameEl.style.outline = '2px solid #ef4444';
+              setTimeout(() => { if (nameEl) nameEl.style.outline = 'none'; }, 3000);
+            }
             return;
           }
         }

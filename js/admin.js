@@ -1418,7 +1418,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${getReputationBadgeHtml(window.appStore.getProductMerchantBadge(product))}
                 ${(() => {
                   const agId = product.agentId || (window.appStore && typeof window.appStore.getProductAgentId === 'function' && window.appStore.getProductAgentId(product));
-                  return agId ? `<span class="badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:0.72rem; font-weight:800; display:inline-flex; align-items:center; gap:3px;" title="ۋاكالەتچى ID كودى"><i class="fas fa-id-badge" style="color:#2563eb;"></i> <span class="number-latin">${agId}</span></span>` : '';
+                  const agBadge = agId ? `<span class="badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:0.72rem; font-weight:800; display:inline-flex; align-items:center; gap:3px;" title="ۋاكالەتچى ID كودى"><i class="fas fa-id-badge" style="color:#2563eb;"></i> <span class="number-latin">${agId}</span></span>` : '';
+                  let quotaBadge = '';
+                  if (window.appStore && typeof window.appStore.checkProductAgentQuota === 'function' && product.name) {
+                    const qRes = window.appStore.checkProductAgentQuota(product.name, null, null, 3);
+                    const qCount = qRes.count || 0;
+                    if (qCount > 0) {
+                      const badgeBg = qCount >= 3 ? '#fef2f2' : (qCount >= 2 ? '#fffbeb' : '#f0fdf4');
+                      const badgeCol = qCount >= 3 ? '#b91c1c' : (qCount >= 2 ? '#b45309' : '#15803d');
+                      const badgeBdr = qCount >= 3 ? '#fecaca' : (qCount >= 2 ? '#fde68a' : '#bbf7d0');
+                      const icon = qCount >= 3 ? 'fa-user-lock' : 'fa-users';
+                      quotaBadge = `<span class="badge" style="background:${badgeBg}; color:${badgeCol}; border:1px solid ${badgeBdr}; font-size:0.72rem; font-weight:800; display:inline-flex; align-items:center; gap:3px;" title="ئوخشاش مەھسۇلاتنى ئېلان قىلغان ۋاكالەتچى سانى: ${qCount}/3"><i class="fas ${icon}"></i> <span class="number-latin">${qCount}/3</span> ۋاكالەتچى</span>`;
+                    }
+                  }
+                  return agBadge + quotaBadge;
                 })()}
               </div>
               <div class="number-latin" style="font-size: 0.72rem; color: var(--text-light); font-weight: 600;">${product.id}</div>

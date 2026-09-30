@@ -4936,6 +4936,73 @@ class StoreManager {
     };
   }
 
+  // 🔤 تاۋار نامىنى تەكشۈرۈش ۋە سېلىشتۇرۇش ئۈچۈن قېلىپلاشتۇرۇش
+  normalizeProductName(name) {
+    if (!name) return '';
+    return String(name)
+      .toLowerCase()
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // ھەرىكەت، تەنۋىن ۋە سوزۇقلارنى چىقىرىش
+      .replace(/ئ/g, '') // ھەمزىنى چىقىرىش
+      .replace(/[\s\-_,.:;()\/\\+]+/g, ' ') // بوشلۇق ۋە بەلگىلەرنى بىردەك قىلىش
+      .trim();
+  }
+
+  // 👥 ئوخشاش مەھسۇلاتنى كۆپ بولغاندا 3 نەپەر ۋاكالەتچى سېتىش چېكىنى تەكشۈرۈش (Max 3 Agents Per Identical Product)
+  checkProductAgentQuota(productName, currentProductId = null, currentAgentId = null, maxAgents = 3) {
+    if (!productName || typeof productName !== 'string') {
+      return { allowed: true, count: 0, max: maxAgents, remaining: maxAgents, message: '' };
+    }
+
+    const targetNorm = this.normalizeProductName(productName);
+    if (!targetNorm || targetNorm.length < 2) {
+      return { allowed: true, count: 0, max: maxAgents, remaining: maxAgents, message: '' };
+    }
+
+    const allProducts = this.getProducts();
+    const existingAgentIds = new Set();
+
+    allProducts.forEach(p => {
+      if (!p || !p.name) return;
+      // ئەگەر رەت قىلىنغان تاۋار بولسا ھېسابقا كىرمەيدۇ
+      if (p.approvalStatus === 'رەت قىلىندى') return;
+      // ئەگەر نۆۋەتتىكى تەھرىرلىنىۋاتقان تاۋار بولسا تاشلىۋېتىلىدۇ
+      if (currentProductId && String(p.id) === String(currentProductId)) return;
+
+      const pNorm = this.normalizeProductName(p.name);
+      // ئوخشاش نام بولۇش شەرتى
+      if (pNorm === targetNorm) {
+        const aId = p.agentId || (p.isAgentSubmitted ? ('agent_' + p.id) : null);
+        if (aId) {
+          // ئەگەر مەزكۇر ۋاكالەتچى ئۆزى ئاللىقاچان بار بولسا چىقىرىۋېتىمىز
+          if (currentAgentId && String(aId) === String(currentAgentId)) return;
+          existingAgentIds.add(String(aId));
+        }
+      }
+    });
+
+    const count = existingAgentIds.size;
+
+    if (count >= maxAgents) {
+      return {
+        allowed: false,
+        count: count,
+        max: maxAgents,
+        remaining: 0,
+        message: `⚠️ «${productName.trim()}» ناملىق مەھسۇلاتنى ئاللىقاچان ${count} نەپەر باشقا سېتىش ۋاكالەتچىسى ئېلان قىلىپ بولغان!\n\nسىستېما بەلگىلىمىسى بويىچە، بازار تەڭپۇڭلۇقى ۋە سېتىش سۈپىتىنى قوغداش ئۈچۈن ھەربىر مەھسۇلاتنى ئەڭ كۆپ بولغاندا ${maxAgents} نەپەر ۋاكالەتچى سېتالايدۇ (بۇ تاۋارنىڭ ۋاكالەتچىلىك كۋوتىسى توشتى).\n\nسىز بۇ تاۋارنى يوللىيالمايسىز؛ باشقا ئوخشىمايدىغان مەھسۇلات تاللاپ سۇنۇڭ.`
+      };
+    }
+
+    return {
+      allowed: true,
+      count: count,
+      max: maxAgents,
+      remaining: maxAgents - count,
+      message: count > 0 
+        ? `بۇ مەھسۇلاتنى ھازىر ${count} ۋاكالەتچى سېتىۋاتىدۇ (يەنە ${maxAgents - count} نەپەر ۋاكالەتچى يوللىيالايدۇ).` 
+        : 'بۇ مەھسۇلاتنى تېخى ھېچقانداق ۋاكالەتچى سۇنمىغان، تۇنجى بولۇپ سېتىش پۇرسىتى سىزدە!'
+    };
+  }
+
   submitAgentProduct(agentIdentifier, productData) {
     if (!agentIdentifier) {
       return { success: false, message: 'ۋاكالەتچى ئۇچۇرى مەلۇم ئەمەس!' };
@@ -4977,6 +5044,16 @@ class StoreManager {
           message: dailyCheck.message
         };
       }
+    }
+
+    // 👥 ئوخشاش مەھسۇلاتنى كۆپ بولغاندا 3 نەپەر ۋاكالەتچى ئېلان قىلىش چېكى (Max 3 Agents Per Identical Product)
+    const quotaCheck = this.checkProductAgentQuota(productData.name, productData.id, agent.id, 3);
+    if (!quotaCheck.allowed) {
+      return {
+        success: false,
+        productQuotaReached: true,
+        message: quotaCheck.message
+      };
     }
 
     // 1. ۋاكالەتچىگە بېرىلگەن ماركا ھوقۇقىنى تەكشۈرۈش

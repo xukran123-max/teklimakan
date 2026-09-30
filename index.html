@@ -1341,16 +1341,19 @@
           </div>
 
           <!-- 🧭 دەلىللەنگەن ۋاكالەتچى بۆلەك ئالماشتۇرغۇچى (Sub-Tabs for Verified Agent) -->
-          <div id="agentVerifiedViewSwitcher" style="display: none; grid-template-columns: 1fr 1fr 1fr; gap: 0.45rem; margin-bottom: 1.25rem;">
-            <button type="button" id="btnSwitchToMyProducts" style="padding: 0.6rem 0.5rem; border: 2px solid var(--primary-color); border-radius: 10px; background: #eff6ff; color: var(--primary-color); font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; transition: all 0.2s;">
+          <div id="agentVerifiedViewSwitcher" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; margin-bottom: 1.25rem;">
+            <button type="button" id="btnSwitchToMyProducts" style="padding: 0.55rem 0.35rem; border: 2px solid var(--primary-color); border-radius: 10px; background: #eff6ff; color: var(--primary-color); font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: all 0.2s;">
               <i class="fas fa-boxes"></i> <span>تاۋارلىرىم</span> (<span id="switcherProdCount">0</span>)
             </button>
-            <button type="button" id="btnSwitchToNewProduct" style="padding: 0.6rem 0.5rem; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; transition: all 0.2s;">
-              <i class="fas fa-plus-circle"></i> <span>يېڭى تاۋار</span>
-              <span id="agentDailyQuotaBadge" style="display: none; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 9999px;"></span>
+            <button type="button" id="btnSwitchToMySales" style="padding: 0.55rem 0.35rem; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: all 0.2s;">
+              <i class="fas fa-shopping-bag" style="color: #0284c7;"></i> <span>سېتىشلار</span> (<span id="switcherSalesCount">0</span>)
             </button>
-            <button type="button" id="btnSwitchToFlashDeals" style="padding: 0.6rem 0.5rem; border: 1.5px solid #f59e0b; border-radius: 10px; background: #ffffff; color: #b45309; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; transition: all 0.2s;">
-              <i class="fas fa-bolt" style="color: #f59e0b;"></i> <span>🔥 كۈندىلىك تاۋارلار</span>
+            <button type="button" id="btnSwitchToNewProduct" style="padding: 0.55rem 0.35rem; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: all 0.2s;">
+              <i class="fas fa-plus-circle"></i> <span>يېڭى تاۋار</span>
+              <span id="agentDailyQuotaBadge" style="display: none; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 9999px;"></span>
+            </button>
+            <button type="button" id="btnSwitchToFlashDeals" style="padding: 0.55rem 0.35rem; border: 1.5px solid #f59e0b; border-radius: 10px; background: #ffffff; color: #b45309; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: all 0.2s;">
+              <i class="fas fa-bolt" style="color: #f59e0b;"></i> <span>🔥 كۈندىلىك</span>
             </button>
           </div>
 
@@ -1379,6 +1382,42 @@
 
             <div id="agentMyProductsList" style="max-height: 320px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.6rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.55rem;">
               <!-- مەھسۇلاتلار ھەرىكەتچان قوشۇلىدۇ -->
+            </div>
+          </div>
+
+          <!-- 🛒 مېنىڭ سېتىشلىرىم سەھىپىسى (خېرىدار ئۇچۇرلىرى پۈتۈنلەي چىقىرىۋېتىلگەن، مەخپىيەتلىك 100% قوغدالغان) -->
+          <div id="agentMySalesWrap" style="display: none; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="font-weight: 800; font-size: 0.95rem; color: #1e3a8a; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fas fa-shopping-bag" style="color: #0284c7;"></i> <span>سېتىلغان تاۋارلار ۋە پايدا نەتىجىلىرى:</span>
+              </div>
+              <div style="font-size: 0.74rem; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                <i class="fas fa-user-shield"></i> خېرىدار مەخپىيەتلىكى قوغدالغان
+              </div>
+            </div>
+
+            <!-- سېتىشلار ھالەت سۈزگۈچى (All, Completed, Shipped, Cancelled, Returned) -->
+            <div style="display: flex; gap: 0.35rem; margin-bottom: 0.65rem; overflow-x: auto; padding-bottom: 2px;" id="agentSalesFilterGroup">
+              <button type="button" class="agent-sales-filter-btn active" data-filter="all" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid var(--primary-color); background: var(--primary-color); color: #ffffff; font-size: 0.78rem; font-weight: 800; cursor: pointer; white-space: nowrap;">
+                ھەممىسى (<span id="salesFilterCountAll">0</span>)
+              </button>
+              <button type="button" class="agent-sales-filter-btn" data-filter="completed" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #065f46; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                ✅ تاماملانغان (<span id="salesFilterCountCompleted">0</span>)
+              </button>
+              <button type="button" class="agent-sales-filter-btn" data-filter="shipped" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #1e40af; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                🚚 يوللانغان (<span id="salesFilterCountShipped">0</span>)
+              </button>
+              <button type="button" class="agent-sales-filter-btn" data-filter="cancelled" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #dc2626; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                ❌ بىكار قىلىنغان (<span id="salesFilterCountCancelled">0</span>)
+              </button>
+              <button type="button" class="agent-sales-filter-btn" data-filter="returned" style="padding: 0.35rem 0.75rem; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #ea580c; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                ↩️ قايتۇرۇلغان (<span id="salesFilterCountReturned">0</span>)
+              </button>
+            </div>
+
+            <!-- سېتىش خاتىرىلىرى تىزىملىكى -->
+            <div id="agentMySalesList" style="max-height: 380px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.6rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.55rem;">
+              <!-- سېتىشلار ھەرىكەتچان قوشۇلىدۇ -->
             </div>
           </div>
 
@@ -2274,12 +2313,12 @@
   </a>
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى (Local Fast Bundle) -->
-  <script src="js/supabase.js.v2.min.js?v=20260930_v158"></script>
-  <script src="js/supabase.js?v=20260930_v158"></script>
+  <script src="js/supabase.js.v2.min.js?v=20260930_v159"></script>
+  <script src="js/supabase.js?v=20260930_v159"></script>
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
-  <script src="js/store.js?v=20260930_v158"></script>
-  <script src="js/app.js?v=20260930_v158"></script>
-  <script src="js/push-manager.js?v=20260930_v158"></script>
+  <script src="js/store.js?v=20260930_v159"></script>
+  <script src="js/app.js?v=20260930_v159"></script>
+  <script src="js/push-manager.js?v=20260930_v159"></script>
 </body>
 </html>

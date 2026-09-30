@@ -101,7 +101,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20260930_v150">
+  <link rel="stylesheet" href="css/style.css?v=20260930_v152">
 
   <!-- 🎯 Meta (Facebook & Instagram) Pixel Code -->
   <script>
@@ -377,6 +377,9 @@
       </div>
     </div>
 
+    <!-- 🤝 خەير-ساخاۋەت تەشۋىقات بۆلىكى (Qerindashlar Charity Fund 5% Trust Banner - پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ) -->
+    <div id="charityTrustContainer" class="charity-trust-container" style="display: none;"></div>
+
     <!-- تۈرلەر بۆلىكى (Category Pills) -->
     <section class="categories-section">
       <div class="section-header">
@@ -456,6 +459,15 @@
         <div class="cart-summary-line total">
           <span id="cartTotalLabel">جەمئىي تۆلەيدىغىنى:</span>
           <span class="cart-total-price" id="cartTotalPrice">0</span>
+        </div>
+
+        <!-- 🤝 قېرىنداشلار فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ) -->
+        <div id="cartCharityContributionRow" class="cart-charity-row" style="display: none;">
+          <a id="cartCharityLink" href="https://www.seidiye.com/category/mihri/" target="_blank" rel="noopener noreferrer" class="cart-charity-badge">
+            <span class="cart-charity-icon"><i class="fas fa-hand-holding-heart"></i></span>
+            <span class="cart-charity-text">بۇ زاكازدىن <strong id="cartCharityAmount">₺0.00</strong> (%5) «قېرىنداشلار فوندى»غا ئىئانە ئاتىلىدۇ</span>
+            <i class="fas fa-external-link-alt" style="font-size: 0.72rem; opacity: 0.7;"></i>
+          </a>
         </div>
 
         <button id="proceedCheckoutBtn" class="btn-checkout">
@@ -594,6 +606,14 @@
             <div style="display: flex; justify-content: space-between; margin-top: 0.75rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem; font-weight: 800;">
               <span id="checkoutTotalLabel">ئومۇمىي سومما:</span>
               <span id="checkoutTotalDisplay" style="color: var(--danger-color); font-size: 1.2rem;">0</span>
+            </div>
+
+            <!-- 🤝 قېرىنداشلار فوندى ئىئانە ئۇچۇرى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ) -->
+            <div id="checkoutCharityNotice" style="display: none; margin-top: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.85rem; color: #065f46;">
+              <a id="checkoutCharityLink" href="https://www.seidiye.com/category/mihri/" target="_blank" rel="noopener noreferrer" style="color: #047857; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-weight: 700;">
+                <span><i class="fas fa-hand-holding-heart" style="color: #10b981; margin-left: 5px;"></i> مەزكۇر زاكازنىڭ %5 قىممىتى (<strong id="checkoutCharityAmount">₺0.00</strong>) «قېرىنداشلار فوندى»غا ئىئانە ئاتىلىدۇ</span>
+                <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+              </a>
             </div>
           </div>
 
@@ -2220,8 +2240,8 @@
   </a>
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
-  <script src="js/store.js?v=20260930_v151"></script>
-  <script src="js/app.js?v=20260930_v151"></script>
+  <script src="js/store.js?v=20260930_v152"></script>
+  <script src="js/app.js?v=20260930_v152"></script>
   <script src="js/push-manager.js?v=20260929_v136"></script>
 
   <!-- ☁️ Supabase رەسمىي SDK ۋە بۇلۇت ئۇلىنىش تەڭشىكى (Local Fast Bundle) -->

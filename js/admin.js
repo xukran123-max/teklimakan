@@ -1016,6 +1016,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderHeroSliderAdmin();
     } else if (tabId === 'shelves') {
       renderShowcaseShelvesAdmin();
+    } else if (tabId === 'charity') {
+      renderCharityAdmin();
     } else if (tabId === 'settings') {
       loadSettingsForm();
     }
@@ -9975,6 +9977,151 @@ document.addEventListener('DOMContentLoaded', () => {
   window.moveShelfAdmin = moveShelfAdmin;
   window.saveShelvesAdmin = saveShelvesAdmin;
   window.resetShelvesAdmin = resetShelvesAdmin;
+
+  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund Admin) ====================
+  function renderCharityAdmin() {
+    if (!window.appStore) return;
+    const summary = window.appStore.getCharityFundSummary();
+    const config = summary.config || {};
+
+    // 1. KPI كارتىلىرى
+    const curMonthPayableEl = document.getElementById('charityCurrentMonthPayable');
+    const curMonthOrdersEl = document.getElementById('charityCurrentMonthOrders');
+    const curMonthStatusBadge = document.getElementById('charityCurrentMonthStatusBadge');
+    const pendingTotalEl = document.getElementById('charityPendingTotal');
+    const allTimeTotalEl = document.getElementById('charityAllTimeTotal');
+    const allTimeSalesEl = document.getElementById('charityAllTimeSales');
+
+    if (curMonthPayableEl) curMonthPayableEl.textContent = window.appStore.formatPrice(summary.currentMonthCharity);
+    if (curMonthOrdersEl) {
+      curMonthOrdersEl.textContent = `${summary.currentMonthOrders} زاكاز / سېتىش: ${window.appStore.formatPrice(summary.currentMonthSales)}`;
+    }
+    if (curMonthStatusBadge) {
+      const isPaid = summary.currentMonthStatus === 'paid';
+      curMonthStatusBadge.textContent = isPaid ? 'تۆلەنگەن' : 'تۆلەنمىگەن';
+      curMonthStatusBadge.style.background = isPaid ? '#10b981' : '#f59e0b';
+    }
+
+    if (pendingTotalEl) pendingTotalEl.textContent = window.appStore.formatPrice(summary.pendingPayoutsTotal);
+    if (allTimeTotalEl) allTimeTotalEl.textContent = window.appStore.formatPrice(summary.allTimeCharity);
+    if (allTimeSalesEl) {
+      allTimeSalesEl.textContent = `سۇپىدىكى جەمئىي رەسمىي سېتىش: ${window.appStore.formatPrice(summary.allTimeSales)}`;
+    }
+
+    // 2. ئايلىق ھېسابات تىزىملىكى جەدۋىلى
+    const tableBody = document.getElementById('charityMonthlyTableBody');
+    if (tableBody) {
+      if (!summary.monthlyList || summary.monthlyList.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              ھازىرچە ھېسابات خاتىرىسى يوق
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = summary.monthlyList.map(item => {
+          const isPaid = item.payoutStatus === 'paid';
+          const badgeStyle = isPaid 
+            ? 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 9999px; font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;'
+            : 'background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 3px 10px; border-radius: 9999px; font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;';
+          const badgeIcon = isPaid ? 'fa-check-circle' : 'fa-hourglass-half';
+          const badgeText = isPaid ? 'تۆلەنگەن (ئۆتكۈزۈلگەن)' : 'تۆلەش كۈتۈلمەكتە';
+
+          const btnActionText = isPaid ? 'تۆلەنمىدىگە ئۆزگەرتىش' : 'تۆلەندى دەپ بەلگىلەش';
+          const btnActionColor = isPaid ? '#64748b' : '#059669';
+          const btnActionBg = isPaid ? '#f1f5f9' : '#ecfdf5';
+          const btnActionBorder = isPaid ? '#cbd5e1' : '#a7f3d0';
+          const btnActionIcon = isPaid ? 'fa-undo' : 'fa-check';
+
+          return `
+            <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s;">
+              <td style="padding: 0.85rem 1rem; font-weight: 800; font-family: monospace; font-size: 0.95rem; color: #0f172a;">
+                <i class="far fa-calendar-alt" style="color: #64748b; margin-left: 5px;"></i> ${item.monthKey}
+              </td>
+              <td style="padding: 0.85rem 1rem;">
+                <span class="number-latin" style="font-weight: 700; color: #334155;">${item.orderCount}</span> قېتىم
+              </td>
+              <td style="padding: 0.85rem 1rem; font-weight: 700; color: #1e293b;">
+                ${window.appStore.formatPrice(item.totalSales)}
+              </td>
+              <td style="padding: 0.85rem 1rem;">
+                <span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">%${config.percentage || 5}</span>
+              </td>
+              <td style="padding: 0.85rem 1rem; font-weight: 900; font-size: 1.05rem; color: #047857;">
+                ${window.appStore.formatPrice(item.charityAmount)}
+              </td>
+              <td style="padding: 0.85rem 1rem;">
+                <span style="${badgeStyle}">
+                  <i class="fas ${badgeIcon}"></i> <span>${badgeText}</span>
+                </span>
+                ${item.payoutUpdatedAt ? `<div style="font-size: 0.72rem; color: #94a3b8; margin-top: 3px;" class="number-latin">${item.payoutUpdatedAt.slice(0, 10)}</div>` : ''}
+              </td>
+              <td style="padding: 0.85rem 1rem; text-align: center;">
+                <button type="button" onclick="window.toggleCharityMonthPayout('${item.monthKey}', '${item.payoutStatus}')" style="background: ${btnActionBg}; color: ${btnActionColor}; border: 1px solid ${btnActionBorder}; border-radius: 8px; padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s;">
+                  <i class="fas ${btnActionIcon}"></i> <span>${btnActionText}</span>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. تەڭشەكلەر جەدۋىلىنى تولدۇرۇش
+    const enabledCb = document.getElementById('charityAdminEnabled');
+    const nameInp = document.getElementById('charityAdminName');
+    const pctInp = document.getElementById('charityAdminPercentage');
+    const urlInp = document.getElementById('charityAdminUrl');
+    const descInp = document.getElementById('charityAdminDescription');
+    const visitUrlBtn = document.getElementById('btnCharityVisitUrl');
+
+    if (enabledCb) enabledCb.checked = config.enabled !== false;
+    if (nameInp) nameInp.value = config.name || 'قېرىنداشلار فوندى';
+    if (pctInp) pctInp.value = config.percentage !== undefined ? config.percentage : 5;
+    if (urlInp) urlInp.value = config.url || 'https://www.seidiye.com/category/mihri/';
+    if (descInp) descInp.value = config.description || 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
+    if (visitUrlBtn && config.url) visitUrlBtn.href = config.url;
+  }
+
+  function saveCharitySettingsAdmin() {
+    if (!window.appStore) return;
+    const enabledCb = document.getElementById('charityAdminEnabled');
+    const nameInp = document.getElementById('charityAdminName');
+    const pctInp = document.getElementById('charityAdminPercentage');
+    const urlInp = document.getElementById('charityAdminUrl');
+    const descInp = document.getElementById('charityAdminDescription');
+
+    const newConfig = {
+      enabled: enabledCb ? enabledCb.checked : true,
+      name: (nameInp ? nameInp.value.trim() : '') || 'قېرىنداشلار فوندى',
+      percentage: Number(pctInp ? pctInp.value : 5) || 5,
+      url: (urlInp ? urlInp.value.trim() : '') || 'https://www.seidiye.com/category/mihri/',
+      description: descInp ? descInp.value.trim() : ''
+    };
+
+    window.appStore.saveCharityFundConfig(newConfig);
+    showAdminToast('قېرىنداشلار فوندى تەڭشەكلىرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
+    renderCharityAdmin();
+  }
+
+  function toggleCharityMonthPayout(monthKey, currentStatus) {
+    if (!window.appStore) return;
+    const newStatus = currentStatus === 'paid' ? 'pending' : 'paid';
+    const confirmMsg = newStatus === 'paid'
+      ? `«${monthKey}» ئېيىدىكى فوند ئىئانىسىنى تولۇق ئۆتكۈزۈپ بېرىلدى دەپ ئۆزگەرتەمسىز؟`
+      : `«${monthKey}» ئېيىدىكى فوند ئىئانىسىنى قايتىدىن «تۆلەش كۈتۈلمەكتە»گە قايتۇرامسىز؟`;
+
+    if (!confirm(confirmMsg)) return;
+
+    window.appStore.setCharityMonthPayoutStatus(monthKey, newStatus);
+    showAdminToast(newStatus === 'paid' ? `«${monthKey}» فوندى ئۆتكۈزۈلگەن دەپ خاتىرىلەندى!` : `«${monthKey}» فوندى ھالىتى ئۆزگەرتىلدى!`, 'success');
+    renderCharityAdmin();
+  }
+
+  window.renderCharityAdmin = renderCharityAdmin;
+  window.saveCharitySettingsAdmin = saveCharitySettingsAdmin;
+  window.toggleCharityMonthPayout = toggleCharityMonthPayout;
 
   function showAdminToast(message, type = 'info') {
     let container = document.getElementById('toastContainer');

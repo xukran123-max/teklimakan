@@ -110,6 +110,7 @@ function initTeklimakanApp() {
     try { updateCartUI(); } catch (e) {}
     try { initHeroSlider(lang); } catch (e) {}
     try { renderShowcaseShelves(lang); } catch (e) {}
+    try { renderCharityTrustBanner(); } catch (e) {}
     try { updateDateDisplay(); } catch (e) {}
     try { if (typeof applyWheelTexts === 'function') applyWheelTexts(); } catch (e) {}
 
@@ -243,6 +244,7 @@ function initTeklimakanApp() {
     try { updateCartUI(); } catch (e) { console.error('updateCartUI error:', e); }
     try { initHeroSlider(); } catch (e) { console.error('initHeroSlider error:', e); }
     try { renderShowcaseShelves(); } catch (e) { console.error('renderShowcaseShelves error:', e); }
+    try { renderCharityTrustBanner(); } catch (e) {}
     try { initSmartHeroScroll(); } catch (e) { console.error('initSmartHeroScroll error:', e); }
     try { initSmartScrollToggle(); } catch (e) { console.error('initSmartScrollToggle error:', e); }
 
@@ -465,6 +467,7 @@ function initTeklimakanApp() {
     if (hBtn5) hBtn5.textContent = i18n.t('heroBtn5');
     try { initHeroSlider(lang); } catch (e) {}
     try { renderShowcaseShelves(lang); } catch (e) {}
+    try { renderCharityTrustBanner(); } catch (e) {}
 
     const flashBadge = document.getElementById('flashSaleBadge');
     if (flashBadge) {
@@ -1901,6 +1904,8 @@ function initTeklimakanApp() {
         const threshold = cartData.threshold || 1000;
         freeShippingText.innerHTML = i18n.t('freeShippingNotice', { amount: `${info.symbol}${threshold}` });
       }
+      const emptyCharityRow = document.getElementById('cartCharityContributionRow');
+      if (emptyCharityRow) emptyCharityRow.style.display = 'none';
       return;
     }
 
@@ -1937,6 +1942,24 @@ function initTeklimakanApp() {
     if (deliveryEl) deliveryEl.textContent = cartData.deliveryFeeCny === 0 ? i18n.t('free') : cartData.deliveryFeeFormatted;
     if (discountEl) discountEl.textContent = discountValCny > 0 ? `-${store.formatPrice(discountValCny)}` : store.formatPrice(0);
     if (totalEl) totalEl.textContent = store.formatPrice(finalTotalCny);
+
+    // 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
+    const cartCharityRow = document.getElementById('cartCharityContributionRow');
+    const cartCharityAmountEl = document.getElementById('cartCharityAmount');
+    const cartCharityLink = document.getElementById('cartCharityLink');
+    const charityCfg = (store && typeof store.getCharityFundConfig === 'function') ? store.getCharityFundConfig() : null;
+
+    if (cartCharityRow) {
+      if (lang === 'ug' && charityCfg && charityCfg.enabled !== false && cartData.items.length > 0 && finalTotalCny > 0) {
+        const rate = (Number(charityCfg.percentage) || 5) / 100;
+        const charityContribution = Math.round(finalTotalCny * rate * 100) / 100;
+        if (cartCharityAmountEl) cartCharityAmountEl.textContent = store.formatPrice(charityContribution);
+        if (cartCharityLink && charityCfg.url) cartCharityLink.href = charityCfg.url;
+        cartCharityRow.style.display = 'block';
+      } else {
+        cartCharityRow.style.display = 'none';
+      }
+    }
 
     // 🚚 1000 لىرا ھەقسىز يەتكۈزۈش پىرسەنتى
     const threshold = cartData.threshold;
@@ -2709,6 +2732,25 @@ function initTeklimakanApp() {
     const formattedPrice = window.appStore.formatPrice(product.price);
     const formattedOldPrice = product.oldPrice ? window.appStore.formatPrice(product.oldPrice) : null;
 
+    let charityBadgeHtml = '';
+    const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
+      ? window.appStore.getCharityFundConfig()
+      : null;
+    if (lang === 'ug' && charityCfg && charityCfg.enabled !== false) {
+      const fundPct = Number(charityCfg.percentage) || 5;
+      const donationAmt = Math.round(Number(product.price || 0) * fundPct) / 100;
+      const formattedDonation = window.appStore.formatPrice(donationAmt);
+      charityBadgeHtml = `
+        <a href="${charityCfg.url || 'https://www.seidiye.com/category/mihri/'}" target="_blank" rel="noopener noreferrer" class="quick-view-charity-badge" title="بۇ مەھسۇلاتتىن ئىئانە ئاتىلىدۇ">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-hand-holding-heart" style="color: #10b981; font-size: 1rem;"></i>
+            <span>بۇ مالدىن <strong>${formattedDonation}</strong> (%${fundPct}) <strong>«${charityCfg.name || 'قېرىنداشلار فوندى'}»</strong>غا ئاتىلىدۇ</span>
+          </span>
+          <i class="fas fa-arrow-left charity-arrow-hint"></i>
+        </a>
+      `;
+    }
+
     modalBody.innerHTML = `
       <div class="quick-view-grid">
         <div class="quick-view-media" style="position: relative;">
@@ -2731,6 +2773,8 @@ function initTeklimakanApp() {
             <span style="font-size: 1.65rem; font-weight: 900; color: var(--danger-color);">${formattedPrice}${product.unit ? `<small style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-right: 6px;"> / <bdi>${product.unit}</bdi></small>` : ''}</span>
             ${formattedOldPrice ? `<span style="font-size: 1rem; color: var(--text-light); text-decoration: line-through;">${formattedOldPrice}</span>` : ''}
           </div>
+
+          ${charityBadgeHtml}
 
           <div style="background: var(--bg-main); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 0.85rem; font-size: 0.9rem; line-height: 1.7; border: 1px solid var(--border-color);">
             ${product.description || ''}
@@ -2937,6 +2981,26 @@ function initTeklimakanApp() {
     }
 
     if (checkoutTotalEl) checkoutTotalEl.textContent = window.appStore.formatPrice(finalTotalCny);
+
+    // 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
+    const checkoutCharityBox = document.getElementById('checkoutCharityNotice');
+    const checkoutCharityAmt = document.getElementById('checkoutCharityAmount');
+    const checkoutCharityLnk = document.getElementById('checkoutCharityLink');
+    const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
+      ? window.appStore.getCharityFundConfig()
+      : null;
+
+    if (checkoutCharityBox) {
+      if (lang === 'ug' && charityCfg && charityCfg.enabled !== false && finalTotalCny > 0) {
+        const rate = (Number(charityCfg.percentage) || 5) / 100;
+        const charityContribution = Math.round(finalTotalCny * rate * 100) / 100;
+        if (checkoutCharityAmt) checkoutCharityAmt.textContent = window.appStore.formatPrice(charityContribution);
+        if (checkoutCharityLnk && charityCfg.url) checkoutCharityLnk.href = charityCfg.url;
+        checkoutCharityBox.style.display = 'block';
+      } else {
+        checkoutCharityBox.style.display = 'none';
+      }
+    }
 
     // چىقىم كۆزنىكى تەرجىمىلىرىنى تولۇق يېڭىلاش
     updateStaticTranslations();
@@ -4802,7 +4866,56 @@ function initTeklimakanApp() {
     if (e.detail && (e.detail.type === 'showcaseShelves' || e.detail.type === 'products' || e.detail.type === 'all')) {
       try { renderShowcaseShelves(); } catch (err) {}
     }
+    if (e.detail && (e.detail.type === 'charityFund' || e.detail.type === 'settings' || e.detail.type === 'all')) {
+      try { renderCharityTrustBanner(); } catch (err) {}
+    }
   });
+
+  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى كۆرۈنۈشى (Charity Fund 5% Frontend) ====================
+  function renderCharityTrustBanner() {
+    const container = document.getElementById('charityTrustContainer');
+    if (!container) return;
+
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
+      ? window.appStore.getCharityFundConfig()
+      : { enabled: true, name: 'قېرىنداشلار فوندى', percentage: 5, url: 'https://www.seidiye.com/category/mihri/' };
+
+    // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن باشقا بەتتە ھازىرچە كۆرۈنمىسۇن!
+    if (lang !== 'ug' || charityCfg.enabled === false) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+
+    const fundUrl = charityCfg.url || 'https://www.seidiye.com/category/mihri/';
+    const fundName = charityCfg.name || 'قېرىنداشلار فوندى';
+    const fundPct = charityCfg.percentage !== undefined ? charityCfg.percentage : 5;
+    const fundDesc = charityCfg.description || 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
+
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="charity-trust-inner">
+        <div class="charity-trust-content">
+          <div class="charity-trust-icon-wrap">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <div class="charity-trust-texts">
+            <div class="charity-trust-title-row">
+              <h3 class="charity-trust-title">مېھرىبانلىق ئەھدىسى: «${fundName}»</h3>
+              <span class="charity-trust-badge">%${fundPct} ساخاۋەت ئۈلۈشى</span>
+            </div>
+            <p class="charity-trust-desc">${fundDesc}</p>
+          </div>
+        </div>
+        <a href="${fundUrl}" target="_blank" rel="noopener noreferrer" class="charity-trust-btn">
+          <span>فوند ھەققىدە كۆرۈش</span>
+          <i class="fas fa-arrow-left"></i>
+        </a>
+      </div>
+    `;
+  }
+  window.renderCharityTrustBanner = renderCharityTrustBanner;
 
   // ==================== 🛍️ زامانىۋى ئۇپۇق سىيرىلما تاۋار راكلىرى (Showcase Shelves) ====================
   function renderShowcaseShelves(forcedLang = null) {

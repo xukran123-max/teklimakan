@@ -23,7 +23,8 @@ const STORAGE_KEYS = {
   CUSTOMER_INBOX: 'teklimakan_customer_inbox_v1',
   COUPONS: 'teklimakan_ecom_coupons_v1',
   HERO_SLIDES: 'teklimakan_ecom_hero_slides_v1',
-  SHOWCASE_SHELVES: 'teklimakan_ecom_showcase_shelves_v1'
+  SHOWCASE_SHELVES: 'teklimakan_ecom_showcase_shelves_v1',
+  CHARITY_PAYOUTS: 'teklimakan_charity_payouts_v1'
 };
 
 // دەسلەپكى ئېتىبار كۇپونلىرى (Initial Coupons)
@@ -1460,6 +1461,13 @@ const INITIAL_SETTINGS = {
       discountPercentage: 20,
       productIds: []
     }
+  },
+  charityFund: {
+    enabled: true,
+    name: 'قېرىنداشلار فوندى',
+    percentage: 5,
+    url: 'https://www.seidiye.com/category/mihri/',
+    description: 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.'
   }
 };
 
@@ -8135,6 +8143,161 @@ class StoreManager {
     try {
       localStorage.setItem('teklimakan_store_sync_pulse', JSON.stringify({ type, ...detail, time: Date.now() }));
     } catch(e) {}
+  }
+
+  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund 5%) ====================
+  getCharityFundConfig() {
+    const settings = this.getSettings() || {};
+    const defaults = {
+      enabled: true,
+      name: 'قېرىنداشلار فوندى',
+      percentage: 5,
+      url: 'https://www.seidiye.com/category/mihri/',
+      description: 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن «قېرىنداشلار فوندى»غا ئىئانە قىلىنىدۇ.'
+    };
+    return { ...defaults, ...(settings.charityFund || {}) };
+  }
+
+  saveCharityFundConfig(config) {
+    const settings = this.getSettings() || {};
+    settings.charityFund = {
+      ...this.getCharityFundConfig(),
+      ...config
+    };
+    this.updateSettings(settings);
+    this.notifyDataChange('charityFund');
+    return true;
+  }
+
+  getCharityPayouts() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.CHARITY_PAYOUTS)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  setCharityMonthPayoutStatus(monthKey, status = 'paid', note = '') {
+    const payouts = this.getCharityPayouts();
+    payouts[monthKey] = {
+      status, // 'paid' | 'pending'
+      updatedAt: new Date().toISOString(),
+      note: note || (status === 'paid' ? 'فوند ھېساباتىغا تولۇق ئۆتكۈزۈپ بېرىلدى' : 'تۆلەش كۈتۈلمەكتە')
+    };
+    try {
+      localStorage.setItem(STORAGE_KEYS.CHARITY_PAYOUTS, JSON.stringify(payouts));
+    } catch (e) {}
+    this.notifyDataChange('charityPayouts');
+    return true;
+  }
+
+  getCharityFundSummary() {
+    const config = this.getCharityFundConfig();
+    const rate = (Number(config.percentage) || 5) / 100;
+    const orders = this.getOrders();
+    const payouts = this.getCharityPayouts();
+
+    const monthGroups = {};
+
+    orders.forEach(order => {
+      const st = String(order.status || '');
+      if (st.includes('بىكار') || st.includes('ئەمەلدىن') || st.toLowerCase().includes('cancel')) {
+        return;
+      }
+
+      let dateStr = order.date || order.createdAt || '';
+      let d = new Date(dateStr);
+      if (isNaN(d.getTime())) {
+        const match = String(dateStr).match(/(\d{4})[-/.](\d{1,2})/);
+        if (match) {
+          d = new Date(Number(match[1]), Number(match[2]) - 1, 1);
+        } else {
+          d = new Date();
+        }
+      }
+
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const monthKey = `${y}-${m}`;
+
+      let orderTotal = Number(order.totalCny || order.total || 0);
+      if (orderTotal <= 0 && Array.isArray(order.items)) {
+        orderTotal = order.items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
+      }
+
+      if (!monthGroups[monthKey]) {
+        monthGroups[monthKey] = {
+          monthKey,
+          year: y,
+          month: Number(m),
+          orderCount: 0,
+          totalSales: 0,
+          charityAmount: 0
+        };
+      }
+
+      monthGroups[monthKey].orderCount += 1;
+      monthGroups[monthKey].totalSales += orderTotal;
+    });
+
+    const currentNow = new Date();
+    const currentMonthKey = `${currentNow.getFullYear()}-${String(currentNow.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!monthGroups[currentMonthKey]) {
+      monthGroups[currentMonthKey] = {
+        monthKey: currentMonthKey,
+        year: currentNow.getFullYear(),
+        month: currentNow.getMonth() + 1,
+        orderCount: 0,
+        totalSales: 0,
+        charityAmount: 0
+      };
+    }
+
+    let allTimeSales = 0;
+    let allTimeCharity = 0;
+    let pendingPayoutsTotal = 0;
+
+    const monthlyList = Object.keys(monthGroups)
+      .sort((a, b) => b.localeCompare(a))
+      .map(k => {
+        const item = monthGroups[k];
+        item.charityAmount = Math.round(item.totalSales * rate * 100) / 100;
+        allTimeSales += item.totalSales;
+        allTimeCharity += item.charityAmount;
+
+        const payoutInfo = payouts[k] || { status: 'pending', updatedAt: null, note: '' };
+        item.payoutStatus = payoutInfo.status;
+        item.payoutNote = payoutInfo.note;
+        item.payoutUpdatedAt = payoutInfo.updatedAt;
+
+        if (item.payoutStatus !== 'paid') {
+          pendingPayoutsTotal += item.charityAmount;
+        }
+
+        return item;
+      });
+
+    const currentMonthData = monthGroups[currentMonthKey] || {
+      monthKey: currentMonthKey,
+      orderCount: 0,
+      totalSales: 0,
+      charityAmount: 0,
+      payoutStatus: (payouts[currentMonthKey] && payouts[currentMonthKey].status) || 'pending'
+    };
+
+    return {
+      config,
+      currentMonthKey,
+      currentMonthSales: currentMonthData.totalSales,
+      currentMonthOrders: currentMonthData.orderCount,
+      currentMonthCharity: currentMonthData.charityAmount,
+      currentMonthStatus: currentMonthData.payoutStatus,
+      allTimeSales: Math.round(allTimeSales * 100) / 100,
+      allTimeCharity: Math.round(allTimeCharity * 100) / 100,
+      pendingPayoutsTotal: Math.round(pendingPayoutsTotal * 100) / 100,
+      monthlyList
+    };
   }
 }
 

@@ -1343,7 +1343,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
     linkText: 'بارلىقىنى كۆرۈش ›',
     linkUrl: '#catalogSection',
     productSource: 'featured',
-    manualProductIds: ['PRD-100', 'PRD-101', 'PRD-102', 'PRD-103', 'PRD-104', 'PRD-105'],
+    manualProductIds: ['PRD-100', 'PRD-119', 'PRD-103', 'PRD-120', 'PRD-754', 'PRD-420'],
     badgeStripText: 'Cuma Kapında',
     badgeStripColor: '#059669',
     badgeStripBgType: 'green',
@@ -1379,7 +1379,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
     linkText: 'بارلىقىنى كۆرۈش ›',
     linkUrl: '#catalogSection',
     productSource: 'bestseller',
-    manualProductIds: [],
+    manualProductIds: ['PRD-128', 'PRD-759', 'PRD-132', 'PRD-341', 'PRD-114', 'PRD-292'],
     badgeStripText: '75 TL Kupon',
     badgeStripColor: '#e11d48',
     badgeStripBgType: 'pink',
@@ -1486,6 +1486,12 @@ class StoreManager {
     if (currentRelease !== STORE_PRODUCTS_RELEASE) {
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
       localStorage.setItem('teklimakan_products_release', STORE_PRODUCTS_RELEASE);
+    }
+    const STORE_SHELVES_RELEASE = 'v20260930_interleaved18';
+    const currentShelvesRel = localStorage.getItem('teklimakan_shelves_release');
+    if (currentShelvesRel !== STORE_SHELVES_RELEASE) {
+      localStorage.removeItem(STORAGE_KEYS.SHOWCASE_SHELVES);
+      localStorage.setItem('teklimakan_shelves_release', STORE_SHELVES_RELEASE);
     }
     const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
     let prods = [];
@@ -7392,6 +7398,10 @@ class StoreManager {
           if (resolvedProducts.length < 4) {
             resolvedProducts = allProducts.slice(0, 8);
           }
+        }
+        if (resolvedProducts.length < 4 && allProducts.length > 0) {
+          const fallback = allProducts.filter(p => !resolvedProducts.some(rp => rp.id === p.id));
+          resolvedProducts = [...resolvedProducts, ...fallback].slice(0, 8);
         }
 
         return {

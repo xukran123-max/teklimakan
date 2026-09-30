@@ -1338,128 +1338,274 @@ function initTeklimakanApp() {
     return `<span class="product-agent-badge platform" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="${officialLabel}"><i class="fas fa-store-alt" style="color: #64748b; font-size: 0.82rem;"></i> <span>${officialLabel}</span></span>`;
   }
 
-  // ==================== تاۋار كارتىلىرى ====================
-  function renderProducts() {
-    const i18n = window.appI18n;
-    const store = window.appStore;
-    const grid = document.getElementById('productsGrid');
-    const countText = document.getElementById('resultsCountText');
-    if (!grid) return;
+  // ==================== تاۋار كارتىلىرىنى ھاسىللاش (Single Product Card) ====================
+  function createSingleProductCard(product, i18n, store) {
+    const card = document.createElement('div');
+    card.className = `product-card ${window.spotlightProductId === product.id ? 'deal-spotlight-active' : ''}`;
+    card.dataset.id = product.id;
 
-    const products = getFilteredProducts();
+    let stockHtml = '';
+    const rawUnit = (product.unit && product.unit !== 'custom') ? product.unit : '';
+    const cleanUnitStr = (u) => {
+      if (!u || typeof u !== 'string') return '';
+      let s = u.trim();
+      if (!s || s === '?????') return '';
+      const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
+      if (midGram) return `${midGram[1]} گرام`;
+      if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
+      if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
+      if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
+      const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
+      if (trailGram) return `${trailGram[2]} گرام`;
+      return s;
+    };
+    const cleanedUnit = cleanUnitStr(rawUnit);
+    const localizedUnit = (i18n && typeof i18n.getUnitName === 'function') ? i18n.getUnitName(cleanedUnit) : cleanedUnit;
+    const unitWord = (i18n && typeof i18n.t === 'function') ? i18n.t('itemsUnit') : 'دانە';
+    const stockUnitLabel = localizedUnit ? (/\d/.test(localizedUnit) ? `${unitWord} (${localizedUnit})` : localizedUnit) : unitWord;
 
-    if (countText) {
-      countText.textContent = `${products.length} ${i18n.t('resultsFound')}`;
+    if (product.stock <= 0) {
+      stockHtml = `<span class="stock-status-out"><i class="fas fa-times-circle"></i> ${i18n.t('outOfStock')}</span>`;
+    } else if (product.stock <= 8) {
+      stockHtml = `<span class="stock-status-low"><i class="fas fa-exclamation-circle"></i> ${i18n.t('lowStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
+    } else {
+      stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
     }
 
-    if (products.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
-          <i class="fas fa-box-open" style="font-size: 3.5rem; color: var(--text-light); margin-bottom: 1rem;"></i>
-          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">${i18n.t('noProductsFound')}</h3>
+    let badgeHtml = '';
+    if (product.badge) {
+      let badgeClass = 'badge-sale';
+      if (product.badge === 'ئەڭ قىزىق') badgeClass = 'badge-hot';
+      if (product.badge === 'يېڭى كەلگەن') badgeClass = 'badge-new';
+      const localizedBadge = i18n.getBadgeName(product.badge);
+      badgeHtml = `<span class="product-badge ${badgeClass}">${localizedBadge}</span>`;
+    }
+
+    const formattedPrice = store.formatPrice(product.price);
+    const formattedOldPrice = product.oldPrice ? store.formatPrice(product.oldPrice) : null;
+    const isWish = store.isInWishlist(product.id);
+    const safeRating = Number(String(product.rating || 5).replace(',', '.'));
+    const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
+
+    card.innerHTML = `
+      <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
+        <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
+        <div class="image-shield-overlay"></div>
+        <div class="product-badges">
+          ${badgeHtml}
         </div>
-      `;
-      return;
-    }
+        <button class="product-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="Wishlist">
+          <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+        </button>
+      </div>
+      <div class="product-card-body">
+        <h3 class="product-title" title="${product.name}">${product.name}</h3>
 
-    grid.innerHTML = '';
-    products.forEach(product => {
-      const card = document.createElement('div');
-      card.className = `product-card ${window.spotlightProductId === product.id ? 'deal-spotlight-active' : ''}`;
-      card.dataset.id = product.id;
+        <div class="product-category-row" style="margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+          <span class="product-category-tag">${i18n.getCategoryName(product.category)}</span>
+          ${getMerchantBadgeHtml(product)}
+          ${getAgentBadgeHtml(product, true)}
+        </div>
+        
+        <div class="product-rating">
+          <i class="fas fa-star"></i>
+          <span>${displayRating}</span>
+          <span class="rating-count">(${product.ratingCount || 10} ${i18n.t('reviewsText')})</span>
+        </div>
 
-      let stockHtml = '';
-      const rawUnit = (product.unit && product.unit !== 'custom') ? product.unit : '';
-      const cleanUnitStr = (u) => {
-        if (!u || typeof u !== 'string') return '';
-        let s = u.trim();
-        if (!s || s === '?????') return '';
-        const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
-        if (midGram) return `${midGram[1]} گرام`;
-        if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
-        if (/^دانە\s*1$/i.test(s) || /^1\s*دانە$/i.test(s)) return 'دانە';
-        if (/^قۇتا\s*1$/i.test(s) || /^1\s*قۇتا$/i.test(s)) return 'قۇتا';
-        const trailGram = s.match(/^(گ[ىي]?رام)\s*(\d+)$/i);
-        if (trailGram) return `${trailGram[2]} گرام`;
-        return s;
-      };
-      const cleanedUnit = cleanUnitStr(rawUnit);
-      const localizedUnit = (i18n && typeof i18n.getUnitName === 'function') ? i18n.getUnitName(cleanedUnit) : cleanedUnit;
-      const unitWord = (i18n && typeof i18n.t === 'function') ? i18n.t('itemsUnit') : 'دانە';
-      const stockUnitLabel = localizedUnit ? (/\d/.test(localizedUnit) ? `${unitWord} (${localizedUnit})` : localizedUnit) : unitWord;
+        <div class="product-stock-bar">
+          ${stockHtml}
+          <span class="sales-count">${i18n.t('salesCount')} <bdi class="number-latin">${product.sales || 0}</bdi></span>
+        </div>
 
-      if (product.stock <= 0) {
-        stockHtml = `<span class="stock-status-out"><i class="fas fa-times-circle"></i> ${i18n.t('outOfStock')}</span>`;
-      } else if (product.stock <= 8) {
-        stockHtml = `<span class="stock-status-low"><i class="fas fa-exclamation-circle"></i> ${i18n.t('lowStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
-      } else {
-        stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
-      }
+        <div class="product-pricing">
+          <span class="current-price">${formattedPrice}${product.unit ? `<small class="unit-text" style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / <bdi>${product.unit}</bdi></small>` : ''}</span>
+          ${formattedOldPrice ? `<span class="original-price">${formattedOldPrice}</span>` : ''}
+        </div>
 
-      let badgeHtml = '';
-      if (product.badge) {
-        let badgeClass = 'badge-sale';
-        if (product.badge === 'ئەڭ قىزىق') badgeClass = 'badge-hot';
-        if (product.badge === 'يېڭى كەلگەن') badgeClass = 'badge-new';
-        const localizedBadge = i18n.getBadgeName(product.badge);
-        badgeHtml = `<span class="product-badge ${badgeClass}">${localizedBadge}</span>`;
-      }
-
-      const formattedPrice = store.formatPrice(product.price);
-      const formattedOldPrice = product.oldPrice ? store.formatPrice(product.oldPrice) : null;
-      const isWish = store.isInWishlist(product.id);
-      const safeRating = Number(String(product.rating || 5).replace(',', '.'));
-      const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
-
-      card.innerHTML = `
-        <div class="product-card-thumb" title="${product.name} - ${i18n.t('quickView')}">
-          <img src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
-          <div class="image-shield-overlay"></div>
-          <div class="product-badges">
-            ${badgeHtml}
-          </div>
-          <button class="product-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="Wishlist">
-            <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+        <div class="product-card-actions">
+          <button class="btn-add-cart" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''}>
+            <i class="fas fa-shopping-bag"></i>
+            <span>${product.stock <= 0 ? i18n.t('outOfStock') : i18n.t('addToCart')}</span>
           </button>
         </div>
-        <div class="product-card-body">
-          <!-- 1. مەھسۇلات نامى ئۈستىدە -->
-          <h3 class="product-title" title="${product.name}">${product.name}</h3>
+      </div>
+    `;
 
-          <!-- 2. تۈرى ئاستىدا، سودىگەر ئىناۋەت بەلگىسى ۋە ۋاكالەتچى ID كودى -->
-          <div class="product-category-row" style="margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-            <span class="product-category-tag">${i18n.getCategoryName(product.category)}</span>
-            ${getMerchantBadgeHtml(product)}
-            ${getAgentBadgeHtml(product, true)}
-          </div>
-          
-          <div class="product-rating">
-            <i class="fas fa-star"></i>
-            <span>${displayRating}</span>
-            <span class="rating-count">(${product.ratingCount || 10} ${i18n.t('reviewsText')})</span>
+    return card;
+  }
+
+  // ==================== 🛍️ زامانىۋى سىيرىلما تاۋار راكى ئېلېمېنتى قۇرۇش (Showcase Shelf Element) ====================
+  function createShowcaseShelfElement(shelf, currentLang = 'ug') {
+    if (!shelf || !Array.isArray(shelf.products) || shelf.products.length === 0) return null;
+
+    const shelfEl = document.createElement('div');
+    shelfEl.className = 'showcase-shelf';
+    shelfEl.dataset.shelfId = shelf.id;
+
+    // Header: Title on right (RTL), Link on left
+    const headerEl = document.createElement('div');
+    headerEl.className = 'showcase-shelf-header';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'showcase-shelf-title';
+    titleEl.innerHTML = shelf.title;
+
+    const linkEl = document.createElement('a');
+    linkEl.className = 'showcase-shelf-link';
+    linkEl.href = shelf.linkUrl || '#catalogSection';
+    const cleanLinkText = (shelf.linkText || 'بارلىقىنى كۆرۈش').replace(/[›>‹<]/g, '').trim();
+    linkEl.innerHTML = `<span>${cleanLinkText}</span> <i class="fas fa-chevron-left" style="font-size: 0.72rem;"></i>`;
+
+    headerEl.appendChild(titleEl);
+    headerEl.appendChild(linkEl);
+    shelfEl.appendChild(headerEl);
+
+    // Track wrapper & track
+    const trackWrap = document.createElement('div');
+    trackWrap.className = 'showcase-shelf-track-wrapper';
+
+    const track = document.createElement('div');
+    track.className = 'showcase-shelf-track';
+
+    shelf.products.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'shelf-product-card';
+      card.dataset.id = product.id;
+
+      const isWish = window.appStore.isInWishlist(product.id);
+      const formattedPrice = window.appStore.formatPrice(product.price);
+      const formattedOldPrice = product.oldPrice ? window.appStore.formatPrice(product.oldPrice) : null;
+      const safeRating = Number(String(product.rating || 5).replace(',', '.'));
+      const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
+      const reviewCount = product.ratingCount || 24;
+
+      // Strip badge:
+      const stripColorClass = shelf.badgeStripBgType ? `strip-${shelf.badgeStripBgType}` : 'strip-green';
+      let stripText = shelf.badgeStripText || '';
+      if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
+        stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
+      }
+
+      // Verified badge:
+      const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';
+
+      // Wishlist button:
+      const wishHtml = shelf.showWishlistBtn ? `
+        <button type="button" class="shelf-card-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="ياقتۇرغانلارغا قوشۇش">
+          <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+        </button>
+      ` : '';
+
+      card.innerHTML = `
+        <div class="shelf-card-thumb-wrap">
+          <img class="shelf-card-img" src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
+          ${wishHtml}
+        </div>
+        ${stripText ? `<div class="shelf-card-strip ${stripColorClass}">${stripText}</div>` : ''}
+        <div class="shelf-card-body">
+          <div>
+            <div class="shelf-card-brand">
+              <span dir="auto">${product.brand || 'تەكلىماكان'}</span>
+              ${verifiedHtml}
+            </div>
+            <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>
           </div>
 
-          <div class="product-stock-bar">
-            ${stockHtml}
-            <span class="sales-count">${i18n.t('salesCount')} <bdi class="number-latin">${product.sales || 0}</bdi></span>
-          </div>
+          <div>
+            <div class="shelf-card-rating">
+              <i class="fas fa-star"></i>
+              <span class="number-latin" style="font-weight: 700;">${displayRating}</span>
+              <span class="rating-count">(<bdi class="number-latin">${reviewCount}</bdi>)</span>
+              <i class="fas fa-camera cam-icon"></i>
+            </div>
 
-          <div class="product-pricing">
-            <span class="current-price">${formattedPrice}${product.unit ? `<small class="unit-text" style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-right: 4px;"> / <bdi>${product.unit}</bdi></small>` : ''}</span>
-            ${formattedOldPrice ? `<span class="original-price">${formattedOldPrice}</span>` : ''}
-          </div>
+            <div class="shelf-card-pricing">
+              <span class="shelf-card-price number-latin">${formattedPrice}</span>
+              ${formattedOldPrice ? `<span class="shelf-card-old-price number-latin">${formattedOldPrice}</span>` : ''}
+            </div>
 
-          <div class="product-card-actions">
-            <button class="btn-add-cart" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''}>
-              <i class="fas fa-shopping-bag"></i>
-              <span>${product.stock <= 0 ? i18n.t('outOfStock') : i18n.t('addToCart')}</span>
+            <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
+              <i class="fas fa-shopping-bag"></i> <span>سېۋەتكە</span>
             </button>
           </div>
         </div>
       `;
 
-      grid.appendChild(card);
+      // Card click -> openQuickView
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.shelf-card-wish-btn') || e.target.closest('.shelf-card-add-btn')) return;
+        if (typeof openQuickView === 'function') openQuickView(product.id);
+      });
+
+      // Wishlist button click
+      const wishBtn = card.querySelector('.shelf-card-wish-btn');
+      if (wishBtn) {
+        wishBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const added = window.appStore.toggleWishlist(product.id);
+          wishBtn.classList.toggle('active', added);
+          const icon = wishBtn.querySelector('i');
+          if (icon) icon.className = added ? 'fas fa-heart' : 'far fa-heart';
+          if (typeof updateWishlistUI === 'function') updateWishlistUI();
+          if (typeof playChime === 'function') playChime('click');
+          const msg = added ? 'ياقتۇرغانلارغا قوشۇلدى!' : 'ياقتۇرغانلاردىن ئۆچۈرۈلدى!';
+          if (typeof showToast === 'function') showToast(msg, 'success');
+        });
+      }
+
+      // Add to Cart button click
+      const addBtn = card.querySelector('.shelf-card-add-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const res = window.appStore.addToCart(product.id, 1);
+          if (res.success) {
+            if (typeof playChime === 'function') playChime('success');
+            if (typeof showToast === 'function') showToast(res.message, 'success');
+            if (typeof updateCartUI === 'function') updateCartUI();
+            if (typeof openCartDrawer === 'function') openCartDrawer();
+          } else {
+            if (typeof showToast === 'function') showToast(res.message, 'error');
+          }
+        });
+      }
+
+      track.appendChild(card);
     });
+
+    // 🖥️ ئۈستەل كومپيۇتېرلار ئۈچۈن قولايلىق چەككۈچ كۇنۇپكىلار
+    const navPrev = document.createElement('button');
+    navPrev.type = 'button';
+    navPrev.className = 'shelf-nav-btn shelf-nav-prev';
+    navPrev.setAttribute('aria-label', 'Previous');
+    navPrev.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    navPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      track.scrollBy({ left: 320, behavior: 'smooth' });
+    });
+
+    const navNext = document.createElement('button');
+    navNext.type = 'button';
+    navNext.className = 'shelf-nav-btn shelf-nav-next';
+    navNext.setAttribute('aria-label', 'Next');
+    navNext.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    navNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      track.scrollBy({ left: -320, behavior: 'smooth' });
+    });
+
+    trackWrap.appendChild(navPrev);
+    trackWrap.appendChild(track);
+    trackWrap.appendChild(navNext);
+    shelfEl.appendChild(trackWrap);
+
+    return shelfEl;
+  }
+
+  // ==================== تاۋار كارتىلىرى كۇنۇپكا ۋە ھەرىكەتلىرىنى باغلاش ====================
+  function attachProductCardEvents(grid, i18n, store) {
+    if (!grid) return;
 
     // 🖼️ مەھسۇلات رەسىمىنى چەككەندە تەپسىلات كۆزنىكى ئېچىلىش
     grid.querySelectorAll('.product-card-thumb').forEach(thumb => {
@@ -1525,6 +1671,115 @@ function initTeklimakanApp() {
         }
       });
     });
+  }
+
+  // ==================== تاۋارلار ۋە سىيرىلما راكلارنى ئارلاشتۇرۇپ كۆرسىتىش (Hybrid Interleaved Feed) ====================
+  function renderProducts() {
+    const i18n = window.appI18n;
+    const store = window.appStore;
+    const grid = document.getElementById('productsGrid');
+    const countText = document.getElementById('resultsCountText');
+    if (!grid) return;
+
+    const products = getFilteredProducts();
+
+    if (countText) {
+      countText.textContent = `${products.length} ${i18n.t('resultsFound')}`;
+    }
+
+    if (products.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+          <i class="fas fa-box-open" style="font-size: 3.5rem; color: var(--text-light); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">${i18n.t('noProductsFound')}</h3>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = '';
+
+    // تاشقى ئۈستۈنكى بۆلەك قايتىلانماسلىقى ئۈچۈن ئۇنى تازىلاش
+    const topShelvesContainer = document.getElementById('showcaseShelvesContainer');
+    if (topShelvesContainer) {
+      topShelvesContainer.innerHTML = '';
+      topShelvesContainer.style.display = 'none';
+    }
+
+    const currentLang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'ug';
+    const isInterleavedAllowed = (
+      currentCategory === 'all' && 
+      currentBrand === 'all' && 
+      (!searchQuery || searchQuery.trim() === '') &&
+      !onlyInStock
+    );
+
+    let shelves = [];
+    if (isInterleavedAllowed && store && typeof store.getShowcaseShelves === 'function') {
+      try {
+        shelves = store.getShowcaseShelves(currentLang) || [];
+      } catch (e) {
+        console.error('Error fetching showcase shelves:', e);
+      }
+    }
+
+    if (!isInterleavedAllowed || shelves.length === 0) {
+      // ئادەتتىكى سۈزۈلگەن ياكى ئىزدەلگەن رېشاتكا
+      products.forEach(product => {
+        grid.appendChild(createSingleProductCard(product, i18n, store));
+      });
+    } else {
+      // 🌟 سىيرىلما تاۋار راكلىرى بىلەن مەھسۇلاتلارنى ئارلاشتۇرۇپ تىزىش:
+      // 1. ئەڭ ئۈستىدە: 1-سىيرىلما راك (مەسىلەن: «سىزگە تەۋسىيە»)
+      // 2. ئاستىدىكى قۇرلاردا: 4 دانە مەھسۇلات (تېلېفوندا دەل 2 قۇر، ئۈستەلدە 1 قۇر)
+      // 3. ئاندىن: 2-سىيرىلما راك (مەسىلەن: «ئالاھىدە باھالىق مەھسۇلاتلار»)
+      // 4. قالغان بارلىق تاۋارلار داۋاملىشىدۇ (ئەگەر كېيىنكى قوشۇمچە راكلار بولسا ھەر 6 تاۋاردىن كېيىن قىستۇرۇلىدۇ)
+      let shelfIdx = 0;
+      let prodIdx = 0;
+
+      // 1-سىيرىلما راك (ئەڭ ئۈستىدە)
+      if (shelfIdx < shelves.length) {
+        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+        if (shelfEl) grid.appendChild(shelfEl);
+        shelfIdx++;
+      }
+
+      // 1-قۇر تەكشى مەھسۇلاتلار (دەسلەپكى 4 مەھسۇلات)
+      const firstBatch = Math.min(prodIdx + 4, products.length);
+      for (; prodIdx < firstBatch; prodIdx++) {
+        grid.appendChild(createSingleProductCard(products[prodIdx], i18n, store));
+      }
+
+      // 2-سىيرىلما راك
+      if (shelfIdx < shelves.length) {
+        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+        if (shelfEl) grid.appendChild(shelfEl);
+        shelfIdx++;
+      }
+
+      // قالغان بارلىق مەھسۇلاتلار
+      while (prodIdx < products.length) {
+        const nextBatch = Math.min(prodIdx + 6, products.length);
+        for (; prodIdx < nextBatch; prodIdx++) {
+          grid.appendChild(createSingleProductCard(products[prodIdx], i18n, store));
+        }
+
+        if (shelfIdx < shelves.length) {
+          const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+          if (shelfEl) grid.appendChild(shelfEl);
+          shelfIdx++;
+        }
+      }
+
+      // قوشۇمچە تۈگەنمىگەن راكلار بولسا
+      while (shelfIdx < shelves.length) {
+        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+        if (shelfEl) grid.appendChild(shelfEl);
+        shelfIdx++;
+      }
+    }
+
+    attachProductCardEvents(grid, i18n, store);
   }
 
   // ==================== سېۋەت ۋە 1000 لىرا ھەقسىز يەتكۈزۈش ====================
@@ -4447,167 +4702,14 @@ function initTeklimakanApp() {
     }
   });
 
-  // ==================== 🛍️ زامانىۋى ئۇپۇق سىيرىلما تاۋار راكلىرى (Trendyol Style Showcase Shelves) ====================
+  // ==================== 🛍️ زامانىۋى ئۇپۇق سىيرىلما تاۋار راكلىرى (Showcase Shelves) ====================
   function renderShowcaseShelves(forcedLang = null) {
-    const container = document.getElementById('showcaseShelvesContainer');
-    if (!container || !window.appStore || typeof window.appStore.getShowcaseShelves !== 'function') return;
-
-    const currentLang = forcedLang || (window.appI18n ? window.appI18n.getLang() : 'ug');
-    const shelves = window.appStore.getShowcaseShelves(currentLang);
-
-    if (!Array.isArray(shelves) || shelves.length === 0) {
-      container.innerHTML = '';
-      container.style.display = 'none';
-      return;
+    try {
+      renderProducts();
+    } catch (e) {
+      console.error('Error in renderShowcaseShelves:', e);
     }
-
-    container.style.display = 'flex';
-    container.innerHTML = '';
-
-    shelves.forEach(shelf => {
-      if (!shelf.products || shelf.products.length === 0) return;
-
-      const shelfEl = document.createElement('div');
-      shelfEl.className = 'showcase-shelf';
-      shelfEl.dataset.shelfId = shelf.id;
-
-      // Header: Title on right (RTL), Link on left
-      const headerEl = document.createElement('div');
-      headerEl.className = 'showcase-shelf-header';
-
-      const titleEl = document.createElement('h3');
-      titleEl.className = 'showcase-shelf-title';
-      titleEl.innerHTML = shelf.title;
-
-      const linkEl = document.createElement('a');
-      linkEl.className = 'showcase-shelf-link';
-      linkEl.href = shelf.linkUrl || '#catalogSection';
-      const cleanLinkText = (shelf.linkText || 'بارلىقىنى كۆرۈش').replace(/[›>‹<]/g, '').trim();
-      linkEl.innerHTML = `<span>${cleanLinkText}</span> <i class="fas fa-chevron-left" style="font-size: 0.72rem;"></i>`;
-
-      headerEl.appendChild(titleEl);
-      headerEl.appendChild(linkEl);
-      shelfEl.appendChild(headerEl);
-
-      // Track wrapper & track
-      const trackWrap = document.createElement('div');
-      trackWrap.className = 'showcase-shelf-track-wrapper';
-
-      const track = document.createElement('div');
-      track.className = 'showcase-shelf-track';
-
-      shelf.products.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'shelf-product-card';
-        card.dataset.id = product.id;
-
-        const isWish = window.appStore.isInWishlist(product.id);
-        const formattedPrice = window.appStore.formatPrice(product.price);
-        const formattedOldPrice = product.oldPrice ? window.appStore.formatPrice(product.oldPrice) : null;
-        const safeRating = Number(String(product.rating || 5).replace(',', '.'));
-        const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
-        const reviewCount = product.ratingCount || 24;
-
-        // Strip badge:
-        const stripColorClass = shelf.badgeStripBgType ? `strip-${shelf.badgeStripBgType}` : 'strip-green';
-        let stripText = shelf.badgeStripText || '';
-        if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
-          stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
-        }
-
-        // Verified badge:
-        const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';
-
-        // Wishlist button:
-        const wishHtml = shelf.showWishlistBtn ? `
-          <button type="button" class="shelf-card-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="ياقتۇرغانلارغا قوشۇش">
-            <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
-          </button>
-        ` : '';
-
-        card.innerHTML = `
-          <div class="shelf-card-thumb-wrap">
-            <img class="shelf-card-img" src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
-            ${wishHtml}
-          </div>
-          ${stripText ? `<div class="shelf-card-strip ${stripColorClass}">${stripText}</div>` : ''}
-          <div class="shelf-card-body">
-            <div>
-              <div class="shelf-card-brand">
-                <span dir="auto">${product.brand || 'تەكلىماكان'}</span>
-                ${verifiedHtml}
-              </div>
-              <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>
-            </div>
-
-            <div>
-              <div class="shelf-card-rating">
-                <i class="fas fa-star"></i>
-                <span class="number-latin" style="font-weight: 700;">${displayRating}</span>
-                <span class="rating-count">(<bdi class="number-latin">${reviewCount}</bdi>)</span>
-                <i class="fas fa-camera cam-icon"></i>
-              </div>
-
-              <div class="shelf-card-pricing">
-                <span class="shelf-card-price number-latin">${formattedPrice}</span>
-                ${formattedOldPrice ? `<span class="shelf-card-old-price number-latin">${formattedOldPrice}</span>` : ''}
-              </div>
-
-              <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
-                <i class="fas fa-shopping-bag"></i> <span>سېۋەتكە</span>
-              </button>
-            </div>
-          </div>
-        `;
-
-        // Card click -> openQuickView
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('.shelf-card-wish-btn') || e.target.closest('.shelf-card-add-btn')) return;
-          if (typeof openQuickView === 'function') openQuickView(product.id);
-        });
-
-        // Wishlist button click
-        const wishBtn = card.querySelector('.shelf-card-wish-btn');
-        if (wishBtn) {
-          wishBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const added = window.appStore.toggleWishlist(product.id);
-            wishBtn.classList.toggle('active', added);
-            const icon = wishBtn.querySelector('i');
-            if (icon) icon.className = added ? 'fas fa-heart' : 'far fa-heart';
-            if (typeof updateWishlistUI === 'function') updateWishlistUI();
-            if (typeof playChime === 'function') playChime('click');
-            const msg = added ? 'ياقتۇرغانلارغا قوشۇلدى!' : 'ياقتۇرغانلاردىن ئۆچۈرۈلدى!';
-            if (typeof showToast === 'function') showToast(msg, 'success');
-          });
-        }
-
-        // Add to Cart button click
-        const addBtn = card.querySelector('.shelf-card-add-btn');
-        if (addBtn) {
-          addBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const res = window.appStore.addToCart(product.id, 1);
-            if (res.success) {
-              if (typeof playChime === 'function') playChime('success');
-              if (typeof showToast === 'function') showToast(res.message, 'success');
-              if (typeof updateCartUI === 'function') updateCartUI();
-              if (typeof openCartDrawer === 'function') openCartDrawer();
-            } else {
-              if (typeof showToast === 'function') showToast(res.message, 'error');
-            }
-          });
-        }
-
-        track.appendChild(card);
-      });
-
-      trackWrap.appendChild(track);
-      shelfEl.appendChild(trackWrap);
-      container.appendChild(shelfEl);
-    });
   }
-
   window.renderShowcaseShelves = renderShowcaseShelves;
 
   // ==================== 🚀 ئايلانما ئېلان تاختىسى سۈكۈتتىكى تەبىئىي ھالىتى (Default Natural Flow) ====================

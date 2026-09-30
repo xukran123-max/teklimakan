@@ -6888,7 +6888,29 @@ class StoreManager {
 
   // ==================== زاكازلار ====================
   getOrders() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
+    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)) || [];
+    let updated = false;
+    orders.forEach(o => {
+      let orderTotal = Number(o.totalCny || o.total || 0);
+      if (orderTotal <= 0) {
+        const itemsList = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+        if (itemsList.length > 0) {
+          const sumItems = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+          if (sumItems > 0) {
+            o.totalCny = sumItems;
+            o.subtotalCny = sumItems;
+            o.totalFormatted = this.formatPrice(sumItems);
+            updated = true;
+          }
+        }
+      }
+    });
+    if (updated) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      } catch (e) {}
+    }
+    return orders;
   }
 
   createOrder(customerData, paymentMethod, notes = '', couponDiscountCny = 0, lang = 'ug', instagramGift = null) {
@@ -7505,7 +7527,17 @@ class StoreManager {
 
     const totalRevenueCny = orders
       .filter(o => o.status !== 'بىكار قىلىندى')
-      .reduce((sum, o) => sum + (o.totalCny || o.total || 0), 0);
+      .reduce((sum, o) => {
+        let orderTotal = Number(o.totalCny || o.total || 0);
+        if (orderTotal <= 0) {
+          const itemsList = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+          if (itemsList.length > 0) {
+            const sumItems = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+            if (sumItems > 0) orderTotal = sumItems;
+          }
+        }
+        return sum + orderTotal;
+      }, 0);
 
     return {
       totalRevenue: this.formatPrice(totalRevenueCny),

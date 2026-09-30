@@ -1521,22 +1521,208 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ==================== زاكازلار جەدۋىلى ====================
+  // ==================== زاكازلار جەدۋىلى ۋە سۈزگۈچلىرى ====================
+  let currentOrderStatusFilter = 'all';
+  let currentOrderSearchQuery = '';
+  let currentOrderDateFilter = 'all';
+
+  function exportOrdersCsv() {
+    const orders = window.appStore ? window.appStore.getOrders() : [];
+    if (!orders || orders.length === 0) {
+      showAdminToast('چىقىرىدىغان زاكاز تېپىلمىدى!', 'warning');
+      return;
+    }
+    const headers = [
+      'زاكاز نومۇرى',
+      'خېرىدار ئىسمى',
+      'تېلېفون',
+      'ئادرېس / شەھەر',
+      'مەھسۇلاتلار',
+      'ئومۇمىي سومما',
+      'پۇل تۆلەش شەكلى',
+      'ھالىتى',
+      'كارگو شىركىتى',
+      'كارگو نومۇرى',
+      'ۋاقتى'
+    ];
+    const rows = orders.map(o => {
+      const cust = (typeof o.customer === 'string') ? JSON.parse(o.customer || '{}') : (o.customer || {});
+      const itemsList = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+      let orderTotal = Number(o.totalCny || o.total || 0);
+      if (orderTotal <= 0 && itemsList.length > 0) {
+        orderTotal = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+      }
+      const itemsStr = itemsList.map(i => `${i.name || i.productName || 'تاۋار'}(x${i.quantity || 1})`).join('; ');
+      const clean = (val) => `"${String(val || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}"`;
+      return [
+        clean(o.id),
+        clean(cust.name || 'خېرىدار'),
+        clean(cust.phone || ''),
+        clean((cust.city ? cust.city + ' ' : '') + (cust.address || '')),
+        clean(itemsStr),
+        clean(window.appStore.formatPrice(orderTotal)),
+        clean(o.paymentMethod || 'نەق پۇل'),
+        clean(o.status || 'ساقلاۋاتىدۇ'),
+        clean(o.cargoCarrier || (o.tracking && o.tracking.carrier) || ''),
+        clean(o.cargoTrackingNo || (o.tracking && o.tracking.trackingNumber) || ''),
+        clean(o.date || '')
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `orders_teklimakan_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showAdminToast('📊 زاكازلار جەدۋىلى Excel (CSV) ھۆججىتى سۈپىتىدە چۈشۈرۈلدى!', 'success');
+  }
+
   function renderOrdersTable() {
     const tbody = document.getElementById('adminOrdersTbody');
     if (!tbody) return;
 
     const orders = window.appStore.getOrders();
-    if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">زاكاز يوق</td></tr>';
+
+    // 1. ئومۇمىي زاكاز سىتاتىستىكىسى (Metrics & Badges) نى ھېسابلاش
+    let countAll = orders.length;
+    let countPending = 0;
+    let countApproved = 0;
+    let countShipped = 0;
+    let countCompleted = 0;
+    let countCanceled = 0;
+    let totalRevenue = 0;
+
+    orders.forEach(order => {
+      let orderTotal = Number(order.totalCny || order.total || 0);
+      const itemsList = Array.isArray(order.items) 
+        ? order.items 
+        : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
+
+      if (orderTotal <= 0 && itemsList.length > 0) {
+        const sumItems = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+        if (sumItems > 0) {
+          orderTotal = sumItems;
+          order.totalCny = sumItems;
+          order.totalFormatted = window.appStore.formatPrice(sumItems);
+        }
+      }
+
+      if (order.status === 'ساقلاۋاتىدۇ') countPending++;
+      else if (order.status === 'تەستىقلاندى') countApproved++;
+      else if (order.status === 'يوللاندى') countShipped++;
+      else if (order.status === 'تاماملاندى') countCompleted++;
+      else if (order.status === 'بىكار قىلىندى') countCanceled++;
+
+      if (order.status !== 'بىكار قىلىندى') {
+        totalRevenue += orderTotal;
+      }
+    });
+
+    // KPI كارتىلىرىنى تولدۇرۇش
+    const elMetricTotal = document.getElementById('orderMetricTotal');
+    const elMetricPending = document.getElementById('orderMetricPending');
+    const elMetricShipped = document.getElementById('orderMetricShipped');
+    const elMetricRevenue = document.getElementById('orderMetricRevenue');
+
+    if (elMetricTotal) elMetricTotal.textContent = countAll;
+    if (elMetricPending) elMetricPending.textContent = countPending;
+    if (elMetricShipped) elMetricShipped.textContent = countShipped;
+    if (elMetricRevenue) elMetricRevenue.textContent = window.appStore.formatPrice(totalRevenue);
+
+    // ھالەت سۈزگۈچ تۈگمىلىرىدىكى سانلارنى تولدۇرۇش
+    const elCountAll = document.getElementById('orderCountAll');
+    const elCountPending = document.getElementById('orderCountPending');
+    const elCountApproved = document.getElementById('orderCountApproved');
+    const elCountShipped = document.getElementById('orderCountShipped');
+    const elCountCompleted = document.getElementById('orderCountCompleted');
+    const elCountCanceled = document.getElementById('orderCountCanceled');
+
+    if (elCountAll) elCountAll.textContent = countAll;
+    if (elCountPending) elCountPending.textContent = countPending;
+    if (elCountApproved) elCountApproved.textContent = countApproved;
+    if (elCountShipped) elCountShipped.textContent = countShipped;
+    if (elCountCompleted) elCountCompleted.textContent = countCompleted;
+    if (elCountCanceled) elCountCanceled.textContent = countCanceled;
+
+    // 2. سۈزۈش (ھالەت، ئىزدەش، ۋاقىت)
+    let filteredOrders = orders.slice();
+
+    if (currentOrderStatusFilter && currentOrderStatusFilter !== 'all') {
+      filteredOrders = filteredOrders.filter(o => o.status === currentOrderStatusFilter);
+    }
+
+    if (currentOrderSearchQuery && currentOrderSearchQuery.trim()) {
+      const q = currentOrderSearchQuery.trim().toLowerCase();
+      filteredOrders = filteredOrders.filter(o => {
+        const oid = String(o.id || '').toLowerCase();
+        const cust = (typeof o.customer === 'string') ? JSON.parse(o.customer || '{}') : (o.customer || {});
+        const name = String(cust.name || '').toLowerCase();
+        const phone = String(cust.phone || '').toLowerCase();
+        const address = String(cust.address || '').toLowerCase();
+        const city = String(cust.city || '').toLowerCase();
+        const tracking = String(o.cargoTrackingNo || (o.tracking && o.tracking.trackingNumber) || '').toLowerCase();
+        const itemsList = Array.isArray(o.items) ? o.items : (typeof o.items === 'string' ? JSON.parse(o.items || '[]') : []);
+        const itemNames = itemsList.map(i => (i.name || i.productName || '')).join(' ').toLowerCase();
+
+        return oid.includes(q) || name.includes(q) || phone.includes(q) || address.includes(q) || city.includes(q) || tracking.includes(q) || itemNames.includes(q);
+      });
+    }
+
+    if (currentOrderDateFilter && currentOrderDateFilter !== 'all') {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const yesterday = new Date(now.getTime() - 86400000);
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      filteredOrders = filteredOrders.filter(o => {
+        const orderDateStr = String(o.date || '');
+        if (currentOrderDateFilter === 'today') {
+          return orderDateStr.startsWith(todayStr);
+        } else if (currentOrderDateFilter === 'yesterday') {
+          return orderDateStr.startsWith(yesterdayStr);
+        } else if (currentOrderDateFilter === 'week') {
+          const orderTime = new Date(orderDateStr.replace(/-/g, '/')).getTime();
+          return !isNaN(orderTime) && (now.getTime() - orderTime <= 7 * 86400000);
+        } else if (currentOrderDateFilter === 'month') {
+          const orderTime = new Date(orderDateStr.replace(/-/g, '/')).getTime();
+          return !isNaN(orderTime) && (now.getTime() - orderTime <= 30 * 86400000);
+        }
+        return true;
+      });
+    }
+
+    // 3. جەدۋەل قۇرلىرىنى ھاسىل قىلىش
+    if (filteredOrders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted); font-size:0.95rem;"><i class="fas fa-inbox" style="font-size:1.8rem; margin-bottom:0.5rem; display:block; color:#cbd5e1;"></i>زاكاز تېپىلمىدى</td></tr>';
+      setupOrdersControls();
       return;
     }
 
     tbody.innerHTML = '';
-    orders.forEach(order => {
+    filteredOrders.forEach(order => {
       const tr = document.createElement('tr');
       const langTag = order.language ? `<span style="font-size:0.75rem; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${order.language.toUpperCase()}</span>` : '';
-      const orderTotalDisplay = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total || 0);
+      
+      const itemsList = Array.isArray(order.items) 
+        ? order.items 
+        : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
+
+      let orderTotal = Number(order.totalCny || order.total || 0);
+      if (orderTotal <= 0 && itemsList.length > 0) {
+        const sumItems = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+        if (sumItems > 0) {
+          orderTotal = sumItems;
+          order.totalCny = sumItems;
+        }
+      }
+      const orderTotalDisplay = window.appStore.formatPrice(orderTotal);
 
       const cust = (typeof order.customer === 'string') 
         ? (JSON.parse(order.customer || '{}')) 
@@ -1549,9 +1735,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ? `<span style="color:#94a3b8; font-size:0.75rem;">🔒 10 كۈندىن ئاشقان، مەخپىيلەشتۈرۈلگەن</span>`
         : (cust.phone || '-');
 
-      const itemsList = Array.isArray(order.items) 
-        ? order.items 
-        : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
       const itemsSummary = itemsList.map(i => `${i.name || i.productName || 'تاۋار'} (x${i.quantity || 1})`).join('، ') || '-';
 
       const carrierName = order.cargoCarrier || (order.tracking && order.tracking.carrier) || '';
@@ -1635,6 +1818,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const oid = sel.dataset.id;
         const newStatus = e.target.value;
         window.appStore.updateOrderStatus(oid, newStatus);
+        renderOrdersTable();
         renderDashboardMetrics();
         showAdminToast('زاكاز ھالىتى يېڭىلاندى!', 'success');
 
@@ -1657,7 +1841,67 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // 🛡️ 10 كۈندىن ئاشقان پۈتكەن زاكازلارنىڭ شەخسىي ئۇچۇرىنى يۇيۇش كۇنۇپكىسى
+    setupOrdersControls();
+  }
+
+  function setupOrdersControls() {
+    // 1. Status Tabs
+    const tabBtns = document.querySelectorAll('.order-status-tab-btn');
+    tabBtns.forEach(btn => {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentOrderStatusFilter = btn.dataset.status || 'all';
+        renderOrdersTable();
+      });
+    });
+
+    // 2. Search Input
+    const searchInput = document.getElementById('orderSearchInput');
+    if (searchInput && !searchInput.dataset.bound) {
+      searchInput.dataset.bound = 'true';
+      searchInput.addEventListener('input', (e) => {
+        currentOrderSearchQuery = e.target.value;
+        renderOrdersTable();
+      });
+    }
+
+    // 3. Date Filter
+    const dateFilter = document.getElementById('orderDateFilter');
+    if (dateFilter && !dateFilter.dataset.bound) {
+      dateFilter.dataset.bound = 'true';
+      dateFilter.addEventListener('change', (e) => {
+        currentOrderDateFilter = e.target.value;
+        renderOrdersTable();
+      });
+    }
+
+    // 4. Add Sample Order
+    const btnSample = document.getElementById('btnAddSampleOrder');
+    if (btnSample && !btnSample.dataset.bound) {
+      btnSample.dataset.bound = 'true';
+      btnSample.addEventListener('click', () => {
+        if (window.appStore && typeof window.appStore.createSampleOrder === 'function') {
+          const newOrder = window.appStore.createSampleOrder();
+          renderOrdersTable();
+          renderDashboardMetrics();
+          showAdminToast(`🧪 سىناق زاكاز مۇۋەپپەقىيەتلىك قوشۇلدى! (${newOrder.id})`, 'success');
+        }
+      });
+    }
+
+    // 5. Export CSV
+    const btnExport = document.getElementById('btnExportOrdersCsv');
+    if (btnExport && !btnExport.dataset.bound) {
+      btnExport.dataset.bound = 'true';
+      btnExport.addEventListener('click', () => {
+        exportOrdersCsv();
+      });
+    }
+
+    // 6. 🛡️ 10 كۈندىن ئاشقان پۈتكەن زاكازلارنىڭ شەخسىي ئۇچۇرىنى يۇيۇش كۇنۇپكىسى
     const btnPrivacy = document.getElementById('btnRunPrivacyCleanup');
     if (btnPrivacy && !btnPrivacy.dataset.bound) {
       btnPrivacy.dataset.bound = 'true';
@@ -4423,7 +4667,12 @@ document.addEventListener('DOMContentLoaded', () => {
       </tr>
     `).join('');
 
-    const invoiceTotal = order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total || 0);
+    let invoiceOrderTotal = Number(order.totalCny || order.total || 0);
+    if (invoiceOrderTotal <= 0 && itemsList.length > 0) {
+      const sumItems = itemsList.reduce((acc, it) => acc + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+      if (sumItems > 0) invoiceOrderTotal = sumItems;
+    }
+    const invoiceTotal = window.appStore.formatPrice(invoiceOrderTotal);
     const isAnonymized = !!(order.isAnonymized || cust.isAnonymized);
 
     body.innerHTML = `
@@ -4474,7 +4723,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </table>
 
       <div style="text-align:left; direction:ltr; font-weight:700;">
-        <div>Total Amount: <span style="color:var(--danger-color); font-size:1.2rem;">${invoiceTotal}</span></div>
+        <div>ئومۇمىي سومما: <span style="color:var(--danger-color); font-size:1.2rem;">${invoiceTotal}</span></div>
       </div>
 
       <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--admin-border); display: flex; justify-content: flex-end; gap: 0.75rem;">

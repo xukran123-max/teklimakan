@@ -8443,6 +8443,23 @@ class StoreManager {
     } catch(e) {}
   }
 
+  // 🔔 سانلىق مەلۇماتلارنىڭ ماس قەدەملىك ئۆزگىرىشىگە مۇشتەرى بولۇش (Event listener)
+  on(type, callback) {
+    if (typeof callback !== 'function') return () => {};
+    const listener = (event) => {
+      const detail = (event && event.detail) || {};
+      if (type === '*' || detail.type === type) {
+        try {
+          callback(detail);
+        } catch (e) {
+          console.error(`[appStore.on] Error in listener for "${type}":`, e);
+        }
+      }
+    };
+    window.addEventListener('uyghur_store_sync', listener);
+    return () => window.removeEventListener('uyghur_store_sync', listener);
+  }
+
   // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund 5%) ====================
   getCharityFundConfig() {
     const settings = this.getSettings() || {};

@@ -1488,9 +1488,7 @@ function initTeklimakanApp() {
       if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
         stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
       }
-      if (stripText && stripText.includes('تالون')) {
-        stripText = stripText.replace(/تالون/g, '').trim();
-      }
+      if (stripText) { stripText = stripText.replace(/kupon|coupon|تالون/gi, '').trim(); if (stripText === '75 TL' || stripText === '75TL') stripText = '🎁 75 TL'; }
 
       // Verified badge:
       const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';
@@ -1507,7 +1505,7 @@ function initTeklimakanApp() {
           <img class="shelf-card-img" src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           ${wishHtml}
         </div>
-        ${stripText ? `<div class="shelf-card-strip ${stripColorClass}">${stripText}</div>` : ''}
+        ${stripText ? `<div class="shelf-card-strip ${stripColorClass}"><bdi dir="ltr" style="unicode-bidi: isolate;">${stripText}</bdi></div>` : ''}
         <div class="shelf-card-body">
           <div>
             <div class="shelf-card-brand">
@@ -1531,8 +1529,8 @@ function initTeklimakanApp() {
             </div>
 
             <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
-              <i class="fas fa-shopping-bag"></i> <span>سېۋەتكە</span>
-            </button>
+                <i class="fas fa-shopping-bag"></i> <span>${currentLang === 'tr' ? 'Sepete Ekle' : (currentLang === 'en' ? 'Add to Cart' : 'سېۋەتكە')}</span>
+              </button>
           </div>
         </div>
       `;
@@ -1579,62 +1577,84 @@ function initTeklimakanApp() {
       track.appendChild(card);
     });
 
-    // 🛍️ ئىككى تەرەپ لەيلىمە سىيرىلغۇچ كۇنۇپكىلار (Responsive Floating Carousel Arrows)
-    const navPrev = document.createElement('button');
-    navPrev.type = 'button';
-    navPrev.className = 'shelf-nav-btn shelf-nav-prev';
-    navPrev.setAttribute('aria-label', 'Previous');
-    navPrev.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    // 🛍️ ئىككى تەرەپ لەيلىمە سىيرىلغۇچ كۇنۇپكىلار (Responsive Floating Carousel Arrows - LTR & RTL Aware)
+    const btnLeft = document.createElement('button');
+    btnLeft.type = 'button';
+    btnLeft.className = 'shelf-nav-btn shelf-nav-left';
+    btnLeft.setAttribute('aria-label', 'Previous');
+    btnLeft.innerHTML = '<i class="fas fa-chevron-left"></i>';
 
-    const navNext = document.createElement('button');
-    navNext.type = 'button';
-    navNext.className = 'shelf-nav-btn shelf-nav-next';
-    navNext.setAttribute('aria-label', 'Next');
-    navNext.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    const btnRight = document.createElement('button');
+    btnRight.type = 'button';
+    btnRight.className = 'shelf-nav-btn shelf-nav-right';
+    btnRight.setAttribute('aria-label', 'Next');
+    btnRight.innerHTML = '<i class="fas fa-chevron-right"></i>';
 
     const getScrollStep = () => Math.max(track.clientWidth * 0.75, 260);
 
-    navPrev.addEventListener('click', (e) => {
+    // Left button ALWAYS scrolls track towards left
+    btnLeft.addEventListener('click', (e) => {
       e.stopPropagation();
-      const step = getScrollStep();
-      const isRtl = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
-      track.scrollBy({ left: isRtl ? step : -step, behavior: 'smooth' });
+      track.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
     });
 
-    navNext.addEventListener('click', (e) => {
+    // Right button ALWAYS scrolls track towards right
+    btnRight.addEventListener('click', (e) => {
       e.stopPropagation();
-      const step = getScrollStep();
-      const isRtl = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
-      track.scrollBy({ left: isRtl ? -step : step, behavior: 'smooth' });
+      track.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
     });
 
     // ئەقىللىق تەڭشەش: چېتىگە يەتكەندە كۇنۇپكىنى يوشۇرۇپ مەھسۇلاتنى توسماسلىقنى كاپالەتلەندۈرۈش
     const updateNavState = () => {
       const maxScroll = track.scrollWidth - track.clientWidth;
       if (maxScroll <= 8) {
-        navPrev.style.display = 'none';
-        navNext.style.display = 'none';
+        btnLeft.style.display = 'none';
+        btnRight.style.display = 'none';
         return;
       }
-      navPrev.style.display = 'inline-flex';
-      navNext.style.display = 'inline-flex';
+      btnLeft.style.display = 'inline-flex';
+      btnRight.style.display = 'inline-flex';
 
-      const absScroll = Math.abs(track.scrollLeft);
-      const isAtStart = absScroll <= 6;
-      const isAtEnd = absScroll >= (maxScroll - 10);
+      const isRtl = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl' || (currentLang === 'ug');
+      const scrollL = track.scrollLeft;
 
-      // In RTL: start is on the right, navPrev is on the right
-      // Hide button at boundary so it NEVER covers any product!
-      if (isAtStart) {
-        navPrev.classList.add('nav-hidden');
+      if (isRtl) {
+        // RTL (Uyghur): Start is on the right
+        const absScroll = Math.abs(scrollL);
+        const atStart = absScroll <= 6;
+        const atEnd = absScroll >= (maxScroll - 10);
+
+        // At start on right: hide right button so first card is 100% unobstructed!
+        if (atStart) {
+          btnRight.classList.add('nav-hidden');
+        } else {
+          btnRight.classList.remove('nav-hidden');
+        }
+
+        // At end on left: hide left button
+        if (atEnd) {
+          btnLeft.classList.add('nav-hidden');
+        } else {
+          btnLeft.classList.remove('nav-hidden');
+        }
       } else {
-        navPrev.classList.remove('nav-hidden');
-      }
+        // LTR (Turkish / English): Start is on the left
+        const atStart = scrollL <= 6;
+        const atEnd = scrollL >= (maxScroll - 10);
 
-      if (isAtEnd) {
-        navNext.classList.add('nav-hidden');
-      } else {
-        navNext.classList.remove('nav-hidden');
+        // At start on left: hide left button so first card is 100% unobstructed!
+        if (atStart) {
+          btnLeft.classList.add('nav-hidden');
+        } else {
+          btnLeft.classList.remove('nav-hidden');
+        }
+
+        // At end on right: hide right button
+        if (atEnd) {
+          btnRight.classList.add('nav-hidden');
+        } else {
+          btnRight.classList.remove('nav-hidden');
+        }
       }
     };
 
@@ -1643,9 +1663,9 @@ function initTeklimakanApp() {
       setTimeout(updateNavState, 80);
     });
 
-    trackWrap.appendChild(navPrev);
+    trackWrap.appendChild(btnLeft);
     trackWrap.appendChild(track);
-    trackWrap.appendChild(navNext);
+    trackWrap.appendChild(btnRight);
     shelfEl.appendChild(trackWrap);
 
     return shelfEl;

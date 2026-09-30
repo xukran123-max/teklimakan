@@ -6036,12 +6036,21 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   visibility: hidden !important;
 }
 
-.shelf-nav-prev {
-  right: -16px;
+.shelf-nav-left, .shelf-nav-next {
+  left: -18px;
 }
 
-.shelf-nav-next {
-  left: -16px;
+.shelf-nav-right, .shelf-nav-prev {
+  right: -18px;
+}
+
+@media (min-width: 1024px) {
+  .shelf-nav-left, .shelf-nav-next {
+    left: -22px;
+  }
+  .shelf-nav-right, .shelf-nav-prev {
+    right: -22px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -6052,11 +6061,11 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
     top: 36%;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   }
-  .shelf-nav-prev {
-    right: -6px;
-  }
-  .shelf-nav-next {
+  .shelf-nav-left, .shelf-nav-next {
     left: -6px;
+  }
+  .shelf-nav-right, .shelf-nav-prev {
+    right: -6px;
   }
 }
 
@@ -6067,11 +6076,11 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
     font-size: 0.72rem;
     top: 35%;
   }
-  .shelf-nav-prev {
-    right: -4px;
-  }
-  .shelf-nav-next {
+  .shelf-nav-left, .shelf-nav-next {
     left: -4px;
+  }
+  .shelf-nav-right, .shelf-nav-prev {
+    right: -4px;
   }
 }
 
@@ -6199,6 +6208,8 @@ body.dark-mode .shelf-nav-btn:hover {
 
 /* 🎯 High-Converting Strip Badge */
 .shelf-card-strip {
+  direction: ltr !important;
+  unicode-bidi: isolate;
   width: 100%;
   height: 25px;
   line-height: 25px;

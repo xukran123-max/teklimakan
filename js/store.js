@@ -1380,7 +1380,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
     linkUrl: '#catalogSection',
     productSource: 'bestseller',
     manualProductIds: ['PRD-128', 'PRD-759', 'PRD-132', 'PRD-341', 'PRD-114', 'PRD-292'],
-    badgeStripText: '75 TL Kupon',
+    badgeStripText: '🎁 75 TL',
     badgeStripColor: '#e11d48',
     badgeStripBgType: 'pink',
     showVerifiedBadge: true,
@@ -1393,16 +1393,16 @@ const DEFAULT_SHOWCASE_SHELVES = [
         badgeStripText: '🎁 75 لىرا'
       },
       tr: {
-        title: "Trendyol Plus'a Özel Fiyatlı Ürünler",
+        title: "Özel Fiyatlı Ürünler",
         subtitle: 'Özel fiyatlar ve popüler indirimli fırsatlar',
         linkText: '',
-        badgeStripText: '75 TL Kupon'
+        badgeStripText: '🎁 75 TL'
       },
       en: {
         title: 'Special Price Products',
         subtitle: 'Exclusive discounts and hot deals',
         linkText: '',
-        badgeStripText: '75 TL Coupon'
+        badgeStripText: '🎁 75 TL'
       }
     }
   }
@@ -5122,7 +5122,24 @@ class StoreManager {
       category,
       unit,
       badge,
-      brand: p.brand || 'تەكلىماكان سۈپەت',
+      brand: (() => {
+        let b = p.brand || 'تەكلىماكان';
+        if (p.translations && p.translations[lang] && p.translations[lang].brand) {
+          return p.translations[lang].brand;
+        }
+        if (lang !== 'ug') {
+          if (b.includes('تەكلىماكان كلاسسىك')) return 'Teklimakan Klasik';
+          if (b.includes('تەكلىماكان ئالىي')) return 'Teklimakan Premium';
+          if (b.includes('تەكلىماكان')) return 'Teklimakan Online';
+          if (b.includes('تۇرپان يېشىل')) return 'Turpan Doğal';
+          if (b.includes('خوتەن قاشتېشى')) return 'Hoten Yeşimi';
+          if (b.includes('ئىلى')) return 'İli Doğal';
+          if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
+            return window.appI18n.autoTranslateUyghur(b, lang);
+          }
+        }
+        return b;
+      })(),
       originalProduct: p
     };
   }
@@ -7389,8 +7406,19 @@ class StoreManager {
           if (s.translations[lang].badgeStripText) badgeStripText = s.translations[lang].badgeStripText;
         }
 
-        if (badgeStripText && badgeStripText.includes('تالون')) {
-          badgeStripText = badgeStripText.replace(/تالون/g, '').trim();
+        // Auto-cleanse competitor trademark 'Trendyol'
+        if (title && (title.includes('Trendyol') || title.includes('trendyol'))) {
+          title = title.replace(/Trendyol Plus'a Özel Fiyatlı Ürünler/gi, 'Özel Fiyatlı Ürünler')
+                       .replace(/Trendyol Plus/gi, 'Teklimakan Plus')
+                       .replace(/Trendyol/gi, 'Teklimakan');
+        }
+
+        // Auto-cleanse 'تالون' / 'Kupon' / 'Coupon'
+        if (badgeStripText) {
+          badgeStripText = badgeStripText.replace(/kupon|coupon|تالون/gi, '').trim();
+          if (badgeStripText === '75 TL' || badgeStripText === '75TL') {
+            badgeStripText = '🎁 75 TL';
+          }
         }
         if (linkText && (linkText.includes('بارلىقىنى كۆرۈش') || linkText.includes('Tümünü') || linkText.includes('See All'))) {
           linkText = '';

@@ -4518,7 +4518,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingStoreSlogan', s.storeSlogan);
     setVal('settingCurrency', s.currency || 'TRY');
     setVal('settingPhone', s.contactPhone || '05551609999');
-    setVal('settingInstagram', s.instagramUrl || 'https://www.instagram.com/teklimakan.online');
+    setVal('settingInstagram', s.instagramUrl || 'https://www.instagram.com/teklimakancom');
+    setVal('settingMetaPixelId', s.metaPixelId || localStorage.getItem('teklimakan_meta_pixel_id') || '');
     setVal('settingEmail', s.contactEmail);
     let curAdminUser = localStorage.getItem('teklimakan_admin_username') || 'seidiye';
     if (curAdminUser === 'admin') {
@@ -7116,7 +7117,8 @@ document.addEventListener('DOMContentLoaded', () => {
           storeSlogan: getVal('settingStoreSlogan'),
           currency: getVal('settingCurrency', 'TRY'),
           contactPhone: getVal('settingPhone', '05551609999'),
-          instagramUrl: getVal('settingInstagram', 'https://www.instagram.com/teklimakan.online'),
+          instagramUrl: getVal('settingInstagram', 'https://www.instagram.com/teklimakancom'),
+          metaPixelId: getVal('settingMetaPixelId', ''),
           contactEmail: getVal('settingEmail'),
           announcement: getVal('settingAnnouncement'),
           telegramBotToken: getVal('settingTelegramBotToken'),
@@ -7143,6 +7145,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newPw = document.getElementById('settingAdminPassword') ? document.getElementById('settingAdminPassword').value.trim() : '';
         if (newPw) {
           localStorage.setItem('teklimakan_admin_password', newPw);
+        }
+        if (updated.metaPixelId !== undefined) {
+          localStorage.setItem('teklimakan_meta_pixel_id', updated.metaPixelId);
         }
 
         showAdminToast('دۇكان تەڭشەكلىرى، باشقۇرغۇچى نامى، پارول ساقلاندى!', 'success');

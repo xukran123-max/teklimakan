@@ -6734,6 +6734,19 @@ class StoreManager {
 
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
     this.notifyDataChange('cart');
+    
+    // 🎯 Meta (Facebook & Instagram) Pixel: AddToCart
+    try {
+      if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+        window.fbq('track', 'AddToCart', {
+          content_name: product.name,
+          content_ids: [product.id],
+          content_type: 'product',
+          value: Number(product.price || 0) * (qty || 1),
+          currency: this.currentCurrency || 'TRY'
+        });
+      }
+    } catch (e) {}
     return { success: true, message: 'مەھسۇلات سېۋەتكە قوشۇلدى!' };
   }
 

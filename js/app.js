@@ -97,7 +97,10 @@ function initTeklimakanApp() {
     try { updateStaticTranslations(); } catch (e) {}
     try { renderBrands(); } catch (e) {}
     try { renderCategories(); } catch (e) {}
-    try { renderProducts(); } catch (e) {}
+    try { renderProducts();
+    try { initSmartInstagramFollowPrompt(); } catch (e) {}
+    try { bindInstagramSmartLinks(); } catch (e) {}
+ } catch (e) {}
     try { renderFlashProductsCards(); } catch (e) {}
     try { updateCartUI(); } catch (e) {}
     try { initHeroSlider(lang); } catch (e) {}
@@ -2656,6 +2659,19 @@ function initTeklimakanApp() {
     const product = window.appStore.getProductById(cleanId, lang) ||
                     window.appStore.getProductById('PRD-' + cleanId, lang);
     if (!product) return;
+    // 🎯 Meta (Facebook & Instagram) Pixel: ViewContent
+    try {
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'ViewContent', {
+          content_name: product.name,
+          content_ids: [product.id],
+          content_type: 'product',
+          value: Number(product.price || 0),
+          currency: (window.appStore && window.appStore.currentCurrency) || 'TRY'
+        });
+      }
+    } catch (e) {}
+
 
     const modal = document.getElementById('quickViewModal');
     const modalBody = document.getElementById('quickViewModalBody');
@@ -2839,6 +2855,17 @@ function initTeklimakanApp() {
 
   // ==================== چىقىم ====================
   function openCheckoutModal() {
+    // 🎯 Meta (Facebook & Instagram) Pixel: InitiateCheckout
+    try {
+      if (typeof window.fbq === 'function') {
+        const totalVal = window.appStore ? window.appStore.getCartTotal() : 0;
+        window.fbq('track', 'InitiateCheckout', {
+          value: totalVal,
+          currency: (window.appStore && window.appStore.currentCurrency) || 'TRY'
+        });
+      }
+    } catch (e) {}
+
     const lang = window.appI18n.getLang();
     const cartData = window.appStore.getCartDetailed(lang);
     if (!cartData || !cartData.items || cartData.items.length === 0) return;
@@ -4758,6 +4785,123 @@ function initTeklimakanApp() {
     }
   }
   window.renderShowcaseShelves = renderShowcaseShelves;
+
+  // ==================== 📸 ئەقلىي Instagram ئەپ ئۇلىنىشى ۋە قايتا نىشانلاش سىستېمىسى (Smart Instagram Deep-Link & Meta Retargeting) ====================
+  function openInstagramProfile(contextUrl = null, source = 'general') {
+    const pageUrl = contextUrl || window.location.href;
+    const pageTitle = document.title || 'تەكلىماكان سودا تورى';
+    const username = 'teklimakancom';
+    const webUrl = 'https://www.instagram.com/' + username;
+    const appUrl = 'instagram://user?username=' + username;
+
+    // 🎯 1. Meta (Facebook & Instagram) Pixel ئارقىلىق خاس پائالىيەتنى ئىز قوغلاش
+    try {
+      if (typeof window.fbq === 'function') {
+        window.fbq('trackCustom', 'InstagramFollowClick', {
+          page_url: pageUrl,
+          page_title: pageTitle,
+          source: source,
+          username: username,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (e) {
+      console.warn('Meta Pixel trackCustom error:', e);
+    }
+
+    try {
+      localStorage.setItem('teklimakan_user_clicked_instagram', 'true');
+      localStorage.setItem('teklimakan_insta_prompt_dismissed', String(Date.now() + 14 * 86400000));
+    } catch (e) {}
+
+    // 📱 2. تېلېفوندا رەسمىي Instagram ئەپىنى بىۋاسىتە قوزغىتىش (Deep-Link)
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      const start = Date.now();
+      window.location.href = appUrl;
+
+      // ئەگەر ئەپ تېلېفوندا قاچىلانمىغان بولسا، 1.2 سېكۇنتتىن كېيىن تور كۆرگۈچكە راۋان يۆتكەش
+      setTimeout(() => {
+        if (Date.now() - start < 1800) {
+          window.open(webUrl, '_blank', 'noopener,noreferrer');
+        }
+      }, 1200);
+    } else {
+      window.open(webUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+  window.openInstagramProfile = openInstagramProfile;
+
+  // 📸 ئەقلىي Instagram ئەگىشىش ئەسكەرتىش بالدىقى (Smart Non-Intrusive Prompt)
+  function initSmartInstagramFollowPrompt() {
+    try {
+      const dismissedUntil = localStorage.getItem('teklimakan_insta_prompt_dismissed');
+      if (dismissedUntil && Number(dismissedUntil) > Date.now()) return;
+    } catch (e) {}
+
+    setTimeout(() => {
+      if (document.querySelector('.modal-backdrop.active') || document.querySelector('.cart-overlay.active')) return;
+      if (document.getElementById('smartInstaFollowBar')) return;
+
+      const bar = document.createElement('div');
+      bar.id = 'smartInstaFollowBar';
+      bar.className = 'smart-insta-follow-bar';
+      bar.innerHTML = `
+        <div class="insta-bar-content">
+          <div class="insta-bar-icon">
+            <i class="fab fa-instagram"></i>
+          </div>
+          <div class="insta-bar-text">
+            <div class="insta-bar-title">
+              <span>تەكلىماكان Instagram</span>
+              <i class="fas fa-check-circle" style="color: #38bdf8; font-size: 0.72rem;"></i>
+            </div>
+            <div class="insta-bar-desc">سەھىپىمىزگە ئەگىشىپ يېڭى تەبىئىي مەھسۇلاتلاردىن خەۋەردار بولۇڭ!</div>
+          </div>
+          <button type="button" class="insta-bar-btn" title="ئەپتە ئېچىش ۋە ئەگىشىش">
+            <span>ئەگىشىش</span>
+            <i class="fas fa-external-link-alt" style="font-size: 0.65rem;"></i>
+          </button>
+          <button type="button" class="insta-bar-close" title="تاقاش">&times;</button>
+        </div>
+      `;
+
+      bar.querySelector('.insta-bar-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openInstagramProfile(window.location.href, 'smart_bar');
+        bar.remove();
+      });
+
+      bar.addEventListener('click', () => {
+        openInstagramProfile(window.location.href, 'smart_bar_card');
+        bar.remove();
+      });
+
+      bar.querySelector('.insta-bar-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+          localStorage.setItem('teklimakan_insta_prompt_dismissed', String(Date.now() + 7 * 86400000));
+        } catch (err) {}
+        bar.classList.add('hide');
+        setTimeout(() => bar.remove(), 300);
+      });
+
+      document.body.appendChild(bar);
+      requestAnimationFrame(() => bar.classList.add('visible'));
+    }, 8500);
+  }
+
+  // بارلىق بېكەت ئىچىدىكى Instagram ئۇلانمىلىرىنى ئەقلىي قوزغاتقۇچ بىلەن تۇتاشتۇرۇش
+  function bindInstagramSmartLinks() {
+    document.querySelectorAll('a[href*="instagram.com"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        openInstagramProfile(window.location.href, 'page_link');
+      });
+    });
+  }
+
 
   // ==================== 🚀 ئايلانما ئېلان تاختىسى سۈكۈتتىكى تەبىئىي ھالىتى (Default Natural Flow) ====================
   function initSmartHeroScroll() {

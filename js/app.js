@@ -4882,12 +4882,9 @@ function initTeklimakanApp() {
   // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى كۆرۈنۈشى (Charity Fund 5% Frontend) ====================
   function renderCharityTrustBanner() {
     const noticeBar = document.getElementById('footerCharityNoticeBar');
-    const fLinkFund = document.getElementById('fLinkCharityFund');
-    const fBrandLink = document.getElementById('footerBrandCharityLink');
     const titleEl = document.getElementById('footerCharityTitle');
     const descEl = document.getElementById('footerCharityDesc');
     const btnEl = document.getElementById('footerCharityBtn');
-    const fLinkSub = document.getElementById('fLinkCharitySub');
 
     const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
     const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
@@ -4897,8 +4894,6 @@ function initTeklimakanApp() {
     // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن باشقا بەتتە ھازىرچە كۆرۈنمىسۇن!
     if (lang !== 'ug' || charityCfg.enabled === false) {
       if (noticeBar) noticeBar.style.display = 'none';
-      if (fLinkFund) fLinkFund.style.display = 'none';
-      if (fBrandLink) fBrandLink.style.display = 'none';
       return;
     }
 
@@ -4912,17 +4907,6 @@ function initTeklimakanApp() {
       if (descEl) descEl.textContent = fundDesc;
       if (btnEl) btnEl.href = fundUrl;
       noticeBar.style.display = 'block';
-    }
-
-    if (fLinkFund) {
-      fLinkFund.href = fundUrl;
-      if (fLinkSub) fLinkSub.textContent = `سېتىلغان ھەربىر مالدىن %${fundPct} ئىئانە ئاتىلىدۇ`;
-      fLinkFund.style.display = 'flex';
-    }
-
-    if (fBrandLink) {
-      fBrandLink.href = fundUrl;
-      fBrandLink.style.display = 'inline-flex';
     }
   }
   window.renderCharityTrustBanner = renderCharityTrustBanner;

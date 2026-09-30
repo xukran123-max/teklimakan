@@ -4611,7 +4611,8 @@ class StoreManager {
       streak7BonusCommission: 1,
       inactivityThresholdDays: 3,
       dailyFlashDealsEnabled: true,
-      dailyFlashDealsDiscount: 15
+      dailyFlashDealsDiscount: 15,
+      dailyProductLimit: 1
     };
   }
 
@@ -4873,14 +4874,14 @@ class StoreManager {
     }
   }
 
-  // 📅 ۋاكالەتچىنىڭ كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (Daily Upload Limit Check)
+  // 📅 ۋاكالەتچىنىڭ كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (Daily Upload Limit: Strictly 1 Product Per Day for Quality Inspection)
   checkAgentDailyProductLimit(agentIdentifier) {
     if (!agentIdentifier) {
-      return { allowed: true, countToday: 0, limit: 10, remaining: 10, message: '' };
+      return { allowed: true, countToday: 0, limit: 1, remaining: 1, message: '' };
     }
     const agent = this.getAgentById(agentIdentifier);
     if (!agent) {
-      return { allowed: true, countToday: 0, limit: 10, remaining: 10, message: '' };
+      return { allowed: true, countToday: 0, limit: 1, remaining: 1, message: '' };
     }
 
     if (agent.status === 'توختىتىلدى') {
@@ -4911,8 +4912,8 @@ class StoreManager {
 
     const count = uploadedToday.length;
     const rules = this.getAgentDailyRules();
-    // كۈندىلىك يوللاش چېكى: ئەگەر agent.dailyProductLimit بولسا شۇ، ئەگەر بولمىسا rules.dailyProductLimit ياكى ئەڭ ئاز دېگەندە 10 دانە
-    const limit = Number(agent.dailyProductLimit || rules.dailyProductLimit || 10);
+    // ئالىي باشقۇرغۇچىنىڭ سۈپەتلىك تەكشۈرۈپ تەستىقلاپ يېتىشەلەيدىغان بولۇشى ئۈچۈن كۈنگە تەستىقلانغان چەك: مەھكەم 1 تال
+    const limit = Number(agent.dailyProductLimit !== undefined ? agent.dailyProductLimit : (rules.dailyProductLimit !== undefined ? rules.dailyProductLimit : 1));
 
     if (count >= limit) {
       return {
@@ -4921,7 +4922,7 @@ class StoreManager {
         limit: limit,
         todayStr: todayStr,
         remaining: 0,
-        message: `⚠️ بۈگۈنكى يېڭى مەھسۇلات يوللاش چېكىڭىز (${count}/${limit}) توشتى!\n\nيېڭى تاۋار يوللاشنى ئەتە قايتا سىناڭ ياكى بار بولغان تاۋارلىرىڭىزنى چەكلىمىسىز تەھرىرلەڭ.`
+        message: '⚠️ بۈگۈنكى يېڭى تاۋار يوللاش پۇرسىتىڭىز توشتى (1/1)!\n\nھۆرمەتلىك سېتىش ۋاكالەتچىسى، باشقۇرغۇچىنىڭ ھەر بىر تاۋارنى ئەستايىدىل تەكشۈرۈپ تەستىقلىشىغا كاپالەتلىك قىلىش ئۈچۈن، كۈنىگە پەقەت 1 تال يېڭى مەھسۇلات يوللاشقا رۇخسەت قىلىنىدۇ. سىز بۈگۈن 1 تال تاۋار يوللاپ بولدىڭىز، كېيىنكى تاۋارنى ئەتە يوللىيالايسىز.\n\n💡 ئەسكەرتىش: مەۋجۇت تاۋارلىرىڭىزنىڭ باھاسى ۋە زاپىسىنى خالىغان ۋاقىتتا چەكلىمىسىز تەھرىرلىيەلەيسىز!'
       };
     }
 
@@ -4931,7 +4932,7 @@ class StoreManager {
       limit: limit,
       todayStr: todayStr,
       remaining: limit - count,
-      message: `سىز بۈگۈن يەنە ${limit - count} يېڭى مەھسۇلات يوللىيالايسىز.`
+      message: 'سىز بۈگۈن يەنە 1 يېڭى مەھسۇلات يوللىيالايسىز.'
     };
   }
 

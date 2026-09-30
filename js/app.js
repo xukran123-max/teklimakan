@@ -4881,8 +4881,13 @@ function initTeklimakanApp() {
 
   // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى كۆرۈنۈشى (Charity Fund 5% Frontend) ====================
   function renderCharityTrustBanner() {
-    const container = document.getElementById('charityTrustContainer');
-    if (!container) return;
+    const noticeBar = document.getElementById('footerCharityNoticeBar');
+    const fLinkFund = document.getElementById('fLinkCharityFund');
+    const fBrandLink = document.getElementById('footerBrandCharityLink');
+    const titleEl = document.getElementById('footerCharityTitle');
+    const descEl = document.getElementById('footerCharityDesc');
+    const btnEl = document.getElementById('footerCharityBtn');
+    const fLinkSub = document.getElementById('fLinkCharitySub');
 
     const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
     const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
@@ -4891,37 +4896,34 @@ function initTeklimakanApp() {
 
     // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن باشقا بەتتە ھازىرچە كۆرۈنمىسۇن!
     if (lang !== 'ug' || charityCfg.enabled === false) {
-      container.style.display = 'none';
-      container.innerHTML = '';
+      if (noticeBar) noticeBar.style.display = 'none';
+      if (fLinkFund) fLinkFund.style.display = 'none';
+      if (fBrandLink) fBrandLink.style.display = 'none';
       return;
     }
 
     const fundUrl = charityCfg.url || 'https://www.seidiye.com/category/mihri/';
     const fundName = charityCfg.name || 'قېرىنداشلار فوندى';
     const fundPct = charityCfg.percentage !== undefined ? charityCfg.percentage : 5;
-    const fundDesc = charityCfg.description || 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
+    const fundDesc = charityCfg.description || 'سۇپىمىزدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
 
-    container.style.display = 'block';
-    container.innerHTML = `
-      <div class="charity-trust-inner">
-        <div class="charity-trust-content">
-          <div class="charity-trust-icon-wrap">
-            <i class="fas fa-hand-holding-heart"></i>
-          </div>
-          <div class="charity-trust-texts">
-            <div class="charity-trust-title-row">
-              <h3 class="charity-trust-title">مېھرىبانلىق ئەھدىسى: «${fundName}»</h3>
-              <span class="charity-trust-badge">%${fundPct} ساخاۋەت ئۈلۈشى</span>
-            </div>
-            <p class="charity-trust-desc">${fundDesc}</p>
-          </div>
-        </div>
-        <a href="${fundUrl}" target="_blank" rel="noopener noreferrer" class="charity-trust-btn">
-          <span>فوند ھەققىدە كۆرۈش</span>
-          <i class="fas fa-arrow-left"></i>
-        </a>
-      </div>
-    `;
+    if (noticeBar) {
+      if (titleEl) titleEl.textContent = `مېھرىبانلىق ئەھدىسى: «${fundName}» (%${fundPct} ساخاۋەت ئۈلۈشى)`;
+      if (descEl) descEl.textContent = fundDesc;
+      if (btnEl) btnEl.href = fundUrl;
+      noticeBar.style.display = 'block';
+    }
+
+    if (fLinkFund) {
+      fLinkFund.href = fundUrl;
+      if (fLinkSub) fLinkSub.textContent = `سېتىلغان ھەربىر مالدىن %${fundPct} ئىئانە ئاتىلىدۇ`;
+      fLinkFund.style.display = 'flex';
+    }
+
+    if (fBrandLink) {
+      fBrandLink.href = fundUrl;
+      fBrandLink.style.display = 'inline-flex';
+    }
   }
   window.renderCharityTrustBanner = renderCharityTrustBanner;
 

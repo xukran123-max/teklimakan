@@ -2331,8 +2331,24 @@ class StoreManager {
   }
 
   getAgentById(id) {
-    const agents = this.getAgents();
-    return agents.find(a => a.id === id) || null;
+    if (!id) return null;
+    const term = String(id).trim().toLowerCase();
+    const cleanDigits = term.replace(/\D/g, '');
+    const normPhone = typeof this.normalizePhoneNumber === 'function' ? this.normalizePhoneNumber(term) : '';
+    const agents = this.getAgents('none');
+    return agents.find(a => {
+      if (!a) return false;
+      if (a.id && String(a.id).trim().toLowerCase() === term) return true;
+      if (a.email && typeof this.normalizeEmail === 'function' && this.normalizeEmail(a.email) === term) return true;
+      if (normPhone && typeof this.normalizePhoneNumber === 'function' && this.normalizePhoneNumber(a.phone) === normPhone) return true;
+      const aDigits = (a.phone || '').replace(/\D/g, '');
+      if (cleanDigits && aDigits) {
+        if (aDigits === cleanDigits) return true;
+        if (cleanDigits.length >= 10 && aDigits.endsWith(cleanDigits.slice(-10))) return true;
+        if (aDigits.length >= 10 && cleanDigits.endsWith(aDigits.slice(-10))) return true;
+      }
+      return false;
+    }) || null;
   }
 
   getAgentPerformanceTier(agent) {
@@ -4857,13 +4873,27 @@ class StoreManager {
     }
   }
 
-  // 📅 ۋاكالەتچىنىڭ كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (Daily Upload Limit: 1 Product Per Day, Editing Unrestricted)
+  // 📅 ۋاكالەتچىنىڭ كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (Daily Upload Limit Check)
   checkAgentDailyProductLimit(agentIdentifier) {
-    const loginRes = this.verifyAgentLogin(agentIdentifier);
-    if (!loginRes.success) {
-      return { allowed: false, countToday: 0, limit: 1, message: loginRes.message };
+    if (!agentIdentifier) {
+      return { allowed: true, countToday: 0, limit: 10, remaining: 10, message: '' };
     }
-    const agent = loginRes.agent;
+    const agent = this.getAgentById(agentIdentifier);
+    if (!agent) {
+      return { allowed: true, countToday: 0, limit: 10, remaining: 10, message: '' };
+    }
+
+    if (agent.status === 'توختىتىلدى') {
+      return { allowed: false, countToday: 0, limit: 0, remaining: 0, isSuspended: true, message: '⛔ ھېساباتىڭىز ۋاقىتلىق توختىتىلغان!' };
+    }
+    if (agent.status === 'تەستىق كۈتۈۋاتىدۇ') {
+      return { allowed: false, countToday: 0, limit: 0, remaining: 0, isPending: true, message: '⏳ ئىلتىماسىڭىز تېخى تەستىقلانمىدى.' };
+    }
+
+    // ئەگەر ۋاكالەتچى چەكلىمىدىن كەچۈرۈم قىلىنغان بولسا
+    if (agent.isExemptFromDailyRule) {
+      return { allowed: true, countToday: 0, limit: 999, remaining: 999, message: 'چەكسىز' };
+    }
 
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -4871,7 +4901,7 @@ class StoreManager {
     // سىستېمىدىكى تاۋارلاردىن بۈگۈن بۇ ۋاكالەتچى قوشقان يېڭى تاۋارلارنى ساناش
     const allProducts = this.getProducts();
     const uploadedToday = allProducts.filter(p => {
-      if (!p.isAgentSubmitted || String(p.agentId) !== String(agent.id)) return false;
+      if (!p || !p.isAgentSubmitted || String(p.agentId) !== String(agent.id)) return false;
       if (!p.createdAt) return false;
       const d = new Date(p.createdAt);
       if (isNaN(d.getTime())) return false;
@@ -4880,7 +4910,9 @@ class StoreManager {
     });
 
     const count = uploadedToday.length;
-    const limit = 1; // كۈندە پەقەت 1 مەھسۇلات يوللاش چېكى
+    const rules = this.getAgentDailyRules();
+    // كۈندىلىك يوللاش چېكى: ئەگەر agent.dailyProductLimit بولسا شۇ، ئەگەر بولمىسا rules.dailyProductLimit ياكى ئەڭ ئاز دېگەندە 10 دانە
+    const limit = Number(agent.dailyProductLimit || rules.dailyProductLimit || 10);
 
     if (count >= limit) {
       return {
@@ -4888,7 +4920,8 @@ class StoreManager {
         countToday: count,
         limit: limit,
         todayStr: todayStr,
-        message: '⚠️ بۈگۈنكى يېڭى مەھسۇلات يوللاش پۇرسىتىڭىز توشتى!\n\nۋاكالەتچىلەر كۈنىگە پەقەت 1 تال مەھسۇلات يوللىيالايدۇ (بۈگۈن 1 تال مەھسۇلات يوللاپ بولدىڭىز).\nيېڭى تاۋار يوللاشنى ئەتە قايتا سىناڭ.\n\n💡 ئەسكەرتىش: بۇرۇن يوللىغان بارلىق مەھسۇلاتلىرىڭىزنىڭ باھاسى ۋە ئۇچۇرلىرىنى خالىغانچە تەھرىرلىسىڭىز بولىدۇ (تەھرىرلەشكە چەك قويۇلمىغان).'
+        remaining: 0,
+        message: `⚠️ بۈگۈنكى يېڭى مەھسۇلات يوللاش چېكىڭىز (${count}/${limit}) توشتى!\n\nيېڭى تاۋار يوللاشنى ئەتە قايتا سىناڭ ياكى بار بولغان تاۋارلىرىڭىزنى چەكلىمىسىز تەھرىرلەڭ.`
       };
     }
 
@@ -4898,16 +4931,38 @@ class StoreManager {
       limit: limit,
       todayStr: todayStr,
       remaining: limit - count,
-      message: 'سىز بۈگۈن يەنە 1 يېڭى مەھسۇلات يوللىيالايسىز.'
+      message: `سىز بۈگۈن يەنە ${limit - count} يېڭى مەھسۇلات يوللىيالايسىز.`
     };
   }
 
   submitAgentProduct(agentIdentifier, productData) {
-    const loginRes = this.verifyAgentLogin(agentIdentifier);
-    if (!loginRes.success) {
-      return loginRes;
+    if (!agentIdentifier) {
+      return { success: false, message: 'ۋاكالەتچى ئۇچۇرى مەلۇم ئەمەس!' };
     }
-    const agent = loginRes.agent;
+    const agent = this.getAgentById(agentIdentifier);
+    if (!agent) {
+      return { success: false, message: 'بۇ ئۇچۇر بىلەن تىزىملاتقان ۋاكالەتچى بايقالمىدى.' };
+    }
+
+    if (agent.status === 'تەستىق كۈتۈۋاتىدۇ') {
+      return { 
+        success: false, 
+        isPending: true, 
+        agent, 
+        message: '⏳ ئىلتىماسىڭىز تېخى «تەستىق كۈتۈۋاتىدۇ» ھالىتىدە. سۇپا باشقۇرغۇچىسى پات يېقىندا تەكشۈرۈپ تەستىقلايدۇ.' 
+      };
+    }
+
+    if (agent.status === 'توختىتىلدى') {
+      const untilText = agent.suspendedUntil ? new Date(agent.suspendedUntil).toLocaleString('ug-CN', { dateStyle: 'medium', timeStyle: 'short' }) : 'باشقۇرغۇچى تەستىقلىغۇچە';
+      const daysCount = agent.violationsCount || 1;
+      return { 
+        success: false, 
+        isSuspended: true, 
+        agent, 
+        message: `⛔ ۋاكالەتچىلىك ھېساباتىڭىز تېلېفون نومۇرى ياكى تور ئۇلانمىسى قوشۇش قائىدىسىگە خىلاپلىق قىلغانلىقىڭىز ئۈچۈن (${daysCount} كۈن) بارلىق مەشغۇلاتتىن توختىتىلغان! توختاش ئاخىرلىشىش ۋاقتى: ${untilText}.` 
+      };
+    }
 
     const isEdit = !!productData.id;
 

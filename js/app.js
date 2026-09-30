@@ -5593,21 +5593,18 @@ function initTeklimakanApp() {
       if (badgeNeeds) badgeNeeds.textContent = needsImg;
       if (switcherBadge) switcherBadge.textContent = products.length;
 
-      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى (1 مەھسۇلات/كۈن) يېڭىلاش
+      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى يېڭىلاش
       const quotaBadge = document.getElementById('agentDailyQuotaBadge');
       if (quotaBadge && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
         const quota = window.appStore.checkAgentDailyProductLimit(agent.id);
-        quotaBadge.style.display = 'inline-block';
         if (!quota.allowed) {
-          quotaBadge.textContent = '1/1 توشتى';
+          quotaBadge.style.display = 'inline-block';
+          quotaBadge.textContent = `${quota.countToday}/${quota.limit} توشتى`;
           quotaBadge.style.background = '#fee2e2';
           quotaBadge.style.color = '#b91c1c';
           quotaBadge.style.border = '1px solid #fca5a5';
         } else {
-          quotaBadge.textContent = '0/1 بۈگۈن';
-          quotaBadge.style.background = '#ecfdf5';
-          quotaBadge.style.color = '#047857';
-          quotaBadge.style.border = '1px solid #a7f3d0';
+          quotaBadge.style.display = 'none';
         }
       }
 
@@ -6590,7 +6587,7 @@ function initTeklimakanApp() {
         scopeSelect.value = currentVerifiedAgent.canPublishMultilingual ? 'all' : 'ug';
       }
 
-      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش (بۈگۈن 1 تال يېڭى تاۋار يوللىغان بولسا ئەسكەرتىش كۆرسىتىش)
+      // 📅 كۈندىلىك مەھسۇلات يوللاش چېكىنى تەكشۈرۈش
       const dailyLimitBanner = document.getElementById('agentDailyLimitNoticeBanner');
       const submitBtn = document.getElementById('btnAgentSubmitProductAction');
       if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
@@ -6599,12 +6596,14 @@ function initTeklimakanApp() {
           if (dailyLimitBanner) dailyLimitBanner.style.display = 'block';
           if (submitBtn) {
             submitBtn.style.opacity = '0.65';
-            submitBtn.title = 'بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). ئەتە يوللىيالايسىز.';
+            submitBtn.disabled = true;
+            submitBtn.title = quota.message || 'بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.';
           }
         } else {
           if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
           if (submitBtn) {
             submitBtn.style.opacity = '1';
+            submitBtn.disabled = false;
             submitBtn.title = '';
           }
         }
@@ -6612,6 +6611,7 @@ function initTeklimakanApp() {
         if (dailyLimitBanner) dailyLimitBanner.style.display = 'none';
         if (submitBtn) {
           submitBtn.style.opacity = '1';
+          submitBtn.disabled = false;
           submitBtn.title = '';
         }
       }
@@ -6644,7 +6644,7 @@ function initTeklimakanApp() {
         if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
           const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
           if (!quota.allowed) {
-            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+            showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'warning');
           }
         }
         resetToNewProductMode();
@@ -6705,7 +6705,7 @@ function initTeklimakanApp() {
         if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
           const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
           if (!quota.allowed) {
-            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+            showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'warning');
           }
         }
         resetToNewProductMode();
@@ -6717,7 +6717,7 @@ function initTeklimakanApp() {
         if (currentVerifiedAgent && window.appStore && typeof window.appStore.checkAgentDailyProductLimit === 'function') {
           const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
           if (!quota.allowed) {
-            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). بار بولغان تاۋارلىرىڭىزنى تەھرىرلىسىڭىز بولىدۇ.', 'warning');
+            showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'warning');
           }
         }
         resetToNewProductMode();
@@ -7714,7 +7714,7 @@ function initTeklimakanApp() {
           const quota = window.appStore.checkAgentDailyProductLimit(currentVerifiedAgent.id);
           if (!quota.allowed) {
             alert(quota.message);
-            showToast('⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى (1/1). كونا مەھسۇلاتلىرىڭىزنى چەكلىمىسىز تەھرىرلىسىڭىز بولىدۇ.', 'error');
+            showToast(quota.message || '⚠️ بۈگۈنكى مەھسۇلات يوللاش چېكىڭىز توشتى.', 'error');
             return;
           }
         }

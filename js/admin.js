@@ -1014,6 +1014,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCustomerRetentionAdmin();
     } else if (tabId === 'hero-slider') {
       renderHeroSliderAdmin();
+    } else if (tabId === 'shelves') {
+      renderShowcaseShelvesAdmin();
     } else if (tabId === 'settings') {
       loadSettingsForm();
     }
@@ -9437,6 +9439,288 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setSlideColor = setSlideColor;
   window.handleSlideFileUpload = handleSlideFileUpload;
   window.setupHeroSliderAdminListeners = setupHeroSliderAdminListeners;
+
+  // ==================== 🛍️ زامانىۋى سىيرىلما تاۋار بۆلەكلىرى (Trendyol Style Shelves) باشقۇرۇش ====================
+  let currentShelvesAdmin = [];
+
+  function renderShowcaseShelvesAdmin() {
+    if (!window.appStore) return;
+    const container = document.getElementById('showcaseShelvesAdminList');
+    if (!container) return;
+
+    currentShelvesAdmin = window.appStore.getRawShowcaseShelves();
+    if (!Array.isArray(currentShelvesAdmin) || currentShelvesAdmin.length === 0) {
+      currentShelvesAdmin = [];
+    }
+
+    container.innerHTML = '';
+
+    if (currentShelvesAdmin.length === 0) {
+      container.innerHTML = `
+        <div style="background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 3rem 1.5rem; text-align: center; color: #64748b;">
+          <i class="fas fa-layer-group" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+          <p style="font-size: 1.1rem; font-weight: 700; margin: 0 0 1rem;">ھازىرچە ھېچقانداق سىيرىلما بۆلەك قوشۇلمىدى</p>
+          <button type="button" onclick="window.resetShelvesAdmin()" class="btn-primary" style="background: #f97316; padding: 0.6rem 1.5rem; font-weight: 800; cursor: pointer;">
+            <i class="fas fa-magic"></i> دەسلەپكى 2 خىل ئۆلچەملىك راكنى يۈكلەش
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const allProducts = window.appStore.getProducts();
+
+    currentShelvesAdmin.forEach((shelf, idx) => {
+      const card = document.createElement('div');
+      card.className = 'shelf-admin-card';
+      card.style.cssText = `background: #ffffff; border: 1.5px solid ${shelf.enabled ? '#fed7aa' : '#e2e8f0'}; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 1.25rem; opacity: ${shelf.enabled ? '1' : '0.75'};`;
+
+      const titleUg = shelf.title || '';
+      const titleTr = (shelf.translations?.tr?.title) || '';
+      const titleEn = (shelf.translations?.en?.title) || '';
+
+      const linkTextUg = shelf.linkText || 'بارلىقىنى كۆرۈش ›';
+      const linkTextTr = (shelf.translations?.tr?.linkText) || 'Tümünü Gör >';
+      const linkTextEn = (shelf.translations?.en?.linkText) || 'See All >';
+
+      const stripUg = (shelf.translations?.ug?.badgeStripText) || shelf.badgeStripText || '';
+      const stripTr = (shelf.translations?.tr?.badgeStripText) || shelf.badgeStripText || '';
+      const stripEn = (shelf.translations?.en?.badgeStripText) || shelf.badgeStripText || '';
+
+      const isManual = shelf.productSource === 'manual';
+      const manualIds = Array.isArray(shelf.manualProductIds) ? shelf.manualProductIds : [];
+
+      card.innerHTML = `
+        <!-- Card Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="width: 32px; height: 32px; border-radius: 8px; background: #fff7ed; color: #ea580c; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 1px solid #ffedd5;">${idx + 1}</span>
+            <strong style="font-size: 1.15rem; color: #1e293b;">${titleUg || 'نامسىز سىيرىلما بۆلەك'}</strong>
+            <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; background: ${shelf.enabled ? '#ecfdf5' : '#f1f5f9'}; padding: 4px 10px; border-radius: 20px; border: 1px solid ${shelf.enabled ? '#a7f3d0' : '#cbd5e1'};">
+              <input type="checkbox" ${shelf.enabled ? 'checked' : ''} onchange="window.updateShelfFieldAdmin(${idx}, 'enabled', this.checked)" style="accent-color: #10b981; cursor: pointer;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: ${shelf.enabled ? '#065f46' : '#64748b'};">${shelf.enabled ? '✅ قوزغىتىلغان' : '⏸️ ۋاقىتلىق توختىتىلغان'}</span>
+            </label>
+          </div>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button type="button" onclick="window.moveShelfAdmin(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; cursor: pointer; ${idx === 0 ? 'opacity: 0.4; cursor: not-allowed;' : ''}" title="يۇقىرىغا يۆتكەش">
+              <i class="fas fa-arrow-up"></i>
+            </button>
+            <button type="button" onclick="window.moveShelfAdmin(${idx}, 1)" ${idx === currentShelvesAdmin.length - 1 ? 'disabled' : ''} class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; cursor: pointer; ${idx === currentShelvesAdmin.length - 1 ? 'opacity: 0.4; cursor: not-allowed;' : ''}" title="ئاستىغا يۆتكەش">
+              <i class="fas fa-arrow-down"></i>
+            </button>
+            <button type="button" onclick="window.deleteShelfAdmin(${idx})" class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; color: #ef4444; border-color: #fecaca; background: #fff5f5; cursor: pointer;" title="ئۆچۈرۈش">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Languages Title Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.3rem;">🇺🇾 بۆلەك تېمىسى (ئۇيغۇرچە):</label>
+            <input type="text" value="${titleUg}" oninput="window.updateShelfFieldAdmin(${idx}, 'title', this.value)" class="form-control" placeholder="مەسىلەن: 🔥 سىزگە تەۋسىيە" style="font-weight: 700;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.3rem;">🇹🇷 Başlık (Türkçe):</label>
+            <input type="text" value="${titleTr}" oninput="window.updateShelfTranslationAdmin(${idx}, 'tr', 'title', this.value)" class="form-control" placeholder="Ör: Keşfetmen İçin Öneriler">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.3rem;">🇬🇧 Title (English):</label>
+            <input type="text" value="${titleEn}" oninput="window.updateShelfTranslationAdmin(${idx}, 'en', 'title', this.value)" class="form-control" placeholder="Ex: Recommended for You">
+          </div>
+        </div>
+
+        <!-- Product Source & Link Target -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">📦 تاۋار مەنبەسى (قايسى تاۋارلار كۆرۈنىدۇ?):</label>
+            <select onchange="window.updateShelfFieldAdmin(${idx}, 'productSource', this.value)" class="form-control" style="font-weight: 700;">
+              <option value="featured" ${shelf.productSource === 'featured' ? 'selected' : ''}>⭐ تەۋسىيە قىلىنغانلار (Featured)</option>
+              <option value="bestseller" ${shelf.productSource === 'bestseller' ? 'selected' : ''}>🔥 ئەڭ كۆپ سېتىلغانلار (Best Sellers)</option>
+              <option value="discounted" ${shelf.productSource === 'discounted' ? 'selected' : ''}>🏷️ ئېتىبار باھادىكى تاۋارلار (Discounted)</option>
+              <option value="manual" ${shelf.productSource === 'manual' ? 'selected' : ''}>🎯 ئۆزەم قولدا تاللايمەن (Manual Custom Selection)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.3rem;">🔗 كۆرۈنمە يۈز ئۇلانمىسى («بارلىقىنى كۆرۈش» نىشانى):</label>
+            <input type="text" value="${shelf.linkUrl || '#catalogSection'}" oninput="window.updateShelfFieldAdmin(${idx}, 'linkUrl', this.value)" class="form-control" placeholder="#catalogSection">
+          </div>
+        </div>
+
+        <!-- 🏷️ Trendyol Strip Badge Settings (رەسىم ئاستىدىكى رەڭلىك ئەۋزەللىك بەلبېغى) -->
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #9f1239; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-tags"></i> 🎯 رەسىم ئاستىدىكى سېتىش ئەۋزەللىك بەلبېغى (Trendyol Strip Badge)
+            </strong>
+            <span style="font-size: 0.78rem; color: #be123c;">خېرىدارنىڭ سېتىۋېلىش قىزىقىشىنى ھەسسىلەپ ئاشۇرىدۇ</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #881337;">بەلبەغ ئۇسلۇبى ۋە رەڭگى:</label>
+              <select onchange="window.updateShelfFieldAdmin(${idx}, 'badgeStripBgType', this.value)" class="form-control" style="font-weight: 700;">
+                <option value="green" ${shelf.badgeStripBgType === 'green' ? 'selected' : ''}>🟢 يېشىل (Cuma Kapında / ھەقسىز يەتكۈزۈش)</option>
+                <option value="pink" ${shelf.badgeStripBgType === 'pink' ? 'selected' : ''}>🔴 ھالرەڭ (75 TL Kupon / تالون بار)</option>
+                <option value="blue" ${shelf.badgeStripBgType === 'blue' ? 'selected' : ''}>🔵 كۆك (دەرىجىدىن تاشقىرى باھا)</option>
+                <option value="amber" ${shelf.badgeStripBgType === 'amber' ? 'selected' : ''}>🟠 نارجى (ئەڭ قىزىق نۇقتا)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #881337;">🇺🇾 بەلبەغ تېكىستى (ئۇيغۇرچە):</label>
+              <input type="text" value="${stripUg}" oninput="window.updateShelfTranslationAdmin(${idx}, 'ug', 'badgeStripText', this.value); window.updateShelfFieldAdmin(${idx}, 'badgeStripText', this.value);" class="form-control" placeholder="مەسىلەن: 🚚 ئەتە بوسۇغىڭىزدا">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #881337;">🇹🇷 Şerit Yazısı (Türkçe):</label>
+              <input type="text" value="${stripTr}" oninput="window.updateShelfTranslationAdmin(${idx}, 'tr', 'badgeStripText', this.value)" class="form-control" placeholder="Ör: Cuma Kapında veya 75 TL Kupon">
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Product Selection Grid (if manual) -->
+        ${isManual ? `
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <strong style="color: #1e293b; font-size: 0.88rem;">🎯 تاللانغان مەھسۇلاتلار (${manualIds.length} دانە تاللاندى):</strong>
+              <small style="color: #64748b;">بۇ بۆلەكتە كۆرۈنىدىغان تاۋارلارنى چېكىپ تاللاڭ ياكى قالدۇرۇڭ</small>
+            </div>
+            <div style="max-height: 220px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; padding: 4px;">
+              ${allProducts.map(p => {
+                const checked = manualIds.includes(p.id);
+                return `
+                  <label style="display: flex; align-items: center; gap: 0.5rem; background: ${checked ? '#eff6ff' : '#ffffff'}; border: 1px solid ${checked ? '#3b82f6' : '#e2e8f0'}; border-radius: 8px; padding: 5px 8px; cursor: pointer; user-select: none;">
+                    <input type="checkbox" ${checked ? 'checked' : ''} onchange="window.toggleShelfProductAdmin(${idx}, '${p.id}', this.checked)" style="accent-color: #2563eb;">
+                    <img src="${p.image || 'images/default_product.jpg'}" style="width: 28px; height: 28px; border-radius: 4px; object-fit: cover;">
+                    <span style="font-size: 0.78rem; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Other Options Row -->
+        <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; padding-top: 0.25rem;">
+          <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; font-weight: 700; color: #334155; cursor: pointer;">
+            <input type="checkbox" ${shelf.showVerifiedBadge !== false ? 'checked' : ''} onchange="window.updateShelfFieldAdmin(${idx}, 'showVerifiedBadge', this.checked)" style="accent-color: #0284c7;">
+            <span>ماركا كۆك دەلىللەش بەلگىسىنى كۆرسىتىش (<i class="fas fa-check-circle" style="color: #0284c7;"></i>)</span>
+          </label>
+          <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; font-weight: 700; color: #334155; cursor: pointer;">
+            <input type="checkbox" ${shelf.showWishlistBtn !== false ? 'checked' : ''} onchange="window.updateShelfFieldAdmin(${idx}, 'showWishlistBtn', this.checked)" style="accent-color: #e11d48;">
+            <span>ياقتۇرغانلارغا قوشۇش يۈرەك كۇنۇپكىسىنى كۆرسىتىش (🤍)</span>
+          </label>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  function updateShelfFieldAdmin(idx, field, value) {
+    if (!currentShelvesAdmin[idx]) return;
+    currentShelvesAdmin[idx][field] = value;
+    if (field === 'productSource') {
+      renderShowcaseShelvesAdmin();
+    }
+  }
+
+  function updateShelfTranslationAdmin(idx, lang, field, value) {
+    if (!currentShelvesAdmin[idx]) return;
+    if (!currentShelvesAdmin[idx].translations) currentShelvesAdmin[idx].translations = {};
+    if (!currentShelvesAdmin[idx].translations[lang]) currentShelvesAdmin[idx].translations[lang] = {};
+    currentShelvesAdmin[idx].translations[lang][field] = value;
+  }
+
+  function toggleShelfProductAdmin(shelfIdx, productId, isChecked) {
+    if (!currentShelvesAdmin[shelfIdx]) return;
+    if (!Array.isArray(currentShelvesAdmin[shelfIdx].manualProductIds)) {
+      currentShelvesAdmin[shelfIdx].manualProductIds = [];
+    }
+    const list = currentShelvesAdmin[shelfIdx].manualProductIds;
+    const pos = list.indexOf(productId);
+    if (isChecked && pos === -1) {
+      list.push(productId);
+    } else if (!isChecked && pos !== -1) {
+      list.splice(pos, 1);
+    }
+  }
+
+  function addNewShelfAdmin() {
+    const newShelf = {
+      id: 'shelf_' + Date.now(),
+      order: currentShelvesAdmin.length + 1,
+      enabled: true,
+      title: 'يېڭى تاللانما راك',
+      subtitle: 'خاس سىيرىلما تاۋارلار بۆلىكى',
+      linkText: 'بارلىقىنى كۆرۈش ›',
+      linkUrl: '#catalogSection',
+      productSource: 'featured',
+      manualProductIds: [],
+      badgeStripText: 'Cuma Kapında',
+      badgeStripColor: '#059669',
+      badgeStripBgType: 'green',
+      showVerifiedBadge: true,
+      showWishlistBtn: true,
+      translations: {
+        ug: { title: 'يېڭى تاللانما راك', linkText: 'بارلىقىنى كۆرۈش ›', badgeStripText: '🚚 ھەقسىز يەتكۈزۈش' },
+        tr: { title: 'Yeni Öneri Rafı', linkText: 'Tümünü Gör >', badgeStripText: 'Cuma Kapında' },
+        en: { title: 'New Curated Shelf', linkText: 'See All >', badgeStripText: 'Fast Delivery' }
+      }
+    };
+    currentShelvesAdmin.push(newShelf);
+    renderShowcaseShelvesAdmin();
+    showAdminToast('يېڭى سىيرىلما بۆلەك قوشۇلدى!', 'info');
+  }
+
+  function deleteShelfAdmin(idx) {
+    if (!confirm('بۇ سىيرىلما بۆلەكنى ئۆچۈرۈشنى جەزملەشتۈرەمسىز؟')) return;
+    currentShelvesAdmin.splice(idx, 1);
+    currentShelvesAdmin.forEach((s, i) => s.order = i + 1);
+    renderShowcaseShelvesAdmin();
+    showAdminToast('بۆلەك ئۆچۈرۈلدى!', 'info');
+  }
+
+  function moveShelfAdmin(idx, dir) {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= currentShelvesAdmin.length) return;
+    const temp = currentShelvesAdmin[idx];
+    currentShelvesAdmin[idx] = currentShelvesAdmin[targetIdx];
+    currentShelvesAdmin[targetIdx] = temp;
+    currentShelvesAdmin.forEach((s, i) => s.order = i + 1);
+    renderShowcaseShelvesAdmin();
+  }
+
+  function saveShelvesAdmin() {
+    if (!window.appStore) return;
+    currentShelvesAdmin.forEach((s, i) => s.order = i + 1);
+    const success = window.appStore.saveShowcaseShelves(currentShelvesAdmin);
+    if (success) {
+      showAdminToast('سىيرىلما تاۋار بۆلەكلىرى مۇۋەپپەقىيەتلىك ساقلاندى ۋە دەرھال كۈچكە ئىگە بولدى!', 'success');
+      renderShowcaseShelvesAdmin();
+    } else {
+      showAdminToast('ساقلاش مەغلۇپ بولدى!', 'error');
+    }
+  }
+
+  function resetShelvesAdmin() {
+    if (!confirm('سىيرىلما راكلارنى دەسلەپكى ئۆلچەملىك ھالەتكە قايتۇرامسىز؟')) return;
+    if (window.appStore) {
+      window.appStore.resetShowcaseShelves();
+      currentShelvesAdmin = window.appStore.getRawShowcaseShelves();
+      renderShowcaseShelvesAdmin();
+      showAdminToast('سىيرىلما راكلار دەسلەپكى ھالەتكە قايتۇرۇلدى!', 'success');
+    }
+  }
+
+  window.renderShowcaseShelvesAdmin = renderShowcaseShelvesAdmin;
+  window.updateShelfFieldAdmin = updateShelfFieldAdmin;
+  window.updateShelfTranslationAdmin = updateShelfTranslationAdmin;
+  window.toggleShelfProductAdmin = toggleShelfProductAdmin;
+  window.addNewShelfAdmin = addNewShelfAdmin;
+  window.deleteShelfAdmin = deleteShelfAdmin;
+  window.moveShelfAdmin = moveShelfAdmin;
+  window.saveShelvesAdmin = saveShelvesAdmin;
+  window.resetShelvesAdmin = resetShelvesAdmin;
 
   function showAdminToast(message, type = 'info') {
     let container = document.getElementById('toastContainer');

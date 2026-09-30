@@ -22,7 +22,8 @@ const STORAGE_KEYS = {
   SMS_HISTORY: 'teklimakan_ecom_sms_history_v1',
   CUSTOMER_INBOX: 'teklimakan_customer_inbox_v1',
   COUPONS: 'teklimakan_ecom_coupons_v1',
-  HERO_SLIDES: 'teklimakan_ecom_hero_slides_v1'
+  HERO_SLIDES: 'teklimakan_ecom_hero_slides_v1',
+  SHOWCASE_SHELVES: 'teklimakan_ecom_showcase_shelves_v1'
 };
 
 // دەسلەپكى ئېتىبار كۇپونلىرى (Initial Coupons)
@@ -1773,6 +1774,83 @@ const DEFAULT_HERO_SLIDES = [
     }
   }
 ];
+
+// ==================== 🛍️ زامانىۋى ئۇپۇق سىيرىلما تاۋار بۆلەكلىرى (Trendyol Style Showcase Shelves) ====================
+const DEFAULT_SHOWCASE_SHELVES = [
+  {
+    id: 'shelf_recommended',
+    order: 1,
+    enabled: true,
+    title: 'سىزگە تەۋسىيە',
+    subtitle: 'تاللانغان تەبىئىي، ساپ يەرلىك نېئمەتلەر',
+    linkText: 'بارلىقىنى كۆرۈش ›',
+    linkUrl: '#catalogSection',
+    productSource: 'featured',
+    manualProductIds: ['PRD-100', 'PRD-101', 'PRD-102', 'PRD-103', 'PRD-104', 'PRD-105'],
+    badgeStripText: 'Cuma Kapında',
+    badgeStripColor: '#059669',
+    badgeStripBgType: 'green',
+    showVerifiedBadge: true,
+    showWishlistBtn: true,
+    translations: {
+      ug: {
+        title: 'سىزگە تەۋسىيە',
+        subtitle: 'تاللانغان تەبىئىي، ساپ يەرلىك نېئمەتلەر',
+        linkText: 'بارلىقىنى كۆرۈش ›',
+        badgeStripText: '🚚 ئەتە بوسۇغىڭىزدا'
+      },
+      tr: {
+        title: 'Keşfetmen İçin Öneriler',
+        subtitle: 'Sizin için seçilen özel doğal ürünler',
+        linkText: 'Tümünü Gör >',
+        badgeStripText: 'Cuma Kapında'
+      },
+      en: {
+        title: 'Recommended for You',
+        subtitle: 'Curated premium organic products',
+        linkText: 'See All >',
+        badgeStripText: 'Fast Delivery'
+      }
+    }
+  },
+  {
+    id: 'shelf_special_deals',
+    order: 2,
+    enabled: true,
+    title: 'ئالاھىدە باھالىق مەھسۇلاتلار',
+    subtitle: 'چەكلىك ۋاقىتلىق ئېتىبار ۋە قىزىق نۇقتىدىكى تاللانمىلار',
+    linkText: 'بارلىقىنى كۆرۈش ›',
+    linkUrl: '#catalogSection',
+    productSource: 'bestseller',
+    manualProductIds: [],
+    badgeStripText: '75 TL Kupon',
+    badgeStripColor: '#e11d48',
+    badgeStripBgType: 'pink',
+    showVerifiedBadge: true,
+    showWishlistBtn: true,
+    translations: {
+      ug: {
+        title: 'ئالاھىدە باھالىق مەھسۇلاتلار',
+        subtitle: 'چەكلىك ۋاقىتلىق ئېتىبار ۋە قىزىق نۇقتىدىكى تاللانمىلار',
+        linkText: 'بارلىقىنى كۆرۈش ›',
+        badgeStripText: '🎁 75 لىرا تالون'
+      },
+      tr: {
+        title: "Trendyol Plus'a Özel Fiyatlı Ürünler",
+        subtitle: 'Özel fiyatlar ve popüler indirimli fırsatlar',
+        linkText: 'Tümünü Gör >',
+        badgeStripText: '75 TL Kupon'
+      },
+      en: {
+        title: 'Special Price Products',
+        subtitle: 'Exclusive discounts and hot deals',
+        linkText: 'See All >',
+        badgeStripText: '75 TL Coupon'
+      }
+    }
+  }
+];
+
 
 const INITIAL_SETTINGS = {
   storeName: 'تەكلىماكان سودا تورى',
@@ -7003,6 +7081,7 @@ class StoreManager {
       coupons: this.getCoupons(),
       settings: this.getSettings(),
       heroSlides: this.getRawHeroSlides(),
+      showcaseShelves: this.getRawShowcaseShelves(),
       wishlist: this.getWishlist()
     };
     return JSON.stringify(backup, null, 2);
@@ -7035,6 +7114,9 @@ class StoreManager {
       }
       if (Array.isArray(backup.heroSlides)) {
         localStorage.setItem(STORAGE_KEYS.HERO_SLIDES, JSON.stringify(backup.heroSlides));
+      }
+      if (Array.isArray(backup.showcaseShelves)) {
+        localStorage.setItem(STORAGE_KEYS.SHOWCASE_SHELVES, JSON.stringify(backup.showcaseShelves));
       }
 
       this.notifyDataChange('all');
@@ -7690,6 +7772,111 @@ class StoreManager {
     return this.saveHeroSlides(JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES)));
   }
 
+  // ==================== 🛍️ زامانىۋى سىيرىلما تاۋار بۆلەكلىرى (Trendyol Style Shelves) ====================
+  getShowcaseShelves(lang = 'ug') {
+    let shelves = null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.SHOWCASE_SHELVES);
+      if (stored) {
+        shelves = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Error reading showcase shelves:', e);
+    }
+
+    if (!Array.isArray(shelves) || shelves.length === 0) {
+      shelves = JSON.parse(JSON.stringify(DEFAULT_SHOWCASE_SHELVES));
+    }
+
+    const allProducts = this.getProductsByLang(lang);
+
+    return shelves
+      .filter(s => s && s.enabled !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((s, idx) => {
+        let title = s.title || '';
+        let subtitle = s.subtitle || '';
+        let linkText = s.linkText || 'بارلىقىنى كۆرۈش ›';
+        let badgeStripText = s.badgeStripText || '';
+
+        if (lang !== 'ug' && s.translations && s.translations[lang]) {
+          if (s.translations[lang].title) title = s.translations[lang].title;
+          if (s.translations[lang].subtitle) subtitle = s.translations[lang].subtitle;
+          if (s.translations[lang].linkText) linkText = s.translations[lang].linkText;
+          if (s.translations[lang].badgeStripText) badgeStripText = s.translations[lang].badgeStripText;
+        }
+
+        // تاۋار مەنبەسى بويىچە تاۋارلارنى يىغىش (Resolve products)
+        let resolvedProducts = [];
+        const source = s.productSource || 'featured';
+
+        if (source === 'manual' && Array.isArray(s.manualProductIds) && s.manualProductIds.length > 0) {
+          resolvedProducts = s.manualProductIds
+            .map(pid => allProducts.find(p => p.id === pid))
+            .filter(Boolean);
+        } else if (source === 'bestseller') {
+          resolvedProducts = [...allProducts]
+            .sort((a, b) => (Number(b.sales) || 0) - (Number(a.sales) || 0))
+            .slice(0, 10);
+        } else if (source === 'discounted') {
+          resolvedProducts = allProducts
+            .filter(p => p.oldPrice && Number(p.oldPrice) > Number(p.price))
+            .slice(0, 10);
+        } else {
+          // featured or fallback
+          resolvedProducts = allProducts.filter(p => p.featured);
+          if (resolvedProducts.length < 4) {
+            resolvedProducts = allProducts.slice(0, 8);
+          }
+        }
+
+        return {
+          id: s.id || `shelf_${idx + 1}`,
+          order: typeof s.order === 'number' ? s.order : (idx + 1),
+          title: title,
+          subtitle: subtitle,
+          linkText: linkText,
+          linkUrl: s.linkUrl || '#catalogSection',
+          productSource: source,
+          manualProductIds: s.manualProductIds || [],
+          badgeStripText: badgeStripText,
+          badgeStripColor: s.badgeStripColor || '#059669',
+          badgeStripBgType: s.badgeStripBgType || 'green',
+          showVerifiedBadge: s.showVerifiedBadge !== false,
+          showWishlistBtn: s.showWishlistBtn !== false,
+          translations: s.translations || {},
+          products: resolvedProducts
+        };
+      });
+  }
+
+  getRawShowcaseShelves() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.SHOWCASE_SHELVES);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(DEFAULT_SHOWCASE_SHELVES));
+  }
+
+  saveShowcaseShelves(shelves) {
+    if (!Array.isArray(shelves)) return false;
+    try {
+      localStorage.setItem(STORAGE_KEYS.SHOWCASE_SHELVES, JSON.stringify(shelves));
+      this.notifyDataChange('showcaseShelves');
+      return true;
+    } catch (e) {
+      console.error('Failed to save showcase shelves:', e);
+      return false;
+    }
+  }
+
+  resetShowcaseShelves() {
+    return this.saveShowcaseShelves(JSON.parse(JSON.stringify(DEFAULT_SHOWCASE_SHELVES)));
+  }
+
   getDashboardMetrics() {
     const products = this.getProducts();
     const orders = this.getOrders();
@@ -8300,4 +8487,5 @@ class StoreManager {
 window.appStore = new StoreManager();
 window.INITIAL_CATEGORIES = INITIAL_CATEGORIES;
 window.DEFAULT_HERO_SLIDES = DEFAULT_HERO_SLIDES;
+window.DEFAULT_SHOWCASE_SHELVES = DEFAULT_SHOWCASE_SHELVES;
 window.INITIAL_PRODUCTS = INITIAL_PRODUCTS;

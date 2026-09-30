@@ -101,6 +101,7 @@ function initTeklimakanApp() {
     try { renderFlashProductsCards(); } catch (e) {}
     try { updateCartUI(); } catch (e) {}
     try { initHeroSlider(lang); } catch (e) {}
+    try { renderShowcaseShelves(lang); } catch (e) {}
     try { updateDateDisplay(); } catch (e) {}
     try { if (typeof applyWheelTexts === 'function') applyWheelTexts(); } catch (e) {}
 
@@ -233,12 +234,14 @@ function initTeklimakanApp() {
     try { renderProducts(); } catch (e) { console.error('renderProducts error:', e); }
     try { updateCartUI(); } catch (e) { console.error('updateCartUI error:', e); }
     try { initHeroSlider(); } catch (e) { console.error('initHeroSlider error:', e); }
+    try { renderShowcaseShelves(); } catch (e) { console.error('renderShowcaseShelves error:', e); }
     try { initSmartHeroScroll(); } catch (e) { console.error('initSmartHeroScroll error:', e); }
     try { initSmartScrollToggle(); } catch (e) { console.error('initSmartScrollToggle error:', e); }
 
     if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
       window.appStore.syncWithSupabase().then(() => {
         try { renderProducts(); } catch (e) {}
+        try { renderShowcaseShelves(); } catch (e) {}
         try { renderBrands(); } catch (e) {}
         try { renderCategories(); } catch (e) {}
       }).catch(err => console.warn('Supabase sync error in initStore:', err));
@@ -450,6 +453,7 @@ function initTeklimakanApp() {
     const hBtn5 = document.querySelector('#heroBtn5 span');
     if (hBtn5) hBtn5.textContent = i18n.t('heroBtn5');
     try { initHeroSlider(lang); } catch (e) {}
+    try { renderShowcaseShelves(lang); } catch (e) {}
 
     const flashBadge = document.getElementById('flashSaleBadge');
     if (flashBadge) {
@@ -4433,12 +4437,174 @@ function initTeklimakanApp() {
     startAutoRotation();
   }
 
-  // تەشۋىقات تاختىسى ماسقەدەملەش تىڭشىغۇچى (Store Sync Listener)
+  // تەشۋىقات تاختىسى ۋە سىيرىلما بۆلەكلەر ماسقەدەملەش تىڭشىغۇچى (Store Sync Listener)
   window.addEventListener('uyghur_store_sync', (e) => {
     if (e.detail && e.detail.type === 'heroSlides') {
       try { initHeroSlider(); } catch (err) {}
     }
+    if (e.detail && (e.detail.type === 'showcaseShelves' || e.detail.type === 'products' || e.detail.type === 'all')) {
+      try { renderShowcaseShelves(); } catch (err) {}
+    }
   });
+
+  // ==================== 🛍️ زامانىۋى ئۇپۇق سىيرىلما تاۋار راكلىرى (Trendyol Style Showcase Shelves) ====================
+  function renderShowcaseShelves(forcedLang = null) {
+    const container = document.getElementById('showcaseShelvesContainer');
+    if (!container || !window.appStore || typeof window.appStore.getShowcaseShelves !== 'function') return;
+
+    const currentLang = forcedLang || (window.appI18n ? window.appI18n.getLang() : 'ug');
+    const shelves = window.appStore.getShowcaseShelves(currentLang);
+
+    if (!Array.isArray(shelves) || shelves.length === 0) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'flex';
+    container.innerHTML = '';
+
+    shelves.forEach(shelf => {
+      if (!shelf.products || shelf.products.length === 0) return;
+
+      const shelfEl = document.createElement('div');
+      shelfEl.className = 'showcase-shelf';
+      shelfEl.dataset.shelfId = shelf.id;
+
+      // Header: Title on right (RTL), Link on left
+      const headerEl = document.createElement('div');
+      headerEl.className = 'showcase-shelf-header';
+
+      const titleEl = document.createElement('h3');
+      titleEl.className = 'showcase-shelf-title';
+      titleEl.innerHTML = shelf.title;
+
+      const linkEl = document.createElement('a');
+      linkEl.className = 'showcase-shelf-link';
+      linkEl.href = shelf.linkUrl || '#catalogSection';
+      linkEl.innerHTML = `<span>${shelf.linkText || 'بارلىقىنى كۆرۈش ›'}</span> <i class="fas fa-chevron-left" style="font-size: 0.75rem;"></i>`;
+
+      headerEl.appendChild(titleEl);
+      headerEl.appendChild(linkEl);
+      shelfEl.appendChild(headerEl);
+
+      // Track wrapper & track
+      const trackWrap = document.createElement('div');
+      trackWrap.className = 'showcase-shelf-track-wrapper';
+
+      const track = document.createElement('div');
+      track.className = 'showcase-shelf-track';
+
+      shelf.products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'shelf-product-card';
+        card.dataset.id = product.id;
+
+        const isWish = window.appStore.isInWishlist(product.id);
+        const formattedPrice = window.appStore.formatPrice(product.price);
+        const formattedOldPrice = product.oldPrice ? window.appStore.formatPrice(product.oldPrice) : null;
+        const safeRating = Number(String(product.rating || 5).replace(',', '.'));
+        const displayRating = isNaN(safeRating) ? '5.0' : safeRating.toFixed(1);
+        const reviewCount = product.ratingCount || 24;
+
+        // Strip badge:
+        const stripColorClass = shelf.badgeStripBgType ? `strip-${shelf.badgeStripBgType}` : 'strip-green';
+        const stripText = shelf.badgeStripText || '';
+
+        // Verified badge:
+        const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';
+
+        // Wishlist button:
+        const wishHtml = shelf.showWishlistBtn ? `
+          <button type="button" class="shelf-card-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="ياقتۇرغانلارغا قوشۇش">
+            <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+          </button>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="shelf-card-thumb-wrap">
+            <img class="shelf-card-img" src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
+            ${wishHtml}
+          </div>
+          ${stripText ? `<div class="shelf-card-strip ${stripColorClass}">${stripText}</div>` : ''}
+          <div class="shelf-card-body">
+            <div>
+              <div class="shelf-card-brand">
+                <span>${product.brand || 'تەكلىماكان'}</span>
+                ${verifiedHtml}
+              </div>
+              <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>
+            </div>
+
+            <div>
+              <div class="shelf-card-rating">
+                <i class="fas fa-star"></i>
+                <span class="number-latin" style="font-weight: 700;">${displayRating}</span>
+                <span class="rating-count">(<bdi class="number-latin">${reviewCount}</bdi>)</span>
+                <i class="fas fa-camera cam-icon"></i>
+              </div>
+
+              <div class="shelf-card-pricing">
+                <span class="shelf-card-price number-latin">${formattedPrice}</span>
+                ${formattedOldPrice ? `<span class="shelf-card-old-price number-latin">${formattedOldPrice}</span>` : ''}
+              </div>
+
+              <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
+                <i class="fas fa-shopping-bag"></i> <span>سېۋەتكە</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Card click -> openQuickView
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.shelf-card-wish-btn') || e.target.closest('.shelf-card-add-btn')) return;
+          if (typeof openQuickView === 'function') openQuickView(product.id);
+        });
+
+        // Wishlist button click
+        const wishBtn = card.querySelector('.shelf-card-wish-btn');
+        if (wishBtn) {
+          wishBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const added = window.appStore.toggleWishlist(product.id);
+            wishBtn.classList.toggle('active', added);
+            const icon = wishBtn.querySelector('i');
+            if (icon) icon.className = added ? 'fas fa-heart' : 'far fa-heart';
+            if (typeof updateWishlistUI === 'function') updateWishlistUI();
+            if (typeof playChime === 'function') playChime('click');
+            const msg = added ? 'ياقتۇرغانلارغا قوشۇلدى!' : 'ياقتۇرغانلاردىن ئۆچۈرۈلدى!';
+            if (typeof showToast === 'function') showToast(msg, 'success');
+          });
+        }
+
+        // Add to Cart button click
+        const addBtn = card.querySelector('.shelf-card-add-btn');
+        if (addBtn) {
+          addBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const res = window.appStore.addToCart(product.id, 1);
+            if (res.success) {
+              if (typeof playChime === 'function') playChime('success');
+              if (typeof showToast === 'function') showToast(res.message, 'success');
+              if (typeof updateCartUI === 'function') updateCartUI();
+              if (typeof openCartDrawer === 'function') openCartDrawer();
+            } else {
+              if (typeof showToast === 'function') showToast(res.message, 'error');
+            }
+          });
+        }
+
+        track.appendChild(card);
+      });
+
+      trackWrap.appendChild(track);
+      shelfEl.appendChild(trackWrap);
+      container.appendChild(shelfEl);
+    });
+  }
+
+  window.renderShowcaseShelves = renderShowcaseShelves;
 
   // ==================== 🚀 ئايلانما ئېلان تاختىسى سۈكۈتتىكى تەبىئىي ھالىتى (Default Natural Flow) ====================
   function initSmartHeroScroll() {

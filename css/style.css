@@ -5926,26 +5926,34 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   align-items: center;
   margin-bottom: 0.85rem;
   padding: 0 0.35rem;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
 }
 
 .showcase-shelf-title {
-  font-size: 1.25rem;
+  font-size: 1.18rem;
   font-weight: 900;
   color: var(--text-main, #0f172a);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .showcase-shelf-link {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: #f97316;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
@@ -5961,7 +5969,7 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 .showcase-shelf-track {
   display: flex;
-  gap: 0.85rem;
+  gap: 0.75rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -5975,13 +5983,14 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 /* 🛍️ Trendyol Style Card */
 .shelf-product-card {
-  flex: 0 0 162px;
-  max-width: 175px;
-  min-width: 150px;
+  flex: 0 0 144px;
+  width: 144px;
+  max-width: 152px;
+  min-width: 136px;
   scroll-snap-align: start;
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -5989,12 +5998,23 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   position: relative;
   user-select: none;
+  direction: rtl;
+  text-align: right;
+}
+
+@media (min-width: 480px) {
+  .shelf-product-card {
+    flex: 0 0 165px;
+    width: 165px;
+    max-width: 175px;
+  }
 }
 
 @media (min-width: 768px) {
   .shelf-product-card {
-    flex: 0 0 190px;
-    max-width: 205px;
+    flex: 0 0 185px;
+    width: 185px;
+    max-width: 200px;
   }
 }
 
@@ -6103,7 +6123,15 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
   color: var(--text-main, #0f172a);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: flex-start;
+  gap: 0.3rem;
+  direction: rtl;
+  text-align: right;
+  width: 100%;
+  overflow: hidden;
+}
+
+.shelf-card-brand span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6111,28 +6139,33 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 .shelf-card-brand .verified-icon {
   color: #0284c7;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
+  flex-shrink: 0;
 }
 
 .shelf-card-title {
   font-size: 0.8rem;
   font-weight: 600;
   color: #475569;
-  margin: 0;
-  line-height: 1.3;
+  margin: 0.15rem 0 0;
+  line-height: 1.25;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-height: 2.1em;
+  height: 2.5em;
+  direction: rtl;
+  text-align: right;
 }
 
 .shelf-card-rating {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font-size: 0.72rem;
   color: #f59e0b;
+  direction: rtl;
+  margin-top: 0.2rem;
 }
 
 .shelf-card-rating .rating-count {
@@ -6149,29 +6182,30 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 .shelf-card-pricing {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.45rem;
   margin-top: 0.15rem;
+  direction: rtl;
+  text-align: right;
 }
 
 .shelf-card-price {
-  font-size: 0.96rem;
+  font-size: 1.05rem;
   font-weight: 900;
   color: #e11d48;
 }
 
 .shelf-card-old-price {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: #94a3b8;
   text-decoration: line-through;
 }
 
 .shelf-card-add-btn {
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
   width: 100%;
-  padding: 0.35rem 0.6rem;
+  padding: 0.36rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid #f97316;
+  border: 1px solid #fed7aa;
   background: #fff7ed;
   color: #ea580c;
   font-size: 0.76rem;
@@ -6186,6 +6220,7 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 .shelf-card-add-btn:hover {
   background: #f97316;
+  border-color: #f97316;
   color: #ffffff;
 }
 

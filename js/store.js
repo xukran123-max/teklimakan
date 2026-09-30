@@ -7363,7 +7363,7 @@ class StoreManager {
         let linkText = s.linkText || 'بارلىقىنى كۆرۈش ›';
         let badgeStripText = s.badgeStripText || '';
 
-        if (lang !== 'ug' && s.translations && s.translations[lang]) {
+        if (s.translations && s.translations[lang]) {
           if (s.translations[lang].title) title = s.translations[lang].title;
           if (s.translations[lang].subtitle) subtitle = s.translations[lang].subtitle;
           if (s.translations[lang].linkText) linkText = s.translations[lang].linkText;

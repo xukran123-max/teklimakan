@@ -4482,7 +4482,8 @@ function initTeklimakanApp() {
       const linkEl = document.createElement('a');
       linkEl.className = 'showcase-shelf-link';
       linkEl.href = shelf.linkUrl || '#catalogSection';
-      linkEl.innerHTML = `<span>${shelf.linkText || 'بارلىقىنى كۆرۈش ›'}</span> <i class="fas fa-chevron-left" style="font-size: 0.75rem;"></i>`;
+      const cleanLinkText = (shelf.linkText || 'بارلىقىنى كۆرۈش').replace(/[›>‹<]/g, '').trim();
+      linkEl.innerHTML = `<span>${cleanLinkText}</span> <i class="fas fa-chevron-left" style="font-size: 0.72rem;"></i>`;
 
       headerEl.appendChild(titleEl);
       headerEl.appendChild(linkEl);
@@ -4509,7 +4510,10 @@ function initTeklimakanApp() {
 
         // Strip badge:
         const stripColorClass = shelf.badgeStripBgType ? `strip-${shelf.badgeStripBgType}` : 'strip-green';
-        const stripText = shelf.badgeStripText || '';
+        let stripText = shelf.badgeStripText || '';
+        if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
+          stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
+        }
 
         // Verified badge:
         const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';
@@ -4530,7 +4534,7 @@ function initTeklimakanApp() {
           <div class="shelf-card-body">
             <div>
               <div class="shelf-card-brand">
-                <span>${product.brand || 'تەكلىماكان'}</span>
+                <span dir="auto">${product.brand || 'تەكلىماكان'}</span>
                 ${verifiedHtml}
               </div>
               <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>

@@ -10824,16 +10824,37 @@ ${text}
     const navbar = document.querySelector('.main-navbar');
     if (!navbar) return;
 
+    // ئورنى ئالمىشىپ كەتكەندە بەت قاڭقىپ (Layout shift) بولۇپ كەتمەسلىكى ئۈچۈن قاچا/بوشلۇق ساقلىغۇچى
+    let spacer = document.getElementById('navbarStickySpacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.id = 'navbarStickySpacer';
+      spacer.style.display = 'none';
+      spacer.style.width = '100%';
+      if (navbar.parentNode) {
+        navbar.parentNode.insertBefore(spacer, navbar.nextSibling);
+      }
+    }
+
+    const topAnnouncement = document.querySelector('.top-announcement');
+    const getThreshold = () => (topAnnouncement && topAnnouncement.offsetHeight > 0) ? topAnnouncement.offsetHeight : 38;
+
     let ticking = false;
     const updateStickyState = () => {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-      if (scrollY > 15) {
+      const threshold = getThreshold();
+
+      if (scrollY > threshold) {
         if (!navbar.classList.contains('is-sticky')) {
+          const navHeight = navbar.offsetHeight;
+          spacer.style.height = navHeight + 'px';
+          spacer.style.display = 'block';
           navbar.classList.add('is-sticky');
         }
       } else {
         if (navbar.classList.contains('is-sticky')) {
           navbar.classList.remove('is-sticky');
+          spacer.style.display = 'none';
         }
       }
       ticking = false;
@@ -10843,6 +10864,12 @@ ${text}
       if (!ticking) {
         window.requestAnimationFrame(updateStickyState);
         ticking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      if (navbar.classList.contains('is-sticky')) {
+        spacer.style.height = navbar.offsetHeight + 'px';
       }
     }, { passive: true });
 

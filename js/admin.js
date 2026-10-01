@@ -10162,4 +10162,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3500);
   }
   window.showAdminToast = showAdminToast;
+
+  // 📲 باشقۇرۇش مەركىزىدە ئەپ ۋە PWA مۇلازىمەتچىسىنى قوزغىتىش
+  if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('Admin ServiceWorker registration error:', err);
+    });
+  }
 });

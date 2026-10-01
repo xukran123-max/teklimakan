@@ -118,7 +118,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20261001_v160">
+  <link rel="stylesheet" href="css/style.css?v=20261001_v161">
 
   <!-- 🎯 Meta (Facebook & Instagram) Pixel Code -->
   <script>
@@ -277,6 +277,69 @@
       </div>
     </div>
   </header>
+
+  <!-- 🌟 چاپلاشما باش تىزىملىك (Fail-safe Sticky Header Controller - دەرھال قوزغىلىدۇ) -->
+  <script>
+    (function() {
+      function initStickyNavbar() {
+        var navbar = document.querySelector('.main-navbar');
+        if (!navbar) return;
+
+        var spacer = document.getElementById('navbarStickySpacer');
+        if (!spacer) {
+          spacer = document.createElement('div');
+          spacer.id = 'navbarStickySpacer';
+          spacer.style.display = 'none';
+          spacer.style.width = '100%';
+          if (navbar.parentNode) {
+            navbar.parentNode.insertBefore(spacer, navbar.nextSibling);
+          }
+        }
+
+        var topBar = document.querySelector('.top-announcement');
+        function getThreshold() {
+          return (topBar && topBar.offsetHeight > 0) ? topBar.offsetHeight : 38;
+        }
+
+        var isSticky = false;
+        function updateSticky() {
+          var scrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+          var threshold = getThreshold();
+
+          if (scrollY > threshold) {
+            if (!isSticky) {
+              isSticky = true;
+              var h = navbar.offsetHeight;
+              spacer.style.height = h + 'px';
+              spacer.style.display = 'block';
+              navbar.classList.add('is-sticky');
+            }
+          } else {
+            if (isSticky) {
+              isSticky = false;
+              navbar.classList.remove('is-sticky');
+              spacer.style.display = 'none';
+            }
+          }
+        }
+
+        window.addEventListener('scroll', updateSticky, { passive: true });
+        window.addEventListener('resize', function() {
+          if (isSticky) {
+            spacer.style.height = navbar.offsetHeight + 'px';
+          }
+        }, { passive: true });
+
+        updateSticky();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStickyNavbar);
+      } else {
+        initStickyNavbar();
+      }
+    })();
+  </script>
 
   <main class="container">
     <!-- تەشۋىقات بۆلىكى (Hero Section) -->
@@ -2333,7 +2396,7 @@
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
   <script src="js/store.js?v=20261001_v164"></script>
-  <script src="js/app.js?v=20261001_v165"></script>
+  <script src="js/app.js?v=20261001_v166"></script>
   <script src="js/push-manager.js?v=20260930_v161"></script>
 </body>
 </html>

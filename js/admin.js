@@ -8548,6 +8548,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🚚 زاكاز ئىز قوغلاش ۋە پوچتا تەڭشىكى
     setupOrderTrackingForm();
 
+    // ✍️ باشقۇرغۇچى مەخسۇس يېڭى زاكاز قوشۇش كۆزنىكى
+    setupCreateOrderModal();
+
     // 🎟️ ئېتىبار كۇپونلىرى جەدۋىلى ۋە قوشۇش
     setupCouponForm();
 
@@ -8708,6 +8711,350 @@ document.addEventListener('DOMContentLoaded', () => {
         showAdminToast(res.message || 'خاتالىق كۆرۈلدى', 'error');
       }
     });
+  }
+
+  // ==================== ✍️ باشقۇرغۇچى مەخسۇس يېڭى زاكاز قۇرۇش كۆزنىكى ====================
+  function openCreateOrderModal() {
+    const modal = document.getElementById('createOrderModal');
+    if (!modal) return;
+
+    // بارلىق قىممەتلەرنى ئەسلىگە كەلتۈرۈش
+    const form = document.getElementById('createOrderForm');
+    if (form) form.reset();
+
+    // مەۋجۇت خېرىدارلار تىزىملىكىنى يېڭىلاش
+    const custSelect = document.getElementById('manualOrderCustomerSelect');
+    if (custSelect) {
+      custSelect.innerHTML = '<option value="">-- يېڭى خېرىدار --</option>';
+      const summary = window.appStore ? window.appStore.getCustomersSummary() : { customers: [] };
+      (summary.customers || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.phone;
+        opt.textContent = `${c.name || 'خېرىدار'} (${c.phone})`;
+        opt.dataset.name = c.name || '';
+        opt.dataset.city = c.city || '';
+        opt.dataset.address = c.address || '';
+        custSelect.appendChild(opt);
+      });
+    }
+
+    // تاۋارلار قاچىسىنى قۇرۇقداپ، دەسلەپكى بىر قۇر قوشۇش
+    const container = document.getElementById('manualOrderItemsContainer');
+    if (container) {
+      container.innerHTML = '';
+      addManualOrderItemRow();
+    }
+
+    calcManualOrderTotals();
+    window.showModal('createOrderModal');
+  }
+  window.openCreateOrderModal = openCreateOrderModal;
+
+  function addManualOrderItemRow(prefill = {}) {
+    const container = document.getElementById('manualOrderItemsContainer');
+    if (!container) return;
+
+    const rowId = 'item-row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    const row = document.createElement('div');
+    row.id = rowId;
+    row.className = 'manual-order-item-row';
+    row.style.cssText = 'background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.75rem; display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; transition: all 0.2s ease;';
+
+    const products = window.appStore ? window.appStore.getProducts() : [];
+
+    let optionsHtml = '<option value="">-- تاۋار تاللاڭ --</option>';
+    products.forEach(p => {
+      const stockBadge = (p.stock !== undefined && p.stock !== null) ? ` (ئامبار: ${p.stock})` : '';
+      const priceText = ` - ${p.price} ₺`;
+      const selected = prefill.productId === p.id ? 'selected' : '';
+      optionsHtml += `<option value="${p.id}" ${selected} data-price="${p.price}" data-stock="${p.stock || 0}" data-image="${p.image || ''}" data-agent="${p.agentId || ''}" data-name="${(p.name || '').replace(/"/g, '&quot;')}">${p.name}${priceText}${stockBadge}</option>`;
+    });
+
+    row.innerHTML = `
+      <!-- تاۋار رەسىمى كىچىك ئالدىن كۆرۈنۈشى -->
+      <div class="item-img-preview" style="width: 42px; height: 42px; border-radius: 8px; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #cbd5e1;">
+        <img src="${prefill.image || 'images/default_product.jpg'}" alt="تاۋار" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+
+      <!-- تاۋار تاللاش تىزىملىكى -->
+      <div style="flex: 2; min-width: 180px;">
+        <select class="form-control item-product-select" style="font-size: 0.84rem; height: 38px; font-weight: 700;" required>
+          ${optionsHtml}
+        </select>
+      </div>
+
+      <!-- بىرلىك باھاسى (تەھرىرلىگىلى بولىدۇ) -->
+      <div style="width: 105px; position: relative;">
+        <input type="number" class="form-control number-latin item-unit-price" placeholder="باھاسى" value="${prefill.price !== undefined ? prefill.price : ''}" min="0" step="0.5" style="font-size: 0.84rem; height: 38px; font-weight: 700; padding-left: 1.5rem;" title="بىرلىك باھاسى" required>
+        <span style="position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: #64748b; font-weight: 700;">₺</span>
+      </div>
+
+      <!-- سانى -->
+      <div style="display: flex; align-items: center; gap: 0.2rem; width: 95px;">
+        <button type="button" class="btn-qty-minus btn btn-sm" style="width: 26px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 4px; font-weight: 900; cursor: pointer;">-</button>
+        <input type="number" class="form-control number-latin item-quantity" value="${prefill.quantity || 1}" min="1" max="999" style="width: 42px; height: 36px; text-align: center; font-size: 0.85rem; font-weight: 800; padding: 0.2rem;" required>
+        <button type="button" class="btn-qty-plus btn btn-sm" style="width: 26px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 4px; font-weight: 900; cursor: pointer;">+</button>
+      </div>
+
+      <!-- قۇر ئومۇمىي پۇلى -->
+      <div class="item-line-total number-latin" style="width: 85px; text-align: left; font-weight: 800; font-size: 0.92rem; color: #059669; white-space: nowrap;">
+        0.00 ₺
+      </div>
+
+      <!-- ئۆچۈرۈش كۇنۇپكىسى -->
+      <button type="button" class="btn-remove-item-row" style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s;" title="بۇ تاۋارنى چىقىرىۋېتىش">
+        <i class="fas fa-trash-alt" style="font-size: 0.82rem;"></i>
+      </button>
+    `;
+
+    container.appendChild(row);
+
+    // ۋەقەلەرنى باغلاش (Events binding for this row)
+    const sel = row.querySelector('.item-product-select');
+    const priceInput = row.querySelector('.item-unit-price');
+    const qtyInput = row.querySelector('.item-quantity');
+    const imgEl = row.querySelector('.item-img-preview img');
+    const lineTotalEl = row.querySelector('.item-line-total');
+    const btnMinus = row.querySelector('.btn-qty-minus');
+    const btnPlus = row.querySelector('.btn-qty-plus');
+    const btnDel = row.querySelector('.btn-remove-item-row');
+
+    function updateRowTotal() {
+      const p = Number(priceInput.value) || 0;
+      const q = Math.max(1, Number(qtyInput.value) || 1);
+      const total = p * q;
+      lineTotalEl.textContent = (window.appStore ? window.appStore.formatPrice(total) : total.toFixed(2) + ' ₺');
+      calcManualOrderTotals();
+    }
+
+    sel.addEventListener('change', () => {
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.value) {
+        priceInput.value = opt.dataset.price || '0';
+        if (opt.dataset.image) {
+          imgEl.src = opt.dataset.image;
+        }
+      } else {
+        priceInput.value = '';
+        imgEl.src = 'images/default_product.jpg';
+      }
+      updateRowTotal();
+    });
+
+    priceInput.addEventListener('input', updateRowTotal);
+    qtyInput.addEventListener('input', updateRowTotal);
+
+    btnMinus.addEventListener('click', () => {
+      let q = Math.max(1, (Number(qtyInput.value) || 1) - 1);
+      qtyInput.value = q;
+      updateRowTotal();
+    });
+
+    btnPlus.addEventListener('click', () => {
+      let q = (Number(qtyInput.value) || 1) + 1;
+      qtyInput.value = q;
+      updateRowTotal();
+    });
+
+    btnDel.addEventListener('click', () => {
+      const allRows = container.querySelectorAll('.manual-order-item-row');
+      if (allRows.length <= 1) {
+        showAdminToast('زاكازدا ئەڭ ئاز بىر مەھسۇلات بولۇشى كېرەك!', 'warning');
+        return;
+      }
+      row.remove();
+      updateItemsCountBadge();
+      calcManualOrderTotals();
+    });
+
+    updateRowTotal();
+    updateItemsCountBadge();
+  }
+
+  function updateItemsCountBadge() {
+    const container = document.getElementById('manualOrderItemsContainer');
+    const badge = document.getElementById('manualOrderItemsCountBadge');
+    if (container && badge) {
+      const count = container.querySelectorAll('.manual-order-item-row').length;
+      badge.textContent = count + ' خىل';
+    }
+  }
+
+  function calcManualOrderTotals() {
+    const container = document.getElementById('manualOrderItemsContainer');
+    if (!container) return;
+
+    let subtotal = 0;
+    container.querySelectorAll('.manual-order-item-row').forEach(row => {
+      const price = Number(row.querySelector('.item-unit-price')?.value) || 0;
+      const qty = Number(row.querySelector('.item-quantity')?.value) || 1;
+      subtotal += (price * qty);
+    });
+
+    const deliveryFee = Math.max(0, Number(document.getElementById('manualOrderDeliveryFee')?.value) || 0);
+    const discount = Math.max(0, Number(document.getElementById('manualOrderDiscount')?.value) || 0);
+    const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
+
+    const subEl = document.getElementById('manualOrderSubtotalDisplay');
+    const totEl = document.getElementById('manualOrderTotalDisplay');
+
+    if (subEl) subEl.textContent = (window.appStore ? window.appStore.formatPrice(subtotal) : subtotal.toFixed(2) + ' ₺');
+    if (totEl) totEl.textContent = (window.appStore ? window.appStore.formatPrice(grandTotal) : grandTotal.toFixed(2) + ' ₺');
+  }
+
+  function setupCreateOrderModal() {
+    // 1. ئېچىش كۇنۇپكىلىرىنى باغلاش
+    const btnOpen = document.getElementById('btnOpenCreateOrderModal');
+    if (btnOpen && !btnOpen.dataset.bound) {
+      btnOpen.dataset.bound = 'true';
+      btnOpen.addEventListener('click', openCreateOrderModal);
+    }
+
+    const btnQuick = document.getElementById('dashQuickCreateOrder');
+    if (btnQuick && !btnQuick.dataset.bound) {
+      btnQuick.dataset.bound = 'true';
+      btnQuick.addEventListener('click', openCreateOrderModal);
+    }
+
+    // 2. مەۋجۇت خېرىداردىن تاللاش ۋە ئاپتوماتىك تولدۇرۇش
+    const custSelect = document.getElementById('manualOrderCustomerSelect');
+    if (custSelect) {
+      custSelect.addEventListener('change', () => {
+        const opt = custSelect.options[custSelect.selectedIndex];
+        if (opt && opt.value) {
+          const nameInput = document.getElementById('manualOrderCustomerName');
+          const phoneInput = document.getElementById('manualOrderCustomerPhone');
+          const cityInput = document.getElementById('manualOrderCustomerCity');
+          const addrInput = document.getElementById('manualOrderCustomerAddress');
+
+          if (nameInput) nameInput.value = opt.dataset.name || '';
+          if (phoneInput) phoneInput.value = opt.value || '';
+          if (cityInput && opt.dataset.city) {
+            cityInput.value = opt.dataset.city;
+          }
+          if (addrInput) addrInput.value = opt.dataset.address || '';
+        }
+      });
+    }
+
+    // 3. تاۋار قوشۇش كۇنۇپكىسى
+    const btnAddItem = document.getElementById('btnAddManualOrderItemRow');
+    if (btnAddItem && !btnAddItem.dataset.bound) {
+      btnAddItem.dataset.bound = 'true';
+      btnAddItem.addEventListener('click', () => addManualOrderItemRow());
+    }
+
+    // 4. يەتكۈزۈش ھەققى ۋە ئېتىبار كىرگۈزۈلگەندە ھېسابلاش
+    const delFeeInput = document.getElementById('manualOrderDeliveryFee');
+    const discInput = document.getElementById('manualOrderDiscount');
+    if (delFeeInput) delFeeInput.addEventListener('input', calcManualOrderTotals);
+    if (discInput) discInput.addEventListener('input', calcManualOrderTotals);
+
+    // 5. جەدۋەل تاپشۇرۇش (Submit Form)
+    const form = document.getElementById('createOrderForm');
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = 'true';
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = (document.getElementById('manualOrderCustomerName')?.value || '').trim();
+        const phone = (document.getElementById('manualOrderCustomerPhone')?.value || '').trim();
+        const city = (document.getElementById('manualOrderCustomerCity')?.value || '').trim();
+        const district = (document.getElementById('manualOrderCustomerDistrict')?.value || '').trim();
+        const address = (document.getElementById('manualOrderCustomerAddress')?.value || '').trim();
+
+        if (!name || !phone) {
+          showAdminToast('خېرىدار ئىسمى ۋە تېلېفون نومۇرى چوقۇم كىرگۈزۈلۈشى كېرەك!', 'error');
+          return;
+        }
+
+        const container = document.getElementById('manualOrderItemsContainer');
+        const rows = container ? container.querySelectorAll('.manual-order-item-row') : [];
+        const items = [];
+
+        for (let row of rows) {
+          const sel = row.querySelector('.item-product-select');
+          const opt = sel ? sel.options[sel.selectedIndex] : null;
+          const pid = sel ? sel.value : '';
+          const price = Number(row.querySelector('.item-unit-price')?.value) || 0;
+          const qty = Number(row.querySelector('.item-quantity')?.value) || 1;
+
+          if (!pid) {
+            showAdminToast('بارلىق قۇرلاردا تاۋار تاللىنىشى كېرەك!', 'warning');
+            sel?.focus();
+            return;
+          }
+
+          items.push({
+            id: pid,
+            productId: pid,
+            name: opt?.dataset.name || 'تاۋار',
+            price: price,
+            quantity: qty,
+            image: opt?.dataset.image || 'images/default_product.jpg',
+            agentId: opt?.dataset.agent || null
+          });
+        }
+
+        if (items.length === 0) {
+          showAdminToast('كەم دېگەندە بىر دانە تاۋار تاللاڭ!', 'warning');
+          return;
+        }
+
+        const deliveryFee = Number(document.getElementById('manualOrderDeliveryFee')?.value) || 0;
+        const discount = Number(document.getElementById('manualOrderDiscount')?.value) || 0;
+        const payMethod = document.getElementById('manualOrderPaymentMethod')?.value || 'بانكا ھېساباتىغا يۆتكەش';
+        const status = document.getElementById('manualOrderStatus')?.value || 'ساقلاۋاتىدۇ';
+        const carrier = document.getElementById('manualOrderCarrier')?.value || '';
+        const trackingNo = (document.getElementById('manualOrderTrackingNo')?.value || '').trim();
+        const notes = (document.getElementById('manualOrderNotes')?.value || '').trim();
+        const deductStock = document.getElementById('manualOrderDeductStock')?.checked !== false;
+        const sendNotif = document.getElementById('manualOrderSendNotification')?.checked !== false;
+
+        const orderData = {
+          customer: { name, phone, city, district, address },
+          items,
+          deliveryFeeCny: deliveryFee,
+          discountCny: discount,
+          paymentMethod: payMethod,
+          status,
+          cargoCarrier: carrier,
+          cargoTrackingNo: trackingNo,
+          notes,
+          deductStock,
+          sendNotification: sendNotif
+        };
+
+        const btnSubmit = document.getElementById('btnSubmitManualOrder');
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> زاكاز قۇرۇلۇۋاتىدۇ...';
+        }
+
+        try {
+          const res = window.appStore.addAdminManualOrder(orderData);
+          if (res && res.success) {
+            window.hideModal('createOrderModal');
+            renderOrdersTable();
+            renderDashboardMetrics();
+            renderRecentOrders();
+            renderCustomersTable();
+
+            showAdminToast(`🎉 يېڭى زاكاز (#${res.order.id}) مۇۋەپپەقىيەتلىك قۇرۇلدى ۋە بۇلۇتقا ساقلاندى!`, 'success');
+          } else {
+            showAdminToast(res?.message || 'زاكاز ساقلاش مەغلۇپ بولدى', 'error');
+          }
+        } catch (err) {
+          console.error('Error creating manual order:', err);
+          showAdminToast('زاكاز قۇرۇشتا كۈتۈلمىگەن خاتالىق يۈز بەردى: ' + err.message, 'error');
+        } finally {
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i class="fas fa-check-circle"></i> <span>زاكازنى قۇرۇش ۋە ساقلاش</span>';
+          }
+        }
+      });
+    }
   }
 
   // ==================== 👥 خېرىدارلار باشقۇرۇش مەركىزى (CRM) ====================

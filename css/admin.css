@@ -2374,5 +2374,46 @@ img {
   user-select: none;
 }
 
+/* ==================== ✍️ باشقۇرغۇچى مەخسۇس زاكاز قوشۇش كۆزنىكى تېلېفون ۋە ئۈستەلئۈستى ماسلىشىشى ==================== */
+#createOrderModal .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 92vh !important;
+  overflow: hidden !important;
+}
+
+.manual-order-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  #createOrderModal {
+    padding: 0.5rem !important;
+  }
+  #createOrderModal .modal-content {
+    width: 100% !important;
+    max-height: 96vh !important;
+    border-radius: 16px !important;
+  }
+  #createOrderModal form {
+    padding: 1rem 0.85rem !important;
+    gap: 1rem !important;
+  }
+  #createOrderModal input,
+  #createOrderModal select,
+  #createOrderModal textarea {
+    font-size: 16px !important;
+  }
+  .manual-order-item-row {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    padding: 0.75rem !important;
+  }
+}
+
 
 

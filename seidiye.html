@@ -23,7 +23,7 @@
   <!-- ئۇيغۇرچە فونىت ۋە ئارقا بەت كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260926_v80">
   <link rel="stylesheet" href="css/style.css?v=20260930_v157">
-  <link rel="stylesheet" href="css/admin.css?v=20260927_v98">
+  <link rel="stylesheet" href="css/admin.css?v=20261001_v100">
 </head>
 <body>
 
@@ -326,7 +326,9 @@
                   <span style="font-size: 0.78rem; color: var(--text-muted);">كۆپ ئىشلىتىلىدىغان باشقۇرۇش قوراللىرى بىر چېكىش ئارقىلىق</span>
                 </div>
               </div>
-              <div class="quick-actions-btns" style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary btn-sm" id="dashQuickCreateOrder" style="border-radius: 8px; font-weight: 700; background: #059669; border-color: #059669;">
+                  <i class="fas fa-cart-plus"></i> يېڭى زاكاز
+                </button>
                 <button type="button" class="btn btn-primary btn-sm" id="dashQuickAddProduct" style="border-radius: 8px; font-weight: 700;">
                   <i class="fas fa-plus"></i> يېڭى تاۋار
                 </button>
@@ -652,6 +654,11 @@
               </div>
 
               <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <!-- ➕ يېڭى زاكاز قوشۇش كۇنۇپكىسى (باشقۇرغۇچى مەخسۇس زاكاز قۇرۇش) -->
+                <button type="button" id="btnOpenCreateOrderModal" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; font-size: 0.85rem; font-weight: 800; padding: 0.48rem 1.1rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35); transition: all 0.2s ease;">
+                  <i class="fas fa-plus-circle" style="font-size: 1rem;"></i>
+                  <span>➕ يېڭى زاكاز قوشۇش</span>
+                </button>
                 <!-- سىناق زاكاز قۇرۇش كۇنۇپكىسى -->
                 <button type="button" id="btnAddSampleOrder" class="btn-secondary" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe; font-size: 0.84rem; font-weight: 800; padding: 0.45rem 0.9rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
                   <i class="fas fa-magic"></i>
@@ -3869,6 +3876,228 @@
   </div>
 
 
+  <!-- ==================== ✍️ باشقۇرغۇچى مەخسۇس زاكاز قوشۇش كۆزنىكى (Admin Create Manual Order Modal) ==================== -->
+  <div class="modal-backdrop" id="createOrderModal">
+    <div class="modal-content" style="max-width: 820px; width: 95%; max-height: 92vh; border-radius: 20px; padding: 0; background: #ffffff; box-shadow: 0 25px 60px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden;">
+      
+      <!-- 1. كۆزنەك بېشى (Modal Header) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.4rem; background: linear-gradient(135deg, #065f46, #059669); color: #ffffff; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            <i class="fas fa-cart-plus"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 1.18rem; font-weight: 800; color: #ffffff;">يېڭى زاكاز قۇرۇش / قولدا زاكاز كىرگۈزۈش</h4>
+            <span style="font-size: 0.8rem; color: #d1fae5;">ۋاتساپ، تېلېفون ياكى دۇكاندىن كەلگەن خېرىدار زاكازلىرىنى سىستېمىغا تىزىملىتىش</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-drawer btn-modal-close" style="background: rgba(255,255,255,0.15); border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; color: #ffffff; transition: all 0.2s;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- 2. كۆزنەك گەۋدىسى (Modal Scrollable Body) -->
+      <form id="createOrderForm" style="display: flex; flex-direction: column; overflow-y: auto; flex: 1; padding: 1.25rem 1.4rem; gap: 1.25rem;">
+        
+        <!-- بۆلەك 1: خېرىدار ئۇچۇرلىرى -->
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.95rem; color: #1e293b;">
+              <i class="fas fa-user-circle" style="color: #059669; font-size: 1.1rem;"></i>
+              <span>1. خېرىدار ئۇچۇرلىرى</span>
+            </div>
+            <!-- مەۋجۇت خېرىداردىن تېز تاللاش -->
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="font-size: 0.76rem; color: #64748b; font-weight: 700;">مەۋجۇت خېرىداردىن تولدۇرۇش:</span>
+              <select id="manualOrderCustomerSelect" class="form-control" style="font-size: 0.78rem; padding: 0.25rem 0.5rem; height: 30px; width: 170px; border-radius: 6px;">
+                <option value="">-- يېڭى خېرىدار --</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">خېرىدار ئىسمى: <span style="color: var(--danger-color);">*</span></label>
+              <input type="text" id="manualOrderCustomerName" class="form-control" placeholder="مەسىلەن: ئەلى ئۆمەر" required style="font-size: 0.88rem; height: 38px;">
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">تېلېفون نومۇرى: <span style="color: var(--danger-color);">*</span></label>
+              <div style="position: relative;">
+                <i class="fab fa-whatsapp" style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); color: #16a34a; font-size: 0.95rem;"></i>
+                <input type="tel" id="manualOrderCustomerPhone" class="form-control number-latin" placeholder="05XXXXXXXXX" required style="font-size: 0.88rem; height: 38px; padding-right: 2rem;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">شەھەر:</label>
+              <select id="manualOrderCustomerCity" class="form-control" style="font-size: 0.88rem; height: 38px; font-weight: 600;">
+                <option value="ئىستانبۇل">ئىستانبۇل (İstanbul)</option>
+                <option value="ئەنقەرە">ئەنقەرە (Ankara)</option>
+                <option value="ئىزمىر">ئىزمىر (İzmir)</option>
+                <option value="بۇرسا">بۇرسا (Bursa)</option>
+                <option value="ئانتاليا">ئانتاليا (Antalya)</option>
+                <option value="كونيا">كونيا (Konya)</option>
+                <option value="كەيسەرى">كەيسەرى (Kayseri)</option>
+                <option value="سامسۇن">سامسۇن (Samsun)</option>
+                <option value="يالوۋا">يالوۋا (Yalova)</option>
+                <option value="غەيرى شەھەر">باشقا شەھەر / چەتئەل</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">رايون / ناھىيە:</label>
+              <input type="text" id="manualOrderCustomerDistrict" class="form-control" placeholder="مەسىلەن: Zeytinburnu / Fatih" style="font-size: 0.88rem; height: 38px;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+            <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">تەپسىلىي يەتكۈزۈش ئادرېسى:</label>
+            <input type="text" id="manualOrderCustomerAddress" class="form-control" placeholder="مەھەللە، كوچا، بىنا ۋە ئىشىك نومۇرى..." style="font-size: 0.86rem; height: 38px;">
+          </div>
+        </div>
+
+        <!-- بۆلەك 2: زاكاز تاۋارلىرى تىزىملىكى -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.95rem; color: #1e293b;">
+              <i class="fas fa-boxes-stacked" style="color: #2563eb; font-size: 1.1rem;"></i>
+              <span>2. زاكاز تاۋارلىرى</span>
+              <span id="manualOrderItemsCountBadge" style="background: #eff6ff; color: #2563eb; font-size: 0.75rem; padding: 1px 7px; border-radius: 9999px; font-weight: 800;">1 خىل</span>
+            </div>
+            <button type="button" id="btnAddManualOrderItemRow" class="btn btn-sm" style="background: #ecfdf5; color: #059669; border: 1.5px solid #a7f3d0; font-size: 0.78rem; font-weight: 800; padding: 4px 11px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <i class="fas fa-plus"></i>
+              <span>تاۋار قوشۇش</span>
+            </button>
+          </div>
+
+          <!-- ھەرىكەتچان تاۋار قۇرلىرى قاچىسى -->
+          <div id="manualOrderItemsContainer" style="display: flex; flex-direction: column; gap: 0.65rem;">
+            <!-- تاۋار قۇرلىرى JS ئارقىلىق دەل ۋاقتىدا قوشۇلىدۇ -->
+          </div>
+        </div>
+
+        <!-- بۆلەك 3: باھا، ھېسابات، ئېتىبار ۋە يەتكۈزۈش ھەققى -->
+        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.2rem;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.85rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+            <i class="fas fa-calculator" style="color: #d97706; font-size: 1.1rem;"></i>
+            <span>3. ھېسابات ۋە چىقىم تەپسىلاتى</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block; color: #64748b;">مەھسۇلاتلار جەمئىيسى:</label>
+              <div id="manualOrderSubtotalDisplay" class="number-latin" style="height: 38px; background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.4rem 0.75rem; font-weight: 800; font-size: 1.05rem; color: #0f172a; display: flex; align-items: center;">0.00 ₺</div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">يەتكۈزۈش ھەققى (Kargo):</label>
+              <div style="position: relative;">
+                <input type="number" id="manualOrderDeliveryFee" class="form-control number-latin" value="0" min="0" step="1" style="font-size: 0.92rem; height: 38px; font-weight: 700; padding-left: 2rem;">
+                <span style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); font-weight: 700; color: #64748b;">₺</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">ئېتىبار / كېمەيتىش (İndirim):</label>
+              <div style="position: relative;">
+                <input type="number" id="manualOrderDiscount" class="form-control number-latin" value="0" min="0" step="1" style="font-size: 0.92rem; height: 38px; font-weight: 700; color: #dc2626; padding-left: 2rem;">
+                <span style="position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); font-weight: 700; color: #dc2626;">₺</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 800; font-size: 0.85rem; margin-bottom: 0.25rem; display: block; color: #15803d;">ئاخىرقى ئومۇمىي سومما:</label>
+              <div id="manualOrderTotalDisplay" class="number-latin" style="height: 38px; background: #ecfdf5; border: 2px solid #86efac; border-radius: 6px; padding: 0.4rem 0.75rem; font-weight: 900; font-size: 1.25rem; color: #166534; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);">0.00 ₺</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- بۆلەك 4: پۇل تۆلەش شەكلى، ھالەت ۋە ئەۋەتىش -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 1.2rem;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.85rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.5rem;">
+            <i class="fas fa-truck-ramp-box" style="color: #6366f1; font-size: 1.1rem;"></i>
+            <span>4. چىقىم شەكلى، زاكاز ھالىتى ۋە پوچتا تەڭشىكى</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">تۆلەش ئۇسۇلى:</label>
+              <select id="manualOrderPaymentMethod" class="form-control" style="font-size: 0.86rem; height: 38px; font-weight: 700;">
+                <option value="بانكا ھېساباتىغا يۆتكەش">🏦 بانكا ھېساباتىغا يۆتكەش (Havale / EFT)</option>
+                <option value="ئىشىك ئالدىدا نەق پۇل">🚪 ئىشىك ئالدىدا نەق پۇل (Kapıda Ödeme)</option>
+                <option value="نەق پۇل تاپشۇردى">💵 نەق پۇل تاپشۇردى (Elden Nakit)</option>
+                <option value="ۋاتساپ زاكاز">💬 ۋاتساپ زاكاز (WhatsApp)</option>
+                <option value="بانكا كارتىسى">💳 بانكا ياكى خەلقئارالىق كارتا</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">دەسلەپكى ھالىتى:</label>
+              <select id="manualOrderStatus" class="form-control" style="font-size: 0.86rem; height: 38px; font-weight: 700;">
+                <option value="ساقلاۋاتىدۇ">⏳ ساقلاۋاتىدۇ (تېخى پۇل كىرمىگەن)</option>
+                <option value="تەستىقلاندى">✅ تەستىقلاندى (پۇل تاپشۇرۇۋېلىندى)</option>
+                <option value="يوللاندى">🚚 يوللاندى (پوسۇلكا ئەۋەتىلگەن)</option>
+                <option value="تاماملاندى">🎉 تاماملاندى (مال يەتكۈزۈلۈپ پۈتكەن)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">پوچتا شىركىتى (Kargo Firması):</label>
+              <select id="manualOrderCarrier" class="form-control" style="font-size: 0.86rem; height: 38px;">
+                <option value="">-- پوچتا تاللاڭ --</option>
+                <option value="PTT Kargo">📦 PTT Kargo (پوستخانا)</option>
+                <option value="Yurtiçi Kargo">⚡ Yurtiçi Kargo</option>
+                <option value="Aras Kargo">🚀 Aras Kargo</option>
+                <option value="MNG Kargo">🚛 MNG Kargo</option>
+                <option value="Sürat Kargo">⚡ Sürat Kargo</option>
+                <option value="Trendyol Express">🛍️ Trendyol Express</option>
+                <option value="ئۆزى ئېلىپ كېتىش">🏬 دۇكاندىن ئۆزى ئالىدۇ</option>
+                <option value="باشقا پوچتا">🌐 باشقا يەتكۈزۈش</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">ئىز قوغلاش نومۇرى (Takip No):</label>
+              <input type="text" id="manualOrderTrackingNo" class="form-control number-latin" placeholder="مەسىلەن: 27509812456" style="font-size: 0.88rem; height: 38px;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+            <label class="form-label" style="font-weight: 700; font-size: 0.82rem; margin-bottom: 0.25rem; display: block;">باشقۇرغۇچى ئەسكەرتىشى ياكى خېرىدار تەلىپى:</label>
+            <input type="text" id="manualOrderNotes" class="form-control" placeholder="مەسىلەن: خېرىدار چۈشتىن كېيىن يەتكۈزۈشنى تەلەپ قىلدى..." style="font-size: 0.86rem; height: 38px;">
+          </div>
+
+          <!-- تاللانما تەڭشەكلىرى (ئامبار كېمەيتىش ۋە ئۇقتۇرۇش ئەۋەتىش) -->
+          <div style="display: flex; gap: 1.5rem; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; font-weight: 700; color: #1e293b; cursor: pointer;">
+              <input type="checkbox" id="manualOrderDeductStock" checked style="width: 17px; height: 17px; accent-color: #059669; cursor: pointer;">
+              <span>📦 ئامبار قالدۇقىدىن ئاپتوماتىك چىقىرىش</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.84rem; font-weight: 700; color: #1e293b; cursor: pointer;">
+              <input type="checkbox" id="manualOrderSendNotification" checked style="width: 17px; height: 17px; accent-color: #059669; cursor: pointer;">
+              <span>📬 خېرىدار ساندۇقىغا ئۇقتۇرۇش ئەۋەتىش</span>
+            </label>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- 3. كۆزنەك ئاستى (Sticky Modal Footer) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.4rem; background: #f8fafc; border-top: 1.5px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap; gap: 0.6rem;">
+        <div style="font-size: 0.82rem; color: #64748b; font-weight: 700;">
+          <i class="fas fa-shield-check" style="color: #059669;"></i> زاكاز سىستېمىغا تىزىملىنىپ، بۇلۇتقا دەل ۋاقتىدا ساقلىنىدۇ.
+        </div>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <button type="button" class="btn-secondary btn-modal-close" style="padding: 0.55rem 1.2rem; font-weight: 700; border-radius: 8px; font-size: 0.88rem; cursor: pointer;">بىكار قىلىش</button>
+          <button type="submit" form="createOrderForm" id="btnSubmitManualOrder" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; padding: 0.6rem 1.6rem; font-weight: 800; border-radius: 8px; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+            <i class="fas fa-check-circle"></i>
+            <span>زاكازنى قۇرۇش ۋە ساقلاش</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- زاكاز تالونى تەپسىلاتى كۆزنىكى -->
   <div class="modal-backdrop" id="orderInvoiceModal">
     <div class="modal-content" style="max-width: 600px;">
@@ -4526,9 +4755,9 @@
   <script src="js/supabase.js.v2.min.js?v=20260930_v161"></script>
   <script src="js/supabase.js?v=20260930_v161"></script>
   <script src="js/i18n.js?v=20260929_v136"></script>
-  <script src="js/store.js?v=20260930_v163"></script>
+  <script src="js/store.js?v=20261001_v164"></script>
   <script src="js/push-manager.js?v=20260930_v161"></script>
-  <script src="js/admin.js?v=20260930_v163"></script>
+  <script src="js/admin.js?v=20261001_v164"></script>
 
   <!-- 🛡️ بارلىق مودال كۆزنەكلەر ۋە كۇنۇپكىلارنىڭ ھەرۋاقىت دەخلىسىز ئىشلىشىنى كاپالەتلەندۈرگۈچى قوشۇمچە بىۋاسىتە سىستېما كودى -->
   <script>
@@ -4682,6 +4911,17 @@
           e.stopPropagation();
           if (typeof window.openProductModal === 'function') {
             window.openProductModal(null);
+          }
+          return;
+        }
+
+        // يېڭى زاكاز قوشۇش كۇنۇپكىسى چېكىلگەندە
+        var addOrderBtn = e.target.closest('#btnOpenCreateOrderModal, #dashQuickCreateOrder');
+        if (addOrderBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof window.openCreateOrderModal === 'function') {
+            window.openCreateOrderModal();
           }
           return;
         }

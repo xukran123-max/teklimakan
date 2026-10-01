@@ -7555,6 +7555,115 @@ class StoreManager {
     return sampleOrder;
   }
 
+  // ==================== ✍️ باشقۇرغۇچى مەخسۇس زاكاز قوشۇش (Manual Admin Order Creation) ====================
+  addAdminManualOrder(orderData) {
+    if (!orderData || !orderData.customer || !orderData.items || orderData.items.length === 0) {
+      return { success: false, message: 'خېرىدار ئۇچۇرى ۋە كەم دېگەندە بىر مەھسۇلات تاللىنىشى كېرەك!' };
+    }
+
+    const orderId = orderData.id || ('ORD-' + (new Date().getFullYear()) + '-' + Math.floor(1000 + Math.random() * 9000) + ' UG');
+    const now = new Date();
+    const formattedDate = orderData.date || `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const products = this.getProducts();
+    const items = orderData.items.map(it => {
+      const prodId = it.id || it.productId;
+      const matchedProd = products.find(p => p.id === prodId);
+      return {
+        id: prodId,
+        name: it.name || (matchedProd ? matchedProd.name : 'نامەلۇم مەھسۇلات'),
+        price: Number(it.price) || (matchedProd ? Number(matchedProd.price) : 0),
+        quantity: Math.max(1, Number(it.quantity) || 1),
+        image: it.image || (matchedProd ? matchedProd.image : 'images/default_product.jpg'),
+        agentId: it.agentId || (matchedProd ? matchedProd.agentId : null)
+      };
+    });
+
+    const subtotal = items.reduce((s, it) => s + (it.price * it.quantity), 0);
+    const deliveryFee = Math.max(0, Number(orderData.deliveryFeeCny) || 0);
+    const discount = Math.max(0, Number(orderData.discountCny) || 0);
+    const total = Math.max(0, subtotal + deliveryFee - discount);
+
+    const newOrder = {
+      id: orderId,
+      customer: {
+        name: (orderData.customer.name || '').trim(),
+        phone: (orderData.customer.phone || '').trim(),
+        city: (orderData.customer.city || '').trim(),
+        district: (orderData.customer.district || '').trim(),
+        address: (orderData.customer.address || '').trim(),
+        email: (orderData.customer.email || '').trim()
+      },
+      items: items,
+      subtotalCny: subtotal,
+      discountCny: discount,
+      deliveryFeeCny: deliveryFee,
+      totalCny: total,
+      totalFormatted: this.formatPrice(total),
+      paymentMethod: orderData.paymentMethod || 'بانكا ھېساباتىغا يۆتكەش',
+      status: orderData.status || 'ساقلاۋاتىدۇ',
+      date: formattedDate,
+      notes: orderData.notes || '',
+      cargoCarrier: orderData.cargoCarrier || '',
+      cargoTrackingNo: orderData.cargoTrackingNo || '',
+      trackingCarrier: orderData.cargoCarrier || '',
+      trackingNumber: orderData.cargoTrackingNo || '',
+      language: orderData.language || 'ug',
+      currency: this.currentCurrency || 'TRY',
+      isManualAdminOrder: true,
+      createdBy: 'admin'
+    };
+
+    // 📦 ئامبار قالدۇقىنى كېمەيتىش (ئەگەر باشقۇرغۇچى ئامباردىن چىقىرىشنى تاللىغان بولسا)
+    if (orderData.deductStock !== false) {
+      let changedProds = false;
+      items.forEach(it => {
+        const prod = products.find(p => p.id === it.id);
+        if (prod) {
+          prod.stock = Math.max(0, (Number(prod.stock) || 0) - it.quantity);
+          prod.sales = (Number(prod.sales) || 0) + it.quantity;
+          prod.isUserEdited = true;
+          prod.updatedAt = new Date().toISOString();
+          this.saveUserEdit(prod);
+          changedProds = true;
+          if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
+            this.trackCloudWrite(window.TeklimakanSupabase.upsertProduct(prod), 'admin manual order inventory');
+          }
+        }
+      });
+      if (changedProds) {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+        this.notifyDataChange('products');
+      }
+    }
+
+    const orders = this.getOrders();
+    orders.unshift(newOrder);
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    this.notifyDataChange('orders');
+
+    // ☁️ Supabase بۇلۇت ئامبىرىغا يۈكلەش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.insertOrder === 'function') {
+      this.trackCloudWrite(window.TeklimakanSupabase.insertOrder(newOrder), 'admin manual order');
+    }
+
+    // 📬 خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا ئۇقتۇرۇش ئەۋەتىش
+    if (orderData.sendNotification !== false && newOrder.customer && newOrder.customer.phone) {
+      try {
+        this.addCustomerInboxNotification({
+          phone: newOrder.customer.phone,
+          orderId: newOrder.id,
+          title: 'سىزگە يېڭى زاكاز قۇرۇلدى',
+          type: 'order_created',
+          message: `ھۆرمەتلىك ${newOrder.customer.name || 'خېرىدار'}، سۇپىمىز ئارقىلىق زاكازىڭىز (#${newOrder.id}) تىزىملاندى. ئومۇمىي سوممىسى: ${this.formatPrice(total)}. ھالىتى: «${newOrder.status}». رەھمەت!`,
+          timestamp: formattedDate
+        });
+      } catch (e) {}
+    }
+
+    return { success: true, order: newOrder };
+  }
+
 
   getSettings() {
     let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || INITIAL_SETTINGS;

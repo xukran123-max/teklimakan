@@ -13,7 +13,14 @@
   RewriteCond %{REQUEST_FILENAME}\.html -f
   RewriteRule ^(.*)$ $1.html [L]
 
-  # 4. تىل قىسقا ئادرېسلىرى (/tr, /en, /ug) - قايتا يۆتكەلمەي بىۋاسىتە كۆرسىتىش (Internal Rewrite)
+  # 4. ئىجتىمائىي تاراتقۇ بوتلىرى (WhatsApp, Facebook, Telegram) /tr ۋە /en ئۈچۈن OG meta بار ئايرىم بەتنى كۆرسۈن
+  RewriteCond %{HTTP_USER_AGENT} (WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterestbot) [NC]
+  RewriteRule ^tr/?$ tr/index.html [L,QSA]
+
+  RewriteCond %{HTTP_USER_AGENT} (WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterestbot) [NC]
+  RewriteRule ^en/?$ en/index.html [L,QSA]
+
+  # 5. تىل قىسقا ئادرېسلىرى (/tr, /en, /ug) - ئادەتتىكى زىيارەتچىلەر ئۈچۈن بىۋاسىتە index.html كۆرسىتىش (Internal Rewrite)
   RewriteRule ^tr/?$ index.html [L,QSA]
   RewriteRule ^tr\.html$ index.html [L,QSA]
   RewriteRule ^en/?$ index.html [L,QSA]

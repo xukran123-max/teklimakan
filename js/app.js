@@ -10819,42 +10819,40 @@ ${text}
   window.scrollToBottom = window.scrollToBottom || function() { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); };
   window.toggleSmartScroll = window.toggleSmartScroll || function() { ((window.scrollY || 0) > 250) ? window.scrollToTop() : window.scrollToBottom(); };
 
-  // 🌟 بەتنى ئاستىغا سىيرىغاندا چاپلاشما باش تىزىملىك (Sticky Header)
+  // 🌟 بەتنى ئاستىغا سىيرىغاندا چاپلاشما باش تىزىملىك (Fixed Header)
   function initStickyHeader() {
     const navbar = document.querySelector('.main-navbar');
     if (!navbar) return;
 
-    // ئورنى ئالمىشىپ كەتكەندە بەت قاڭقىپ (Layout shift) بولۇپ كەتمەسلىكى ئۈچۈن قاچا/بوشلۇق ساقلىغۇچى
-    let spacer = document.getElementById('navbarStickySpacer');
-    if (!spacer) {
-      spacer = document.createElement('div');
-      spacer.id = 'navbarStickySpacer';
-      spacer.style.display = 'none';
-      spacer.style.width = '100%';
-      if (navbar.parentNode) {
-        navbar.parentNode.insertBefore(spacer, navbar.nextSibling);
-      }
+    // ئىسكى spacer بولسا ئۆچۈرۈۋەت
+    const oldSpacer = document.getElementById('navbarStickySpacer');
+    if (oldSpacer) oldSpacer.remove();
+
+    // header دائىم fixed بولغانلىقى ئۈچۈن، بەت مەزمۇنى ئۇنىڭ ئاستىدا يوشۇرۇنۇپ قالماسلىقى ئۈچۈن body غا padding-top قوشۇش
+    function applyBodyPadding() {
+      const navHeight = navbar.offsetHeight;
+      document.body.style.paddingTop = navHeight + 'px';
     }
 
+    // بەت يۈكلەنگەندە ۋە ئېكران چوڭلۇقى ئۆزگەرگەندە ئارىلىقنى يېڭىلاش
+    applyBodyPadding();
+    window.addEventListener('resize', applyBodyPadding, { passive: true });
+
+    // ئاستىغا سىيرىلغاندا is-sticky كىلاسىنى قوشۇپ، كۆرۈنۈش ئۈنۈمىنى ئۆزگەرتىش (Glass effect)
     const topAnnouncement = document.querySelector('.top-announcement');
     const getThreshold = () => (topAnnouncement && topAnnouncement.offsetHeight > 0) ? topAnnouncement.offsetHeight : 38;
 
     let ticking = false;
-    const updateStickyState = () => {
+    const updateStickyVisuals = () => {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
       const threshold = getThreshold();
-
       if (scrollY > threshold) {
         if (!navbar.classList.contains('is-sticky')) {
-          const navHeight = navbar.offsetHeight;
-          spacer.style.height = navHeight + 'px';
-          spacer.style.display = 'block';
           navbar.classList.add('is-sticky');
         }
       } else {
         if (navbar.classList.contains('is-sticky')) {
           navbar.classList.remove('is-sticky');
-          spacer.style.display = 'none';
         }
       }
       ticking = false;
@@ -10862,18 +10860,12 @@ ${text}
 
     window.addEventListener('scroll', () => {
       if (!ticking) {
-        window.requestAnimationFrame(updateStickyState);
+        window.requestAnimationFrame(updateStickyVisuals);
         ticking = true;
       }
     }, { passive: true });
 
-    window.addEventListener('resize', () => {
-      if (navbar.classList.contains('is-sticky')) {
-        spacer.style.height = navbar.offsetHeight + 'px';
-      }
-    }, { passive: true });
-
-    updateStickyState();
+    updateStickyVisuals();
   }
   initStickyHeader();
 }

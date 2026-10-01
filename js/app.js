@@ -10818,6 +10818,37 @@ ${text}
   window.scrollToTop = window.scrollToTop || function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
   window.scrollToBottom = window.scrollToBottom || function() { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); };
   window.toggleSmartScroll = window.toggleSmartScroll || function() { ((window.scrollY || 0) > 250) ? window.scrollToTop() : window.scrollToBottom(); };
+
+  // 🌟 بەتنى ئاستىغا سىيرىغاندا چاپلاشما باش تىزىملىك (Sticky Header)
+  function initStickyHeader() {
+    const navbar = document.querySelector('.main-navbar');
+    if (!navbar) return;
+
+    let ticking = false;
+    const updateStickyState = () => {
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      if (scrollY > 15) {
+        if (!navbar.classList.contains('is-sticky')) {
+          navbar.classList.add('is-sticky');
+        }
+      } else {
+        if (navbar.classList.contains('is-sticky')) {
+          navbar.classList.remove('is-sticky');
+        }
+      }
+      ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateStickyState);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    updateStickyState();
+  }
+  initStickyHeader();
 }
 
 if (document.readyState === 'loading') {

@@ -10828,25 +10828,35 @@ ${text}
     const oldSpacer = document.getElementById('navbarStickySpacer');
     if (oldSpacer) oldSpacer.remove();
 
-    // header دائىم fixed بولغانلىقى ئۈچۈن، بەت مەزمۇنى ئۇنىڭ ئاستىدا يوشۇرۇنۇپ قالماسلىقى ئۈچۈن body غا padding-top قوشۇش
-    function applyBodyPadding() {
-      const navHeight = navbar.offsetHeight;
-      document.body.style.paddingTop = navHeight + 'px';
+    const topAnnouncement = document.querySelector('.top-announcement');
+
+    function getAnnouncementHeight() {
+      if (!topAnnouncement || topAnnouncement.offsetHeight <= 0) return 0;
+      // ئېلان بالدىقى يوشۇرۇنغان بولسا 0 قايتۇر
+      var style = window.getComputedStyle(topAnnouncement);
+      if (style.display === 'none' || style.visibility === 'hidden') return 0;
+      return topAnnouncement.offsetHeight;
     }
 
-    // بەت يۈكلەنگەندە ۋە ئېكران چوڭلۇقى ئۆزگەرگەندە ئارىلىقنى يېڭىلاش
-    applyBodyPadding();
-    window.addEventListener('resize', applyBodyPadding, { passive: true });
+    function updateHeaderPosition() {
+      var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      var annHeight = getAnnouncementHeight();
+      var navHeight = navbar.offsetHeight;
 
-    // ئاستىغا سىيرىلغاندا is-sticky كىلاسىنى قوشۇپ، كۆرۈنۈش ئۈنۈمىنى ئۆزگەرتىش (Glass effect)
-    const topAnnouncement = document.querySelector('.top-announcement');
-    const getThreshold = () => (topAnnouncement && topAnnouncement.offsetHeight > 0) ? topAnnouncement.offsetHeight : 38;
+      // ئېلان بالدىقى كۆرۈنۈۋاتسا، navbar ئۇنىڭ ئاستىدا بولسۇن
+      // ئاستىغا سىيرىلغاندا navbar ئاستا-ئاستا ئۈستىگە كەلسۇن
+      if (annHeight > 0) {
+        var offset = Math.max(0, annHeight - scrollY);
+        navbar.style.top = offset + 'px';
+      } else {
+        navbar.style.top = '0px';
+      }
 
-    let ticking = false;
-    const updateStickyVisuals = () => {
-      const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-      const threshold = getThreshold();
-      if (scrollY > threshold) {
+      // body padding-top: ئېلان بالدىقى + navbar ئېگىزلىكى
+      document.body.style.paddingTop = (annHeight + navHeight) + 'px';
+
+      // ئاستىغا سىيرىلغاندا is-sticky كىلاسىنى قوشۇپ glass effect بەرسۇن
+      if (scrollY > annHeight) {
         if (!navbar.classList.contains('is-sticky')) {
           navbar.classList.add('is-sticky');
         }
@@ -10855,17 +10865,25 @@ ${text}
           navbar.classList.remove('is-sticky');
         }
       }
-      ticking = false;
-    };
+    }
 
-    window.addEventListener('scroll', () => {
+    // دەسلەپكى ھالەتنى تەڭشەش
+    updateHeaderPosition();
+
+    // سىيرىلغاندا يېڭىلاش
+    var ticking = false;
+    window.addEventListener('scroll', function() {
       if (!ticking) {
-        window.requestAnimationFrame(updateStickyVisuals);
+        window.requestAnimationFrame(function() {
+          updateHeaderPosition();
+          ticking = false;
+        });
         ticking = true;
       }
     }, { passive: true });
 
-    updateStickyVisuals();
+    // ئېكران چوڭلۇقى ئۆزگەرگەندە يېڭىلاش
+    window.addEventListener('resize', updateHeaderPosition, { passive: true });
   }
   initStickyHeader();
 }

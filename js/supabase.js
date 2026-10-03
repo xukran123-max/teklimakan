@@ -123,12 +123,27 @@ window.TeklimakanSupabase = {
     return true;
   },
 
-  // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي ئېقىم تېجەش ۋە كاش بىلەن)
+  // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي كۈچلۈك ئېقىم تېجەش ۋە 30 مىنۇتلۇق پۇختا كاش بىلەن)
   async fetchProducts(force = false) {
     const now = Date.now();
-    // 🛡️ ئەگەر كاش مەۋجۇت بولۇپ 3 مىنۇت ئىچىدە قايتا چاقىرىلسا، ساندانغا بېرىپ بايلىق ۋە Egress ئىسراپ قىلماسلىق
-    if (!force && this._productsCache && (now - this._productsCacheTime < 3 * 60 * 1000)) {
+    const CACHE_TTL = 30 * 60 * 1000; // 30 مىنۇت پۇختا كاش
+
+    // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش
+    if (!force && this._productsCache && (now - this._productsCacheTime < CACHE_TTL)) {
       return this._productsCache;
+    }
+
+    // 2) يەرلىك كاش (localStorage Backup Cache) تەكشۈرۈش
+    if (!force && !this._productsCache) {
+      try {
+        const storedCache = localStorage.getItem('teklimakan_supabase_products_cache');
+        const storedTime = Number(localStorage.getItem('teklimakan_supabase_products_cache_time') || 0);
+        if (storedCache && (now - storedTime < CACHE_TTL)) {
+          this._productsCache = JSON.parse(storedCache);
+          this._productsCacheTime = storedTime;
+          return this._productsCache;
+        }
+      } catch (e) {}
     }
 
     const sb = getSupabase();
@@ -142,6 +157,10 @@ window.TeklimakanSupabase = {
       if (Array.isArray(data)) {
         this._productsCache = data;
         this._productsCacheTime = now;
+        try {
+          localStorage.setItem('teklimakan_supabase_products_cache', JSON.stringify(data));
+          localStorage.setItem('teklimakan_supabase_products_cache_time', String(now));
+        } catch (e) {}
       }
       return data;
     } catch (e) {
@@ -230,9 +249,21 @@ window.TeklimakanSupabase = {
   },
   async fetchOrders(force = false) {
     const now = Date.now();
-    // 🛡️ ئەگەر كاش بار بولۇپ 2 مىنۇت ئىچىدە بولسا، كاشتىن قايتۇرۇپ ئېقىم تېجەش
-    if (!force && this._ordersCache && (now - this._ordersCacheTime < 2 * 60 * 1000)) {
+    const CACHE_TTL = 15 * 60 * 1000; // 15 مىنۇت كاش
+
+    if (!force && this._ordersCache && (now - this._ordersCacheTime < CACHE_TTL)) {
       return this._ordersCache;
+    }
+    if (!force && !this._ordersCache) {
+      try {
+        const stored = localStorage.getItem('teklimakan_supabase_orders_cache');
+        const stTime = Number(localStorage.getItem('teklimakan_supabase_orders_cache_time') || 0);
+        if (stored && (now - stTime < CACHE_TTL)) {
+          this._ordersCache = JSON.parse(stored);
+          this._ordersCacheTime = stTime;
+          return this._ordersCache;
+        }
+      } catch (e) {}
     }
     const sb = getSupabase();
     if (!sb) return this._ordersCache || null;
@@ -242,6 +273,10 @@ window.TeklimakanSupabase = {
       if (Array.isArray(data)) {
         this._ordersCache = data;
         this._ordersCacheTime = now;
+        try {
+          localStorage.setItem('teklimakan_supabase_orders_cache', JSON.stringify(data));
+          localStorage.setItem('teklimakan_supabase_orders_cache_time', String(now));
+        } catch (e) {}
       }
       return data;
     } catch (e) {
@@ -387,9 +422,21 @@ window.TeklimakanSupabase = {
   // ۋاكالەتچىلەرنى ئوقۇش (ئەقلىي كاش بىلەن)
   async fetchAgents(force = false) {
     const now = Date.now();
-    // 🛡️ ئەگەر كاش بار بولۇپ 2 مىنۇت ئىچىدە بولسا، كاشتىن قايتۇرۇپ ئېقىم تېجەش
-    if (!force && this._agentsCache && (now - this._agentsCacheTime < 2 * 60 * 1000)) {
+    const CACHE_TTL = 30 * 60 * 1000; // 30 مىنۇت كاش
+
+    if (!force && this._agentsCache && (now - this._agentsCacheTime < CACHE_TTL)) {
       return this._agentsCache;
+    }
+    if (!force && !this._agentsCache) {
+      try {
+        const stored = localStorage.getItem('teklimakan_supabase_agents_cache');
+        const stTime = Number(localStorage.getItem('teklimakan_supabase_agents_cache_time') || 0);
+        if (stored && (now - stTime < CACHE_TTL)) {
+          this._agentsCache = JSON.parse(stored);
+          this._agentsCacheTime = stTime;
+          return this._agentsCache;
+        }
+      } catch (e) {}
     }
     const sb = getSupabase();
     if (!sb) {
@@ -405,6 +452,10 @@ window.TeklimakanSupabase = {
           if (Array.isArray(data)) {
             this._agentsCache = data;
             this._agentsCacheTime = now;
+            try {
+              localStorage.setItem('teklimakan_supabase_agents_cache', JSON.stringify(data));
+              localStorage.setItem('teklimakan_supabase_agents_cache_time', String(now));
+            } catch (e) {}
             return data;
           }
         }
@@ -426,6 +477,10 @@ window.TeklimakanSupabase = {
             if (Array.isArray(rData)) {
               this._agentsCache = rData;
               this._agentsCacheTime = now;
+              try {
+                localStorage.setItem('teklimakan_supabase_agents_cache', JSON.stringify(rData));
+                localStorage.setItem('teklimakan_supabase_agents_cache_time', String(now));
+              } catch (e) {}
               return rData;
             }
           }
@@ -435,6 +490,10 @@ window.TeklimakanSupabase = {
       if (Array.isArray(data)) {
         this._agentsCache = data;
         this._agentsCacheTime = now;
+        try {
+          localStorage.setItem('teklimakan_supabase_agents_cache', JSON.stringify(data));
+          localStorage.setItem('teklimakan_supabase_agents_cache_time', String(now));
+        } catch (e) {}
       }
       return data;
     } catch (e) {

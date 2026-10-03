@@ -6927,18 +6927,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (productFileInput) {
-      productFileInput.addEventListener('click', (e) => { e.target.value = ''; });
       productFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
-        handleAdminProductFile(file);
+        if (file) handleAdminProductFile(file);
       });
     }
 
     if (productCameraInput) {
-      productCameraInput.addEventListener('click', (e) => { e.target.value = ''; });
       productCameraInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
-        handleAdminProductFile(file);
+        if (file) handleAdminProductFile(file);
       });
     }
 

@@ -1871,8 +1871,8 @@ class StoreManager {
 
     const force = options && options.force === true;
     const now = Date.now();
-    // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش (ئالدىنقى قېتىمدىن 10 مىنۇت ئۆتمىگەن بولسا ۋە مەجبۇرىي بولمىسا قايتا تارتمايدۇ)
-    const shouldSyncProducts = force || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 10 * 60 * 1000);
+    // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش (ئالدىنقى قېتىمدىن 30 مىنۇت ئۆتمىگەن بولسا ۋە مەجبۇرىي بولمىسا قايتا تارتمايدۇ، ئېقىم تېجەيدۇ)
+    const shouldSyncProducts = force || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 30 * 60 * 1000);
 
     // ئەگەر ئالدىنقى بەت (ئادەتتىكى خېرىدار) بولسا ۋە تاۋارلار تېخى يېڭى بولسا، تور ئېقىمىنى تېجەش ئۈچۈن قايتا سۈرۈشتۈرمەيمىز
     if (!isAdminContext && !shouldSyncProducts) {
@@ -2174,13 +2174,10 @@ class StoreManager {
             });
           });
 
-          // 🛡️ يەرلىكتە بار، لېكىن تېخى بۇلۇتقا چىقمىغان ۋاكالەتچىلەرنى قوغداش ۋە بۇلۇتقا يوللاش
+          // 🛡️ يەرلىكتە بار، لېكىن تېخى بۇلۇتقا چىقمىغان ۋاكالەتچىلەرنى قوغداش
           localMap.forEach((la, id) => {
             if (!aMap.has(id) && !deletedAgentIds.includes(id)) {
               aMap.set(id, la);
-              if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
-                window.TeklimakanSupabase.upsertAgent(la).catch(() => {});
-              }
             }
           });
 
@@ -2242,13 +2239,19 @@ class StoreManager {
   }
 
   formatPrice(amountInTry) {
-    const info = this.getCurrencyInfo();
+    const isAdmin = typeof window !== 'undefined' && (
+      window.location.pathname.includes('seidiye') ||
+      !!document.getElementById('adminApp') ||
+      !!document.getElementById('adminLoginForm')
+    );
+    const effectiveCurrency = isAdmin ? 'TRY' : this.currentCurrency;
+    const info = CURRENCY_RATES[effectiveCurrency] || CURRENCY_RATES['TRY'];
     const rate = info ? info.rate : 1.0;
     const num = Number(amountInTry);
     const validAmount = isNaN(num) ? 0 : num;
     const converted = Math.round(validAmount * rate);
     const formattedNum = converted.toLocaleString('en-US');
-    if (this.currentCurrency === 'USD') {
+    if (effectiveCurrency === 'USD') {
       return `$${formattedNum}`;
     }
     return `${formattedNum} ₺`;

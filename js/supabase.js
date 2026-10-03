@@ -128,20 +128,26 @@ window.TeklimakanSupabase = {
     const now = Date.now();
     const CACHE_TTL = 30 * 60 * 1000; // 30 مىنۇت پۇختا كاش
 
-    // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش
-    if (!force && this._productsCache && (now - this._productsCacheTime < CACHE_TTL)) {
+    // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش — بوش ماسسىف بولسا كاشنى ئىشلەتمەيمىز
+    if (!force && this._productsCache && this._productsCache.length > 0 && (now - this._productsCacheTime < CACHE_TTL)) {
       return this._productsCache;
     }
 
-    // 2) يەرلىك كاش (localStorage Backup Cache) تەكشۈرۈش
+    // 2) يەرلىك كاش (localStorage Backup Cache) تەكشۈرۈش — بوش ماسسىف بولسا كاشنى ئىشلەتمەيمىز
     if (!force && !this._productsCache) {
       try {
         const storedCache = localStorage.getItem('teklimakan_supabase_products_cache');
         const storedTime = Number(localStorage.getItem('teklimakan_supabase_products_cache_time') || 0);
         if (storedCache && (now - storedTime < CACHE_TTL)) {
-          this._productsCache = JSON.parse(storedCache);
-          this._productsCacheTime = storedTime;
-          return this._productsCache;
+          const parsed = JSON.parse(storedCache);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this._productsCache = parsed;
+            this._productsCacheTime = storedTime;
+            return this._productsCache;
+          }
+          // بوش ماسسىف بولسا، كاشنى ئۆچۈرۈپ يېڭىدىن Supabase دىن تارتىمىز
+          localStorage.removeItem('teklimakan_supabase_products_cache');
+          localStorage.removeItem('teklimakan_supabase_products_cache_time');
         }
       } catch (e) {}
     }
@@ -251,7 +257,7 @@ window.TeklimakanSupabase = {
     const now = Date.now();
     const CACHE_TTL = 15 * 60 * 1000; // 15 مىنۇت كاش
 
-    if (!force && this._ordersCache && (now - this._ordersCacheTime < CACHE_TTL)) {
+    if (!force && this._ordersCache && this._ordersCache.length > 0 && (now - this._ordersCacheTime < CACHE_TTL)) {
       return this._ordersCache;
     }
     if (!force && !this._ordersCache) {
@@ -259,9 +265,14 @@ window.TeklimakanSupabase = {
         const stored = localStorage.getItem('teklimakan_supabase_orders_cache');
         const stTime = Number(localStorage.getItem('teklimakan_supabase_orders_cache_time') || 0);
         if (stored && (now - stTime < CACHE_TTL)) {
-          this._ordersCache = JSON.parse(stored);
-          this._ordersCacheTime = stTime;
-          return this._ordersCache;
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this._ordersCache = parsed;
+            this._ordersCacheTime = stTime;
+            return this._ordersCache;
+          }
+          localStorage.removeItem('teklimakan_supabase_orders_cache');
+          localStorage.removeItem('teklimakan_supabase_orders_cache_time');
         }
       } catch (e) {}
     }
@@ -424,7 +435,7 @@ window.TeklimakanSupabase = {
     const now = Date.now();
     const CACHE_TTL = 30 * 60 * 1000; // 30 مىنۇت كاش
 
-    if (!force && this._agentsCache && (now - this._agentsCacheTime < CACHE_TTL)) {
+    if (!force && this._agentsCache && this._agentsCache.length > 0 && (now - this._agentsCacheTime < CACHE_TTL)) {
       return this._agentsCache;
     }
     if (!force && !this._agentsCache) {
@@ -432,9 +443,14 @@ window.TeklimakanSupabase = {
         const stored = localStorage.getItem('teklimakan_supabase_agents_cache');
         const stTime = Number(localStorage.getItem('teklimakan_supabase_agents_cache_time') || 0);
         if (stored && (now - stTime < CACHE_TTL)) {
-          this._agentsCache = JSON.parse(stored);
-          this._agentsCacheTime = stTime;
-          return this._agentsCache;
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this._agentsCache = parsed;
+            this._agentsCacheTime = stTime;
+            return this._agentsCache;
+          }
+          localStorage.removeItem('teklimakan_supabase_agents_cache');
+          localStorage.removeItem('teklimakan_supabase_agents_cache_time');
         }
       } catch (e) {}
     }

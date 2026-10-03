@@ -1871,8 +1871,9 @@ class StoreManager {
 
     const force = options && options.force === true;
     const now = Date.now();
-    // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش (ئالدىنقى قېتىمدىن 30 مىنۇت ئۆتمىگەن بولسا ۋە مەجبۇرىي بولمىسا قايتا تارتمايدۇ، ئېقىم تېجەيدۇ)
-    const shouldSyncProducts = force || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 30 * 60 * 1000);
+    // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش — يەرلىك تاۋار بولمىسا مەجبۇرىي تارتىمىز
+    const localProductsEmpty = this.getProducts().length === 0;
+    const shouldSyncProducts = force || localProductsEmpty || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 30 * 60 * 1000);
 
     // ئەگەر ئالدىنقى بەت (ئادەتتىكى خېرىدار) بولسا ۋە تاۋارلار تېخى يېڭى بولسا، تور ئېقىمىنى تېجەش ئۈچۈن قايتا سۈرۈشتۈرمەيمىز
     if (!isAdminContext && !shouldSyncProducts) {

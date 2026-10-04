@@ -2045,7 +2045,17 @@ class StoreManager {
           const mergedStr = JSON.stringify(merged);
           const currentProductsStr = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
           if (mergedStr !== currentProductsStr) {
-            localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
+            try {
+              localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
+            } catch (quotaErr) {
+              console.warn('localStorage quota exceeded, cleaning temporary caches:', quotaErr);
+              try {
+                localStorage.removeItem('teklimakan_supabase_products_cache');
+                localStorage.removeItem('teklimakan_supabase_orders_cache');
+                localStorage.removeItem('teklimakan_supabase_agents_cache');
+                localStorage.setItem(STORAGE_KEYS.PRODUCTS, mergedStr);
+              } catch (e2) {}
+            }
             this.notifyDataChange('products');
           }
         } else if (isAdminContext && Array.isArray(remoteProducts) && remoteProducts.length === 0) {
@@ -5338,6 +5348,17 @@ class StoreManager {
       prods = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [];
     } catch (e) {
       prods = [];
+    }
+    // 🛡️ ئەگەر يەرلىك ساندان قۇرۇق بولۇپ قالسا، دەسلەپكى تاۋارلار بىلەن دەرھال تولۇقلاپ بوش كۆرۈنۈشنىڭ ئالدىنى ئېلىش
+    if (!Array.isArray(prods) || prods.length === 0) {
+      if (typeof INITIAL_PRODUCTS !== 'undefined' && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
+        prods = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+        try {
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
+        } catch (e) {}
+      } else {
+        prods = [];
+      }
     }
     return prods.map(p => {
       if (!p.unit) p.unit = 'دانە';

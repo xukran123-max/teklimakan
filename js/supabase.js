@@ -123,56 +123,55 @@ window.TeklimakanSupabase = {
     return true;
   },
 
-  // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي كۈچلۈك ئېقىم تېجەش ۋە 30 مىنۇتلۇق پۇختا كاش بىلەن)
+  // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي كۈچلۈك ئېقىم تېجەش ۋە SDK + REST قوش كاپالەتلىك)
   async fetchProducts(force = false) {
     const now = Date.now();
-    const CACHE_TTL = 30 * 60 * 1000; // 30 مىنۇت پۇختا كاش
+    const CACHE_TTL = 15 * 60 * 1000; // 15 مىنۇت پۇختا كاش
 
-    // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش — بوش ماسسىف بولسا كاشنى ئىشلەتمەيمىز
-    if (!force && this._productsCache && this._productsCache.length > 0 && (now - this._productsCacheTime < CACHE_TTL)) {
+    // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش
+    if (!force && this._productsCache && Array.isArray(this._productsCache) && this._productsCache.length > 0 && (now - this._productsCacheTime < CACHE_TTL)) {
       return this._productsCache;
     }
 
-    // 2) يەرلىك كاش (localStorage Backup Cache) تەكشۈرۈش — بوش ماسسىف بولسا كاشنى ئىشلەتمەيمىز
-    if (!force && !this._productsCache) {
+    // 2) Supabase SDK ئارقىلىق سىناش
+    const sb = getSupabase();
+    if (sb) {
       try {
-        const storedCache = localStorage.getItem('teklimakan_supabase_products_cache');
-        const storedTime = Number(localStorage.getItem('teklimakan_supabase_products_cache_time') || 0);
-        if (storedCache && (now - storedTime < CACHE_TTL)) {
-          const parsed = JSON.parse(storedCache);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            this._productsCache = parsed;
-            this._productsCacheTime = storedTime;
-            return this._productsCache;
-          }
-          // بوش ماسسىف بولسا، كاشنى ئۆچۈرۈپ يېڭىدىن Supabase دىن تارتىمىز
-          localStorage.removeItem('teklimakan_supabase_products_cache');
-          localStorage.removeItem('teklimakan_supabase_products_cache_time');
+        const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          this._productsCache = data;
+          this._productsCacheTime = now;
+          return data;
         }
-      } catch (e) {}
+        if (error) {
+          console.warn('Supabase SDK fetchProducts خاتالىقى:', error.message);
+        }
+      } catch (e) {
+        console.warn('Supabase SDK products ئۇلىنىش خاتالىقى:', e);
+      }
     }
 
-    const sb = getSupabase();
-    if (!sb) return this._productsCache || null;
+    // 3) ئەڭ ئىشەنچلىك چاقماقتەك REST API Fallback (SDK بولمىسىمۇ 100% ئىشلەيدۇ)
     try {
-      const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
-      if (error) {
-        console.warn('Supabase fetchProducts خاتالىقى:', error.message);
-        return this._productsCache || null;
+      const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/products?select=*&order=created_at.desc`, {
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        }
+      });
+      if (res.ok) {
+        const restData = await res.json();
+        if (Array.isArray(restData) && restData.length > 0) {
+          this._productsCache = restData;
+          this._productsCacheTime = now;
+          return restData;
+        }
       }
-      if (Array.isArray(data)) {
-        this._productsCache = data;
-        this._productsCacheTime = now;
-        try {
-          localStorage.setItem('teklimakan_supabase_products_cache', JSON.stringify(data));
-          localStorage.setItem('teklimakan_supabase_products_cache_time', String(now));
-        } catch (e) {}
-      }
-      return data;
-    } catch (e) {
-      console.warn('Supabase products ئۇلىنىش خاتالىقى:', e);
-      return this._productsCache || null;
+    } catch (restErr) {
+      console.warn('Supabase REST fallback fetchProducts خاتالىقى:', restErr);
     }
+
+    return this._productsCache || null;
   },
 
   // تاۋارنى بۇلۇتقا ساقلاش ياكى يېڭىلاش
@@ -257,42 +256,41 @@ window.TeklimakanSupabase = {
     const now = Date.now();
     const CACHE_TTL = 15 * 60 * 1000; // 15 مىنۇت كاش
 
-    if (!force && this._ordersCache && this._ordersCache.length > 0 && (now - this._ordersCacheTime < CACHE_TTL)) {
+    if (!force && this._ordersCache && Array.isArray(this._ordersCache) && this._ordersCache.length > 0 && (now - this._ordersCacheTime < CACHE_TTL)) {
       return this._ordersCache;
     }
-    if (!force && !this._ordersCache) {
+
+    const sb = getSupabase();
+    if (sb) {
       try {
-        const stored = localStorage.getItem('teklimakan_supabase_orders_cache');
-        const stTime = Number(localStorage.getItem('teklimakan_supabase_orders_cache_time') || 0);
-        if (stored && (now - stTime < CACHE_TTL)) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            this._ordersCache = parsed;
-            this._ordersCacheTime = stTime;
-            return this._ordersCache;
-          }
-          localStorage.removeItem('teklimakan_supabase_orders_cache');
-          localStorage.removeItem('teklimakan_supabase_orders_cache_time');
+        const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
+        if (!error && Array.isArray(data)) {
+          this._ordersCache = data;
+          this._ordersCacheTime = now;
+          return data;
         }
       } catch (e) {}
     }
-    const sb = getSupabase();
-    if (!sb) return this._ordersCache || null;
+
+    // REST fallback for orders
     try {
-      const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
-      if (error) return this._ordersCache || null;
-      if (Array.isArray(data)) {
-        this._ordersCache = data;
-        this._ordersCacheTime = now;
-        try {
-          localStorage.setItem('teklimakan_supabase_orders_cache', JSON.stringify(data));
-          localStorage.setItem('teklimakan_supabase_orders_cache_time', String(now));
-        } catch (e) {}
+      const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/orders?select=*&order=created_at.desc`, {
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+        }
+      });
+      if (res.ok) {
+        const rData = await res.json();
+        if (Array.isArray(rData)) {
+          this._ordersCache = rData;
+          this._ordersCacheTime = now;
+          return rData;
+        }
       }
-      return data;
-    } catch (e) {
-      return this._ordersCache || null;
-    }
+    } catch (e) {}
+
+    return this._ordersCache || null;
   },
 
   // زاكازنى بۇلۇتقا قوشۇش

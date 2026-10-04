@@ -1304,10 +1304,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.innerHTML = '';
     products.forEach(product => {
-      const tr = document.createElement('tr');
+      try {
+        const tr = document.createElement('tr');
 
-      // 🛡️ تېكىست بۇزۇلۇشنى تەكشۈرۈش ۋە كاپالەتلەندۈرۈش (Anti-Corruption Display Shield)
-      const isBad = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
+        // 🛡️ تېكىست بۇزۇلۇشنى تەكشۈرۈش ۋە كاپالەتلەندۈرۈش (Anti-Corruption Display Shield)
+        const isBad = (str) => typeof str === 'string' && (/\?{2,}/.test(str) || str.includes('????') || str === '?????');
       const cleanUnit = (u) => {
         if (!u || isBad(u)) return 'دانە';
         let s = String(u).trim();
@@ -1470,8 +1471,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </td>
       `;
-
       tbody.appendChild(tr);
+    } catch (rowErr) {
+      console.warn('Row render error for product', product && product.id, rowErr);
+    }
     });
 
     // ⚡ مەشغۇلات كۇنۇپكىلىرى ئىنكاسىنى چاقماقتەك تېزلىتىش (Single Event Delegation)

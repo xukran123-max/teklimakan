@@ -1811,37 +1811,46 @@ function initTeklimakanApp() {
       }
     }
 
+    const appendSafeCard = (p) => {
+      try {
+        const c = createSingleProductCard(p, i18n, store);
+        if (c) grid.appendChild(c);
+      } catch (err) {
+        console.warn('Card creation error for product', p && p.id, err);
+      }
+    };
+
     if (!isInterleavedAllowed || shelves.length === 0) {
       // ئادەتتىكى سۈزۈلگەن ياكى ئىزدەلگەن رېشاتكا
       products.forEach(product => {
-        grid.appendChild(createSingleProductCard(product, i18n, store));
+        appendSafeCard(product);
       });
     } else {
       // 🌟 سىيرىلما تاۋار راكلىرى بىلەن مەھسۇلاتلارنى ئارلاشتۇرۇپ تىزىش:
-      // 1. ئەڭ ئۈستىدە: 1-سىيرىلما راك (مەسىلەن: «سىزگە تەۋسىيە»)
-      // 2. ئاستىدىكى قۇرلاردا: 4 دانە مەھسۇلات (تېلېفوندا دەل 2 قۇر، ئۈستەلدە 1 قۇر)
-      // 3. ئاندىن: 2-سىيرىلما راك (مەسىلەن: «ئالاھىدە باھالىق مەھسۇلاتلار»)
-      // 4. قالغان بارلىق تاۋارلار داۋاملىشىدۇ (ئەگەر كېيىنكى قوشۇمچە راكلار بولسا ھەر 6 تاۋاردىن كېيىن قىستۇرۇلىدۇ)
       let shelfIdx = 0;
       let prodIdx = 0;
 
       // 1-سىيرىلما راك (ئەڭ ئۈستىدە)
       if (shelfIdx < shelves.length) {
-        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
-        if (shelfEl) grid.appendChild(shelfEl);
+        try {
+          const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+          if (shelfEl) grid.appendChild(shelfEl);
+        } catch (e) {}
         shelfIdx++;
       }
 
       // 1-قۇر تەكشى مەھسۇلاتلار (دەسلەپكى 4 مەھسۇلات)
       const firstBatch = Math.min(prodIdx + 4, products.length);
       for (; prodIdx < firstBatch; prodIdx++) {
-        grid.appendChild(createSingleProductCard(products[prodIdx], i18n, store));
+        appendSafeCard(products[prodIdx]);
       }
 
       // 2-سىيرىلما راك
       if (shelfIdx < shelves.length) {
-        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
-        if (shelfEl) grid.appendChild(shelfEl);
+        try {
+          const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+          if (shelfEl) grid.appendChild(shelfEl);
+        } catch (e) {}
         shelfIdx++;
       }
 
@@ -1849,20 +1858,24 @@ function initTeklimakanApp() {
       while (prodIdx < products.length) {
         const nextBatch = Math.min(prodIdx + 6, products.length);
         for (; prodIdx < nextBatch; prodIdx++) {
-          grid.appendChild(createSingleProductCard(products[prodIdx], i18n, store));
+          appendSafeCard(products[prodIdx]);
         }
 
         if (shelfIdx < shelves.length) {
-          const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
-          if (shelfEl) grid.appendChild(shelfEl);
+          try {
+            const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+            if (shelfEl) grid.appendChild(shelfEl);
+          } catch (e) {}
           shelfIdx++;
         }
       }
 
       // قوشۇمچە تۈگەنمىگەن راكلار بولسا
       while (shelfIdx < shelves.length) {
-        const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
-        if (shelfEl) grid.appendChild(shelfEl);
+        try {
+          const shelfEl = createShowcaseShelfElement(shelves[shelfIdx], currentLang);
+          if (shelfEl) grid.appendChild(shelfEl);
+        } catch (e) {}
         shelfIdx++;
       }
     }

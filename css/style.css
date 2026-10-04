@@ -4596,13 +4596,26 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
 
 @media (max-width: 640px) {
   .admin-floating-badge {
-    bottom: 20px;
+    bottom: 84px;
     right: 14px;
     left: auto !important;
     padding: 0.5rem 0.95rem;
     font-size: 0.82rem;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(234, 179, 8, 0.7);
   }
+}
+
+.bottom-nav-admin i {
+  color: #f59e0b;
+}
+.header-admin-btn {
+  color: #f59e0b !important;
+  font-size: 1.1rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.header-admin-btn:hover {
+  color: #d97706 !important;
+  transform: scale(1.1);
 }
 
 /* Category Icon Palette */

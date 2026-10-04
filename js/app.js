@@ -8462,12 +8462,8 @@ function initTeklimakanApp() {
     const navBtn = document.getElementById('adminSecretNavBtn');
     const floatBadge = document.getElementById('adminFloatingBadge');
 
-    if (shouldShow) {
-      if (navBtn) navBtn.style.display = 'none';
-      if (floatBadge) floatBadge.style.display = 'inline-flex';
-    } else {
-      if (navBtn) navBtn.style.display = 'none';
-      if (floatBadge) floatBadge.style.display = 'none';
+    if (floatBadge) {
+      floatBadge.style.display = 'inline-flex';
     }
 
     // 3. ئاستىدىكى نەشر ھوقۇقى (©) نى 3 قېتىم چەكسە ئارقا بەتكە تېز كىرىپ ئۈسكۈنىنى دەرھال تىزىملىۋالىدۇ

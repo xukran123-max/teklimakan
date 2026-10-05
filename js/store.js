@@ -1811,10 +1811,10 @@ class StoreManager {
     const now = Date.now();
     // تاۋارلارنى ماس قەدەملەشنى ئەقلىي كونترول قىلىش — يەرلىك تاۋار بولمىسا مەجبۇرىي تارتىمىز
     const localProductsEmpty = this.getProducts().length === 0;
-    const shouldSyncProducts = force || localProductsEmpty || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 30 * 60 * 1000);
+    // تاۋارلارنى بۇلۇتتىن دەل ۋاقتىدا يېڭىلاش (ئەگەر force بولسا ياكى 10 سېكۇنتتىن ئاشقان بولسا قايتا تارتىدۇ)
+    const shouldSyncProducts = force || localProductsEmpty || !this._lastProductsSyncTime || (now - this._lastProductsSyncTime > 10 * 1000);
 
-    // ئەگەر ئالدىنقى بەت (ئادەتتىكى خېرىدار) بولسا ۋە تاۋارلار تېخى يېڭى بولسا، تور ئېقىمىنى تېجەش ئۈچۈن قايتا سۈرۈشتۈرمەيمىز
-    if (!isAdminContext && !shouldSyncProducts) {
+    if (!shouldSyncProducts) {
       return;
     }
 
@@ -1871,6 +1871,7 @@ class StoreManager {
               if (isAdminContext && window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertProduct === 'function') {
                 window.TeklimakanSupabase.upsertProduct(localItem);
               }
+              map.set(rp.id, localItem);
               return;
             }
 

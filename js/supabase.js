@@ -126,7 +126,7 @@ window.TeklimakanSupabase = {
   // تاۋارلارنى بۇلۇتتىن ئوقۇش (ئەقلىي كۈچلۈك ئېقىم تېجەش ۋە SDK + REST قوش كاپالەتلىك)
   async fetchProducts(force = false) {
     const now = Date.now();
-    const CACHE_TTL = 15 * 60 * 1000; // 15 مىنۇت پۇختا كاش
+    const CACHE_TTL = 10 * 1000; // 10 سېكۇنت قىسقا كاش (ئۆزگىرىشلەر تېز ئەكس ئېتىدۇ)
 
     // 1) ئەستە تۇتۇش (Memory Cache) تەكشۈرۈش
     if (!force && this._productsCache && Array.isArray(this._productsCache) && this._productsCache.length > 0 && (now - this._productsCacheTime < CACHE_TTL)) {

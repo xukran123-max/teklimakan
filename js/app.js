@@ -249,7 +249,7 @@ function initTeklimakanApp() {
     try { initSmartScrollToggle(); } catch (e) { console.error('initSmartScrollToggle error:', e); }
 
     if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
-      window.appStore.syncWithSupabase().then(() => {
+      window.appStore.syncWithSupabase({ force: true }).then(() => {
         try { renderProducts(); } catch (e) {}
         try { renderShowcaseShelves(); } catch (e) {}
         try { renderBrands(); } catch (e) {}

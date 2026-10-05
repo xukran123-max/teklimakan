@@ -2961,14 +2961,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!agent) {
         agent = {
-          id: 'AGT-101',
-          name: 'ئەلىجان روزى',
-          city: 'ئىستانبۇل (فاتىھ)',
-          phone: '05551609999',
-          certCode: 'TK-CERT-2026-101',
-          authorizedBrands: ['تەكلىماكان كىلاسسىك', 'خوتەن مىراس'],
-          registeredAt: '2026-08-15',
-          authExpireDate: '2027-08-15'
+          id: 'AGT-000',
+          name: 'ۋاكالەتچى',
+          city: 'ئىستانبۇل',
+          phone: '',
+          certCode: 'TK-CERT-2026-000',
+          authorizedBrands: [],
+          registeredAt: new Date().toISOString().split('T')[0],
+          authExpireDate: '2027-12-31'
         };
       }
       currentViewingCertAgent = agent;

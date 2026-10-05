@@ -174,97 +174,10 @@ const INITIAL_REPUTATION_BADGES = [
   }
 ];
 
-// دەسلەپكى تىزىملاتقان ۋاكالەتچىلەر ۋە ماركا ھوقۇقلىرى (Initial Vendors/Agents)
-const INITIAL_AGENTS = [
-  {
-    id: 'AGT-101',
-    name: 'ئەلىجان روزى',
-    email: 'alijan@teklimakan.com',
-    phone: '05550000101',
-    city: 'ئىستانبۇل (فاتىھ)',
-    status: 'تەستىقلاندى', // 'تەستىقلاندى', 'تەستىق كۈتۈۋاتىدۇ', 'توختىتىلدى'
-    reputation: 'ئىشەنچىلىك سودىگەر',
-    canPublishMultilingual: false,
-    authorizedBrands: ['تەكلىماكان كىلاسسىك', 'خوتەن مىراس'],
-    registeredAt: '2026-08-15',
-    authExpireDate: '2027-08-15',
-    certCode: 'TK-CERT-2026-101',
-    productsCount: 6,
-    salesTotal: 54200,
-    monthlySales: 19800,
-    monthlyOrders: 28,
-    commissionRate: 15,
-    violationsCount: 0,
-    suspendedUntil: null,
-    suspensionReason: ''
-  },
-  {
-    id: 'AGT-102',
-    name: 'سەلىم يىلماز',
-    email: 'selim@teklimakan.com',
-    phone: '05321112233',
-    city: 'ئەنقەرە (چانکايالىق)',
-    status: 'تەستىقلاندى',
-    reputation: 'ئالتۇن دەرىجىلىك سودىگەر',
-    canPublishMultilingual: false,
-    authorizedBrands: ['Rize Çay Evi', 'TecnoPro Audio'],
-    registeredAt: '2026-08-20',
-    authExpireDate: '2027-08-20',
-    certCode: 'TK-CERT-2026-102',
-    productsCount: 4,
-    salesTotal: 34500,
-    monthlySales: 11200,
-    monthlyOrders: 18,
-    commissionRate: 15,
-    violationsCount: 0,
-    suspendedUntil: null,
-    suspensionReason: ''
-  },
-  {
-    id: 'AGT-103',
-    name: 'مەريەم كېرەم',
-    email: 'meryem@teklimakan.com',
-    phone: '05443334455',
-    city: 'بۇرسا (نىلۈفەر)',
-    status: 'تەستىق كۈتۈۋاتىدۇ',
-    reputation: 'يېڭى باشلىغان سودىگەر',
-    canPublishMultilingual: false,
-    authorizedBrands: ['تۇرپان يېشىل'],
-    registeredAt: '2026-09-02',
-    authExpireDate: '2027-09-02',
-    certCode: 'TK-CERT-2026-103',
-    productsCount: 2,
-    salesTotal: 8600,
-    monthlySales: 3400,
-    monthlyOrders: 5,
-    commissionRate: 10,
-    violationsCount: 0,
-    suspendedUntil: null,
-    suspensionReason: ''
-  },
-  {
-    id: 'AGT-104',
-    name: 'Ablikim Uyghur',
-    email: 'ablikim@teklimakan.com',
-    phone: '05559998877',
-    city: 'ئىستانبۇل (زەيتىنبۇرنۇ)',
-    status: 'تەستىقلاندى',
-    reputation: 'ئىشەنچىلىك سودىگەر',
-    canPublishMultilingual: false,
-    authorizedBrands: ['تەكلىماكان كىلاسسىك', 'SilkRoad Press'],
-    registeredAt: '2026-09-10',
-    authExpireDate: '2027-09-10',
-    certCode: 'TK-CERT-2026-104',
-    productsCount: 3,
-    salesTotal: 28900,
-    monthlySales: 14600,
-    monthlyOrders: 21,
-    commissionRate: 15,
-    violationsCount: 0,
-    suspendedUntil: null,
-    suspensionReason: ''
-  }
-];
+// سۈكۈتتىكى ۋاكالەتچىلەر تىزىملىكى (بارلىق ۋاكالەتچىلەر پەقەت ھەقىقىي تىزىملاتقانلار ۋە بۇلۇتتىن كېلىدۇ)
+const INITIAL_AGENTS = [];
+const FAKE_DEMO_AGENT_IDS = ['AGT-101', 'AGT-102', 'AGT-103', 'AGT-104'];
+const FAKE_DEMO_AGENT_EMAILS = ['alijan@teklimakan.com', 'selim@teklimakan.com', 'meryem@teklimakan.com', 'ablikim@teklimakan.com'];
 
 // پۇل بىرلىكى نىسبەتلىرى (ئاساسىي پۇل بىرلىكى: تۈرك لىراسى ₺)
 const CURRENCY_RATES = {
@@ -1623,9 +1536,34 @@ class StoreManager {
     if (updated) {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
     }
+        // 🧹 سۈكۈتتىكى سىناق ۋاكالەتچىلىرىنى (AGT-101 ~ AGT-104) بىر قېتىمدىلا مەڭگۈلۈك چىقىرىۋېتىش ۋە ئۆچۈرۈلگەنلەرگە قوشۇش
+    let deletedAgentIds = this.getDeletedAgentIds();
+    let deletedChanged = false;
+    FAKE_DEMO_AGENT_IDS.forEach(fid => {
+      if (!deletedAgentIds.includes(fid)) {
+        deletedAgentIds.push(fid);
+        deletedChanged = true;
+      }
+    });
+    if (deletedChanged) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.DELETED_AGENTS, JSON.stringify(deletedAgentIds));
+      } catch (e) {}
+    }
+
     const storedAgents = localStorage.getItem(STORAGE_KEYS.AGENTS);
     if (!storedAgents) {
-      localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(INITIAL_AGENTS));
+      localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify([]));
+    } else {
+      try {
+        const parsedAgents = JSON.parse(storedAgents);
+        if (Array.isArray(parsedAgents)) {
+          const cleanedAgents = parsedAgents.filter(a => a && !FAKE_DEMO_AGENT_IDS.includes(a.id) && !FAKE_DEMO_AGENT_EMAILS.includes(a.email) && !deletedAgentIds.includes(a.id));
+          if (cleanedAgents.length !== parsedAgents.length) {
+            localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(cleanedAgents));
+          }
+        }
+      } catch (e) {}
     }
     const storedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
     let validCat = false;
@@ -2185,14 +2123,14 @@ class StoreManager {
             });
           });
 
-          // 🛡️ يەرلىكتە بار، لېكىن تېخى بۇلۇتقا چىقمىغان ۋاكالەتچىلەرنى قوغداش
+          // 🛡️ يەرلىكتە بار، لېكىن تېخى بۇلۇتقا چىقمىغان ھەقىقىي ۋاكالەتچىلەرنى قوغداش (سىناق ۋاكالەتچىلەر كىرمەيدۇ)
           localMap.forEach((la, id) => {
-            if (!aMap.has(id) && !deletedAgentIds.includes(id)) {
+            if (!aMap.has(id) && !deletedAgentIds.includes(id) && !FAKE_DEMO_AGENT_IDS.includes(id) && !FAKE_DEMO_AGENT_EMAILS.includes(la.email)) {
               aMap.set(id, la);
             }
           });
 
-          const mergedAgents = Array.from(aMap.values());
+          const mergedAgents = Array.from(aMap.values()).filter(a => a && !deletedAgentIds.includes(a.id) && !FAKE_DEMO_AGENT_IDS.includes(a.id) && !FAKE_DEMO_AGENT_EMAILS.includes(a.email));
           const agentsStr = JSON.stringify(mergedAgents);
           const currentAgentsStr = localStorage.getItem(STORAGE_KEYS.AGENTS);
           if (agentsStr !== currentAgentsStr) {
@@ -2274,11 +2212,16 @@ class StoreManager {
 
   // ==================== ۋاكالەتچىلەر ۋە ماركا رۇخسىتى (Agents & Brand Auth) ====================
   getAgents(sortBy = 'name') {
-    let agents = JSON.parse(localStorage.getItem(STORAGE_KEYS.AGENTS)) || INITIAL_AGENTS;
-    const deletedAgentIds = this.getDeletedAgentIds();
-    if (Array.isArray(deletedAgentIds) && deletedAgentIds.length > 0) {
-      agents = agents.filter(a => a && a.id && !deletedAgentIds.includes(a.id));
+    let raw = localStorage.getItem(STORAGE_KEYS.AGENTS);
+    let agents = [];
+    try {
+      agents = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(agents)) agents = [];
+    } catch (e) {
+      agents = [];
     }
+    const deletedAgentIds = this.getDeletedAgentIds();
+    agents = agents.filter(a => a && a.id && !FAKE_DEMO_AGENT_IDS.includes(a.id) && !FAKE_DEMO_AGENT_EMAILS.includes(a.email) && !deletedAgentIds.includes(a.id));
 
     // بارلىق ۋاكالەتچىلەرنىڭ شەھەر، سېتىش سوممىسى ۋە كومىسسىيەلىرىنى تولۇقلاش
     let updated = false;

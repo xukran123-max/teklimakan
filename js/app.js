@@ -8448,8 +8448,9 @@ function initTeklimakanApp() {
 
   // ==================== 🔐 مەخپىي باشقۇرغۇچى كۇنۇپكىسى (پەقەت باشقۇرغۇچى ئۈسكۈنىسىدىلا كۆرۈنىدۇ) ====================
   function initAdminDeviceButton() {
-    // 1. ئۈسكۈنە سالاھىيىتىنى دەلىللەش
+    // 1. ئۈسكۈنە سالاھىيىتىنى دەلىللەش (پەقەت ئارقا سۇپىغا كىرىپ باققان باشقۇرغۇچى ئۈسكۈنىسىدىلا ئېچىلىدۇ)
     const isAuth = localStorage.getItem('teklimakan_admin_device') === 'true' ||
+                   localStorage.getItem('teklimakan_admin_auth') === 'true' ||
                    sessionStorage.getItem('teklimakan_admin_auth') === 'true';
 
     // 2. ئەگەر سىناق ياكى تۇنجى قېتىم ئاكتىپلاش ئۈچۈن تور ئادرېسىغا ?admin=1 ياكى ?admin=true قوشۇپ ئاچسىمۇ مەڭگۈلۈك ئاكتىپلايدۇ
@@ -8459,11 +8460,15 @@ function initTeklimakanApp() {
     }
 
     const shouldShow = isAuth || localStorage.getItem('teklimakan_admin_device') === 'true';
-    const navBtn = document.getElementById('adminSecretNavBtn');
+    const headerAdminBtn = document.getElementById('headerAdminBtn');
     const floatBadge = document.getElementById('adminFloatingBadge');
 
-    if (floatBadge) {
-      floatBadge.style.display = 'inline-flex';
+    if (shouldShow) {
+      if (headerAdminBtn) headerAdminBtn.style.setProperty('display', 'inline-flex', 'important');
+      if (floatBadge) floatBadge.style.setProperty('display', 'inline-flex', 'important');
+    } else {
+      if (headerAdminBtn) headerAdminBtn.style.setProperty('display', 'none', 'important');
+      if (floatBadge) floatBadge.style.setProperty('display', 'none', 'important');
     }
 
     // 3. ئاستىدىكى نەشر ھوقۇقى (©) نى 3 قېتىم چەكسە ئارقا بەتكە تېز كىرىپ ئۈسكۈنىنى دەرھال تىزىملىۋالىدۇ

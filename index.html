@@ -118,7 +118,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20261004_v181">
+  <link rel="stylesheet" href="css/style.css?v=20261005_v186">
 
   <!-- 🎯 Meta (Facebook & Instagram) Pixel Code -->
   <script>
@@ -274,7 +274,7 @@
         <button id="themeToggleBtn" class="action-btn theme-toggle-btn" title="تۈن ۋە كۈندۈز تەڭشىكى">
           <i class="fas fa-moon"></i>
         </button>
-        <a href="seidiye" class="action-btn header-admin-btn" id="headerAdminBtn" title="ئارقا سۇپا باشقۇرۇش (Admin)" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" aria-label="باشقۇرۇش مەركىزى">
+        <a href="seidiye" class="action-btn header-admin-btn" id="headerAdminBtn" title="ئارقا سۇپا باشقۇرۇش (Admin)" style="text-decoration: none; display: none !important; align-items: center; justify-content: center;" aria-label="باشقۇرۇش مەركىزى">
           <i class="fas fa-user-shield"></i>
         </a>
       </div>
@@ -2321,19 +2321,11 @@
         <span class="bottom-nav-text" id="navWishlistText">ياقتۇرغانلىرىم</span>
       </button>
 
-      <!-- 4. ئارقا سۇپا (Admin Backend - تېلېفوندىن بىۋاسىتە كىرىش) -->
-      <a href="seidiye" class="bottom-nav-item bottom-nav-admin" id="adminBottomNavBtn" title="ئارقا سۇپا باشقۇرۇش" style="text-decoration: none; color: inherit;">
-        <div class="bottom-nav-icon-wrap">
-          <i class="fas fa-user-shield" style="color: #f59e0b;"></i>
-        </div>
-        <span class="bottom-nav-text" id="navAdminText">ئارقا سۇپا</span>
-      </a>
-
     </div>
   </nav>
 
-  <!-- 🔐 لەيلىمە ئارقا سۇپا تېز كىرىش تۈگمىسى -->
-  <a href="seidiye" id="adminFloatingBadge" class="admin-floating-badge" style="display: inline-flex;" title="ئارقا سۇپىغا كىرىش (باشقۇرۇش مەركىزى)">
+  <!-- 🔐 لەيلىمە ئارقا سۇپا تېز كىرىش تۈگمىسى (پەقەت تەكشۈرۈلگەن باشقۇرغۇچى ئۈسكۈنىسىدىلا كۆرۈنىدۇ) -->
+  <a href="seidiye" id="adminFloatingBadge" class="admin-floating-badge" style="display: none !important;" title="ئارقا سۇپىغا كىرىش (باشقۇرۇش مەركىزى)">
     <i class="fas fa-shield-alt"></i>
     <span>ئارقا سۇپا</span>
   </a>
@@ -2344,7 +2336,7 @@
 
   <!-- 🛍️ تەكلىماكان ئاساسىي سىستېما كودلىرى (Core Shop Scripts - 100% يەرلىك ۋە تېز) -->
   <script src="js/store.js?v=20261005_v185"></script>
-  <script src="js/app.js?v=20261005_v185"></script>
+  <script src="js/app.js?v=20261005_v186"></script>
   <script src="js/push-manager.js?v=20261004_v180"></script>
 </body>
 </html>

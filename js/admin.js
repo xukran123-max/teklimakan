@@ -9686,6 +9686,9 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <button type="button" onclick="window.saveHeroSlidesAdmin()" class="btn-primary" style="background: #2563eb; padding: 0.4rem 1rem; font-size: 0.82rem; font-weight: 800; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 8px rgba(37,99,235,0.25);" title="ئۆزگىرىشلەرنى ساقلاش">
+              <i class="fas fa-save"></i> <span>ساقلاش</span>
+            </button>
             <button type="button" onclick="window.moveHeroSlideAdmin(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.82rem; cursor: pointer; ${idx === 0 ? 'opacity: 0.4; cursor: not-allowed;' : ''}" title="يۇقىرىغا يۆتكەش">
               <i class="fas fa-arrow-up"></i>
             </button>
@@ -9700,10 +9703,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <!-- Live Visual Preview Box -->
         <div style="margin-bottom: 1.5rem;">
-          <div style="font-size: 0.82rem; font-weight: 800; color: #64748b; margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.4rem;">
-            <i class="fas fa-eye" style="color: #6366f1;"></i> <span>بۇ ئېلاننىڭ باش بەتتىكى ئەسلى كۆرۈنۈشى (جانلىق سىناق كۆزنەك):</span>
+          <div style="font-size: 0.82rem; font-weight: 800; color: #64748b; margin-bottom: 0.45rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-eye" style="color: #6366f1;"></i> <span>بۇ ئېلاننىڭ باش بەتتىكى ئەسلى كۆرۈنۈشى (جانلىق سىناق كۆزنەك):</span>
+            </div>
+            <span style="font-size: 0.75rem; color: #059669; font-weight: 700; background: #ecfdf5; padding: 2px 8px; border-radius: 6px;">💡 خەتلەرنى ئاستىدىكى 2-بۆلەكتىكى كاتەكچىلەرگە يېزىسىز</span>
           </div>
-          <div id="slideLivePreview_${idx}" style="position: relative; border-radius: 14px; overflow: hidden; height: 180px; background-image: url('${imgSrc}'); background-size: cover; background-position: center; border: 1.5px solid #cbd5e1; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);">
+          <div id="slideLivePreview_${idx}" onclick="document.getElementById('slideTitleInput_${idx}')?.focus()" title="خەتنى ئۆزگەرتىش ئۈچۈن چېكىڭ (تۆۋەندىكى تېكىست كاتەكچىسىگە ئۆتىدۇ)" style="position: relative; border-radius: 14px; overflow: hidden; height: 180px; background-image: url('${imgSrc}'); background-size: cover; background-position: center; border: 1.5px solid #cbd5e1; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2); cursor: pointer;">
             <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.45) 60%, rgba(15, 23, 42, 0.15) 100%);"></div>
             <div style="position: relative; z-index: 2; padding: 1.25rem 1.5rem; max-width: 580px; color: #ffffff; text-align: right; direction: rtl;">
               <span id="prevTag_${idx}" style="display: inline-block; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 9999px; background: ${tagColor}; color: #ffffff; margin-bottom: 0.45rem;">
@@ -9762,16 +9768,19 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <!-- Column 2: Text & Color Configuration -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
-            <div style="font-weight: 800; font-size: 0.92rem; color: #1e293b; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.45rem;">
-              <i class="fas fa-edit" style="color: #10b981;"></i> <span>2. خەت، بېلگە ۋە كۇنۇپكا تەڭشىكى</span>
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; font-size: 0.92rem; color: #1e293b; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <i class="fas fa-edit" style="color: #10b981;"></i> <span>2. خەت، بېلگە ۋە كۇنۇپكا تەڭشىكى</span>
+              </div>
+              <span style="background: #dcfce7; color: #15803d; font-size: 0.74rem; font-weight: 800; padding: 3px 8px; border-radius: 6px;">✍️ خەتلەرنى مۇشۇ ئاستىدىكى كاتەكچىلەرگە يېزىسىز</span>
             </div>
 
             <!-- Tag and Color Picker -->
             <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin-bottom: 0.75rem;">
               <div class="form-group" style="margin: 0;">
                 <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">كىچىك بېلگە (Tag):</label>
-                <input type="text" id="slideTagInput_${idx}" class="form-control" style="font-size: 0.85rem;" value="${slideTag}" oninput="window.updateSlideField(${idx}, 'tag', this.value)" placeholder="مەسىلەن: ئەتىيازلىق ئېتىبار">
+                <input type="text" id="slideTagInput_${idx}" class="form-control" style="font-size: 0.88rem; background: #ffffff !important; border: 1.5px solid #94a3b8 !important;" value="${slideTag}" oninput="window.updateSlideField(${idx}, 'tag', this.value)" placeholder="مەسىلەن: ئەتىيازلىق ئېتىبار">
               </div>
               <div class="form-group" style="margin: 0; min-width: 80px;">
                 <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">بېلگە رەڭگى:</label>
@@ -9793,13 +9802,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Main Title -->
             <div class="form-group" style="margin-bottom: 0.75rem;">
               <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">باش ماۋزۇ (Title):</label>
-              <input type="text" id="slideTitleInput_${idx}" class="form-control" style="font-size: 0.9rem; font-weight: 800;" value="${slideTitle}" oninput="window.updateSlideField(${idx}, 'title', this.value)" placeholder="باش ماۋزۇ كىرگۈزۈڭ">
+              <input type="text" id="slideTitleInput_${idx}" class="form-control" style="font-size: 0.95rem; font-weight: 800; background: #ffffff !important; border: 1.5px solid #94a3b8 !important;" value="${slideTitle}" oninput="window.updateSlideField(${idx}, 'title', this.value)" placeholder="باش ماۋزۇ كىرگۈزۈڭ">
             </div>
 
             <!-- Subtitle / Description -->
             <div class="form-group" style="margin-bottom: 0.75rem;">
               <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #475569;">چۈشەندۈرۈش تېكىستى (Subtitle):</label>
-              <textarea id="slideDescInput_${idx}" class="form-control" rows="2" style="font-size: 0.84rem;" oninput="window.updateSlideField(${idx}, 'subtitle', this.value)" placeholder="قىسقىچە تەشۋىقات تېكىستى">${slideSubtitle}</textarea>
+              <textarea id="slideDescInput_${idx}" class="form-control" rows="2" style="font-size: 0.88rem; background: #ffffff !important; border: 1.5px solid #94a3b8 !important;" oninput="window.updateSlideField(${idx}, 'subtitle', this.value)" placeholder="قىسقىچە تەشۋىقات تېكىستى">${slideSubtitle}</textarea>
             </div>
 
             <!-- Button Text & Link -->

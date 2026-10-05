@@ -1014,6 +1014,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCustomerRetentionAdmin();
     } else if (tabId === 'hero-slider') {
       renderHeroSliderAdmin();
+    } else if (tabId === 'marquee') {
+      renderAdminMarqueeList();
     } else if (tabId === 'shelves') {
       renderShowcaseShelvesAdmin();
     } else if (tabId === 'charity') {

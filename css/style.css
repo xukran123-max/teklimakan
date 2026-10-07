@@ -6453,7 +6453,7 @@ body.dark-mode .shelf-card-add-btn:hover {
   color: #ffffff;
 }
 
-/* ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى ئۇسلۇبلىرى (Charity Fund 5%) ==================== */
+/* ==================== 🤝 تەكلىماكان خەير-ساخاۋەت فوندى ئۇسلۇبلىرى (Charity Fund 5%) ==================== */
 .footer-charity-notice-bar {
   margin: 1.5rem 0 1.25rem;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.28) 100%);
@@ -6540,13 +6540,30 @@ body.dark-mode .shelf-card-add-btn:hover {
 }
 
 @media (max-width: 640px) {
+  .footer-charity-notice-bar {
+    padding: 0.85rem 1rem;
+  }
   .footer-charity-inner {
     flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+  .footer-charity-left {
     align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .footer-charity-texts strong {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .footer-charity-texts p {
+    font-size: 0.8rem;
+    line-height: 1.55;
   }
   .footer-charity-btn {
     width: 100%;
     justify-content: center;
+    padding: 0.55rem 1rem;
   }
 }
 

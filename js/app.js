@@ -335,7 +335,7 @@ function initTeklimakanApp() {
         customAttrs = 'style="cursor: pointer;" onclick="document.getElementById(\'footerBrandInstaLink\')?.click()"';
       } else if (isCharity) {
         const url = it.url || 'https://www.seidiye.com/category/mihri/';
-        customAttrs = `style="cursor: pointer;" onclick="window.open('${url}', '_blank')" title="«قېرىنداشلار فوندى» سەھىپىسىنى يېڭى بەتتە كۆرۈش"`;
+        customAttrs = `style="cursor: pointer;" onclick="window.open('${url}', '_blank')" title="«تەكلىماكان فوندى» سەھىپىسىنى يېڭى بەتتە كۆرۈش"`;
       }
       itemsHtml += `
         <div class="marquee-item" ${customAttrs}>
@@ -1963,7 +1963,7 @@ function initTeklimakanApp() {
     if (discountEl) discountEl.textContent = discountValCny > 0 ? `-${store.formatPrice(discountValCny)}` : store.formatPrice(0);
     if (totalEl) totalEl.textContent = store.formatPrice(finalTotalCny);
 
-    // 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
+    // 🤝 تەكلىماكان خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
     const cartCharityRow = document.getElementById('cartCharityContributionRow');
     const cartCharityAmountEl = document.getElementById('cartCharityAmount');
     const cartCharityLink = document.getElementById('cartCharityLink');
@@ -2764,7 +2764,7 @@ function initTeklimakanApp() {
         <a href="${charityCfg.url || 'https://www.seidiye.com/category/mihri/'}" target="_blank" rel="noopener noreferrer" class="quick-view-charity-badge" title="بۇ مەھسۇلاتتىن ئىئانە ئاتىلىدۇ">
           <span style="display: flex; align-items: center; gap: 6px;">
             <i class="fas fa-hand-holding-heart" style="color: #10b981; font-size: 1rem;"></i>
-            <span>بۇ مالدىن <strong>${formattedDonation}</strong> (%${fundPct}) <strong>«${charityCfg.name || 'قېرىنداشلار فوندى'}»</strong>غا ئاتىلىدۇ</span>
+            <span>بۇ مالنىڭ %${fundPct} قىممىتى (<strong>${formattedDonation}</strong>) <strong>«${charityCfg.name || 'تەكلىماكان فوندى'}»</strong>غا ئاجرىتىلىدۇ</span>
           </span>
           <i class="fas fa-arrow-left charity-arrow-hint"></i>
         </a>
@@ -3002,7 +3002,7 @@ function initTeklimakanApp() {
 
     if (checkoutTotalEl) checkoutTotalEl.textContent = window.appStore.formatPrice(finalTotalCny);
 
-    // 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
+    // 🤝 تەكلىماكان خەير-ساخاۋەت فوندى ئەسكەرتىشى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ)
     const checkoutCharityBox = document.getElementById('checkoutCharityNotice');
     const checkoutCharityAmt = document.getElementById('checkoutCharityAmount');
     const checkoutCharityLnk = document.getElementById('checkoutCharityLink');
@@ -4892,7 +4892,7 @@ function initTeklimakanApp() {
     }
   });
 
-  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى كۆرۈنۈشى (Charity Fund 5% Frontend) ====================
+  // ==================== 🤝 تەكلىماكان خەير-ساخاۋەت فوندى كۆرۈنۈشى (Charity Fund 5% Frontend) ====================
   function renderCharityTrustBanner() {
     const noticeBar = document.getElementById('footerCharityNoticeBar');
     const titleEl = document.getElementById('footerCharityTitle');
@@ -4902,7 +4902,7 @@ function initTeklimakanApp() {
     const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
     const charityCfg = (window.appStore && typeof window.appStore.getCharityFundConfig === 'function')
       ? window.appStore.getCharityFundConfig()
-      : { enabled: true, name: 'قېرىنداشلار فوندى', percentage: 5, url: 'https://www.seidiye.com/category/mihri/' };
+      : { enabled: true, name: 'تەكلىماكان فوندى', percentage: 5, url: 'https://www.seidiye.com/category/mihri/' };
 
     // پەقەتلا ئۇيغۇرچە بەتتە كۆرۈنسۇن باشقا بەتتە ھازىرچە كۆرۈنمىسۇن!
     if (lang !== 'ug' || charityCfg.enabled === false) {
@@ -4911,12 +4911,12 @@ function initTeklimakanApp() {
     }
 
     const fundUrl = charityCfg.url || 'https://www.seidiye.com/category/mihri/';
-    const fundName = charityCfg.name || 'قېرىنداشلار فوندى';
+    const fundName = charityCfg.name || 'تەكلىماكان فوندى';
     const fundPct = charityCfg.percentage !== undefined ? charityCfg.percentage : 5;
-    const fundDesc = charityCfg.description || 'سۇپىمىزدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
+    const fundDesc = charityCfg.description || 'سۇپىمىزدىن سېتىۋېلىنغان ھەربىر تاۋارنىڭ %5 قىممىتى ئېھتىياجلىق قېرىنداشلىرىمىزغا ياردەم بېرىش ئۈچۈن «تەكلىماكان فوندى» ھېسابىغا ئاجرىتىلىدۇ.';
 
     if (noticeBar) {
-      if (titleEl) titleEl.textContent = `مېھرىبانلىق ئەھدىسى: «${fundName}» (%${fundPct} ساخاۋەت ئۈلۈشى)`;
+      if (titleEl) titleEl.textContent = `«${fundName}» — خەير-ساخاۋەت ئەھدىسى (%${fundPct})`;
       if (descEl) descEl.textContent = fundDesc;
       if (btnEl) btnEl.href = fundUrl;
       noticeBar.style.display = 'block';

@@ -10350,7 +10350,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.saveShelvesAdmin = saveShelvesAdmin;
   window.resetShelvesAdmin = resetShelvesAdmin;
 
-  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund Admin) ====================
+  // ==================== 🤝 تەكلىماكان خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund Admin) ====================
   function renderCharityAdmin() {
     if (!window.appStore) return;
     const summary = window.appStore.getCharityFundSummary();
@@ -10449,10 +10449,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const visitUrlBtn = document.getElementById('btnCharityVisitUrl');
 
     if (enabledCb) enabledCb.checked = config.enabled !== false;
-    if (nameInp) nameInp.value = config.name || 'قېرىنداشلار فوندى';
+    if (nameInp) nameInp.value = config.name || 'تەكلىماكان فوندى';
     if (pctInp) pctInp.value = config.percentage !== undefined ? config.percentage : 5;
     if (urlInp) urlInp.value = config.url || 'https://www.seidiye.com/category/mihri/';
-    if (descInp) descInp.value = config.description || 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.';
+    if (descInp) descInp.value = config.description || 'سۇپىمىزدىن سېتىۋېلىنغان ھەربىر تاۋارنىڭ %5 قىممىتى ئېھتىياجلىق قېرىنداشلىرىمىزغا ياردەم بېرىش ئۈچۈن «تەكلىماكان فوندى» ھېسابىغا ئاجرىتىلىدۇ.';
     if (visitUrlBtn && config.url) visitUrlBtn.href = config.url;
   }
 
@@ -10466,14 +10466,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newConfig = {
       enabled: enabledCb ? enabledCb.checked : true,
-      name: (nameInp ? nameInp.value.trim() : '') || 'قېرىنداشلار فوندى',
+      name: (nameInp ? nameInp.value.trim() : '') || 'تەكلىماكان فوندى',
       percentage: Number(pctInp ? pctInp.value : 5) || 5,
       url: (urlInp ? urlInp.value.trim() : '') || 'https://www.seidiye.com/category/mihri/',
       description: descInp ? descInp.value.trim() : ''
     };
 
     window.appStore.saveCharityFundConfig(newConfig);
-    showAdminToast('قېرىنداشلار فوندى تەڭشەكلىرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
+    showAdminToast('«تەكلىماكان فوندى» تەڭشەكلىرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
     renderCharityAdmin();
   }
 

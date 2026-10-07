@@ -1377,10 +1377,10 @@ const INITIAL_SETTINGS = {
   },
   charityFund: {
     enabled: true,
-    name: 'قېرىنداشلار فوندى',
+    name: 'تەكلىماكان فوندى',
     percentage: 5,
     url: 'https://www.seidiye.com/category/mihri/',
-    description: 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن قېرىنداشلار فوندىغا ئىئانە قىلىنىدۇ.'
+    description: 'سۇپىمىزدىن سېتىۋېلىنغان ھەربىر تاۋارنىڭ %5 قىممىتى ئېھتىياجلىق قېرىنداشلىرىمىزغا ياردەم بېرىش ئۈچۈن «تەكلىماكان فوندى» ھېسابىغا ئاجرىتىلىدۇ.'
   }
 };
 
@@ -7674,14 +7674,14 @@ class StoreManager {
         };
       });
 
-    // 🤝 پەقەت ئۇيغۇرچىدا كۆرۈنسۇن: قېرىنداشلار فوندى 5% ساخاۋەت ئۈلۈشىنى ئايلانما ئېلان تاختىسىغا كەسپىي قوشۇش
+    // 🤝 پەقەت ئۇيغۇرچىدا كۆرۈنسۇن: تەكلىماكان فوندى 5% ساخاۋەت ئۈلۈشىنى ئايلانما ئېلان تاختىسىغا كەسپىي قوشۇش
     if (lang === 'ug') {
       const charityCfg = (typeof this.getCharityFundConfig === 'function') ? this.getCharityFundConfig() : null;
       if (charityCfg && charityCfg.enabled !== false) {
         list.push({
           id: 'charity_fund_marquee',
           badge: `ساخاۋەت %${charityCfg.percentage || 5}`,
-          text: `🤝 ${charityCfg.name || 'قېرىنداشلار فوندى'}: مەزكۇر سۇپىدىكى ھەربىر مالنىڭ %${charityCfg.percentage || 5} قىممىتى مۇھتاج قېرىنداشلارغا ئاتىلىدۇ`,
+          text: `🤝 «${charityCfg.name || 'تەكلىماكان فوندى'}»: سۇپىمىزدىكى ھەربىر زاكازنىڭ %${charityCfg.percentage || 5} قىممىتى ئېھتىياجلىق قېرىنداشلارغا ياردەم ئۈچۈن ئاجرىتىلىدۇ`,
           badgeStyle: 'badge-charity',
           linkType: 'charity',
           url: charityCfg.url || 'https://www.seidiye.com/category/mihri/'
@@ -8538,17 +8538,26 @@ class StoreManager {
     return () => window.removeEventListener('uyghur_store_sync', listener);
   }
 
-  // ==================== 🤝 قېرىنداشلار خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund 5%) ====================
+  // ==================== 🤝 تەكلىماكان خەير-ساخاۋەت فوندى باشقۇرۇش (Charity Fund 5%) ====================
   getCharityFundConfig() {
     const settings = this.getSettings() || {};
     const defaults = {
       enabled: true,
-      name: 'قېرىنداشلار فوندى',
+      name: 'تەكلىماكان فوندى',
       percentage: 5,
       url: 'https://www.seidiye.com/category/mihri/',
-      description: 'مەزكۇر سۇپىدا سېتىلغان ھەربىر مەھسۇلاتنىڭ %5 قىممىتى مۇھتاج قېرىنداشلارغا ياردەم بېرىش ئۈچۈن «قېرىنداشلار فوندى»غا ئىئانە قىلىنىدۇ.'
+      description: 'سۇپىمىزدىن سېتىۋېلىنغان ھەربىر تاۋارنىڭ %5 قىممىتى ئېھتىياجلىق قېرىنداشلىرىمىزغا ياردەم بېرىش ئۈچۈن «تەكلىماكان فوندى» ھېسابىغا ئاجرىتىلىدۇ.'
     };
-    return { ...defaults, ...(settings.charityFund || {}) };
+    const current = { ...defaults, ...(settings.charityFund || {}) };
+    if (current.name === 'قېرىنداشلار فوندى' || !current.name) {
+      current.name = 'تەكلىماكان فوندى';
+      if (!current.description || current.description.includes('قېرىنداشلار فوندى')) {
+        current.description = defaults.description;
+      }
+      settings.charityFund = current;
+      try { this.updateSettings(settings); } catch (e) {}
+    }
+    return current;
   }
 
   saveCharityFundConfig(config) {

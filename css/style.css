@@ -1272,7 +1272,8 @@ html[data-theme="dark"] .main-navbar.is-sticky {
   flex-shrink: 0;
   order: 0 !important;
   text-decoration: none;
-  height: 38px;
+  height: auto;
+  min-height: 38px;
   line-height: 1;
 }
 
@@ -1295,13 +1296,14 @@ html[data-theme="dark"] .main-navbar.is-sticky {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
   border: 2px solid #eab308;
   margin: 0;
   padding: 0;
   vertical-align: middle;
   flex-shrink: 0;
+  aspect-ratio: 1 / 1;
   transition: var(--transition);
 }
 
@@ -3135,7 +3137,8 @@ body {
   border-radius: 50%;
   border: 2px solid #eab308;
   box-shadow: 0 4px 12px rgba(234, 179, 8, 0.25);
-  object-fit: cover;
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
   flex-shrink: 0;
 }
 
@@ -3826,7 +3829,8 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     gap: 0.45rem;
     padding: 0;
     margin: 0;
-    height: 36px;
+    height: auto;
+    min-height: 36px;
     line-height: 1;
     flex-shrink: 0;
   }
@@ -3839,6 +3843,8 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     padding: 0;
     vertical-align: middle;
     flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
   }
   .brand-store-name {
     font-size: 1.05rem;
@@ -4323,16 +4329,21 @@ html[dir="ltr"] .footer-contact-btn-item:hover .footer-contact-arrow {
     padding: 0 0.75rem;
   }
   .brand-logo {
-    gap: 0.4rem;
+    gap: 0.35rem;
     padding: 0;
     margin: 0;
-    height: 34px;
+    height: auto;
+    min-height: 34px;
+    flex-shrink: 0;
   }
   .logo-img {
     width: 34px;
     height: 34px;
     margin: 0;
     padding: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    flex-shrink: 0;
   }
   .brand-store-name {
     font-size: 0.98rem;

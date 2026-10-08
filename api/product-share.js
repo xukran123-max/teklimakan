@@ -1,4 +1,4 @@
-﻿const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
+const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
 
 function escapeHtml(str) {
@@ -14,10 +14,14 @@ function escapeHtml(str) {
 module.exports = async function handler(req, res) {
   try {
     const rawId = req.query.id || req.query.product || req.query.prd || req.query.p || '';
-    const id = String(rawId).trim();
+    const id = String(rawId).trim().replace(/\.(jpg|jpeg|png|webp)$/i, '');
     const lang = (req.query.lang || 'ug').toLowerCase();
 
-    const baseUrl = 'https://www.teklimakan.com';
+    // 🛡️ Always use canonical non-www domain to avoid 307 redirects breaking WhatsApp crawler
+    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'teklimakan.com').replace(/^www\./i, '');
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const baseUrl = `${protocol}://${host}`;
+
     const targetUrl = id 
       ? `${baseUrl}/?id=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}`
       : `${baseUrl}/`;
@@ -26,7 +30,7 @@ module.exports = async function handler(req, res) {
       return res.redirect(302, targetUrl);
     }
 
-    const cleanId = id.replace(/^#/, '');
+    const cleanId = id.replace(/^#/, '').trim();
     const cleanIdWithPrefix = cleanId.startsWith('PRD-') ? cleanId : `PRD-${cleanId}`;
 
     // Fetch product details from Supabase
@@ -53,6 +57,7 @@ module.exports = async function handler(req, res) {
     let title = 'تەكلىماكان سودا تورى — تەبىئىي، ساپ ۋە ئەلا سۈپەتلىك يەرلىك مەھسۇلاتلار';
     let desc = 'تەكلىماكان تور سۇپىسى: تەبىئىي پىننە گۈلقەنتى، مېۋە-چىۋە، قۇرۇق يەل-يېمىش ۋە ئىشەنچلىك مال سېتىۋېلىش مەركىزى.';
     let imageUrl = `${baseUrl}/images/og-share-cover.jpg`;
+    let imageMime = 'image/jpeg';
 
     if (product) {
       let name = product.name || '';
@@ -74,10 +79,26 @@ module.exports = async function handler(req, res) {
       const fullPriceStr = priceStr ? ` (${priceStr}${unitStr})` : '';
 
       title = `${name}${fullPriceStr} — تەكلىماكان سودا تورى`;
-      desc = pDesc ? pDesc.slice(0, 200) : `تەكلىماكان تور سۇپىسىدا ${name} مەھسۇلاتى سېتىلماقتا. باھاسى: ${priceStr}.`;
+      desc = pDesc ? pDesc.slice(0, 250) : `تەكلىماكان تور سۇپىسىدا ${name} مەھسۇلاتى سېتىلماقتا. باھاسى: ${priceStr}.`;
 
-      // Point to dedicated dynamic image endpoint
-      imageUrl = `${baseUrl}/api/product-image?id=${encodeURIComponent(product.id)}`;
+      // 🖼️ Format direct image URL without any redirects
+      const rawImg = product.image ? String(product.image).trim() : '';
+      if (rawImg.startsWith('data:image/png')) {
+        imageMime = 'image/png';
+        imageUrl = `${baseUrl}/product-preview/${encodeURIComponent(product.id)}.png`;
+      } else if (rawImg.startsWith('data:image/')) {
+        imageMime = 'image/jpeg';
+        imageUrl = `${baseUrl}/product-preview/${encodeURIComponent(product.id)}.jpg`;
+      } else if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
+        imageUrl = rawImg;
+        if (rawImg.endsWith('.png')) imageMime = 'image/png';
+      } else if (rawImg) {
+        const cleanPath = rawImg.replace(/^\/+/, '');
+        imageUrl = `${baseUrl}/${cleanPath}`;
+        if (cleanPath.endsWith('.png')) imageMime = 'image/png';
+      } else {
+        imageUrl = `${baseUrl}/images/og-share-cover.jpg`;
+      }
     }
 
     const safeTitle = escapeHtml(title);
@@ -92,18 +113,24 @@ module.exports = async function handler(req, res) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeTitle}</title>
 
-  <!-- Open Graph / WhatsApp / Facebook / Telegram -->
-  <meta property="og:type" content="product">
+  <!-- Open Graph / WhatsApp / Facebook / Telegram / Viber -->
+  <meta property="og:type" content="website">
   <meta property="og:site_name" content="تەكلىماكان سودا تورى">
   <meta property="og:title" content="${safeTitle}">
   <meta property="og:description" content="${safeDesc}">
   <meta property="og:url" content="${safeTargetUrl}">
   <meta property="og:image" content="${safeImageUrl}">
   <meta property="og:image:secure_url" content="${safeImageUrl}">
-  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:type" content="${imageMime}">
   <meta property="og:image:width" content="600">
   <meta property="og:image:height" content="600">
   <meta property="og:image:alt" content="${safeTitle}">
+
+  <!-- WhatsApp & Social Link Preview Helpers -->
+  <link rel="image_src" href="${safeImageUrl}">
+  <meta itemprop="image" content="${safeImageUrl}">
+  <meta itemprop="name" content="${safeTitle}">
+  <meta itemprop="description" content="${safeDesc}">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -114,8 +141,7 @@ module.exports = async function handler(req, res) {
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="${baseUrl}/images/favicon.svg">
 
-  <!-- Instant Browser Redirect to Storefront Modal -->
-  <meta http-equiv="refresh" content="0;url=${safeTargetUrl}">
+  <!-- Instant Browser Redirect for Real Users (No meta-refresh so bots parse OG tags) -->
   <script>
     window.location.replace('${safeTargetUrl}');
   </script>
@@ -151,6 +177,7 @@ module.exports = async function handler(req, res) {
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid #e2e8f0;
+      background: #f1f5f9;
     }
     .img-wrap img {
       width: 100%;
@@ -201,6 +228,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).send(html);
   } catch (err) {
     console.error('product-share error:', err);
-    return res.redirect(302, 'https://www.teklimakan.com/');
+    return res.redirect(302, 'https://teklimakan.com/');
   }
 };

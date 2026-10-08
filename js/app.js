@@ -2905,7 +2905,7 @@ function initTeklimakanApp() {
         const phone = '905551609999';
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
-        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
+        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin.replace(/^https?:\/\/www\./i, 'https://') : 'https://teklimakan.com';
         const itemUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         
         const greeting = window.appI18n.t('waOrderGreeting');
@@ -2933,7 +2933,7 @@ function initTeklimakanApp() {
     if (shareBtn) {
       shareBtn.addEventListener('click', async () => {
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
-        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'https://www.teklimakan.com';
+        const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin.replace(/^https?:\/\/www\./i, 'https://') : 'https://teklimakan.com';
         const shareUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
         const platformTitle = window.appI18n.t('shareModalTitle') || 'تەكلىماكان';
         const shareTitle = `${product.name} - ${platformTitle}`;

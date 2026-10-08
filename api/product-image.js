@@ -1,12 +1,17 @@
-﻿const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
+const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
 
 module.exports = async function handler(req, res) {
   try {
+    const host = (req.headers['x-forwarded-host'] || req.headers.host || 'teklimakan.com').replace(/^www\./i, '');
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const baseUrl = `${protocol}://${host}`;
+
     const rawId = req.query.id || req.query.product || req.query.prd || '';
-    const id = String(rawId).trim();
+    // Strip file extension if present (e.g. PRD-840.jpg -> PRD-840)
+    const id = String(rawId).trim().replace(/\.(jpg|jpeg|png|webp)$/i, '');
     if (!id) {
-      return res.redirect(302, 'https://www.teklimakan.com/images/og-share-cover.jpg');
+      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
     }
 
     const cleanId = id.replace(/^#/, '');
@@ -22,17 +27,17 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      return res.redirect(302, 'https://www.teklimakan.com/images/og-share-cover.jpg');
+      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
     }
 
     const rows = await response.json();
     if (!rows || rows.length === 0 || !rows[0].image) {
-      return res.redirect(302, 'https://www.teklimakan.com/images/og-share-cover.jpg');
+      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
     }
 
     const img = rows[0].image.trim();
 
-    // 2. Base64 data URL (extract mime and decode to binary buffer)
+    // 2. Base64 data URL (extract mime and decode to binary buffer directly - 200 OK)
     if (img.startsWith('data:image/')) {
       const match = img.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
       if (match) {
@@ -52,9 +57,9 @@ module.exports = async function handler(req, res) {
 
     // 4. Relative file path (e.g. "images/products/PRD-103.jpg")
     const cleanPath = img.replace(/^\/+/, '');
-    return res.redirect(302, `https://www.teklimakan.com/${cleanPath}`);
+    return res.redirect(302, `${baseUrl}/${cleanPath}`);
   } catch (err) {
     console.error('product-image error:', err);
-    return res.redirect(302, 'https://www.teklimakan.com/images/og-share-cover.jpg');
+    return res.redirect(302, 'https://teklimakan.com/images/og-share-cover.jpg');
   }
 };

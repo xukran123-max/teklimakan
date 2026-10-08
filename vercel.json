@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/product-preview/(.*)",
+      "destination": "/api/product-image?id=$1"
+    },
+    {
       "source": "/",
       "has": [
         {

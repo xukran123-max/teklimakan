@@ -1,3 +1,18 @@
+
+function isPseudoCategory(name) {
+  if (!name) return false;
+  const s = String(name).trim().toLowerCase();
+  return s === 'all' ||
+         s === 'بارلىق تۈرلەر' ||
+         s === 'بارلىق مەھسۇلاتلار' ||
+         s === 'tüm kategoriler' ||
+         s === 'tum kategoriler' ||
+         s === 'tüm ürünler' ||
+         s === 'tum urunler' ||
+         s === 'all categories' ||
+         s === 'all products';
+}
+if (typeof window !== 'undefined') window.isPseudoCategory = isPseudoCategory;
 /**
  * ================================================================
  * تەكلىماكان تور سودا سۇپىسى - كۆپ تىللىق ئالدى دۇكان (App.js)
@@ -1201,12 +1216,16 @@ function initTeklimakanApp() {
       }));
     }
 
+    // 🛡️ «بارلىق تۈرلەر / Tüm Kategoriler» ساختا تۈرلىرىنى تىزىملىكتىن پاكىز چىقىرىۋېتىش (پەقەت يەككە 'all' قالىدۇ)
+    categories = categories.filter(c => c && (c.id === 'all' || (!isPseudoCategory(c.id) && !isPseudoCategory(c.name))));
+
     const container = document.getElementById('categoryPillsContainer');
     const select = document.getElementById('searchCategorySelect');
 
     if (container) {
       container.innerHTML = '';
       categories.forEach(cat => {
+        if (cat.id !== 'all' && (isPseudoCategory(cat.id) || isPseudoCategory(cat.name))) return;
         const pill = document.createElement('button');
         pill.className = `category-pill ${currentCategory === cat.id ? 'active' : ''}`;
         pill.innerHTML = `<i class="${cat.icon}"></i> <span>${cat.displayName}</span>`;
@@ -1224,7 +1243,7 @@ function initTeklimakanApp() {
     if (select) {
       select.innerHTML = `<option value="all">${window.appI18n.t('allCategories')}</option>`;
       categories.forEach(cat => {
-        if (cat.id !== 'all') {
+        if (cat.id !== 'all' && !isPseudoCategory(cat.id) && !isPseudoCategory(cat.name)) {
           const opt = document.createElement('option');
           opt.value = cat.id;
           opt.textContent = cat.displayName;
@@ -2060,8 +2079,8 @@ function initTeklimakanApp() {
           <div style="width: 72px; height: 72px; border-radius: 50%; background: #ffe4e6; color: #f43f5e; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 1rem;">
             <i class="far fa-heart"></i>
           </div>
-          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">ياقتۇرغان تاۋار تېخى يوق</h4>
-          <p style="font-size: 0.88rem; line-height: 1.6; margin: 0; color: var(--text-muted);">دۇكاندىكى مەھسۇلاتلارنىڭ ئۈستىدىكى قىزىل يۈرەك بەلگىسىنى چېكىپ، ياقتۇرغان تاۋارلىرىڭىزنى بۇ يەرگە ساقلىۋالالايسىز.</p>
+          <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">${lang === 'tr' ? 'Favori Ürününüz Yok' : (lang === 'en' ? 'No Favorites Yet' : 'ياقتۇرغان تاۋار تېخى يوق')}</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; margin: 0; color: var(--text-muted);">${lang === 'tr' ? 'Ürünlerin üzerindeki kalp simgesine tıklayarak beğendiğiniz ürünleri buraya kaydedebilirsiniz.' : (lang === 'en' ? 'Click the heart icon on any product to save your favorites here.' : 'دۇكاندىكى مەھسۇلاتلارنىڭ ئۈستىدىكى قىزىل يۈرەك بەلگىسىنى چېكىپ، ياقتۇرغان تاۋارلىرىڭىزنى بۇ يەرگە ساقلىۋالالايسىز.')}</p>
         </div>
       `;
       return;
@@ -2072,8 +2091,8 @@ function initTeklimakanApp() {
       const formattedPrice = p.priceFormatted || store.formatPrice(p.price || 0);
       const formattedOldPrice = p.oldPrice ? store.formatPrice(p.oldPrice) : null;
       const stockStatus = (Number(p.stock) || 0) > 0
-        ? `<span style="color: #10b981; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-check-circle"></i> ئامباردا بار</span>`
-        : `<span style="color: #ef4444; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-times-circle"></i> تۈگىگەن</span>`;
+        ? `<span style="color: #10b981; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-check-circle"></i> ${lang === 'tr' ? 'Stokta Var' : (lang === 'en' ? 'In Stock' : 'ئامباردا بار')}</span>`
+        : `<span style="color: #ef4444; font-weight: 700; font-size: 0.78rem;"><i class="fas fa-times-circle"></i> ${lang === 'tr' ? 'Tükendi' : (lang === 'en' ? 'Out of Stock' : 'تۈگىگەن')}</span>`;
       const pName = p.displayName || p.name || 'تاۋار';
 
       return `
@@ -2088,10 +2107,10 @@ function initTeklimakanApp() {
             <div>${stockStatus}</div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0;">
-            <button type="button" class="btn-move-wish-cart" data-id="${p.id}" title="سېۋەتكە يۆتكەش" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" ${(Number(p.stock) || 0) <= 0 ? 'disabled' : ''}>
+            <button type="button" class="btn-move-wish-cart" data-id="${p.id}" title="${lang === 'tr' ? 'Sepete Ekle' : (lang === 'en' ? 'Move to Cart' : 'سېۋەتكە يۆتكەش')}" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;" ${(Number(p.stock) || 0) <= 0 ? 'disabled' : ''}>
               <i class="fas fa-cart-plus"></i>
             </button>
-            <button type="button" class="btn-remove-wish" data-id="${p.id}" title="ئۆچۈرۈش" style="background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">
+            <button type="button" class="btn-remove-wish" data-id="${p.id}" title="${lang === 'tr' ? 'Kaldır' : (lang === 'en' ? 'Remove' : 'ئۆچۈرۈش')}" style="background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">
               <i class="fas fa-trash-alt"></i>
             </button>
           </div>
@@ -2183,7 +2202,9 @@ function initTeklimakanApp() {
     const savedPhone = initialQuery || 
                        localStorage.getItem('teklimakan_customer_phone') || 
                        localStorage.getItem('teklimakan_last_order_id') || '';
-    const savedName = localStorage.getItem('teklimakan_customer_name') || 'ھۆرمەتلىك خېرىدار';
+    const lang = (window.appI18n && window.appI18n.getLang()) || 'ug';
+    const defGuestName = lang === 'tr' ? 'Değerli Müşterimiz' : (lang === 'en' ? 'Dear Customer' : 'ھۆرمەتلىك خېرىدار');
+    const savedName = localStorage.getItem('teklimakan_customer_name') || defGuestName;
 
     const banner = document.getElementById('inboxCustomerProfileBanner');
     const nameEl = document.getElementById('inboxCustomerNameText');
@@ -2353,8 +2374,8 @@ function initTeklimakanApp() {
         resultsWrap.innerHTML = `
           <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
             <i class="fas fa-bell-slash" style="font-size: 2.8rem; margin-bottom: 0.75rem; color: #cbd5e1;"></i>
-            <h4 style="font-size: 1rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem;">ھازىرچە يېڭى ئۇقتۇرۇش يوق</h4>
-            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6;">پوسۇلكىڭىز كارگوغا چىققاندا ياكى سۇپا باشقۇرغۇچىسى ئۇچۇر يازغاندا مۇشۇ يەرگە دەل ۋاقتىدا چىقىدۇ.</p>
+            <h4 style="font-size: 1rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem;">${lang === 'tr' ? 'Henüz Yeni Bildirim Yok' : (lang === 'en' ? 'No New Notifications' : 'ھازىرچە يېڭى ئۇقتۇرۇش يوق')}</h4>
+            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6;">${lang === 'tr' ? 'Siparişiniz kargoya verildiğinde veya sistem mesajı geldiğinde burada anında görünecektir.' : (lang === 'en' ? 'Updates will appear here when your order is shipped or customer care contacts you.' : 'پوسۇلكىڭىز كارگوغا چىققاندا ياكى سۇپا باشقۇرغۇچىسى ئۇچۇر يازغاندا مۇشۇ يەرگە دەل ۋاقتىدا چىقىدۇ.')}</p>
           </div>
         `;
         return;
@@ -2374,28 +2395,28 @@ function initTeklimakanApp() {
           iconBg = '#dcfce7';
           iconColor = '#16a34a';
           iconClass = 'fa-truck-fast';
-          badgeText = 'كارگو يوللاندى';
+          badgeText = lang === 'tr' ? 'Kargoya Verildi' : (lang === 'en' ? 'Shipped' : 'كارگو يوللاندى');
           badgeBg = '#f0fdf4';
           badgeColor = '#15803d';
         } else if (n.type === 'order_created') {
           iconBg = '#eef2ff';
           iconColor = '#4f46e5';
           iconClass = 'fa-file-invoice';
-          badgeText = 'مېلىڭىز قوبۇل قىلىندى';
+          badgeText = lang === 'tr' ? 'Sipariş Alındı' : (lang === 'en' ? 'Order Received' : 'مېلىڭىز قوبۇل قىلىندى');
           badgeBg = '#eef2ff';
           badgeColor = '#4338ca';
         } else if (n.type === 'order_completed') {
           iconBg = '#ecfdf5';
           iconColor = '#059669';
           iconClass = 'fa-circle-check';
-          badgeText = 'مېلىڭىز يەتكۈزۈلدى';
+          badgeText = lang === 'tr' ? 'Teslim Edildi' : (lang === 'en' ? 'Delivered' : 'مېلىڭىز يەتكۈزۈلدى');
           badgeBg = '#ecfdf5';
           badgeColor = '#047857';
         } else if (n.type === 'admin_message') {
           iconBg = '#fef3c7';
           iconColor = '#d97706';
           iconClass = 'fa-comment-dots';
-          badgeText = 'سۇپا خېتى';
+          badgeText = lang === 'tr' ? 'Sistem Bildirimi' : (lang === 'en' ? 'System Notice' : 'سۇپا خېتى');
           badgeBg = '#fffbeb';
           badgeColor = '#b45309';
         }
@@ -2444,7 +2465,7 @@ function initTeklimakanApp() {
                   </div>
                   ${n.trackingUrl ? `
                     <a href="${n.trackingUrl}" target="_blank" style="background: #0284c7; color: #fff; padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
-                      <i class="fas fa-external-link-alt"></i> پوچتىدىن تەكشۈرۈش
+                      <i class="fas fa-external-link-alt"></i> ${lang === 'tr' ? 'Kargo Sitesinden Takip Et' : (lang === 'en' ? 'Track on Carrier Website' : 'پوچتىدىن تەكشۈرۈش')}
                     </a>
                   ` : ''}
                 </div>
@@ -2453,7 +2474,7 @@ function initTeklimakanApp() {
 
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; border-top: 1px dashed #f1f5f9; padding-top: 0.55rem;">
               <a href="https://api.whatsapp.com/send?phone=905551609999&text=${encodeURIComponent(`ئەسسالامۇئەلەيكۇم تەكلىماكان سۇپىسى، مېنىڭ پوسۇلكا كود نومۇرۇم: #${n.orderId || cleanQ}. مېلىمنى سۈرۈشتۈرمەكچىتىم.`)}" target="_blank" style="color: #16a34a; font-weight: 700; font-size: 0.8rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
-                <i class="fab fa-whatsapp"></i> WhatsApp تىن سۈرۈشتۈرۈش
+                <i class="fab fa-whatsapp"></i> ${lang === 'tr' ? 'WhatsApp ile Danışın' : (lang === 'en' ? 'Inquire via WhatsApp' : 'WhatsApp تىن سۈرۈشتۈرۈش')}
               </a>
             </div>
           </div>
@@ -2624,7 +2645,19 @@ function initTeklimakanApp() {
             <div><b>${lblCust}</b> ${isOrderAnon ? '<span style="color:#059669; font-weight:700;">🛡️ [Gizlendi]</span>' : (order.customer?.name || '-')}</div>
             <div><b>${lblPhone}</b> <span class="number-latin" style="direction: ltr;">${phoneMasked}</span></div>
             <div><b>${lblAddr}</b> ${isOrderAnon ? '<span style="color:#64748b;">🔒 [Gizlendi]</span>' : ((order.customer?.city || '') + ' ' + (order.customer?.address || ''))}</div>
-            <div><b>${lblPayMethod}</b> ${order.paymentMethod || 'Havale / EFT'}</div>
+            <div><b>${lblPayMethod}</b> ${(() => {
+              let pm = order.paymentMethod || 'Havale / EFT';
+              if (lang === 'tr') {
+                if (pm.includes('بانكا') || pm.includes('Havale')) return 'Banka Havalesi / EFT';
+                if (pm.includes('كارتا') || pm.includes('Card')) return 'Banka / Kredi Kartı';
+                if (pm.includes('ۋاتساپ') || pm.includes('WhatsApp')) return 'WhatsApp ile Ödeme';
+              } else if (lang === 'en') {
+                if (pm.includes('بانكا') || pm.includes('Havale')) return 'Bank Transfer / EFT';
+                if (pm.includes('كارتا') || pm.includes('Card')) return 'Credit / Debit Card';
+                if (pm.includes('ۋاتساپ') || pm.includes('WhatsApp')) return 'Payment via WhatsApp';
+              }
+              return pm;
+            })()}</div>
             <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-weight: 800; font-size: 1rem; color: var(--danger-color);">
               <span>${lblTotal}</span>
               <span>${order.totalFormatted || window.appStore.formatPrice(order.totalCny || order.total)}</span>
@@ -5902,7 +5935,7 @@ function initTeklimakanApp() {
 
         // تۈرلەرنى تولدۇرۇش
         if (prodCatSelect) {
-          const categories = window.appStore.getCategories();
+          const categories = window.appStore.getCategories().filter(c => c.id !== 'all' && !isPseudoCategory(c.id) && !isPseudoCategory(c.name));
           prodCatSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
         }
 

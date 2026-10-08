@@ -1,3 +1,19 @@
+
+// 🛡️ ساختا تۈر ناملىرىنى (بارلىق تۈرلەر، Tüm Kategoriler قاتارلىقلارنى) سۈزۈپ چىقىرىش ياردەمچىسى
+function isPseudoCategory(name) {
+  if (!name) return false;
+  const s = String(name).trim().toLowerCase();
+  return s === 'all' ||
+         s === 'بارلىق تۈرلەر' ||
+         s === 'بارلىق مەھسۇلاتلار' ||
+         s === 'tüm kategoriler' ||
+         s === 'tum kategoriler' ||
+         s === 'tüm ürünler' ||
+         s === 'tum urunler' ||
+         s === 'all categories' ||
+         s === 'all products';
+}
+if (typeof window !== 'undefined') window.isPseudoCategory = isPseudoCategory;
 /**
  * ================================================================
  * مەركىزىي سانلىق مەلۇمات ئامبىرى ۋە ھالەت باشقۇرغۇچ (Store.js)
@@ -1031,7 +1047,7 @@ const INITIAL_PRODUCTS = [
 ];
 
 const INITIAL_CATEGORIES = [
-  { id: 'all', name: 'بارلىق مەھسۇلاتلار', order: 0, icon: 'fas fa-th-large', translations: { ug: 'بارلىق مەھسۇلاتلار', tr: 'Tüm Ürünler', en: 'All Products' } },
+  { id: 'all', name: 'بارلىق تۈرلەر', order: 0, icon: 'fas fa-th-large', translations: { ug: 'بارلىق تۈرلەر', tr: 'Tüm Kategoriler', en: 'All Categories' } },
   { id: 'ئۇيغۇر تىبابىتى', name: 'ئۇيغۇر تىبابىتى', order: 1, icon: 'fas fa-mortar-pestle', translations: { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' } },
   { id: 'پىششىق دورىلار', name: 'پىششىق دورىلار', order: 2, icon: 'fas fa-pills', translations: { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' } },
   { id: 'ئۆسۈملۈك دورىلار', name: 'ئۆسۈملۈك دورىلار', order: 3, icon: 'fas fa-leaf', translations: { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' } },
@@ -1569,8 +1585,10 @@ class StoreManager {
     let validCat = false;
     try {
       if (storedCategories) {
-        const parsed = JSON.parse(storedCategories);
+        let parsed = JSON.parse(storedCategories);
         if (Array.isArray(parsed) && parsed.length >= 6 && parsed.some(c => c.id === 'گۈلقەنتلەر')) {
+          parsed = parsed.filter(c => c && (c.id === 'all' || (!isPseudoCategory(c.id) && !isPseudoCategory(c.name))));
+          localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(parsed));
           validCat = true;
         }
       }
@@ -6352,11 +6370,14 @@ class StoreManager {
       categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
     }
 
+    // 🛡️ كېرەكسىز ياكى قايتىلانغان ساختا تۈرلەرنى (بارلىق تۈرلەر، Tüm Kategoriler) دەسلەپتىلا چىقىرىۋېتىش (پەقەت تۈپ 'all' قالىدۇ)
+    categories = categories.filter(c => c && (c.id === 'all' || (!isPseudoCategory(c.id) && !isPseudoCategory(c.name))));
+
     const existingIds = new Set(categories.map(c => c.id || c.name));
 
-    // 1. بارلىق ئۆلچەملىك تۈرلەردىن تېلېفوندا كەم قالغانلىرىنى ئاپتوماتىك قوشۇش
+    // 1. بارلىق ئۆلچەملىك تۈرلەردىن كەم قالغانلىرىنى ئاپتوماتىك تولۇقلاش
     INITIAL_CATEGORIES.forEach(ic => {
-      if (ic.id && !existingIds.has(ic.id)) {
+      if (ic.id && !isPseudoCategory(ic.id) && !existingIds.has(ic.id)) {
         existingIds.add(ic.id);
         categories.push(JSON.parse(JSON.stringify(ic)));
       }
@@ -6366,7 +6387,7 @@ class StoreManager {
     const products = this.getProducts();
     products.forEach(p => {
       const cat = p.category ? p.category.trim() : '';
-      if (cat && cat !== 'all' && !existingIds.has(cat)) {
+      if (cat && !isPseudoCategory(cat) && !existingIds.has(cat)) {
         existingIds.add(cat);
         const trName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'tr') : cat;
         const enName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'en') : cat;
@@ -6380,6 +6401,13 @@ class StoreManager {
         });
       }
     });
+
+    // 🛡️ 'all' تۈرىنىڭ تەرجىمىسىنى ھەر ۋاقىت توغرا قىلىش
+    const allCat = categories.find(c => c.id === 'all');
+    if (allCat) {
+      allCat.name = 'all';
+      allCat.translations = { ug: 'بارلىق تۈرلەر', tr: 'Tüm Kategoriler', en: 'All Categories' };
+    }
 
     // 3. تەرتىپ سانلىرىنى كاپالەتلەندۈرۈش ۋە رەتلەش
     let nextOrder = 1;
@@ -6414,14 +6442,24 @@ class StoreManager {
     } catch(e) {}
 
     return categories.map(c => {
-      let displayName = (c.translations && c.translations[lang])
-        ? c.translations[lang]
-        : (window.appI18n && typeof window.appI18n.getCategoryName === 'function' ? window.appI18n.getCategoryName(c.name, lang) : c.name);
+      let displayName = '';
+      if (c.id === 'all') {
+        displayName = (window.appI18n && typeof window.appI18n.t === 'function')
+          ? window.appI18n.t('allCategories', lang)
+          : (lang === 'tr' ? 'Tüm Kategoriler' : (lang === 'en' ? 'All Categories' : 'بارلىق تۈرلەر'));
+      } else if (c.translations && c.translations[lang]) {
+        displayName = c.translations[lang];
+      } else if (window.appI18n && typeof window.appI18n.getCategoryName === 'function') {
+        displayName = window.appI18n.getCategoryName(c.name, lang);
+      } else {
+        displayName = c.name;
+      }
       return { status: 'active', ...c, displayName };
     });
   }
 
   addCategory(categoryName, icon = 'fas fa-tag', translations = {}, order = null) {
+    if (isPseudoCategory(categoryName)) return false;
     let categories = this.getCategories('ug');
     if (categories.some(c => c.name === categoryName || c.id === categoryName)) return false;
 

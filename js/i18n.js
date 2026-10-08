@@ -1,3 +1,18 @@
+
+function isPseudoCategory(name) {
+  if (!name) return false;
+  const s = String(name).trim().toLowerCase();
+  return s === 'all' ||
+         s === 'بارلىق تۈرلەر' ||
+         s === 'بارلىق مەھسۇلاتلار' ||
+         s === 'tüm kategoriler' ||
+         s === 'tum kategoriler' ||
+         s === 'tüm ürünler' ||
+         s === 'tum urunler' ||
+         s === 'all categories' ||
+         s === 'all products';
+}
+if (typeof window !== 'undefined') window.isPseudoCategory = isPseudoCategory;
 /**
  * ================================================================
  * تەكلىماكان سودا تورى - كۆپ تىللىق لۇغەت (i18n.js)
@@ -1532,8 +1547,15 @@ class I18nManager {
     }
   }
 
-  t(key, params = {}) {
-    const dict = I18N_TRANSLATIONS[this.currentLang] || I18N_TRANSLATIONS['ug'];
+  t(key, params = {}, targetLang = null) {
+    let lang = this.currentLang;
+    if (typeof params === 'string') {
+      lang = params;
+      params = {};
+    } else if (targetLang) {
+      lang = targetLang;
+    }
+    const dict = I18N_TRANSLATIONS[lang] || I18N_TRANSLATIONS['ug'];
     let text = dict[key] || I18N_TRANSLATIONS['ug'][key] || key;
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
@@ -1541,9 +1563,10 @@ class I18nManager {
     return text;
   }
 
-  getBrandName(brand) {
+  getBrandName(brand, targetLang = null) {
     if (!brand) return '';
-    if (brand === 'بارلىق ماركىلار') return this.t('allBrands');
+    const lang = targetLang || this.currentLang;
+    if (brand === 'بارلىق ماركىلار') return this.t('allBrands', lang);
     const direct = BRAND_LOCALIZATIONS[brand];
     if (direct && direct[this.currentLang]) {
       return direct[this.currentLang];
@@ -1557,26 +1580,27 @@ class I18nManager {
     return this.autoTranslateUyghur(brand, this.currentLang);
   }
 
-  getCategoryName(category) {
+  getCategoryName(category, targetLang = null) {
     if (!category) return '';
-    if (category === 'all' || category === 'بارلىق مەھسۇلاتلار' || category === 'بارلىق تۈرلەر') {
-      return this.t('allCategories');
+    const lang = targetLang || this.currentLang;
+    if (category === 'all' || isPseudoCategory(category)) {
+      return this.t('allCategories', lang);
     }
     const direct = CATEGORY_LOCALIZATIONS[category];
-    if (direct && direct[this.currentLang]) {
-      return direct[this.currentLang];
+    if (direct && direct[lang]) {
+      return direct[lang];
     }
     for (const [key, map] of Object.entries(CATEGORY_LOCALIZATIONS)) {
       if (category.includes(key) || key.includes(brandKeyClean(category))) {
-        return map[this.currentLang] || category;
+        return map[lang] || category;
       }
     }
-    return this.autoTranslateUyghur(category, this.currentLang);
+    return this.autoTranslateUyghur(category, lang);
   }
 
-  getBadgeName(badge) {
+  getBadgeName(badge, targetLang = null) {
     if (!badge) return '';
-    const lang = this.currentLang;
+    const lang = targetLang || this.currentLang;
     if (lang === 'ug') return badge;
     if (PROMO_BADGE_LOCALIZATIONS && PROMO_BADGE_LOCALIZATIONS[badge] && PROMO_BADGE_LOCALIZATIONS[badge][lang]) {
       return PROMO_BADGE_LOCALIZATIONS[badge][lang];
@@ -1924,6 +1948,14 @@ class I18nManager {
       const el = root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
       if (el && text !== undefined) el.textContent = text;
     };
+    const setHtml = (id, html) => {
+      const el = root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
+      if (el && html !== undefined) el.innerHTML = html;
+    };
+    const setPlaceholder = (id, ph) => {
+      const el = root.getElementById ? root.getElementById(id) : root.querySelector('#' + id);
+      if (el && ph !== undefined) el.placeholder = ph;
+    };
 
     // 2. ئۈستۈنكى ئېلان ۋە ئايلانما خەۋەرلەر (Marquee Ticker)
     setText('topAnnouncementText', this.t('announcement'));
@@ -1944,16 +1976,34 @@ class I18nManager {
     const adminSecretNavBtn = root.querySelector ? root.querySelector('#adminSecretNavBtn span') : null;
     if (adminSecretNavBtn) adminSecretNavBtn.textContent = this.t('adminNavBtn') || (lang === 'tr' ? 'Yönetim' : (lang === 'en' ? 'Admin' : 'ئارقا سۇپا'));
 
-    const searchInput = root.getElementById ? root.getElementById('mainSearchInput') : root.querySelector('#mainSearchInput');
-    if (searchInput) searchInput.placeholder = this.t('searchPlaceholder');
+    setPlaceholder('mainSearchInput', this.t('searchPlaceholder'));
+    const mainSearchBtn = root.getElementById ? root.getElementById('mainSearchBtn') : root.querySelector('#mainSearchBtn');
+    if (mainSearchBtn) mainSearchBtn.title = this.t('searchBtn') || (lang === 'tr' ? 'Ara' : (lang === 'en' ? 'Search' : 'ئىزدەش'));
+
+    // 🔍 ئىزدەش سەھىپىسىدىكى تۈرلەر تاللاش كۆزنىكى (searchCategorySelect)
+    const searchCatSelect = root.getElementById ? root.getElementById('searchCategorySelect') : root.querySelector('#searchCategorySelect');
+    if (searchCatSelect) {
+      const allOpt = searchCatSelect.querySelector('option[value="all"]');
+      if (allOpt) allOpt.textContent = this.t('allCategories');
+      searchCatSelect.querySelectorAll('option').forEach(opt => {
+        if (opt.value === 'all') {
+          opt.textContent = this.t('allCategories');
+        } else if (opt.value && typeof isPseudoCategory === 'function' && isPseudoCategory(opt.value)) {
+          // ئەگەر ئىلگىرى قالغان ساختا تۈر بولسا دەرھال چىقىرىۋېتىش
+          opt.remove();
+        } else if (opt.value) {
+          opt.textContent = this.getCategoryName(opt.value, lang);
+        }
+      });
+    }
 
     root.querySelectorAll('.brand-store-name').forEach(el => el.textContent = this.t('storeName'));
     root.querySelectorAll('.brand-store-sub').forEach(el => el.textContent = this.t('storeSubtitle'));
 
     // 4. يېتەكلىگۈچ كۇنۇپكىلىرى (Desktop & Mobile)
-    setText('navCartText', this.t('cartBtn') || 'سېۋەت');
-    setText('navWishlistText', this.t('wishlistBtn') || 'ياقتۇرغانلىرىم');
-    setText('navOrdersText', this.t('navOrdersText') || 'سېتىۋالغىنىم');
+    setText('navCartText', this.t('cartBtn') || (lang === 'tr' ? 'Sepet' : (lang === 'en' ? 'Cart' : 'سېۋەت')));
+    setText('navWishlistText', this.t('wishlistBtn') || (lang === 'tr' ? 'Favorilerim' : (lang === 'en' ? 'Wishlist' : 'ياقتۇرغانلىرىم')));
+    setText('navOrdersText', this.t('navOrdersText') || (lang === 'tr' ? 'Siparişlerim' : (lang === 'en' ? 'My Orders' : 'سېتىۋالغىنىم')));
 
     // 5. تەشۋىقات بۆلىكى (Hero Section Slides 1-5)
     for (let s = 1; s <= 5; s++) {
@@ -1993,8 +2043,89 @@ class I18nManager {
     setText('filterStockTitle', this.t('filterStockTitle'));
     setText('filterPriceTitle', this.t('filterPriceTitle'));
     setText('filterCouponTitle', this.t('filterCouponTitle'));
+    setText('filterOnlyInStockSpan', this.t('filterOnlyInStock'));
+    setText('filterCouponHint', this.t('couponHint'));
+    setText('quickCouponCopyText', this.t('copyCoupon'));
 
-    // 9. ئاستى قىسىم (Footer)
+    // 🛒 9. سېۋەت تارتمىسى (Cart Drawer)
+    setText('cartDrawerTitle', this.t('cartTitle'));
+    setText('cartSubtotalLabel', this.t('subtotal'));
+    setText('cartDeliveryLabel', this.t('deliveryFee'));
+    setText('cartDiscountLabel', this.t('discount'));
+    setText('cartTotalLabel', this.t('total'));
+    setText('applyCouponBtn', this.t('applyCoupon'));
+    setPlaceholder('couponCodeInput', this.t('couponPlaceholder'));
+    const proceedCheckoutBtn = root.querySelector ? root.querySelector('#proceedCheckoutBtn span') : null;
+    if (proceedCheckoutBtn) proceedCheckoutBtn.textContent = this.t('checkoutBtn');
+
+    // ❤️ 10. ياقتۇرغانلار تارتمىسى (Wishlist Drawer)
+    setText('wishlistDrawerTitle', this.t('wishlistTitle'));
+    setText('btnMoveAllWishlistSpan', this.t('btnMoveAllWishlist') || (lang === 'tr' ? 'Tümünü Sepete Ekle' : (lang === 'en' ? 'Move All to Cart' : 'ھەممىنى سېۋەتكە يۆتكەش')));
+    setText('btnClearWishlistSpan', this.t('btnClearWishlist') || (lang === 'tr' ? 'Listeyi Temizle' : (lang === 'en' ? 'Clear List' : 'تىزىملىكنى تازىلاش')));
+
+    // 📦 11. زاكاز ۋە كارگو سۈرۈشتۈرۈش كۆزنىكى (Order Tracking Modal)
+    setText('orderTrackModalTitleSpan', this.t('orderTrackModalTitle') || (lang === 'tr' ? 'Siparişlerim ve Kargo Takibi' : (lang === 'en' ? 'My Orders & Cargo Tracking' : 'مېنىڭ زاكازلىرىم ۋە كارگو سۈرۈشتۈرۈش')));
+    setText('orderTrackInputLabel', this.t('orderTrackInputLabel') || (lang === 'tr' ? 'Telefon numaranızı veya sipariş kodunu girin:' : (lang === 'en' ? 'Enter phone number or order code:' : 'تېلېفون نومۇرىڭىز ياكى پوسۇلكا / زاكاز كودىنى كىرگۈزۈڭ:')));
+    setPlaceholder('orderTrackQueryInput', this.t('orderTrackQueryPlaceholder') || (lang === 'tr' ? 'Örn: 0555xxxxxxx veya ORD-...' : (lang === 'en' ? 'e.g. 0555xxxxxxx or ORD-...' : 'مەسىلەن: 0555xxxxxxx ياكى TKLM-...')));
+    setText('btnDoTrackOrderText', this.t('orderTrackSearchBtn') || (lang === 'tr' ? 'Sorgula' : (lang === 'en' ? 'Track' : 'پوسۇلكامنى كۆرۈش')));
+    setText('btnToggleInboxSearch', lang === 'tr' ? 'Numara Değiştir' : (lang === 'en' ? 'Change Number' : 'نومۇر ئالماشتۇرۇش'));
+    setText('inboxCustomerNameText', lang === 'tr' ? 'Değerli Müşterimiz' : (lang === 'en' ? 'Dear Customer' : 'ھۆرمەتلىك خېرىدار'));
+
+    // 💳 12. چىقىم قىلىش كۆزنىكى (Checkout Modal)
+    const checkoutTitleEl = root.getElementById ? root.getElementById('checkoutModalTitle') : root.querySelector('#checkoutModalTitle');
+    if (checkoutTitleEl) checkoutTitleEl.innerHTML = `<i class="fas fa-truck"></i> ${this.t('checkoutTitle')}`;
+    setText('checkoutSummaryTitle', this.t('checkoutItemsSummary') || (lang === 'tr' ? 'Sipariş Özeti' : (lang === 'en' ? 'Order Summary' : 'سېتىۋالىدىغان ماللىرىڭىز:')));
+    setText('checkoutTotalLabel', this.t('checkoutTotalLabel') || (lang === 'tr' ? 'Genel Toplam:' : (lang === 'en' ? 'Total Payable:' : 'ئومۇمىي سومما:')));
+    setHtml('checkoutCustNameLabel', `${this.t('custName')} <span style="color: var(--danger-color);">*</span>`);
+    setPlaceholder('checkoutCustName', this.t('custNamePlaceholder') || (lang === 'tr' ? 'Ahmet Yılmaz / Murat Kaya' : (lang === 'en' ? 'Ahmet Yilmaz / Murat Kaya' : 'Ahmet Yılmaz / Murat Kaya (چوقۇم تۈركچە)')));
+    setHtml('checkoutCustPhoneLabel', `${this.t('custPhone')} <span style="color: var(--danger-color);">*</span>`);
+    setHtml('checkoutCustCityLabel', `${this.t('custCity')} <span style="color: var(--danger-color);">*</span>`);
+    setHtml('checkoutCustAddressLabel', `${this.t('custAddress')} <span style="color: var(--danger-color);">*</span>`);
+    setPlaceholder('checkoutCustAddress', this.t('custAddressPlaceholder') || (lang === 'tr' ? 'Örnek: Sümer Mah. 28/2 Sok. No:5 D:3 Zeytinburnu / İstanbul (Mahalle, cadde, kapı no, ilçe)' : (lang === 'en' ? 'Street address, building, district, city' : 'مەھەللە، كوچا، بىنا نومۇرى، ناھىيە (Örnek: Sümer Mah. 28/2 Sok. No:5 D:3 Zeytinburnu / İstanbul)')));
+    setText('checkoutPaymentLabel', this.t('paymentMethod'));
+    setText('payMethodHavaleSpan', this.t('payHavale'));
+    setText('payMethodCardSpan', this.t('payCard'));
+    setText('payMethodWhatsappSpan', this.t('payWhatsapp'));
+    setText('checkoutCardHolderLabel', this.t('cardHolderLabel'));
+    setPlaceholder('checkoutCardHolder', this.t('cardHolderPlaceholder') || 'AHMET YILMAZ');
+    setText('checkoutCardNumberLabel', this.t('cardNumberLabel'));
+    setText('checkoutCardExpiryLabel', this.t('cardExpiryLabel'));
+    setText('checkoutCardCvvLabel', this.t('cardCvvLabel'));
+    setText('checkoutCustNotesLabel', this.t('custNotes'));
+    setPlaceholder('checkoutCustNotes', this.t('custNotesPlaceholder'));
+    const submitBtnText = root.getElementById ? root.getElementById('submitOrderBtnText') : root.querySelector('#submitOrderBtnText');
+    if (submitBtnText) submitBtnText.textContent = this.t('submitOrderBtn');
+
+    // 🔍 13. تېز كۆرۈش كۆزنىكى (Quick View)
+    setText('quickViewModalTitle', this.t('quickViewModalTitle'));
+
+    // 🎡 14. ئامەت چاقى (Lucky Wheel)
+    setText('luckyWheelModalTitle', lang === 'tr' ? '🎡 Şans Çarkı' : (lang === 'en' ? '🎡 Lucky Wheel' : '🎡 ئامەت چاقى'));
+    setText('luckyWheelModalSubtitle', lang === 'tr' ? 'Günde 1 kez ücretsiz çevirin, anında indirim kuponu kazanın!' : (lang === 'en' ? 'Spin once free daily and win discount coupons!' : 'كۈندە 1 قېتىم ھەقسىز ئايلاندۇرۇپ، پۇل ئېتىبار كۇپونى ئۇتۇڭ!'));
+    setText('btnSpinWheelAction', lang === 'tr' ? 'Çevir' : (lang === 'en' ? 'Spin' : 'ئايلاندۇر'));
+    const luckyWheelTitle = root.querySelector ? root.querySelector('.lucky-wheel-btn-title') : null;
+    if (luckyWheelTitle) luckyWheelTitle.textContent = lang === 'tr' ? '🎡 Şans Çarkı' : (lang === 'en' ? '🎡 Lucky Wheel' : '🎡 ئامەت چاقى');
+    const luckyWheelSub = root.querySelector ? root.querySelector('.lucky-wheel-btn-sub') : null;
+    if (luckyWheelSub) luckyWheelSub.textContent = lang === 'tr' ? '1 Kez Ücretsiz!' : (lang === 'en' ? '1 Free Spin!' : '1 قېتىم ھەقسىز!');
+
+    // 🌐 15. ئاستى قىسىم (Footer)
+    setText('footerBrandDesc', this.t('footerBrandDesc'));
+    setText('footerMedicineSpan', this.t('btnUyghurMedicine') || (lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تىبابىتى')));
+    setText('fCol2TitleText', this.t('footerCol2') || (lang === 'tr' ? 'Platform Hakkında' : (lang === 'en' ? 'About Platform' : 'سۇپا ھەققىدە')));
+    setText('fLinkAboutSpan', this.t('fLinkAbout') || (lang === 'tr' ? 'Hakkımızda' : (lang === 'en' ? 'About Us' : 'بىز ھەققىدە')));
+    setText('fLinkAboutSub', this.t('fLinkAboutSub') || (lang === 'tr' ? 'Platform hakkında ve kurumsal bilgiler' : (lang === 'en' ? 'Platform introduction & info' : 'سۇپا تونۇشتۇرۇشى ۋە ئۇچۇرلىرى')));
+    setText('fLinkTrackOrderSpan', this.t('fLinkTrackOrder') || (lang === 'tr' ? 'Kargo Durumu Sorgula' : (lang === 'en' ? 'Track Order & Cargo' : 'پوسۇلكا ئەھۋالىنى تەكشۈرۈش')));
+    setText('fLinkTrackOrderSub', this.t('fLinkTrackOrderSub') || (lang === 'tr' ? 'Sipariş ve kargo takibi' : (lang === 'en' ? 'Order status & parcel tracking' : 'مېلىڭىزنى ئىز قوغلاش ۋە سۈرۈشتۈرۈش')));
+    setText('fColRatesTitleText', this.t('footerRatesTitle') || (lang === 'tr' ? 'Piyasa Döviz Kurları' : (lang === 'en' ? 'Exchange Rates' : 'بازار پېرېۋوت باھاسى')));
+    setText('rateNameUsd', this.t('rateNameUsd') || (lang === 'tr' ? '$ Dolar (USD)' : (lang === 'en' ? '$ US Dollar (USD)' : '$ دوللار (USD)')));
+    setText('rateNameEur', this.t('rateNameEur') || (lang === 'tr' ? '€ Euro (EUR)' : (lang === 'en' ? '€ Euro (EUR)' : '€ ياۋرو (EUR)')));
+    setText('btnRefreshRatesText', this.t('rateRefreshText') || (lang === 'tr' ? 'Yenile' : (lang === 'en' ? 'Refresh' : 'يېڭىلاش')));
+    const rTrendUsd = root.querySelector ? root.querySelector('#rateTrendUsd span') : null;
+    if (rTrendUsd) rTrendUsd.textContent = this.t('rateTrendMarket') || (lang === 'tr' ? 'Piyasa Fiyatı' : (lang === 'en' ? 'Market Price' : 'بازار باھاسى'));
+    const rTrendEur = root.querySelector ? root.querySelector('#rateTrendEur span') : null;
+    if (rTrendEur) rTrendEur.textContent = this.t('rateTrendMarket') || (lang === 'tr' ? 'Piyasa Fiyatı' : (lang === 'en' ? 'Market Price' : 'بازار باھاسى'));
+    setText('footerCopyright', this.t('footerCopyright') || (lang === 'tr' ? 'Tüm Hakları Saklıdır © 2026 Teklimakan Pazaryeri.' : (lang === 'en' ? 'All Rights Reserved © 2026 Teklimakan Marketplace.' : 'بارلىق نەشر ھوقۇقى قوغدىلىدۇ © 2026 تەكلىماكان سودا تورى.')));
+
     root.querySelectorAll('.footer-col').forEach(col => {
       const h4 = col.querySelector('h4');
       if (!h4) return;
@@ -2008,7 +2139,7 @@ class I18nManager {
       }
     });
 
-    // 10. بەت تولۇق تەرجىمە قىلىنغاندىن كېيىن يوشۇرۇش پەردىسىنى دەرھال ئېچىش
+    // 16. بەت تولۇق تەرجىمە قىلىنغاندىن كېيىن يوشۇرۇش پەردىسىنى دەرھال ئېچىش
     document.documentElement.removeAttribute('data-lang-pending');
   }
 }

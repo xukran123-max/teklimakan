@@ -6,6 +6,10 @@
       "destination": "/api/product-image?id=$1"
     },
     {
+      "source": "/p/(.*)",
+      "destination": "/api/product-share?slug=$1"
+    },
+    {
       "source": "/",
       "has": [
         {

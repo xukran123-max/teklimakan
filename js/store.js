@@ -14,6 +14,35 @@ function isPseudoCategory(name) {
          s === 'all products';
 }
 if (typeof window !== 'undefined') window.isPseudoCategory = isPseudoCategory;
+
+// 🔤 ئۇيغۇرچە / تۈركچە / ئىنگلىزچە يېزىقلارنى چىرايلىق SEO Slug (قىسقا ئادرېس) قىلىپ ئايلاندۇرۇش ياردەمچىسى
+function transliterateToSlug(text) {
+  if (!text) return '';
+  const map = {
+    'ا': 'a', 'ە': 'e', 'ى': 'i', 'ې': 'e', 'و': 'o', 'ۇ': 'u', 'ۆ': 'o', 'ۈ': 'u',
+    'ب': 'b', 'پ': 'p', 'ت': 't', 'ج': 'j', 'چ': 'ch', 'خ': 'x', 'د': 'd', 'ر': 'r', 'ز': 'z',
+    'ژ': 'zh', 'س': 's', 'ش': 'sh', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'گ': 'g', 'ڭ': 'ng',
+    'ل': 'l', 'م': 'm', 'ن': 'n', 'ھ': 'h', 'ي': 'y', 'ۋ': 'w', 'ئ': '', 'لا': 'la',
+    '،': '-', '؛': '-', '؟': '', '–': '-', '—': '-'
+  };
+  const trMap = {
+    'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ı': 'i', 'I': 'i', 'İ': 'i',
+    'ö': 'o', 'Ö': 'o', 'ş': 's', 'Ş': 's', 'ü': 'u', 'Ü': 'u'
+  };
+  let out = '';
+  for (const ch of String(text)) {
+    if (map[ch] !== undefined) out += map[ch];
+    else if (trMap[ch] !== undefined) out += trMap[ch];
+    else out += ch;
+  }
+  return out.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\-_\s]/g, '')
+    .trim()
+    .replace(/[\s\-_]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+if (typeof window !== 'undefined') window.transliterateToSlug = transliterateToSlug;
 /**
  * ================================================================
  * مەركىزىي سانلىق مەلۇمات ئامبىرى ۋە ھالەت باشقۇرغۇچ (Store.js)
@@ -1964,6 +1993,7 @@ class StoreManager {
               agentId: rp.agent_id || null,
               agentName: rp.agent_name || null,
               translations: safeTranslations,
+              slug: rp.slug || (rp.translations && rp.translations.slug) || localItem?.slug || transliterateToSlug(safeName),
               isUserEdited: isCloudEdited || isLocallyEdited,
               updatedAt: cloudUpdated || localUpdated || new Date().toISOString()
             };
@@ -5423,10 +5453,37 @@ class StoreManager {
     if (!id) return null;
     const cleanId = String(id).trim().toLowerCase();
     const products = this.getProducts();
-    const p = products.find(prod => String(prod.id).trim().toLowerCase() === cleanId);
+    let p = products.find(prod => String(prod.id).trim().toLowerCase() === cleanId);
+    if (!p) {
+      const prdMatch = cleanId.match(/prd-\d+/i);
+      if (prdMatch) {
+        p = products.find(prod => String(prod.id).trim().toLowerCase() === prdMatch[0].toLowerCase());
+      }
+    }
+    if (!p) {
+      p = products.find(prod => {
+        if (prod.slug && String(prod.slug).trim().toLowerCase() === cleanId) return true;
+        if (prod.translations && prod.translations.slug && String(prod.translations.slug).trim().toLowerCase() === cleanId) return true;
+        return false;
+      });
+    }
+    if (!p) {
+      p = products.find(prod => {
+        const s = transliterateToSlug(prod.name);
+        return s && s === cleanId;
+      });
+    }
     if (!p) return null;
     if (lang) return this.getLocalizedProduct(p, lang);
     return p;
+  }
+
+  getProductBySlug(slugOrId, lang = null) {
+    return this.getProductById(slugOrId, lang);
+  }
+
+  transliterateToSlug(text) {
+    return transliterateToSlug(text);
   }
 
   getProductMerchantBadge(product) {
@@ -6078,6 +6135,12 @@ class StoreManager {
         updatedAt: nowIso,
         approvalStatus: productData.approvalStatus || (index !== -1 ? products[index].approvalStatus : 'تەستىقلاندى')
       };
+      if (!updatedProduct.slug) {
+        updatedProduct.slug = transliterateToSlug(updatedProduct.name);
+      }
+      if (updatedProduct.translations && !updatedProduct.translations.slug) {
+        updatedProduct.translations.slug = updatedProduct.slug;
+      }
       updatedProduct.translations = this.prepareProductTranslations(updatedProduct, previousProduct);
       if (index !== -1) {
         products[index] = updatedProduct;
@@ -6103,6 +6166,12 @@ class StoreManager {
         isUserEdited: true,
         ...productData
       };
+      if (!newProduct.slug) {
+        newProduct.slug = transliterateToSlug(newProduct.name);
+      }
+      if (newProduct.translations && !newProduct.translations.slug) {
+        newProduct.translations.slug = newProduct.slug;
+      }
       newProduct.translations = this.prepareProductTranslations(newProduct);
       products.unshift(newProduct);
       savedProduct = newProduct;

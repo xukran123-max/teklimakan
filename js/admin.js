@@ -422,6 +422,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadSettingsForm();
     populateCategoryDropdowns();
+
+    // 🔗 مەھسۇلات Slug (قىسقا ئادرېس) بىر تەرەپ قىلىش
+    const slugInput = document.getElementById('formProductSlug');
+    const nameUgInput = document.getElementById('formProductNameUg');
+    const btnAutoSlug = document.getElementById('btnAutoGenerateSlug');
+    const getSafeSlug = (txt) => {
+      if (!txt) return '';
+      if (window.appStore && typeof window.appStore.transliterateToSlug === 'function') {
+        return window.appStore.transliterateToSlug(txt);
+      }
+      if (typeof transliterateToSlug === 'function') {
+        return transliterateToSlug(txt);
+      }
+      return '';
+    };
+
+    if (slugInput) {
+      slugInput.oninput = () => {
+        slugInput.dataset.manual = slugInput.value.trim() ? 'true' : 'false';
+      };
+    }
+
+    if (nameUgInput && slugInput) {
+      nameUgInput.oninput = () => {
+        if (slugInput.dataset.manual !== 'true') {
+          slugInput.value = getSafeSlug(nameUgInput.value.trim());
+        }
+      };
+    }
+
+    if (btnAutoSlug && slugInput) {
+      btnAutoSlug.onclick = () => {
+        const srcText = (document.getElementById('formProductNameUg')?.value.trim()) ||
+                        (document.getElementById('formProductNameTr')?.value.trim()) ||
+                        (document.getElementById('formProductNameEn')?.value.trim()) || '';
+        if (srcText) {
+          slugInput.value = getSafeSlug(srcText);
+          slugInput.dataset.manual = 'false';
+        }
+      };
+    }
     renderCustomerRetentionAdmin();
     setupCustomerRetentionListeners();
     renderHeroSliderAdmin();
@@ -4503,6 +4544,11 @@ document.addEventListener('DOMContentLoaded', () => {
       titleEl.textContent = 'تاۋار ئۇچۇرىنى تەھرىرلەش';
       document.getElementById('formProductId').value = product.id;
       document.getElementById('formProductNameUg').value = product.name;
+      if (slugInput) {
+        const existingSlug = product.slug || (product.translations && product.translations.slug) || getSafeSlug(product.name);
+        slugInput.value = existingSlug || '';
+        slugInput.dataset.manual = (product.slug || (product.translations && product.translations.slug)) ? 'true' : 'false';
+      }
       if (brandInput) brandInput.value = product.brand || 'تەكلىماكان كىلاسسىك';
       document.getElementById('formProductCategory').value = product.category;
       document.getElementById('formProductPrice').value = product.price;
@@ -4602,6 +4648,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pushCheck) pushCheck.checked = true;
 
       titleEl.textContent = 'يېڭى تاۋار قوشۇش';
+      if (slugInput) {
+        slugInput.value = '';
+        slugInput.dataset.manual = 'false';
+      }
       document.getElementById('formProductId').value = '';
       if (brandInput) brandInput.value = 'تەكلىماكان كىلاسسىك';
       if (unitInput) unitInput.value = 'دانە';
@@ -6750,14 +6800,22 @@ document.addEventListener('DOMContentLoaded', () => {
           const badgeTr = (window.appI18n && badge) ? window.appI18n.getBadgeName(badge, 'tr') : badge;
           const badgeEn = (window.appI18n && badge) ? window.appI18n.getBadgeName(badge, 'en') : badge;
 
+          const slugVal = document.getElementById('formProductSlug')?.value.trim();
+          const autoSlug = (window.appStore && typeof window.appStore.transliterateToSlug === 'function')
+            ? window.appStore.transliterateToSlug(nameUg)
+            : (typeof transliterateToSlug === 'function' ? transliterateToSlug(nameUg) : '');
+          const finalSlug = slugVal || autoSlug;
+
           const translations = {
             ug: { name: nameUg, description: descUg, category: category, unit: unit, badge: badge },
             tr: { name: nameTr, description: descTr, category: categoryTr, unit: unitTr, badge: badgeTr },
-            en: { name: nameEn, description: descEn, category: categoryEn, unit: unitEn, badge: badgeEn }
+            en: { name: nameEn, description: descEn, category: categoryEn, unit: unitEn, badge: badgeEn },
+            slug: finalSlug
           };
 
           const data = {
             name: nameUg,
+            slug: finalSlug,
             brand,
             category,
             price,

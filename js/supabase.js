@@ -187,6 +187,9 @@ window.TeklimakanSupabase = {
       if (product.isUserEdited !== false) {
         translations.isUserEdited = true;
       }
+      if (product.slug) {
+        translations.slug = product.slug;
+      }
       const nowIso = product.updatedAt || new Date().toISOString();
       translations.updatedAt = nowIso;
 

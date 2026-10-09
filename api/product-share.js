@@ -11,10 +11,37 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+function transliterateToSlug(text) {
+  if (!text) return '';
+  const map = {
+    'ا': 'a', 'ە': 'e', 'ى': 'i', 'ې': 'e', 'و': 'o', 'ۇ': 'u', 'ۆ': 'o', 'ۈ': 'u',
+    'ب': 'b', 'پ': 'p', 'ت': 't', 'ج': 'j', 'چ': 'ch', 'خ': 'x', 'د': 'd', 'ر': 'r', 'ز': 'z',
+    'ژ': 'zh', 'س': 's', 'ش': 'sh', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'گ': 'g', 'ڭ': 'ng',
+    'ل': 'l', 'م': 'm', 'ن': 'n', 'ھ': 'h', 'ي': 'y', 'ۋ': 'w', 'ئ': '', 'لا': 'la',
+    '،': '-', '؛': '-', '؟': '', '–': '-', '—': '-'
+  };
+  const trMap = {
+    'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ı': 'i', 'I': 'i', 'İ': 'i',
+    'ö': 'o', 'Ö': 'o', 'ş': 's', 'Ş': 's', 'ü': 'u', 'Ü': 'u'
+  };
+  let out = '';
+  for (const ch of String(text)) {
+    if (map[ch] !== undefined) out += map[ch];
+    else if (trMap[ch] !== undefined) out += trMap[ch];
+    else out += ch;
+  }
+  return out.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\-_\s]/g, '')
+    .trim()
+    .replace(/[\s\-_]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 module.exports = async function handler(req, res) {
   try {
+    const rawSlug = req.query.slug || '';
     const rawId = req.query.id || req.query.product || req.query.prd || req.query.p || '';
-    const id = String(rawId).trim().replace(/\.(jpg|jpeg|png|webp)$/i, '');
     const lang = (req.query.lang || 'ug').toLowerCase();
 
     // 🛡️ Always use canonical non-www domain to avoid 307 redirects breaking WhatsApp crawler
@@ -22,36 +49,91 @@ module.exports = async function handler(req, res) {
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const baseUrl = `${protocol}://${host}`;
 
-    const targetUrl = id 
-      ? `${baseUrl}/?id=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}`
-      : `${baseUrl}/`;
-
-    if (!id) {
-      return res.redirect(302, targetUrl);
+    let identifier = (rawSlug || rawId || '').trim().replace(/\.(jpg|jpeg|png|webp)$/i, '');
+    if (!identifier) {
+      return res.redirect(302, `${baseUrl}/`);
     }
 
-    const cleanId = id.replace(/^#/, '').trim();
-    const cleanIdWithPrefix = cleanId.startsWith('PRD-') ? cleanId : `PRD-${cleanId}`;
+    // Try extracting PRD-xxx from slug or identifier
+    let cleanId = '';
+    const prdMatch = identifier.match(/prd-\d+/i);
+    if (prdMatch) {
+      cleanId = prdMatch[0].toUpperCase();
+    } else if (/^\d+$/.test(identifier)) {
+      cleanId = `PRD-${identifier}`;
+    }
 
     // Fetch product details from Supabase
     let product = null;
     try {
-      const queryUrl = `${SUPABASE_URL}/rest/v1/products?or=(id.eq.${encodeURIComponent(cleanId)},id.eq.${encodeURIComponent(cleanIdWithPrefix)})&select=*&limit=1`;
-      const response = await fetch(queryUrl, {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      if (cleanId) {
+        const queryUrl = `${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(cleanId)}&select=*&limit=1`;
+        const response = await fetch(queryUrl, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (response.ok) {
+          const rows = await response.json();
+          if (rows && rows.length > 0) product = rows[0];
         }
-      });
-      if (response.ok) {
-        const rows = await response.json();
-        if (rows && rows.length > 0) {
-          product = rows[0];
+      }
+
+      // If not found by cleanId, attempt lookup by translations->>slug
+      if (!product && identifier) {
+        const queryUrl = `${SUPABASE_URL}/rest/v1/products?translations->>slug=eq.${encodeURIComponent(identifier)}&select=*&limit=1`;
+        const response = await fetch(queryUrl, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (response.ok) {
+          const rows = await response.json();
+          if (rows && rows.length > 0) {
+            product = rows[0];
+            cleanId = product.id;
+          }
+        }
+      }
+
+      // Fallback: search products and match transliterated title or slug
+      if (!product && identifier) {
+        const queryUrl = `${SUPABASE_URL}/rest/v1/products?select=*&limit=100`;
+        const response = await fetch(queryUrl, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (response.ok) {
+          const rows = await response.json();
+          if (Array.isArray(rows)) {
+            const found = rows.find(r => {
+              if (r.id && r.id.toLowerCase() === identifier.toLowerCase()) return true;
+              if (r.translations && r.translations.slug && r.translations.slug.toLowerCase() === identifier.toLowerCase()) return true;
+              const slugGen = transliterateToSlug(r.name);
+              return slugGen && slugGen.toLowerCase() === identifier.toLowerCase();
+            });
+            if (found) {
+              product = found;
+              cleanId = product.id;
+            }
+          }
         }
       }
     } catch (e) {
       console.warn('Supabase fetch error:', e);
     }
+
+    const finalId = product ? product.id : (cleanId || identifier);
+    const prodSlug = (product && product.translations && product.translations.slug) ||
+                     (product && product.slug) ||
+                     transliterateToSlug(product ? product.name : '');
+    const canonicalSlug = prodSlug ? `${prodSlug}-${finalId}` : finalId;
+    const canonicalUrl = `${baseUrl}/p/${canonicalSlug}`;
+    const targetUrl = `${baseUrl}/?id=${encodeURIComponent(finalId)}&lang=${encodeURIComponent(lang)}`;
 
     // Default metadata if product not found
     let title = 'تەكلىماكان سودا تورى — تەبىئىي، ساپ ۋە ئەلا سۈپەتلىك يەرلىك مەھسۇلاتلار';
@@ -105,6 +187,8 @@ module.exports = async function handler(req, res) {
     const safeDesc = escapeHtml(desc);
     const safeImageUrl = escapeHtml(imageUrl);
     const safeTargetUrl = escapeHtml(targetUrl);
+    const safeCanonicalUrl = escapeHtml(canonicalUrl);
+    const jsTargetUrl = targetUrl.replace(/'/g, "\\'");
 
     const html = `<!DOCTYPE html>
 <html lang="${lang}" dir="rtl">
@@ -118,7 +202,7 @@ module.exports = async function handler(req, res) {
   <meta property="og:site_name" content="تەكلىماكان سودا تورى">
   <meta property="og:title" content="${safeTitle}">
   <meta property="og:description" content="${safeDesc}">
-  <meta property="og:url" content="${safeTargetUrl}">
+  <meta property="og:url" content="${safeCanonicalUrl}">
   <meta property="og:image" content="${safeImageUrl}">
   <meta property="og:image:secure_url" content="${safeImageUrl}">
   <meta property="og:image:type" content="${imageMime}">
@@ -138,12 +222,15 @@ module.exports = async function handler(req, res) {
   <meta name="twitter:description" content="${safeDesc}">
   <meta name="twitter:image" content="${safeImageUrl}">
 
+  <!-- Canonical link -->
+  <link rel="canonical" href="${safeCanonicalUrl}">
+
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="${baseUrl}/images/favicon.svg">
 
   <!-- Instant Browser Redirect for Real Users (No meta-refresh so bots parse OG tags) -->
   <script>
-    window.location.replace('${safeTargetUrl}');
+    window.location.replace('${jsTargetUrl}');
   </script>
 
   <style>

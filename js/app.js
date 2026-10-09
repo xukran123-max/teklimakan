@@ -2716,7 +2716,16 @@ function initTeklimakanApp() {
       let prodId = url.searchParams.get('id') || 
                    url.searchParams.get('product') || 
                    url.searchParams.get('prd') || 
-                   url.searchParams.get('p');
+                   url.searchParams.get('p') ||
+                   url.searchParams.get('slug');
+
+      // Check pathname if visiting /p/xxx directly
+      if (!prodId && window.location.pathname.startsWith('/p/')) {
+        const slugPart = window.location.pathname.replace(/^\/p\//, '').trim();
+        if (slugPart) {
+          prodId = slugPart;
+        }
+      }
 
       if (!prodId && window.location.hash) {
         const hash = window.location.hash.replace(/^#/, '').trim();
@@ -2729,7 +2738,8 @@ function initTeklimakanApp() {
 
       prodId = decodeURIComponent(prodId).trim();
 
-      const findProduct = () => window.appStore?.getProductById(prodId) ||
+      const findProduct = () => window.appStore?.getProductBySlug(prodId) ||
+        window.appStore?.getProductById(prodId) ||
         window.appStore?.getProductById('PRD-' + prodId);
       let opened = false;
       const openFoundProduct = () => {
@@ -2906,7 +2916,9 @@ function initTeklimakanApp() {
         const formattedPrice = window.appStore.formatPrice(product.price * currentQty);
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin.replace(/^https?:\/\/www\./i, 'https://') : 'https://teklimakan.com';
-        const itemUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
+        const prodSlug = product.slug || (product.translations && product.translations.slug) || ((window.appStore && typeof window.appStore.transliterateToSlug === 'function') ? window.appStore.transliterateToSlug(product.name) : '');
+        const slugSegment = prodSlug ? `${prodSlug}-${product.id}` : product.id;
+        const itemUrl = `${baseUrl}/p/${slugSegment}`;
         
         const greeting = window.appI18n.t('waOrderGreeting');
         const prodLabel = window.appI18n.t('waProductLabel');
@@ -2934,7 +2946,9 @@ function initTeklimakanApp() {
       shareBtn.addEventListener('click', async () => {
         const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
         const baseUrl = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin.replace(/^https?:\/\/www\./i, 'https://') : 'https://teklimakan.com';
-        const shareUrl = `${baseUrl}/api/product-share?id=${encodeURIComponent(product.id)}&lang=${encodeURIComponent(lang)}`;
+        const prodSlug = product.slug || (product.translations && product.translations.slug) || ((window.appStore && typeof window.appStore.transliterateToSlug === 'function') ? window.appStore.transliterateToSlug(product.name) : '');
+        const slugSegment = prodSlug ? `${prodSlug}-${product.id}` : product.id;
+        const shareUrl = `${baseUrl}/p/${slugSegment}`;
         const platformTitle = window.appI18n.t('shareModalTitle') || 'تەكلىماكان';
         const shareTitle = `${product.name} - ${platformTitle}`;
         const highlightText = window.appI18n.t('shareProductHighlight') || '🌟 تەكلىماكان سۇپىسىدىكى مەھسۇلات:';

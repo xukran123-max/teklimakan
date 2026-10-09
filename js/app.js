@@ -2814,6 +2814,34 @@ function initTeklimakanApp() {
       `;
     }
 
+    // 📦 ئامبار زاپىسىنىڭ كۆرۈنۈشىنى ئەقلىي ۋە راۋان بىر تەرەپ قىلىش (مەسىلەن: 500 دانە (100 گرام))
+    const unitWord = (window.appI18n && typeof window.appI18n.t === 'function') ? window.appI18n.t('itemsUnit') : 'دانە';
+    const rawUnit = product.unit || '';
+    const localizedUnit = (window.appI18n && typeof window.appI18n.getUnitName === 'function') ? window.appI18n.getUnitName(rawUnit) : rawUnit;
+    const stockUnitLabel = localizedUnit
+      ? (/\d/.test(localizedUnit) ? `${unitWord} (${localizedUnit})` : localizedUnit)
+      : unitWord;
+
+    let stockStatusHtml = '';
+    if (product.stock <= 0) {
+      stockStatusHtml = `
+        <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: var(--danger-color); display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fas fa-times-circle"></i>
+          <span>${window.appI18n.t('outOfStock')}</span>
+        </div>
+      `;
+    } else {
+      const stockPrefix = (window.appI18n && typeof window.appI18n.t === 'function') ? window.appI18n.t('inStock') : 'ئامباردا بار:';
+      stockStatusHtml = `
+        <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: var(--success-color); display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fas fa-check-circle"></i>
+          <span>${stockPrefix}</span>
+          <span class="number-latin">${product.stock}</span>
+          <bdi>${stockUnitLabel}</bdi>
+        </div>
+      `;
+    }
+
     modalBody.innerHTML = `
       <div class="quick-view-grid">
         <div class="quick-view-media" style="position: relative;">
@@ -2843,9 +2871,7 @@ function initTeklimakanApp() {
             ${product.description || ''}
           </div>
 
-          <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: ${product.stock > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
-            ${window.appI18n.t('filterStockTitle')}: <span class="number-latin">${product.stock}</span> <bdi>${product.unit || window.appI18n.t('itemsUnit')}</bdi>
-          </div>
+          ${stockStatusHtml}
 
           <div class="quick-view-actions">
             <div class="qty-control-wrap" style="height: 44px; min-width: 105px; display: flex; align-items: center;">

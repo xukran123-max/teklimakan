@@ -32,6 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.cleanProductUnit = cleanUnit;
 
+  // 🔗 مەھسۇلات Slug (قىسقا ئادرېس) ھاسىللاش ياردەمچىسى
+  function getSafeSlug(txt) {
+    if (!txt) return '';
+    if (window.appStore && typeof window.appStore.transliterateToSlug === 'function') {
+      return window.appStore.transliterateToSlug(txt);
+    }
+    if (typeof transliterateToSlug === 'function') {
+      return transliterateToSlug(txt);
+    }
+    if (typeof window.transliterateToSlug === 'function') {
+      return window.transliterateToSlug(txt);
+    }
+    return '';
+  }
+  window.getSafeSlug = getSafeSlug;
+
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -422,47 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadSettingsForm();
     populateCategoryDropdowns();
-
-    // 🔗 مەھسۇلات Slug (قىسقا ئادرېس) بىر تەرەپ قىلىش
-    const slugInput = document.getElementById('formProductSlug');
-    const nameUgInput = document.getElementById('formProductNameUg');
-    const btnAutoSlug = document.getElementById('btnAutoGenerateSlug');
-    const getSafeSlug = (txt) => {
-      if (!txt) return '';
-      if (window.appStore && typeof window.appStore.transliterateToSlug === 'function') {
-        return window.appStore.transliterateToSlug(txt);
-      }
-      if (typeof transliterateToSlug === 'function') {
-        return transliterateToSlug(txt);
-      }
-      return '';
-    };
-
-    if (slugInput) {
-      slugInput.oninput = () => {
-        slugInput.dataset.manual = slugInput.value.trim() ? 'true' : 'false';
-      };
-    }
-
-    if (nameUgInput && slugInput) {
-      nameUgInput.oninput = () => {
-        if (slugInput.dataset.manual !== 'true') {
-          slugInput.value = getSafeSlug(nameUgInput.value.trim());
-        }
-      };
-    }
-
-    if (btnAutoSlug && slugInput) {
-      btnAutoSlug.onclick = () => {
-        const srcText = (document.getElementById('formProductNameUg')?.value.trim()) ||
-                        (document.getElementById('formProductNameTr')?.value.trim()) ||
-                        (document.getElementById('formProductNameEn')?.value.trim()) || '';
-        if (srcText) {
-          slugInput.value = getSafeSlug(srcText);
-          slugInput.dataset.manual = 'false';
-        }
-      };
-    }
     renderCustomerRetentionAdmin();
     setupCustomerRetentionListeners();
     renderHeroSliderAdmin();
@@ -4484,6 +4459,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.reset();
     populateCategoryDropdowns();
+
+    // 🔗 مەھسۇلات Slug (قىسقا ئادرېس) بۆلىكىنى دەسلەپلەشتۈرۈش
+    const slugInput = document.getElementById('formProductSlug');
+    const nameUgInput = document.getElementById('formProductNameUg');
+    const btnAutoSlug = document.getElementById('btnAutoGenerateSlug');
+
+    if (slugInput) {
+      slugInput.oninput = () => {
+        slugInput.dataset.manual = slugInput.value.trim() ? 'true' : 'false';
+      };
+    }
+
+    if (nameUgInput && slugInput) {
+      nameUgInput.oninput = () => {
+        if (slugInput.dataset.manual !== 'true') {
+          slugInput.value = getSafeSlug(nameUgInput.value.trim());
+        }
+      };
+    }
+
+    if (btnAutoSlug && slugInput) {
+      btnAutoSlug.onclick = () => {
+        const srcText = (document.getElementById('formProductNameUg')?.value.trim()) ||
+                        (document.getElementById('formProductNameTr')?.value.trim()) ||
+                        (document.getElementById('formProductNameEn')?.value.trim()) || '';
+        if (srcText) {
+          slugInput.value = getSafeSlug(srcText);
+          slugInput.dataset.manual = 'false';
+        }
+      };
+    }
 
     // تىل تاللاش گۇرۇپپىسىنى قوزغىتىش
     const scopeSelect = document.getElementById('formLanguageScope');

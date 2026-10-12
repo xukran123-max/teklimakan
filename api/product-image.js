@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
     // Strip file extension if present (e.g. PRD-840.jpg -> PRD-840)
     const id = String(rawId).trim().replace(/\.(jpg|jpeg|png|webp)$/i, '');
     if (!id) {
-      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
+      return res.redirect(302, `${baseUrl}/images/share-cover-v2.jpg`);
     }
 
     const cleanId = id.replace(/^#/, '');
@@ -27,12 +27,12 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
+      return res.redirect(302, `${baseUrl}/images/share-cover-v2.jpg`);
     }
 
     const rows = await response.json();
     if (!rows || rows.length === 0 || !rows[0].image) {
-      return res.redirect(302, `${baseUrl}/images/og-share-cover.jpg`);
+      return res.redirect(302, `${baseUrl}/images/share-cover-v2.jpg`);
     }
 
     const img = rows[0].image.trim();
@@ -60,6 +60,6 @@ module.exports = async function handler(req, res) {
     return res.redirect(302, `${baseUrl}/${cleanPath}`);
   } catch (err) {
     console.error('product-image error:', err);
-    return res.redirect(302, 'https://teklimakan.com/images/og-share-cover.jpg');
+    return res.redirect(302, 'https://teklimakan.com/images/share-cover-v2.jpg');
   }
 };

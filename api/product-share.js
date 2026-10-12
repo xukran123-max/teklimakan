@@ -138,7 +138,7 @@ module.exports = async function handler(req, res) {
     // Default metadata if product not found
     let title = 'تەكلىماكان سودا تورى — تەبىئىي، ساپ ۋە ئەلا سۈپەتلىك يەرلىك مەھسۇلاتلار';
     let desc = 'تەكلىماكان تور سۇپىسى: تەبىئىي پىننە گۈلقەنتى، مېۋە-چىۋە، قۇرۇق يەل-يېمىش ۋە ئىشەنچلىك مال سېتىۋېلىش مەركىزى.';
-    let imageUrl = `${baseUrl}/images/og-share-cover.jpg`;
+    let imageUrl = `${baseUrl}/images/share-cover-v2.jpg`;
     let imageMime = 'image/jpeg';
 
     if (product) {
@@ -179,7 +179,7 @@ module.exports = async function handler(req, res) {
         imageUrl = `${baseUrl}/${cleanPath}`;
         if (cleanPath.endsWith('.png')) imageMime = 'image/png';
       } else {
-        imageUrl = `${baseUrl}/images/og-share-cover.jpg`;
+        imageUrl = `${baseUrl}/images/share-cover-v2.jpg`;
       }
     }
 

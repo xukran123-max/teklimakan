@@ -86,6 +86,10 @@ function initTeklimakanApp() {
   }
 
   function selectSiteLanguage(lang) {
+    if (lang === 'tr' || lang === 'en') {
+      window.location.href = 'https://teklimakan.online';
+      return;
+    }
     if (!lang || !['ug', 'tr', 'en'].includes(lang)) return;
     if (window.appI18n && typeof window.appI18n.setLang === 'function') {
       window.appI18n.setLang(lang);

@@ -1469,51 +1469,20 @@ const UNIT_LOCALIZATIONS = {
 
 class I18nManager {
   constructor() {
-    let initialLang = 'ug';
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const langParam = urlParams.get('lang');
-      const hash = window.location.hash ? window.location.hash.toLowerCase().replace(/[^a-z]/g, '') : '';
-
-      // 🌐 URL دىكى يول (pathname) ئارقىلىق تىلنى ئاپتوماتىك تونۇش: /tr, /en, /ug قاتارلىقلار
-      const pathSegments = (window.location.pathname || '').toLowerCase().split('/').filter(Boolean);
-      const firstSegment = pathSegments[0] || '';
-      let pathLang = '';
-      if (['tr', 'tr.html'].includes(firstSegment)) pathLang = 'tr';
-      else if (['en', 'en.html'].includes(firstSegment)) pathLang = 'en';
-      else if (['ug', 'ug.html'].includes(firstSegment)) pathLang = 'ug';
-
-      if (pathLang) {
-        initialLang = pathLang;
-        localStorage.setItem('teklimakan_language', pathLang);
-      } else if (langParam && ['ug', 'tr', 'en'].includes(langParam)) {
-        initialLang = langParam;
-        localStorage.setItem('teklimakan_language', langParam);
-      } else if (hash && ['ug', 'tr', 'en'].includes(hash)) {
-        initialLang = hash;
-        localStorage.setItem('teklimakan_language', hash);
-      } else {
-        const saved = localStorage.getItem('teklimakan_language');
-        if (saved && ['ug', 'tr', 'en'].includes(saved)) {
-          initialLang = saved;
-        } else {
-          // ئەگەر زىيارەتچى ئىلگىرى تاللىمىغان يېڭى ئادەم بولسا، تېلېفون ياكى كومپيۇتېرىنىڭ تىلىغا قاراپ ئەقلىي ئېچىش
-          const navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-          if (navLang.startsWith('tr')) {
-            initialLang = 'tr';
-          } else if (navLang.startsWith('en')) {
-            initialLang = 'en';
-          } else {
-            initialLang = 'ug';
-          }
-        }
+      const path = (window.location.pathname || '').toLowerCase();
+      if (langParam === 'tr' || langParam === 'en' || path.startsWith('/tr') || path.startsWith('/en')) {
+        window.location.replace('https://teklimakan.online');
+        return;
       }
-    } catch (e) {
-      initialLang = localStorage.getItem('teklimakan_language') || 'ug';
-    }
-    this.currentLang = initialLang;
+    } catch (e) {}
+
+    this.currentLang = 'ug';
     try {
-      localStorage.setItem('teklimakan_currency_preference', initialLang === 'en' ? 'USD' : 'TRY');
+      localStorage.setItem('teklimakan_language', 'ug');
+      localStorage.setItem('teklimakan_currency_preference', 'TRY');
     } catch (e) {}
   }
 
@@ -1522,6 +1491,10 @@ class I18nManager {
   }
 
   setLang(lang) {
+    if (lang === 'tr' || lang === 'en') {
+      window.location.href = 'https://teklimakan.online';
+      return;
+    }
     if (['ug', 'tr', 'en'].includes(lang)) {
       this.currentLang = lang;
       localStorage.setItem('teklimakan_language', lang);

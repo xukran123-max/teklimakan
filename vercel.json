@@ -40,52 +40,6 @@
       "destination": "/api/product-share"
     },
     {
-      "source": "/tr",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterestbot).*"
-        }
-      ],
-      "destination": "/tr/index.html"
-    },
-    {
-      "source": "/en",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|Pinterestbot).*"
-        }
-      ],
-      "destination": "/en/index.html"
-    },
-    {
-      "source": "/tr",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/tr/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/tr.html",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en.html",
-      "destination": "/index.html"
-    },
-    {
       "source": "/ug",
       "destination": "/index.html"
     },
@@ -103,6 +57,36 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/tr",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
+    {
+      "source": "/tr/(.*)",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
+    {
+      "source": "/tr.html",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
+    {
+      "source": "/en",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
+    {
+      "source": "/en/(.*)",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
+    {
+      "source": "/en.html",
+      "destination": "https://teklimakan.online",
+      "permanent": false
+    },
     {
       "source": "/admin.html",
       "destination": "/",

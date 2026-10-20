@@ -1,0 +1,17 @@
+# Robots.txt for https://teklimakan.com
+# Googlebot & standard search engine crawlers
+
+User-agent: *
+Allow: /
+Allow: /images/
+Allow: /css/
+Allow: /js/
+Allow: /p/
+Disallow: /seidiye
+Disallow: /seidiye.html
+Disallow: /admin
+Disallow: /api/send-email
+Disallow: /api/send-sms
+
+# Sitemap Location
+Sitemap: https://teklimakan.com/sitemap.xml

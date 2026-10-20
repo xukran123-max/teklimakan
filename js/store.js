@@ -1434,6 +1434,7 @@ class StoreManager {
     // 💵 تىل بىلەن ماس قەدەمدە پۇل بىرلىكىنى بېكىتىش (ug/tr -> TRY, en -> USD)
     const currentLang = localStorage.getItem('teklimakan_language') || 'ug';
     this.currentCurrency = currentLang === 'en' ? 'USD' : 'TRY';
+    this.telegram = typeof window !== 'undefined' ? window.TeklimakanTelegram : null;
     try {
       localStorage.setItem(STORAGE_KEYS.CURRENCY, this.currentCurrency);
     } catch (e) {}

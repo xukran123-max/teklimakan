@@ -6862,6 +6862,15 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isNewProduct && pushCheck && pushCheck.checked && window.broadcastProductPush) {
             window.broadcastProductPush(data, true);
           }
+
+          // 🤖 Telegram غا تاۋار رەسىمى ۋە تەپسىلاتى بىلەن بىللە ئاپتوماتىك ئەۋەتىش
+          try {
+            if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.notifyNewProduct === 'function') {
+              window.TeklimakanTelegram.notifyNewProduct(data, { name: 'ئالىي باشقۇرغۇچى', role: 'admin' }, !isNewProduct);
+            }
+          } catch (tgErr) {
+            console.warn('Admin Telegram notification error:', tgErr);
+          }
         } catch (err) {
           console.error('تاۋار ساقلاش خاتالىقى:', err);
           showAdminToast('ساقلاش جەريانىدا خاتالىق كۆرۈلدى', 'error');

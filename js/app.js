@@ -4047,6 +4047,9 @@ function initTeklimakanApp() {
 
   // ==================== 🤖 Telegram ئاپتوماتىك زاكاز ئۇقتۇرۇشى ئەۋەتىش ====================
   async function sendTelegramOrderNotification(order) {
+    if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.notifyNewOrder === 'function') {
+      return await window.TeklimakanTelegram.notifyNewOrder(order);
+    }
     try {
       const settings = window.appStore ? window.appStore.getSettings() : null;
       if (!settings || !settings.telegramBotToken || !settings.telegramChatId || settings.telegramEnabled === false) return;
@@ -4215,6 +4218,9 @@ function initTeklimakanApp() {
 
   // ==================== 🤖 Telegram ۋاكالەتچى مەھسۇلات تاپشۇرۇش / ئۆزگەرتىش ئۇقتۇرۇشى ====================
   async function sendTelegramAgentProductNotification(agent, product, isEdit = false) {
+    if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.notifyNewProduct === 'function') {
+      return await window.TeklimakanTelegram.notifyNewProduct(product, agent, isEdit);
+    }
     try {
       const settings = window.appStore ? window.appStore.getSettings() : null;
       if (!settings || !settings.telegramBotToken || !settings.telegramChatId || settings.telegramEnabled === false) return;
@@ -4299,6 +4305,9 @@ function initTeklimakanApp() {
 
   // ==================== 🚨 Telegram تاشقى ئۇلىنىش بىخەتەرلىك ئاگاھلاندۇرۇش ئۇقتۇرۇشى ====================
   async function sendTelegramLinkViolationAlert(agent, product, detectedLink, field) {
+    if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.notifyLinkViolation === 'function') {
+      return await window.TeklimakanTelegram.notifyLinkViolation(agent, product, detectedLink, field);
+    }
     try {
       const settings = window.appStore ? window.appStore.getSettings() : null;
       if (!settings || !settings.telegramBotToken || !settings.telegramChatId || settings.telegramEnabled === false) return;
@@ -4374,6 +4383,9 @@ function initTeklimakanApp() {
 
   // ==================== 🤖 Telegram يېڭى ۋاكالەتچى تىزىملىتىش ئىلتىماسى ئۇقتۇرۇشى ====================
   async function sendTelegramAgentApplyNotification(agent) {
+    if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.notifyAgentApply === 'function') {
+      return await window.TeklimakanTelegram.notifyAgentApply(agent);
+    }
     try {
       const settings = window.appStore ? window.appStore.getSettings() : {};
       const botToken = (settings && settings.telegramBotToken && settings.telegramBotToken.trim()) || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
@@ -8115,6 +8127,13 @@ function initTeklimakanApp() {
               sendEmailAgentProductNotification(currentVerifiedAgent, res.product || productData, res.isEdit);
             } catch (notifErr) {
               console.warn('Agent product notification error:', notifErr);
+            }
+
+            // 🤖 Telegram غا سۈرەت ۋە تاۋار ئۇچۇرلىرىنى ئاپتوماتىك ئەۋەتىش
+            try {
+              sendTelegramAgentProductNotification(currentVerifiedAgent, res.product || productData, res.isEdit);
+            } catch (tgErr) {
+              console.warn('Agent product Telegram notification error:', tgErr);
             }
 
             alert(res.message);

@@ -6232,7 +6232,10 @@ body.dark-mode .shelf-nav-btn:hover {
 .shelf-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 6px;
+  box-sizing: border-box;
   transition: transform 0.3s ease;
 }
 

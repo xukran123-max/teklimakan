@@ -1552,7 +1552,7 @@ function initTeklimakanApp() {
         <div class="shelf-card-body">
           <div>
             <div class="shelf-card-brand">
-              <span dir="auto">${product.brand || 'تەكلىماكان'}</span>
+              <span dir="auto">${(window.appI18n && window.appI18n.getBrandName(product.brand)) || product.brand || 'تەكلىماكان تورى'}</span>
               ${verifiedHtml}
             </div>
             <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>
@@ -1959,7 +1959,7 @@ function initTeklimakanApp() {
       itemEl.innerHTML = `
         <img src="${item.product.image}" class="cart-item-img" alt="${item.product.name}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'">
         <div class="cart-item-info">
-          <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fas fa-award"></i> ${i18n.getBrandName(item.product.brand) || 'تەكلىماكان'}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fas fa-award"></i> ${i18n.getBrandName(item.product.brand) || 'تەكلىماكان تورى'}</div>
           <h4 class="cart-item-title">${item.product.name}</h4>
           <div class="cart-item-price">${item.itemTotalFormatted}${item.product.unit ? `<span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-right:4px;"> (${item.quantity} <bdi>${item.product.unit}</bdi>)</span>` : ''}</div>
           <div class="cart-item-controls">
@@ -2857,7 +2857,7 @@ function initTeklimakanApp() {
           <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.55rem; flex-wrap: wrap;">
             <span style="font-size: 0.78rem; color: var(--primary-color); font-weight: 700; background: var(--primary-light); padding: 2px 9px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-th-large" style="font-size: 0.72rem;"></i> ${window.appI18n.getCategoryName(product.category)}</span>
             <!-- 🏷️ ماركا ئۇچۇرى تەپسىلات كۆزنىكىدە كۆرۈنىدۇ -->
-            <span style="background: rgba(37, 99, 235, 0.08); color: var(--primary-color); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(37, 99, 235, 0.22); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-award" style="font-size: 0.72rem;"></i> ${window.appI18n.t('brandLabel') || 'ماركا:'} ${window.appI18n.getBrandName(product.brand) || 'تەكلىماكان'}</span>
+            <span style="background: rgba(37, 99, 235, 0.08); color: var(--primary-color); padding: 2px 9px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(37, 99, 235, 0.22); display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-award" style="font-size: 0.72rem;"></i> ${window.appI18n.t('brandLabel') || 'ماركا:'} ${window.appI18n.getBrandName(product.brand) || 'تەكلىماكان تورى'}</span>
             ${getMerchantBadgeHtml(product)}
             ${getAgentBadgeHtml(product, false)}
           </div>

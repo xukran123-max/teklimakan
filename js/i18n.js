@@ -1009,6 +1009,31 @@ const I18N_TRANSLATIONS = {
 };
 
 const BRAND_LOCALIZATIONS = {
+  'تەكلىماكان تورى': {
+    ug: 'تەكلىماكان تورى',
+    tr: 'Teklimakan Online',
+    en: 'Teklimakan Online'
+  },
+  'تەكلىماكان تېبابىتى': {
+    ug: 'تەكلىماكان تورى',
+    tr: 'Teklimakan Online',
+    en: 'Teklimakan Online'
+  },
+  'Teklimakan Online': {
+    ug: 'تەكلىماكان تورى',
+    tr: 'Teklimakan Online',
+    en: 'Teklimakan Online'
+  },
+  'teklimakan online': {
+    ug: 'تەكلىماكان تورى',
+    tr: 'Teklimakan Online',
+    en: 'Teklimakan Online'
+  },
+  'Teklimakan pazaryeri': {
+    ug: 'تەكلىماكان تورى',
+    tr: 'Teklimakan Online',
+    en: 'Teklimakan Online'
+  },
   'تەكلىماكان كىلاسسىك': {
     ug: 'تەكلىماكان كىلاسسىك',
     tr: 'Teklimakan Klasik',

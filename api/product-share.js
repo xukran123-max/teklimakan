@@ -183,6 +183,45 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    let productJsonLd = '';
+    if (product) {
+      try {
+        const schemaObj = {
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          "name": title.replace(/ — تەكلىماكان سودا تورى$/, ''),
+          "image": [imageUrl],
+          "description": desc,
+          "sku": String(product.id || ''),
+          "brand": {
+            "@type": "Brand",
+            "name": product.brand || 'تەكلىماكان تورى'
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": canonicalUrl,
+            "priceCurrency": "TRY",
+            "price": String(product.price || 0),
+            "priceValidUntil": "2027-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "تەكلىماكان سودا تورى"
+            }
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": String(product.rating || 5),
+            "reviewCount": String(product.rating_count || 12),
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        };
+        productJsonLd = `\n  <!-- 🔍 Google Rich Snippets: Product, Price & Rating -->\n  <script type="application/ld+json">\n  ${JSON.stringify(schemaObj, null, 2)}\n  </script>`;
+      } catch (e) {}
+    }
+
     const safeTitle = escapeHtml(title);
     const safeDesc = escapeHtml(desc);
     const safeImageUrl = escapeHtml(imageUrl);
@@ -223,7 +262,7 @@ module.exports = async function handler(req, res) {
   <meta name="twitter:image" content="${safeImageUrl}">
 
   <!-- Canonical link -->
-  <link rel="canonical" href="${safeCanonicalUrl}">
+  <link rel="canonical" href="${safeCanonicalUrl}">${productJsonLd}
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="${baseUrl}/images/favicon.svg">

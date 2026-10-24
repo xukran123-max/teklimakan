@@ -246,6 +246,46 @@ const INITIAL_BRANDS = [
 // دەسلەپكى تاۋارلار تىزىملىكى (ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
 const INITIAL_PRODUCTS = [
   {
+    "id": "PRD-226",
+    "brand": "Teklimakan Online",
+    "languageScope": "all",
+    "name": "كۆز ئاسراش مەجۇنى (كۆز نۇرى مەلھىمى)",
+    "category": "ئۇيغۇر تىبابىتى",
+    "price": 280,
+    "oldPrice": 350,
+    "stock": 100,
+    "sales": 42,
+    "rating": 5.0,
+    "ratingCount": 36,
+    "featured": true,
+    "badge": "تەۋسىيە",
+    "image": "images/products/koz_asrash_mejuni.webp",
+    "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەبىئىي تاغ ھەسىلى، زەپە، گۈلسامساق ۋە ئەبرىشەم كۈلى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. كۆز قۇرغاقلىشىش، چارچاش، تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز سېزىمى تۆۋەنلەشنى تۈگىتىدۇ؛ كۆرۈش قۇۋۋىتىنى ئاشۇرۇپ، كۆز نېرۋىلىرى ۋە قان ئايلىنىشنى ياخشىلايدۇ. %100 تەبىئىي، كونسېرۋانتسىز ساپ مەھسۇلات.",
+    "translations": {
+      "en": {
+        "name": "Natural Herbal Eye Care & Vision Support Paste (250g)",
+        "unit": "Jar (250g)",
+        "badge": "Best Seller",
+        "category": "Uyghur Traditional Medicine",
+        "description": "Formulated using traditional Uyghur botanical wisdom with pure mountain honey, saffron, eyebright, and natural silk cocoon essence. Relieves digital eye strain, dryness, and fatigue while promoting visual clarity and microcirculation. 100% natural, additive-free, and chemical-free."
+      },
+      "tr": {
+        "name": "Doğal Göz Bakım & Görme Destek Macunu (250g)",
+        "unit": "Kutu (250g)",
+        "badge": "Çok Satan",
+        "category": "Uygur Tıbbı",
+        "description": "Geleneksel Uygur tıbbının bin yıllık reçetesiyle; saf dağ balı, safran, gözotu ve ipek kozası özü gibi şifalı bitkilerden özenle hazırlanmıştır. Ekran ışığı, yorgunluk ve kuruluğa bağlı göz zayıflığını giderir, görme netliğini ve göz damarlarındaki kan dolaşımını destekler. %100 doğal, katkısız ve koruyucusuzdur."
+      },
+      "ug": {
+        "name": "كۆز ئاسراش مەجۇنى (كۆز نۇرى مەلھىمى)",
+        "unit": "قۇتا (250g)",
+        "badge": "تەۋسىيە",
+        "category": "ئۇيغۇر تىبابىتى",
+        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەبىئىي تاغ ھەسىلى، زەپە، گۈلسامساق ۋە ئەبرىشەم كۈلى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. كۆز قۇرغاقلىشىش، چارچاش، تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز سېزىمى تۆۋەنلەشنى تۈگىتىدۇ؛ كۆرۈش قۇۋۋىتىنى ئاشۇرۇپ، كۆز نېرۋىلىرى ۋە قان ئايلىنىشنى ياخشىلايدۇ. %100 تەبىئىي، كونسېرۋانتسىز ساپ مەھسۇلات."
+      }
+    }
+  },
+  {
     "id": "PRD-420",
     "brand": "Teklimakan Online",
     "languageScope": "ug",

@@ -7388,6 +7388,36 @@ function initTeklimakanApp() {
             return;
           }
 
+          // 📸 ئەقلىي سۈرەت تەكرارلىق تەكشۈرۈش (Image dHash Duplicate Check)
+          try {
+            if (window.appStore && typeof window.appStore.computeImageDHash === 'function') {
+              const dHash = await window.appStore.computeImageDHash(img);
+              const dHashInput = document.getElementById('agentImageDHash');
+              if (dHashInput && dHash) dHashInput.value = dHash;
+
+              const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
+              const aId = currentVerifiedAgent ? currentVerifiedAgent.id : null;
+              const imgDup = window.appStore.checkProductDuplicate({
+                imageHash: dHash,
+                id: editId,
+                agentId: aId
+              });
+
+              const imgNoticeBox = document.getElementById('agentImageDuplicateNotice');
+              const imgNoticeText = document.getElementById('agentImageDuplicateNoticeText');
+              if (imgDup && imgDup.blocked && imgDup.reason === 'duplicate_image' && imgDup.matchedProduct) {
+                if (imgNoticeBox && imgNoticeText) {
+                  imgNoticeBox.style.display = 'block';
+                  imgNoticeText.innerHTML = '⚠️ دىققەت: بۇ رەسىم سۇپىدىكى مەۋجۇت تاۋار <strong>«' + escapeModalHtml(imgDup.matchedProduct.name) + '»</strong> نىڭ سۈرىتى بىلەن تەكرار (%' + imgDup.similarityScore + ' ئوخشاش)! سۇپا سۈپىتىنى ساقلاش ئۈچۈن باشقا ئۆزگىچە سۈرەت ئىشلىتىڭ.';
+                }
+              } else {
+                if (imgNoticeBox) imgNoticeBox.style.display = 'none';
+              }
+            }
+          } catch (dHashErr) {
+            console.warn('dHash duplicate check warning:', dHashErr);
+          }
+
           // 5-قائىدە: ئاپتوماتىك كۆلەمنى تەڭشەش ۋە «تەكلىماكان كاپالىتى» ئالتۇن تامغىسىنى بېسىش
           let finalImageSrc = rawBase64;
           let displayW = img.width;
@@ -7519,13 +7549,21 @@ function initTeklimakanApp() {
       }, 1500);
     }
 
-    // 👥 ئوخشاش مەھسۇلاتنىڭ 3 ۋاكالەتچى سېتىش چېكى ئەسكەرتمىسىنى يېڭىلاش
+    // 👥 ئوخشاش مەھسۇلاتنىڭ 3 ۋاكالەتچى سېتىش چېكى ۋە ئەقلىي تەكرارلىقنى يېڭىلاش
     function updateSameProductQuotaNotice(prodName) {
       const noticeBox = document.getElementById('agentSameProdQuotaNotice');
       const icon = document.getElementById('agentSameProdQuotaIcon');
       const text = document.getElementById('agentSameProdQuotaText');
       const badge = document.getElementById('agentSameProdQuotaBadge');
       const submitBtn = document.getElementById('btnAgentSubmitProductAction');
+      const dupActionCard = document.getElementById('agentDuplicateActionCard');
+      const dupScoreBadge = document.getElementById('agentDuplicateSimScoreBadge');
+      const dupThumb = document.getElementById('agentDuplicateMatchedThumb');
+      const dupTitle = document.getElementById('agentDuplicateMatchedTitle');
+      const dupPrice = document.getElementById('agentDuplicateMatchedPrice');
+      const btnCopyCoSell = document.getElementById('btnAgentCopyDuplicateCoSell');
+      const btnDiffSpec = document.getElementById('btnAgentSpecifyDifferentSpec');
+
       if (!noticeBox || !text || !badge) return;
 
       const editId = editProdIdInput ? editProdIdInput.value.trim() : '';
@@ -7533,20 +7571,27 @@ function initTeklimakanApp() {
 
       if (!name || name.length < 2) {
         noticeBox.style.display = 'none';
+        if (dupActionCard) dupActionCard.style.display = 'none';
         return;
       }
 
-      if (!window.appStore || typeof window.appStore.checkProductAgentQuota !== 'function') {
+      if (!window.appStore || typeof window.appStore.checkProductDuplicate !== 'function') {
         noticeBox.style.display = 'none';
+        if (dupActionCard) dupActionCard.style.display = 'none';
         return;
       }
 
       const agentId = currentVerifiedAgent ? currentVerifiedAgent.id : null;
-      const res = window.appStore.checkProductAgentQuota(name, editId, agentId, 3);
+      const dupRes = window.appStore.checkProductDuplicate({
+        name: name,
+        id: editId,
+        agentId: agentId,
+        maxQuota: 3
+      });
 
       noticeBox.style.display = 'flex';
 
-      if (!res.allowed) {
+      if (dupRes.blocked) {
         noticeBox.style.background = '#fff1f2';
         noticeBox.style.border = '1.5px solid #fecdd3';
         noticeBox.style.color = '#9f1239';
@@ -7554,20 +7599,70 @@ function initTeklimakanApp() {
           icon.className = 'fas fa-exclamation-triangle';
           icon.style.color = '#e11d48';
         }
-        text.innerHTML = `⚠️ <strong>«${escapeModalHtml(name)}»</strong> ناملىق مەھسۇلاتنى ئاللىقاچان <strong>3 نەپەر باشقا ۋاكالەتچى</strong> ئېلان قىلىپ بولغان (چەك تولغان). باشقا تاۋار تاللاڭ!`;
-        badge.textContent = `3/3 تولدى`;
+        text.innerHTML = dupRes.message.replace(/\n/g, '<br>');
+        badge.textContent = dupRes.shortBadge || 'تەكرار';
         badge.style.background = '#fee2e2';
         badge.style.color = '#b91c1c';
         badge.style.border = '1px solid #fca5a5';
+
+        // مەۋجۇت تاۋار ھەرىكەت كارتوچكىسىنى تولدۇرۇش
+        if (dupActionCard && dupRes.matchedProduct) {
+          dupActionCard.style.display = 'block';
+          if (dupScoreBadge) dupScoreBadge.textContent = dupRes.shortBadge || ('%' + dupRes.similarityScore + ' ئوخشاش');
+          if (dupThumb) dupThumb.src = dupRes.matchedProduct.image || 'images/default-product.jpg';
+          if (dupTitle) dupTitle.textContent = dupRes.matchedProduct.name;
+          if (dupPrice) dupPrice.textContent = 'باھاسى: ₺' + (dupRes.matchedProduct.price || 0);
+
+          if (btnCopyCoSell) {
+            btnCopyCoSell.onclick = (e) => {
+              e.preventDefault();
+              const url = dupRes.coSellUrl;
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                  showToast('✅ «' + dupRes.matchedProduct.name + '» نىڭ شەخسىي سېتىش ئۇلانمىسى كۆچۈرۈلدى! بارلىق كىرىم سىزگە يېزىلىدۇ.', 'success');
+                });
+              } else {
+                prompt('سېتىش ئۇلانمىڭىز:', url);
+              }
+            };
+          }
+
+          if (btnDiffSpec) {
+            btnDiffSpec.onclick = (e) => {
+              e.preventDefault();
+              const nameIn = document.getElementById('agentProdName');
+              if (nameIn) {
+                nameIn.focus();
+                nameIn.value = nameIn.value + ' ';
+                showToast('💡 تاۋار نامىغا ئۆلچىمىنى (مەسىلەن: 50ml ياكى 100g) ياكى ماركىسىنى قوشۇپ كىرگۈزۈڭ.', 'info');
+              }
+            };
+          }
+        }
 
         if (submitBtn && !editId) {
           submitBtn.setAttribute('data-quota-blocked', 'true');
           submitBtn.style.opacity = '0.65';
           submitBtn.style.cursor = 'not-allowed';
-          submitBtn.title = 'بۇ تاۋارنى ئاللىقاچان 3 ۋاكالەتچى ئېلان قىلىپ بولغان (چەك تولغان). سىز باشقا تاۋار سۇنۇڭ.';
+          submitBtn.title = 'بۇ تاۋار دۇكاندا بار ياكى تەكرار بولغانلىقى ئۈچۈن بىۋاسىتە شەخسىي ئۇلانمىسى بىلەن سېتىش تەۋسىيە قىلىنىدۇ.';
         }
       } else {
-        if (res.count > 0) {
+        if (dupActionCard) dupActionCard.style.display = 'none';
+
+        if (dupRes.severity === 'medium') {
+          noticeBox.style.background = '#fffbeb';
+          noticeBox.style.border = '1.5px solid #fde68a';
+          noticeBox.style.color = '#92400e';
+          if (icon) {
+            icon.className = 'fas fa-info-circle';
+            icon.style.color = '#d97706';
+          }
+          text.innerHTML = dupRes.message.replace(/\n/g, '<br>');
+          badge.textContent = dupRes.shortBadge || 'يېقىن تاۋار';
+          badge.style.background = '#fef3c7';
+          badge.style.color = '#b45309';
+          badge.style.border = '1px solid #fcd34d';
+        } else if (dupRes.agentCount > 0) {
           noticeBox.style.background = '#eff6ff';
           noticeBox.style.border = '1.5px solid #bfdbfe';
           noticeBox.style.color = '#1e40af';
@@ -7575,8 +7670,8 @@ function initTeklimakanApp() {
             icon.className = 'fas fa-users';
             icon.style.color = '#2563eb';
           }
-          text.innerHTML = `ℹ️ بۇ مەھسۇلاتنى ھازىر <strong>${res.count} ۋاكالەتچى</strong> سېتىۋاتىدۇ (سىستېما بەلگىلىمىسى بويىچە يەنە <strong>${res.remaining} نەپەر</strong> ئېلان قىلالايدۇ).`;
-          badge.textContent = `${res.count}/3 ئورۇن`;
+          text.innerHTML = 'ℹ️ بۇ مەھسۇلاتنى ھازىر <strong>' + dupRes.agentCount + ' ۋاكالەتچى</strong> سېتىۋاتىدۇ (سىستېما بويىچە يەنە <strong>' + Math.max(0, 3 - dupRes.agentCount) + ' نەپەر</strong> ئېلان قىلالايدۇ).';
+          badge.textContent = dupRes.agentCount + '/3 ئورۇن';
           badge.style.background = '#dbeafe';
           badge.style.color = '#1d4ed8';
           badge.style.border = '1px solid #93c5fd';
@@ -7588,8 +7683,8 @@ function initTeklimakanApp() {
             icon.className = 'fas fa-check-circle';
             icon.style.color = '#10b981';
           }
-          text.innerHTML = `✅ بۇ مەھسۇلاتنى تېخى ھېچكىم يوللىمىغان، <strong>تۇنجى بولۇپ سېتىش پۇرسىتى سىزدە</strong>!`;
-          badge.textContent = `0/3 ئەركىن`;
+          text.innerHTML = '✅ بۇ مەھسۇلاتنى تېخى ھېچكىم يوللىمىغان، <strong>تۇنجى بولۇپ سېتىش پۇرسىتى سىزدە</strong>!';
+          badge.textContent = '0/3 ئەركىن';
           badge.style.background = '#dcfce7';
           badge.style.color = '#15803d';
           badge.style.border = '1px solid #86efac';
@@ -8023,6 +8118,7 @@ function initTeklimakanApp() {
           stock,
           unit,
           image: finalImage,
+          imageDHash: (document.getElementById('agentImageDHash')?.value || ''),
           needsAdminImage: needsAdminImgVal,
           description: desc,
           languageScope,

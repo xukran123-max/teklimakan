@@ -4471,11 +4471,60 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    let adminDupDebounce = null;
+    function checkAdminProdDuplicate() {
+      const val = (nameUgInput?.value || '').trim();
+      const noticeBox = document.getElementById('adminProdDuplicateNotice');
+      const text = document.getElementById('adminProdDuplicateText');
+      const badge = document.getElementById('adminProdDuplicateBadge');
+      const icon = document.getElementById('adminProdDuplicateIcon');
+      const currentId = document.getElementById('formProductId')?.value || null;
+      if (!noticeBox || !text || !badge) return;
+
+      if (!val || val.length < 2 || !window.appStore || typeof window.appStore.checkProductDuplicate !== 'function') {
+        noticeBox.style.display = 'none';
+        return;
+      }
+
+      const res = window.appStore.checkProductDuplicate({
+        name: val,
+        id: currentId,
+        maxQuota: 3
+      });
+
+      if (res.isDuplicate || res.severity === 'medium') {
+        noticeBox.style.display = 'flex';
+        if (res.isDuplicate) {
+          noticeBox.style.background = '#fff1f2';
+          noticeBox.style.border = '1.5px solid #fecdd3';
+          noticeBox.style.color = '#9f1239';
+          if (icon) { icon.className = 'fas fa-exclamation-triangle'; icon.style.color = '#e11d48'; }
+          text.innerHTML = '⚠️ دىققەت: دۇكاندا بۇنىڭغا ئوخشاش مەھسۇلات مەۋجۇت: <strong>«' + (res.matchedProduct?.name || '') + '»</strong> (ئەڭ كۆپ ئوخشاشلىق: %' + res.similarityScore + '). ئەگەر باشقا سىغىم بولسا ئۆلچىمىنى ئېنىق كىرگۈزۈڭ.';
+          badge.textContent = res.shortBadge || ('%' + res.similarityScore + ' تەكرار');
+          badge.style.background = '#fee2e2';
+          badge.style.color = '#b91c1c';
+        } else {
+          noticeBox.style.background = '#fffbeb';
+          noticeBox.style.border = '1.5px solid #fde68a';
+          noticeBox.style.color = '#92400e';
+          if (icon) { icon.className = 'fas fa-info-circle'; icon.style.color = '#d97706'; }
+          text.innerHTML = '💡 تەۋسىيە: دۇكاندىكى <strong>«' + (res.matchedProduct?.name || '') + '»</strong> بىلەن يېقىن كېلىدۇ (%' + res.similarityScore + ' ئوخشاش).';
+          badge.textContent = '%' + res.similarityScore + ' ئوخشاش';
+          badge.style.background = '#fef3c7';
+          badge.style.color = '#b45309';
+        }
+      } else {
+        noticeBox.style.display = 'none';
+      }
+    }
+
     if (nameUgInput && slugInput) {
       nameUgInput.oninput = () => {
         if (slugInput.dataset.manual !== 'true') {
           slugInput.value = getSafeSlug(nameUgInput.value.trim());
         }
+        clearTimeout(adminDupDebounce);
+        adminDupDebounce = setTimeout(checkAdminProdDuplicate, 250);
       };
     }
 

@@ -4955,6 +4955,317 @@ class StoreManager {
       .trim();
   }
 
+  // ==================== 🛡️ ئەقلىي تاۋار تەكرارلىق ۋە ئوخشاشلىق تەكشۈرۈش سىستېمىسى (Smart Duplicate Detection) ====================
+
+  // 1. ئالىي دەرىجىلىك ئۇيغۇرچە ۋە كۆپ تىللىق نام قېلىپلاشتۇرۇش
+  normalizeProductNameAdv(name) {
+    if (!name) return '';
+    return String(name)
+      .toLowerCase()
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // ھەرىكەت ۋە تەنۋىن
+      .replace(/ئ/g, '') // ھەمزە
+      .replace(/[يىې]/g, 'ى') // سوزۇق ۋە ئۈزۈك «ي» شەكلى
+      .replace(/[وۇۆۈ]/g, 'ۇ') // «ۋ/و/ۇ/ۆ/ۈ» نۇسخىلىرى
+      .replace(/[كگڭ]/g, 'ك') // كاف تۈرلىرى
+      .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+      .replace(/\bمېيى\b/g, 'يېغى').replace(/\bماي\b/g, 'ياغ')
+      .replace(/\bسۈپەتلىك\b|\bئەلا\b|\bساپ\b|\bتەبىئىي\b|\bيېڭى\b|\bخالاس\b|\bمەھسۇلاتى\b|\bdoğal\b|\bsaf\b|\bkaliteli\b/gi, '')
+      .replace(/[\s\-_,.:;()\/\\+]+/g, ' ')
+      .trim();
+  }
+
+  // 2. مەھسۇلات ئۆلچىمى / سىغىمىنى ئايرىپ ئېلىش (Extract Capacity / Size / Spec)
+  extractProductSpec(str) {
+    if (!str) return null;
+    const m = String(str).match(/(\d+(?:\.\d+)?)\s*(ml|l|g|kg|مىللىلېتىر|گىرام|دانە|تال|قۇتا)/i);
+    if (!m) return null;
+    let unit = m[2].toLowerCase();
+    if (unit === 'مىللىلېتىر') unit = 'ml';
+    if (unit === 'گىرام') unit = 'g';
+    if (unit === 'تال') unit = 'دانە';
+    return {
+      raw: m[0].trim(),
+      value: parseFloat(m[1]),
+      unit: unit,
+      normalized: String(parseFloat(m[1])) + unit
+    };
+  }
+
+  // 3. ئۆلچەم بەلگىلىرىنى چىقىرىپ تاشلاپ تۈپ نامىنى ئېلىش
+  stripProductSpecs(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/\b\d+(?:\.\d+)?\s*(?:ml|l|g|kg|مىللىلېتىر|گىرام|دانە|تال|قۇتا)\b/gi, '')
+      .replace(/[\s\-_,.:;()\/\\+]+/g, ' ')
+      .trim();
+  }
+
+  // 4. تېكىست ئارىلىقىنى ھېسابلاش (Levenshtein Distance)
+  calculateLevenshteinDistance(s1, s2) {
+    const m = s1.length, n = s2.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = s1[i - 1] === s2[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+    return dp[m][n];
+  }
+
+  // 5. ئىككى مەھسۇلات نامىنىڭ ئەقلىي ئوخشاشلىقىنى سېلىشتۇرۇش
+  calculateProductSimilarity(t1, t2) {
+    if (!t1 || !t2) return { similarity: 0, diffSpecs: false, isMatch: false };
+    const spec1 = this.extractProductSpec(t1);
+    const spec2 = this.extractProductSpec(t2);
+    const diffSpecs = !!(spec1 && spec2 && spec1.normalized !== spec2.normalized);
+
+    const base1 = this.normalizeProductNameAdv(this.stripProductSpecs(t1));
+    const base2 = this.normalizeProductNameAdv(this.stripProductSpecs(t2));
+
+    if (base1 === base2 && base1.length >= 2) {
+      const sim = diffSpecs ? 0.60 : 1.0;
+      return {
+        similarity: sim,
+        diffSpecs: diffSpecs,
+        spec1: spec1 ? spec1.raw : null,
+        spec2: spec2 ? spec2.raw : null,
+        isMatch: !diffSpecs
+      };
+    }
+
+    const words1 = base1.split(' ').filter(w => w.length > 1);
+    const words2 = base2.split(' ').filter(w => w.length > 1);
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    let intersection = 0;
+    set1.forEach(w => { if (set2.has(w)) intersection++; });
+    const union = new Set([...words1, ...words2]).size;
+    const jaccard = union > 0 ? intersection / union : 0;
+    const minWords = Math.min(set1.size, set2.size);
+    const containment = minWords > 0 ? intersection / minWords : 0;
+
+    const maxLen = Math.max(base1.length, base2.length);
+    const levDist = this.calculateLevenshteinDistance(base1, base2);
+    const levScore = maxLen > 0 ? 1 - (levDist / maxLen) : 1;
+
+    let score = Math.max(jaccard, levScore);
+    if (containment === 1 && minWords >= 2) {
+      score = Math.max(score, 0.88);
+    }
+
+    if (diffSpecs) {
+      score = score * 0.70; // سىغىم پەرقى بايقالسا تەكرارلىق جازاسى تۆۋەنلەيدۇ (يېڭى ئۆلچەم سۈپىتىدە قارىلىدۇ)
+    }
+
+    return {
+      similarity: Math.round(score * 100) / 100,
+      diffSpecs: diffSpecs,
+      spec1: spec1 ? spec1.raw : null,
+      spec2: spec2 ? spec2.raw : null,
+      isMatch: score >= 0.75 && !diffSpecs
+    };
+  }
+
+  // 6. 📸 سۈرەتنىڭ 64 بىتلىق پەرقلىق بارماق ئىزىنى ھېسابلاش (Compute 64-bit Perceptual dHash)
+  async computeImageDHash(imageSource) {
+    if (!imageSource) return null;
+    if (typeof window === 'undefined' || !window.document) return null;
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 9;
+            canvas.height = 8;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 9, 8);
+            const imgData = ctx.getImageData(0, 0, 9, 8).data;
+            const grays = [];
+            for (let i = 0; i < imgData.length; i += 4) {
+              grays.push(0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2]);
+            }
+            let hash = '';
+            for (let y = 0; y < 8; y++) {
+              for (let x = 0; x < 8; x++) {
+                hash += (grays[y * 9 + x] > grays[y * 9 + x + 1] ? '1' : '0');
+              }
+            }
+            resolve(hash);
+          } catch (canvasErr) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        if (typeof imageSource === 'string') {
+          img.src = imageSource;
+        } else if (imageSource && imageSource.src) {
+          img.src = imageSource.src;
+        } else {
+          resolve(null);
+        }
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+
+  // 7. 🔍 ئىككى سۈرەتنىڭ dHash ئارىلىقىنى سېلىشتۇرۇش (Hamming Distance)
+  compareImageDHash(h1, h2) {
+    if (!h1 || !h2 || h1.length !== 64 || h2.length !== 64) {
+      return { distance: 64, similarity: 0, isMatch: false };
+    }
+    let dist = 0;
+    for (let i = 0; i < 64; i++) {
+      if (h1[i] !== h2[i]) dist++;
+    }
+    const similarity = (64 - dist) / 64;
+    return {
+      distance: dist,
+      similarity: Math.round(similarity * 100) / 100,
+      isMatch: dist <= 10 // <= 10 bits mismatch = >= 84.4% visual similarity
+    };
+  }
+
+  // 8. 🛡️ تاۋار نامى ۋە سۈرىتى بويىچە بىر تۇتاش ئەقلىي تەكرارلىق ۋە كۋوتا تەكشۈرۈش
+  checkProductDuplicate(options = {}) {
+    const name = (options.name || '').trim();
+    const currentId = options.id || options.currentProductId || null;
+    const currentAgentId = options.agentId || null;
+    const imageHash = options.imageHash || null;
+    const maxQuota = options.maxQuota || 3;
+
+    if (!name && !imageHash) {
+      return { isDuplicate: false, blocked: false, severity: 'none', similarityScore: 0, message: '' };
+    }
+
+    const allProducts = this.getProducts();
+    let highestMatch = null;
+    let highestSim = 0;
+    let matchType = 'none';
+    let diffSpecs = false;
+    let specInfo = null;
+    const existingAgentIds = new Set();
+
+    for (const p of allProducts) {
+      if (!p || !p.name) continue;
+      if (p.approvalStatus === 'رەت قىلىندى' || p.isDeleted) continue;
+      if (currentId && String(p.id) === String(currentId)) continue;
+
+      // 1. تاۋار نامى ئوخشاشلىقىنى سېلىشتۇرۇش
+      if (name) {
+        const simRes = this.calculateProductSimilarity(name, p.name);
+        let trSim = 0;
+        if (p.translations && p.translations.tr && p.translations.tr.name) {
+          trSim = this.calculateProductSimilarity(name, p.translations.tr.name).similarity;
+        }
+        const effectiveSim = Math.max(simRes.similarity, trSim);
+
+        if (effectiveSim > highestSim) {
+          highestSim = effectiveSim;
+          highestMatch = p;
+          matchType = 'name';
+          diffSpecs = simRes.diffSpecs;
+          specInfo = { spec1: simRes.spec1, spec2: simRes.spec2 };
+        }
+
+        // سۇپىدا بۇ ئوخشاش تاۋارنى ساتىدىغان باشقا ۋاكالەتچىلەر سانىنى قوشۇش
+        if (effectiveSim >= 0.80 && !simRes.diffSpecs) {
+          const aId = p.agentId || (p.isAgentSubmitted ? ('agent_' + p.id) : null);
+          if (aId) {
+            if (!currentAgentId || String(aId) !== String(currentAgentId)) {
+              existingAgentIds.add(String(aId));
+            }
+          }
+        }
+      }
+
+      // 2. سۈرەتنىڭ dHash ئوخشاشلىقىنى سېلىشتۇرۇش
+      if (imageHash && p.imageDHash) {
+        const imgComp = this.compareImageDHash(imageHash, p.imageDHash);
+        if (imgComp.isMatch && imgComp.similarity > highestSim) {
+          highestSim = imgComp.similarity;
+          highestMatch = p;
+          matchType = 'image';
+        }
+      }
+    }
+
+    // كۋوتا ھېسابلاش
+    const agentCount = existingAgentIds.size;
+    const quotaReached = agentCount >= maxQuota;
+
+    // ئەگەر ئۆلچىمى ياكى سىغىمى پەرقلىق بولسا (مەسىلەن: 25ml vs 100ml)، مۇستەقىل تۈر دەپ قارىلىدۇ
+    if (diffSpecs && specInfo) {
+      return {
+        isDuplicate: false,
+        blocked: false,
+        severity: 'none',
+        isVariant: true,
+        specDiff: specInfo,
+        matchedProduct: highestMatch,
+        similarityScore: Math.round(highestSim * 100),
+        message: 'ℹ️ «' + highestMatch.name + '» بىلەن ئوخشاش، ئەمما ئۆلچىمى پەرقلىق نۇسخا سۈپىتىدە قوشۇلىدۇ (' + (specInfo.spec1 || '') + ' vs ' + (specInfo.spec2 || '') + ').'
+      };
+    }
+
+    const agentCode = currentAgentId ? ('&agent=' + currentAgentId) : '';
+    const origin = (typeof window !== 'undefined' && window.location) ? (window.location.origin + window.location.pathname) : 'https://teklimakan.com';
+    const coSellUrl = highestMatch ? (origin + '?prod=' + highestMatch.id + agentCode) : '';
+
+    if (highestSim >= 0.80 || quotaReached) {
+      const reason = quotaReached ? 'quota_reached' : (matchType === 'image' ? 'duplicate_image' : 'similar_name');
+      let msg = '';
+      if (quotaReached) {
+        msg = '⚠️ «' + highestMatch.name + '» ناملىق تاۋارنى ئاللىقاچان ' + agentCount + ' نەپەر باشقا سېتىش ۋاكالەتچىسى ئېلان قىلىپ بولغان (ئەڭ كۆپ بولغاندا ' + maxQuota + ' كۋوتا تولدى).\n\nبۇ تاۋارنى تەكرار كىرگۈزمەي، بىۋاسىتە شۇ تاۋارنىڭ شەخسىي سېتىش ئۇلانمىسىنى ئېلىپ ساتسىڭىز پايدىڭىز ئوخشاشلا ھېسابلىنىدۇ!';
+      } else if (matchType === 'image') {
+        msg = '📸 سىز يۈكلىگەن رەسىم مەۋجۇت تاۋار «' + highestMatch.name + '» نىڭ رەسىمى بىلەن تەكرار (%' + Math.round(highestSim * 100) + ' ئوخشاشلىق)!\n\nتوربېكەت سۈپىتى ۋە Google SEO دەرىجىسى ئۈچۈن باشقا ئۆزگىچە رەسىم ئىشلىتىڭ ياكى سېتىش ئۇلانمىسى ئارقىلىق سېتىڭ.';
+      } else {
+        msg = '⚠️ دىققەت: دۇكاندا بۇ مەھسۇلاتقا ئوپمۇ-ئوخشاش «' + highestMatch.name + '» مەۋجۇت (%' + Math.round(highestSim * 100) + ' ئوخشاشلىق)!\n\nئوخشاش تاۋارنى قايتا يوللاپ سۈپەتسىز كارتوچكا كۆپەيتمەي، مەۋجۇت تاۋارنىڭ تارقىتىش ئۇلانمىسىنى ئېلىپ بىۋاسىتە ساتسىڭىز مەنپەئەتىڭىز كاپالەتكە ئىگە بولىدۇ.';
+      }
+
+      return {
+        isDuplicate: true,
+        blocked: true,
+        severity: 'high',
+        reason: reason,
+        agentCount: agentCount,
+        maxQuota: maxQuota,
+        similarityScore: Math.round(highestSim * 100),
+        matchedProduct: highestMatch,
+        coSellUrl: coSellUrl,
+        message: msg,
+        shortBadge: quotaReached ? (agentCount + '/' + maxQuota + ' تولدى') : ('%' + Math.round(highestSim * 100) + ' تەكرار')
+      };
+    } else if (highestSim >= 0.60) {
+      return {
+        isDuplicate: false,
+        blocked: false,
+        severity: 'medium',
+        reason: 'partial_name_match',
+        agentCount: agentCount,
+        maxQuota: maxQuota,
+        similarityScore: Math.round(highestSim * 100),
+        matchedProduct: highestMatch,
+        coSellUrl: coSellUrl,
+        message: '💡 تەۋسىيە: دۇكاندىكى «' + highestMatch.name + '» بىلەن يېقىن كېلىدۇ (%' + Math.round(highestSim * 100) + ' ئوخشاش). ئەگەر ئۆلچىمى ياكى ماركىسى پەرقلىق بولسا، نامىدا سىغىم ياكى ماركىنى ئېنىق ئەسكەرتىپ داۋاملاشتۇرۇڭ.',
+        shortBadge: '%' + Math.round(highestSim * 100) + ' ئوخشاشلىق'
+      };
+    }
+
+    return {
+      isDuplicate: false,
+      blocked: false,
+      severity: 'none',
+      similarityScore: Math.round(highestSim * 100),
+      matchedProduct: null,
+      message: '✅ بۇ مەھسۇلات تېخى يوق، تۇنجى بولۇپ سېتىش پۇرسىتى سىزدە!'
+    };
+  }
+
   // 👥 ئوخشاش مەھسۇلاتنى كۆپ بولغاندا 3 نەپەر ۋاكالەتچى سېتىش چېكىنى تەكشۈرۈش (Max 3 Agents Per Identical Product)
   checkProductAgentQuota(productName, currentProductId = null, currentAgentId = null, maxAgents = 3) {
     if (!productName || typeof productName !== 'string') {

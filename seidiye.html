@@ -2321,6 +2321,14 @@
           <div class="form-group">
             <label class="form-label">مەھسۇلات نامى (ئۇيغۇرچە / ئاساسىي نامى) <span style="color: var(--danger-color);">*</span></label>
             <input type="text" id="formProductNameUg" class="form-control" placeholder="مەسىلەن: ساپ خوتەن قاشتېشى بىلەزۈك" required>
+            <!-- 🛡️ تاۋار نامى تەكرارلىق ئاگاھلاندۇرۇشى (Admin Duplicate Alert) -->
+            <div id="adminProdDuplicateNotice" style="display: none; margin-top: 0.45rem; font-size: 0.8rem; border-radius: 8px; padding: 0.45rem 0.75rem; align-items: center; justify-content: space-between; gap: 0.5rem; transition: all 0.2s;">
+              <div style="display: flex; align-items: center; gap: 0.45rem; flex: 1;">
+                <i id="adminProdDuplicateIcon" class="fas fa-info-circle" style="font-size: 1rem;"></i>
+                <span id="adminProdDuplicateText"></span>
+              </div>
+              <span id="adminProdDuplicateBadge" style="font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; white-space: nowrap;"></span>
+            </div>
           </div>
 
           <!-- مەھسۇلات ئۇلانمىسى (SEO & Slug / ئىختىيارىي قىسقا ئادرېس) -->
@@ -2517,6 +2525,10 @@
             </div>
 
             <!-- ئەكىرگەن رەسىمنى ئالدىن كۆرۈش ۋە ئەقلىي تەكشۈرۈش نەتىجىسى -->
+            <!-- 📸 سۈرەت تەكرارلىق ئاگاھلاندۇرۇشى -->
+            <div id="adminProdImageDuplicateNotice" style="display: none; margin-bottom: 0.75rem; font-size: 0.8rem; border-radius: 8px; padding: 0.45rem 0.75rem; background: #fff1f2; border: 1.5px solid #fecdd3; color: #9f1239;">
+              <i class="fas fa-images"></i> <span id="adminProdImageDuplicateText"></span>
+            </div>
             <div id="productImagePreviewBox" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem; background: #ffffff; border: 1.5px dashed #3b82f6; border-radius: var(--radius-md); text-align: center;">
               <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
                 <div style="position: relative; display: inline-block;">

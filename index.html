@@ -1570,6 +1570,30 @@
                 </div>
                 <span id="agentSameProdQuotaBadge" style="font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; white-space: nowrap;">0/3</span>
               </div>
+              <!-- 🔗 ئەقلىي تەكرارلىق ھەرىكەت كارتوچكىسى (Smart Duplicate Co-Sell & Variant Guidance Card) -->
+              <div id="agentDuplicateActionCard" style="display: none; margin-top: 0.5rem; background: #ffffff; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 0.75rem; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.8rem; font-weight: 800; color: #9f1239; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="fas fa-store-alt"></i> دۇكاندىكى مەۋجۇت تاۋار تېپىلدى:
+                  </span>
+                  <span id="agentDuplicateSimScoreBadge" style="background: #fee2e2; color: #b91c1c; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;">%95 ئوخشاش</span>
+                </div>
+                <div id="agentDuplicateMatchedProdRow" style="display: flex; align-items: center; gap: 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem; margin-bottom: 0.6rem;">
+                  <img id="agentDuplicateMatchedThumb" src="images/default-product.jpg" alt="" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+                  <div style="flex: 1; min-width: 0;">
+                    <div id="agentDuplicateMatchedTitle" style="font-size: 0.84rem; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                    <div id="agentDuplicateMatchedPrice" style="font-size: 0.76rem; font-weight: 700; color: #059669;"></div>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <button type="button" id="btnAgentCopyDuplicateCoSell" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; border-radius: 7px; padding: 0.55rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);">
+                    <i class="fas fa-link"></i> <span>بۇ تاۋارنىڭ شەخسىي سېتىش ئۇلانمىسىنى ئېلىش (بىۋاسىتە سېتىش)</span>
+                  </button>
+                  <button type="button" id="btnAgentSpecifyDifferentSpec" style="width: 100%; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 0.45rem; font-size: 0.76rem; font-weight: 700; cursor: pointer;">
+                    ✍️ مېنىڭ تاۋىرىم پەرقلىق (ئۆلچەم ياكى سىغىم كىرگۈزۈش)
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- 🌐 مەھسۇلات ئېلان قىلىش تىلى (Language Scope) -->
@@ -1745,6 +1769,17 @@
               <input type="text" id="agentProdImage" class="form-control number-latin" placeholder="ياكى سۈرەت تور ئۇلانمىسىنى كىرگۈزۈڭ: https://...">
               
               <!-- ئالدىن كۆرۈش قۇتىسى ۋە تېخنىكىلىق ئۇچۇرلار -->
+              <!-- 📸 سۈرەت تەكرارلىق ئاگاھلاندۇرۇش قۇتىسى -->
+              <div id="agentImageDuplicateNotice" style="display: none; margin-top: 0.6rem; padding: 0.65rem 0.85rem; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 10px; color: #9f1239; font-size: 0.82rem; line-height: 1.45;">
+                <div style="display: flex; align-items: flex-start; gap: 0.45rem;">
+                  <i class="fas fa-images" style="font-size: 1.1rem; color: #e11d48; margin-top: 2px;"></i>
+                  <div id="agentImageDuplicateNoticeText">
+                    ⚠️ بۇ رەسىم سۇپىدىكى مەۋجۇت تاۋارنىڭ رەسىمى بىلەن تەكرار! سۈپەتنى ساقلاش ئۈچۈن باشقا رەسىم ئىشلىتىڭ.
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="agentImageDHash" value="">
+              
               <div id="agentImagePreviewWrap" style="display: none; margin-top: 0.6rem; padding: 0.75rem; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                 <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
                   <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; background: #f8fafc; max-width: 160px; max-height: 160px;">

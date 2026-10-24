@@ -7713,6 +7713,36 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const btnCopyWaImg = document.getElementById('btnCopyWaImage');
+    if (btnCopyWaImg) {
+      btnCopyWaImg.addEventListener('click', async () => {
+        const modal = document.getElementById('modalWhatsAppBroadcast');
+        const pid = modal?.dataset?.currentProductId;
+        const prod = pid ? window.appStore.getProductById(pid) : null;
+        if (!prod || !prod.image) {
+          showAdminToast('سۈرەت تېپىلمىدى', 'warning');
+          return;
+        }
+        btnCopyWaImg.disabled = true;
+        btnCopyWaImg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> رەسىم كۆچۈرۈلۈۋاتىدۇ...';
+        try {
+          const imgUrl = window.TeklimakanWhatsApp.getFullImageUrl(prod);
+          const ok = await window.TeklimakanWhatsApp.copyProductImageToClipboard(imgUrl);
+          if (ok) {
+            showAdminToast('✅ تاۋارنىڭ سۈزۈك رەسىمى كۆچۈرۈلدى! WhatsApp تا چاپلاڭ (Ctrl+V).', 'success');
+          } else {
+            window.open(imgUrl, '_blank');
+            showAdminToast('📷 رەسىم يېڭى كۆزنەكتە ئېچىلدى.', 'info');
+          }
+        } catch (copyErr) {
+          showAdminToast('سۈرەتنى كۆچۈرۈش مەغلۇپ بولدى', 'error');
+        } finally {
+          btnCopyWaImg.disabled = false;
+          btnCopyWaImg.innerHTML = '<i class="fas fa-camera"></i> <span>📷 سۈرەتنى كۆچۈرۈش</span>';
+        }
+      });
+    }
+
     const btnCopyWa = document.getElementById('btnCopyWhatsAppText');
     if (btnCopyWa) {
       btnCopyWa.addEventListener('click', () => {

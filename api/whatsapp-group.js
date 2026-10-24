@@ -2,6 +2,8 @@
 // 🚀 تەكلىماكان سۇپىسى — WhatsApp گۇرۇپپا ئاپتوماتىك ئۇقتۇرۇش مۇلازىمىتى
 // Teklimakan Automated WhatsApp Group Broadcaster Serverless Endpoint
 // ================================================================
+// ھەم ئۇيغۇرچە ھەم تۈركچە ئەھۋالدا، تاۋارنىڭ سۈزۈك سۈرىتى چوقۇم ئۇچۇر بىلەن
+// بىرگە (Media + Caption) ھالىتىدە گۇرۇپپىغا بىۋاستە يەتكۈزۈلىدۇ.
 
 module.exports = async function handler(req, res) {
   // CORS تەڭشىكى
@@ -29,7 +31,7 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'ئۇچۇر تېكىستى (text) بوش بولسا بولمايدۇ.' });
     }
 
-    // 1. خاس Webhook ئارقىلىق يوللاش
+    // 1. خاس Webhook ئارقىلىق يوللاش (سۈرەت بىلەن بىللە)
     if (provider === 'webhook' || (webhookUrl && webhookUrl.startsWith('http'))) {
       const targetUrl = webhookUrl;
       const resp = await fetch(targetUrl, {
@@ -55,6 +57,7 @@ module.exports = async function handler(req, res) {
     }
 
     // 2. Green-API ئارقىلىق توپقا ئەۋەتىش (https://green-api.com)
+    // سۈرەت بار بولسا sendFileByUrl بىلەن Caption قىلىپ يوللايدۇ
     if (provider === 'green-api') {
       if (!instanceId || !token || !chatId) {
         return res.status(400).json({
@@ -63,43 +66,73 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      // Group ID format normalizer: e.g. "12036302xxxxxx@g.us" or append "@g.us" if needed
       let formattedChatId = String(chatId).trim();
       if (!formattedChatId.includes('@')) {
         formattedChatId = `${formattedChatId}@g.us`;
       }
 
-      const greenApiUrl = `https://api.green-api.com/waInstance${instanceId}/sendMessage/${token}`;
-      const payload = {
-        chatId: formattedChatId,
-        message: text
-      };
+      let sentSuccess = false;
+      let resultData = null;
 
-      const resp = await fetch(greenApiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      // ئەگەر سۈرەت بولسا ئالدى بىلەن سۈرەتنى تېكىستى بىلەن بىللە ئەۋەتىدۇ (sendFileByUrl)
+      if (imageUrl && imageUrl.startsWith('http')) {
+        try {
+          const fileUrl = `https://api.green-api.com/waInstance${instanceId}/sendFileByUrl/${token}`;
+          const fileResp = await fetch(fileUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chatId: formattedChatId,
+              urlFile: imageUrl,
+              fileName: 'product.jpg',
+              caption: text
+            })
+          });
+          const fileData = await fileResp.json().catch(() => ({}));
+          if (fileResp.ok && fileData.idMessage) {
+            sentSuccess = true;
+            resultData = fileData;
+          }
+        } catch (fileErr) {
+          console.warn('[GreenAPI] sendFileByUrl failed, falling back to sendMessage:', fileErr);
+        }
+      }
 
-      const data = await resp.json().catch(() => ({}));
-      if (resp.ok && data.idMessage) {
+      // سۈرەتلىك يوللانمىغان بولسا ياكى سۈرەت بولمىسا تېكىستىنى يوللايدۇ
+      if (!sentSuccess) {
+        const textUrl = `https://api.green-api.com/waInstance${instanceId}/sendMessage/${token}`;
+        const textResp = await fetch(textUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chatId: formattedChatId,
+            message: text
+          })
+        });
+        resultData = await textResp.json().catch(() => ({}));
+        sentSuccess = textResp.ok && !!resultData.idMessage;
+      }
+
+      if (sentSuccess) {
         return res.status(200).json({
           success: true,
           provider: 'green-api',
-          messageId: data.idMessage,
-          message: 'WhatsApp توپىغا ئۇچۇر مۇۋەپپەقىيەتلىك يەتكۈزۈلدى!'
+          messageId: resultData.idMessage,
+          hasImage: !!imageUrl,
+          message: 'WhatsApp توپىغا سۈرەتلىك تاۋار ئېلانى مۇۋەپپەقىيەتلىك يەتكۈزۈلدى!'
         });
       } else {
-        return res.status(resp.status || 500).json({
+        return res.status(500).json({
           success: false,
           provider: 'green-api',
-          error: data.message || 'Green-API دىن خاتالىق قايتتى',
-          details: data
+          error: resultData?.message || 'Green-API دىن خاتالىق قايتتى',
+          details: resultData
         });
       }
     }
 
     // 3. UltraMsg ئارقىلىق توپقا ئەۋەتىش (https://ultramsg.com)
+    // سۈرەت بار بولسا messages/image ئارقىلىق caption بىلەن ئەۋەتىدۇ
     if (provider === 'ultramsg') {
       if (!instanceId || !token || !chatId) {
         return res.status(400).json({
@@ -113,38 +146,64 @@ module.exports = async function handler(req, res) {
         formattedChatId = `${formattedChatId}@g.us`;
       }
 
-      const ultraUrl = `https://api.ultramsg.com/${instanceId}/messages/chat`;
-      const params = new URLSearchParams({
-        token,
-        to: formattedChatId,
-        body: text
-      });
+      let sentSuccess = false;
+      let resultData = null;
 
-      const resp = await fetch(ultraUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
-      });
+      if (imageUrl && imageUrl.startsWith('http')) {
+        try {
+          const ultraImgUrl = `https://api.ultramsg.com/${instanceId}/messages/image`;
+          const params = new URLSearchParams({
+            token,
+            to: formattedChatId,
+            image: imageUrl,
+            caption: text
+          });
+          const imgResp = await fetch(ultraImgUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+          });
+          resultData = await imgResp.json().catch(() => ({}));
+          sentSuccess = imgResp.ok && (resultData.sent === 'true' || resultData.sent === true || resultData.id);
+        } catch (imgErr) {
+          console.warn('[UltraMsg] image send failed, falling back to chat:', imgErr);
+        }
+      }
 
-      const data = await resp.json().catch(() => ({}));
-      if (resp.ok && (data.sent === 'true' || data.sent === true || data.id)) {
+      if (!sentSuccess) {
+        const ultraTextUrl = `https://api.ultramsg.com/${instanceId}/messages/chat`;
+        const params = new URLSearchParams({
+          token,
+          to: formattedChatId,
+          body: text
+        });
+        const textResp = await fetch(ultraTextUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        });
+        resultData = await textResp.json().catch(() => ({}));
+        sentSuccess = textResp.ok && (resultData.sent === 'true' || resultData.sent === true || resultData.id);
+      }
+
+      if (sentSuccess) {
         return res.status(200).json({
           success: true,
           provider: 'ultramsg',
-          messageId: data.id,
-          message: 'WhatsApp توپىغا ئۇچۇر مۇۋەپپەقىيەتلىك يەتكۈزۈلدى!'
+          messageId: resultData.id,
+          hasImage: !!imageUrl,
+          message: 'WhatsApp توپىغا سۈرەتلىك تاۋار ئېلانى مۇۋەپپەقىيەتلىك يەتكۈزۈلدى!'
         });
       } else {
-        return res.status(resp.status || 500).json({
+        return res.status(500).json({
           success: false,
           provider: 'ultramsg',
-          error: data.message || 'UltraMsg دىن خاتالىق قايتتى',
-          details: data
+          error: resultData?.message || 'UltraMsg دىن خاتالىق قايتتى',
+          details: resultData
         });
       }
     }
 
-    // Provider نامەلۇم بولسا
     return res.status(400).json({
       success: false,
       error: `قوللىمايدىغان provider: ${provider}. پەقەت 'green-api', 'ultramsg', ياكى 'webhook' قوللىنىلىدۇ.`

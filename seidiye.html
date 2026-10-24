@@ -4891,7 +4891,12 @@
         <div style="display: flex; gap: 0.9rem; align-items: center; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
           <img id="whatsappBroadcastModalThumb" src="images/default_product.jpg" alt="تاۋار سۈرىتى" style="width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid #bbf7d0; background: #fff; flex-shrink: 0;">
           <div style="flex: 1; min-width: 0;">
-            <div style="font-weight: 800; font-size: 0.95rem; color: #166534; margin-bottom: 0.2rem;">تەييار ئېلان قىلىش كارتىسى</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #166534; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>تەييار ئېلان قىلىش كارتىسى</span>
+              <span style="font-size: 0.72rem; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 1px 6px; border-radius: 6px; font-weight: 800;">
+                <i class="fas fa-check-circle"></i> سۈرەت كاپالەتلەندى
+              </span>
+            </div>
             <div style="font-size: 0.82rem; color: #15803d; line-height: 1.5;">
               تۆۋەندىكى مەزمۇن گۇرۇپپىدا سۈرەتلىك تولۇق كارتىچە بولۇپ چىقىدۇ. سىز بىۋاستە تاللاپ يوللىسىڭىز ياكى تېكىستنى تەھرىرلىسىڭىزمۇ بولىدۇ.
             </div>
@@ -4922,14 +4927,18 @@
 
           <!-- 3-كۆچۈرۈۋېلىش ۋە تاقاش -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.2rem;">
-            <button type="button" id="btnCopyWhatsAppText" class="btn-secondary" style="padding: 0.65rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer; background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b;">
+            <button type="button" id="btnCopyWaImage" class="btn-secondary" style="padding: 0.65rem; border-radius: 10px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer; background: #f0fdf4; border: 1.5px solid #86efac; color: #166534;">
+              <i class="fas fa-camera"></i>
+              <span>📷 سۈرەتنى كۆچۈرۈش</span>
+            </button>
+            <button type="button" id="btnCopyWhatsAppText" class="btn-secondary" style="padding: 0.65rem; border-radius: 10px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer; background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b;">
               <i class="fas fa-copy"></i>
               <span>تېكىستنى كۆچۈرۈش</span>
             </button>
-            <button type="button" class="btn-secondary" onclick="window.TeklimakanWhatsApp.closeBroadcastModal()" style="padding: 0.65rem; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b;">
-              تاقاش
-            </button>
           </div>
+          <button type="button" class="btn-secondary" onclick="window.TeklimakanWhatsApp.closeBroadcastModal()" style="padding: 0.5rem; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; margin-top: 0.2rem;">
+            تاقاش
+          </button>
         </div>
       </div>
     </div>

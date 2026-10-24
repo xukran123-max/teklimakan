@@ -64,6 +64,58 @@
     return `${base}/p/${pid}`;
   }
 
+  // 🖼️ ھەرئىككىلا ئەھۋالدا رەسىم چوقۇم بولۇش كاپالىتى
+  function hasValidProductImage(prod) {
+    if (!prod || !prod.image || typeof prod.image !== 'string') return false;
+    const clean = prod.image.trim().toLowerCase();
+    if (!clean || clean === '' || clean.includes('default_product.jpg')) return false;
+    return true;
+  }
+
+  function getFullImageUrl(prod) {
+    if (!prod || !prod.image) return '';
+    if (prod.image.startsWith('http')) return prod.image;
+    return `${SITE_UG_URL}/${prod.image.replace(/^\/+/, '')}`;
+  }
+
+  async function copyProductImageToClipboard(imgUrl) {
+    if (!imgUrl) return false;
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imgUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        return true;
+      }
+    } catch (e) {
+      console.warn('[WhatsAppBroadcaster] Canvas copy failed:', e);
+    }
+    return false;
+  }
+
+  function downloadProductImage(imgUrl, fileName = 'product.jpg') {
+    if (!imgUrl) return;
+    const a = document.createElement('a');
+    a.href = imgUrl;
+    a.download = fileName;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   function cleanDescription(desc) {
     if (!desc) return '';
     let clean = String(desc)
@@ -204,6 +256,10 @@
     let broadcastedCount = 0;
 
     allProducts.forEach(prod => {
+      // 📷 ھەرئىككىلا ئەھۋالدا رەسىم چوقۇم بولۇشى كېرەك! سۈرەتسىز تاۋارلار سۈزۈپ تاشلىنىدۇ
+      if (!hasValidProductImage(prod)) {
+        return;
+      }
       if (isProductBroadcastedRecently(prod.id, 30)) {
         broadcastedCount++;
       } else {
@@ -592,6 +648,10 @@
     isProductBroadcastedRecently,
     getNextBroadcastLanguage,
     getEligibleProducts,
+    hasValidProductImage,
+    getFullImageUrl,
+    copyProductImageToClipboard,
+    downloadProductImage,
     formatProductBroadcastText,
     getWhatsAppShareUrl,
     openGroupShare,

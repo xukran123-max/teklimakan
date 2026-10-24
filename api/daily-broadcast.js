@@ -2,10 +2,11 @@
 // 🚀 تەكلىماكان سۇپىسى — كۈندىلىك كەچ سائەت 20:30 WhatsApp ئېلان مۇلازىمىتى
 // Teklimakan Daily WhatsApp Broadcast Serverless Cron Handler
 // ================================================================
-// 1. 30 كۈن ئىچىدە تەكرارلانماسلىق.
-// 2. مەھسۇلات تۈگىگەندە ئەسكەرتىش بېرىش (Exhaustion Alert).
-// 3. بىر كۈن ئۇيغۇرچە (teklimakan.com)، ئەتىسى تۈركچە (teklimakan.online) نۆۋەتلىشىش.
-// 4. مەجبۇرىي ئورگان ئاخىرقى خەتلىرى (Mandatory Official Footers).
+// 1. ھەرئىككىلا ئەھۋالدا (ئۇيغۇرچە / تۈركچە) رەسىم چوقۇم بولۇش كېرەك!
+// 2. 30 كۈن ئىچىدە تەكرارلانماسلىق كاپالىتى.
+// 3. مەھسۇلات تۈگەپ كەتسە سۈكۈت قىلماي ساھىبخانغا ئەسكەرتىش بېرىش.
+// 4. بىر كۈن ئۇيغۇرچە (teklimakan.com)، ئەتىسى تۈركچە (teklimakan.online).
+// 5. مەجبۇرىي ئورگان ئاخىرقى خەتلىرى.
 
 const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
@@ -40,6 +41,14 @@ function cleanDescription(desc) {
   let clean = String(desc).replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
   if (clean.length > 220) clean = clean.slice(0, 215).trim() + '...';
   return clean;
+}
+
+// 🖼️ رەسىمنىڭ بارلىقى ۋە ھەقىقىي سۈپەتلىك ئىكەنلىكىنى تەكشۈرۈش
+function hasValidProductImage(prod) {
+  if (!prod || !prod.image || typeof prod.image !== 'string') return false;
+  const clean = prod.image.trim().toLowerCase();
+  if (!clean || clean === '' || clean.includes('default_product.jpg')) return false;
+  return true;
 }
 
 module.exports = async function handler(req, res) {
@@ -87,12 +96,12 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    // لاياقەتلىك تاۋارلارنى ئايرىش
-    const eligibleProducts = products.filter(p => !recentProductIds.has(String(p.id)));
+    // 📸 رەسىمى بار ھەم 30 كۈن ئىچىدە يوللانمىغان لاياقەتلىك تاۋارلارنى سۈزۈش
+    const eligibleProducts = products.filter(p => !recentProductIds.has(String(p.id)) && hasValidProductImage(p));
 
-    // 4. ئەگەر بارلىق تاۋارلار 30 كۈن ئىچىدە ئېلان قىلىنىپ بولغان بولسا (Exhaustion Alert)
+    // 4. ئەگەر تاۋار تۈگەپ كەتكەن بولسا ئاگاھلاندۇرۇش چىقىرىش
     if (eligibleProducts.length === 0) {
-      const alertMsg = `⚠️ <b>تەكلىماكان سۇپىسى: WhatsApp كۈندىلىك ئېلان ئەسكەرتىشى</b>\n\nبارلىق تاۋارلىرىڭىز (${products.length} تاۋار) يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولغانلىقى ئۈچۈن، تەكرار ئېلان بېرىشنىڭ ئالدىنى ئېلىش مەقسىتىدە بۈگۈنكى (${targetLang.toUpperCase()}) ئېلان قىلىش توختىتىلدى.\nيېڭى تاۋار قوشسىڭىز ئاپتوماتىك داۋاملىشىدۇ!`;
+      const alertMsg = `⚠️ <b>تەكلىماكان سۇپىسى: WhatsApp كۈندىلىك ئېلان ئەسكەرتىشى</b>\n\nبارلىق سۈرەتلىك تاۋارلىرىڭىز يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولدى! تەكرارلىقنىڭ ئالدىنى ئېلىش ۋە سۈرەتسىز تاۋار چىقىپ قالماسلىق ئۈچۈن، بۈگۈنكى (${targetLang.toUpperCase()}) ئېلان قىلىش توختىتىلدى.\nيېڭى تاۋارغا سۈرەت قويۇپ ئېلان قىلسىڭىز ئاپتوماتىك داۋاملىشىدۇ!`;
 
       try {
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -107,16 +116,21 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({
         success: false,
         exhausted: true,
-        message: 'بارلىق مەھسۇلاتلار يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولدى. تەكرارلىقنىڭ ئالدىنى ئېلىش ئۈچۈن بۈگۈنكى ئېلان توختىتىلدى ۋە ساھىبخانغا ئەسكەرتىش بېرىلدى.',
+        message: 'بارلىق سۈرەتلىك مەھسۇلاتلار يېقىنقى 30 كۈن ئىچىدە ئېلان قىلىنىپ بولدى. تەكرارلىق ۋە سۈرەتسىز ئېلان چىقىشنىڭ ئالدىنى ئېلىش ئۈچۈن ئېلان توختىتىلدى.',
         recentBroadcastCount: recentProductIds.size,
         totalProducts: products.length
       });
     }
 
-    // 5. نۆۋەتتىكى ئەڭ لاياقەتلىك تاۋارنى تاللاش
+    // 5. نۆۋەتتىكى ئەڭ لاياقەتلىك تاۋارنى تاللاش (چوقۇم رەسىمى بار تاۋار)
     const prod = eligibleProducts[0];
     const price = prod.price ? Number(prod.price).toLocaleString('en-US') : '0';
     const oldPrice = prod.old_price || prod.oldPrice;
+
+    // تولۇق سۈرەت ئۇلانمىسى
+    const fullImageUrl = prod.image.startsWith('http')
+      ? prod.image
+      : `https://teklimakan.com/${prod.image.replace(/^\/+/, '')}`;
 
     let broadcastText = '';
     let prodUrl = '';
@@ -212,7 +226,7 @@ module.exports = async function handler(req, res) {
       ].join('\n');
     }
 
-    // 6. Supabase كە ئېلان خاتىرىسىنى ساقلاش (30 كۈنلۈك قايتا تەكشۈرۈش ئۈچۈن)
+    // 6. ئېلان خاتىرىسىنى ساقلاش
     try {
       await fetch(`${SUPABASE_URL}/rest/v1/push_broadcast_logs`, {
         method: 'POST',
@@ -243,8 +257,11 @@ module.exports = async function handler(req, res) {
         id: prod.id,
         name: prod.name,
         price: prod.price,
+        image: fullImageUrl,
         url: prodUrl
       },
+      imageUrl: fullImageUrl,
+      hasImage: true,
       broadcastText,
       shareUrl,
       groupLink: DEFAULT_GROUP_LINK

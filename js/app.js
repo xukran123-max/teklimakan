@@ -1413,7 +1413,7 @@ function initTeklimakanApp() {
     } else if (product.stock <= 8) {
       stockHtml = `<span class="stock-status-low"><i class="fas fa-exclamation-circle"></i> ${i18n.t('lowStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
     } else {
-      stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')} <bdi class="number-latin">${product.stock}</bdi> ${stockUnitLabel}</span>`;
+      stockHtml = `<span class="stock-status-in"><i class="fas fa-check-circle"></i> ${i18n.t('inStock')}</span>`;
     }
 
     let badgeHtml = '';
@@ -1459,7 +1459,7 @@ function initTeklimakanApp() {
 
         <div class="product-stock-bar">
           ${stockHtml}
-          <span class="sales-count">${i18n.t('salesCount')} <bdi class="number-latin">${product.sales || 0}</bdi></span>
+          ${Number(product.sales) > 0 ? `<span class="sales-count">${i18n.t('salesCount')} <bdi class="number-latin">${product.sales}</bdi></span>` : ''}
         </div>
 
         <div class="product-pricing">

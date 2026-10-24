@@ -912,11 +912,11 @@ const INITIAL_PRODUCTS = [
         "description": "Premium thin-shell organic paper walnuts."
       },
       "tr": {
-        "name": "İnce Kabuklu Kağıt Ceviz",
+        "name": "İnce Kabuklu Doğal Ceviz",
         "unit": "kg",
         "badge": "تەۋسىيە",
         "category": "Kuru Meyve & Yemişler",
-        "description": "Yüksek kaliteli ince kabuklu doğal kağıt ceviz."
+        "description": "Yüksek kaliteli ince kabuklu doğal ince kabuklu ceviz."
       },
       "ug": {
         "name": "قەغەز ياڭاق",

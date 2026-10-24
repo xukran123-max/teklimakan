@@ -1480,6 +1480,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="min-width: 120px; text-align: center;">
           <div style="display: flex; gap: 0.4rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             ${quickApprovalAction}
+            <button type="button" class="btn-action-whatsapp" data-id="${product.id}" title="WhatsApp گۇرۇپپىسىغا يوللاش" style="background:#25D366; color:#ffffff; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; transition:transform 0.15s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+              <i class="fab fa-whatsapp"></i>
+            </button>
             <button type="button" class="btn-action-edit" data-id="${product.id}" onclick="window.openProductModal('${product.id}')" title="تەھرىرلەش">
               <i class="fas fa-edit"></i>
             </button>
@@ -1499,6 +1502,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tbody._delegationInit) {
       tbody._delegationInit = true;
       tbody.addEventListener('click', (e) => {
+        const waBtn = e.target.closest('.btn-action-whatsapp');
+        if (waBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const pid = waBtn.dataset.id;
+          if (pid && window.TeklimakanWhatsApp) {
+            window.TeklimakanWhatsApp.openBroadcastModal(pid);
+          }
+          return;
+        }
+
         const editBtn = e.target.closest('.btn-action-edit');
         if (editBtn) {
           e.preventDefault();
@@ -1528,6 +1542,14 @@ document.addEventListener('DOMContentLoaded', () => {
               showAdminToast(res.message, 'success');
               renderProductsTable();
               renderDashboardMetrics();
+              try {
+                const approvedProd = window.appStore.getProductById(pid);
+                if (approvedProd && window.TeklimakanWhatsApp) {
+                  window.TeklimakanWhatsApp.notifyNewProduct(approvedProd, { isApproved: true });
+                }
+              } catch (waApproveErr) {
+                console.warn('WhatsApp notify after approval err:', waApproveErr);
+              }
             } else {
               showAdminToast(res ? res.message : 'تەستىقلاشتا خاتالىق كۆرۈلدى', 'error');
             }
@@ -4906,6 +4928,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingTelegramChatId', s.telegramChatId);
     setChecked('settingTelegramEnabled', s.telegramEnabled !== false);
     setChecked('settingEmailNotificationEnabled', s.emailNotificationEnabled !== false);
+    setChecked('settingWhatsappEnabled', s.whatsappEnabled !== false);
+    setVal('settingWhatsappProvider', s.whatsappProvider || 'direct');
+    setVal('settingWhatsappGroupId', s.whatsappGroupId || '');
+    setVal('settingWhatsappInstanceId', s.whatsappInstanceId || '');
+    setVal('settingWhatsappToken', s.whatsappToken || '');
+    setChecked('settingWhatsappAutoBroadcast', s.whatsappAutoBroadcast !== false);
+
+    const waDetails = document.getElementById('whatsappApiDetailsRow');
+    if (waDetails) {
+      waDetails.style.display = (s.whatsappProvider === 'direct' || !s.whatsappProvider) ? 'none' : 'grid';
+    }
 
     const curPreset = s.smtpPreset || 'gmail';
     setVal('settingSmtpPreset', curPreset);
@@ -6920,6 +6953,13 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch (tgErr) {
             console.warn('Admin Telegram notification error:', tgErr);
           }
+          try {
+            if (window.TeklimakanWhatsApp && typeof window.TeklimakanWhatsApp.notifyNewProduct === 'function') {
+              window.TeklimakanWhatsApp.notifyNewProduct(data, { isNewProduct, name: 'ئالىي باشقۇرغۇچى' });
+            }
+          } catch (waErr) {
+            console.warn('Admin WhatsApp notification error:', waErr);
+          }
         } catch (err) {
           console.error('تاۋار ساقلاش خاتالىقى:', err);
           showAdminToast('ساقلاش جەريانىدا خاتالىق كۆرۈلدى', 'error');
@@ -7514,6 +7554,12 @@ document.addEventListener('DOMContentLoaded', () => {
           telegramChatId: getVal('settingTelegramChatId'),
           telegramEnabled: document.getElementById('settingTelegramEnabled') ? document.getElementById('settingTelegramEnabled').checked : true,
           emailNotificationEnabled: document.getElementById('settingEmailNotificationEnabled') ? document.getElementById('settingEmailNotificationEnabled').checked : true,
+          whatsappEnabled: document.getElementById('settingWhatsappEnabled') ? document.getElementById('settingWhatsappEnabled').checked : true,
+          whatsappProvider: getVal('settingWhatsappProvider', 'direct'),
+          whatsappGroupId: getVal('settingWhatsappGroupId'),
+          whatsappInstanceId: getVal('settingWhatsappInstanceId'),
+          whatsappToken: getVal('settingWhatsappToken'),
+          whatsappAutoBroadcast: document.getElementById('settingWhatsappAutoBroadcast') ? document.getElementById('settingWhatsappAutoBroadcast').checked : true,
           smtpPreset: getVal('settingSmtpPreset', 'gmail'),
           smtpHost: getVal('settingSmtpHost', 'smtp.gmail.com'),
           smtpPort: parseInt(getVal('settingSmtpPort', 587)) || 587,
@@ -7579,6 +7625,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderAdminMarqueeList();
         showAdminToast('🎉 ئايلانما ئېلان تاختىسى مۇۋەپپەقىيەتلىك ساقلاندى ۋە دەرھال ئېلان قىلىندى!', 'success');
+      });
+    }
+
+    // 📢 WhatsApp توپ ئۇقتۇرۇشى تەڭشىكى ۋە سىناق كۇنۇپكىلىرى
+    const selWaProvider = document.getElementById('settingWhatsappProvider');
+    if (selWaProvider) {
+      selWaProvider.addEventListener('change', () => {
+        const waDetails = document.getElementById('whatsappApiDetailsRow');
+        if (waDetails) {
+          waDetails.style.display = (selWaProvider.value === 'direct') ? 'none' : 'grid';
+        }
+      });
+    }
+
+    const btnTestWa = document.getElementById('btnTestWhatsappBroadcast');
+    if (btnTestWa) {
+      btnTestWa.addEventListener('click', () => {
+        const prods = window.appStore.getProducts();
+        const prod = prods[0];
+        if (prod && window.TeklimakanWhatsApp) {
+          window.TeklimakanWhatsApp.openBroadcastModal(prod);
+        } else {
+          showAdminToast('سىناق قىلىدىغان تاۋار تېپىلمىدى', 'warning');
+        }
+      });
+    }
+
+    const btnOpenWaDirect = document.getElementById('btnOpenWhatsAppDirect');
+    if (btnOpenWaDirect) {
+      btnOpenWaDirect.addEventListener('click', () => {
+        const txt = document.getElementById('whatsappBroadcastText')?.value || '';
+        if (window.TeklimakanWhatsApp) {
+          const url = window.TeklimakanWhatsApp.getWhatsAppShareUrl(txt);
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      });
+    }
+
+    const btnCopyWa = document.getElementById('btnCopyWhatsAppText');
+    if (btnCopyWa) {
+      btnCopyWa.addEventListener('click', () => {
+        const txt = document.getElementById('whatsappBroadcastText')?.value || '';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => {
+            showAdminToast('✅ تېكىست كۆچۈرۈۋېلىندى! WhatsApp گۇرۇپپىڭىزغا چاپلاپ يوللاڭ.', 'success');
+          }).catch(() => {
+            showAdminToast('تېكىستنى كۆچۈرۈش مەغلۇپ بولدى', 'error');
+          });
+        }
+      });
+    }
+
+    const btnSendWaApi = document.getElementById('btnSendWhatsAppApi');
+    if (btnSendWaApi) {
+      btnSendWaApi.addEventListener('click', async () => {
+        const modal = document.getElementById('modalWhatsAppBroadcast');
+        const pid = modal?.dataset?.currentProductId;
+        const prod = pid ? window.appStore.getProductById(pid) : null;
+        const txt = document.getElementById('whatsappBroadcastText')?.value || '';
+        if (!prod) {
+          showAdminToast('مەھسۇلات ئۇچۇرى تېپىلمىدى', 'error');
+          return;
+        }
+        btnSendWaApi.disabled = true;
+        btnSendWaApi.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ئەۋەتىلىۋاتىدۇ...';
+        try {
+          const res = await window.TeklimakanWhatsApp.sendBackgroundGroupNotify(prod, { text: txt });
+          if (res && res.success) {
+            showAdminToast('🎉 WhatsApp توپىغا ئۇچۇر مۇۋەپپەقىيەتلىك ئەۋەتىلدى!', 'success');
+            window.TeklimakanWhatsApp.closeBroadcastModal();
+          } else {
+            showAdminToast('❌ ئەۋەتكىلى بولمىدى: ' + (res?.error || 'نامەلۇم خاتالىق'), 'error');
+          }
+        } catch (apiErr) {
+          showAdminToast('❌ خاتالىق: ' + apiErr.message, 'error');
+        } finally {
+          btnSendWaApi.disabled = false;
+          btnSendWaApi.innerHTML = '<i class="fas fa-paper-plane"></i> ئارقا سەپتىن بىۋاستە توپقا ئەۋەتىش (Cloud Gateway)';
+        }
       });
     }
 

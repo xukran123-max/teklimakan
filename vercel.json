@@ -109,5 +109,11 @@
       "destination": "/",
       "permanent": false
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/daily-broadcast",
+      "schedule": "30 17 * * *"
+    }
   ]
 }

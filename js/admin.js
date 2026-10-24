@@ -4930,7 +4930,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setChecked('settingEmailNotificationEnabled', s.emailNotificationEnabled !== false);
     setChecked('settingWhatsappEnabled', s.whatsappEnabled !== false);
     setVal('settingWhatsappProvider', s.whatsappProvider || 'direct');
-    setVal('settingWhatsappGroupId', s.whatsappGroupId || '');
+    setVal('settingWhatsappGroupId', s.whatsappGroupId || 'https://chat.whatsapp.com/HSer7ggKO9iCvjUShuCmmW');
     setVal('settingWhatsappInstanceId', s.whatsappInstanceId || '');
     setVal('settingWhatsappToken', s.whatsappToken || '');
     setChecked('settingWhatsappAutoBroadcast', s.whatsappAutoBroadcast !== false);
@@ -7635,6 +7635,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const waDetails = document.getElementById('whatsappApiDetailsRow');
         if (waDetails) {
           waDetails.style.display = (selWaProvider.value === 'direct') ? 'none' : 'grid';
+        }
+      });
+    }
+
+    const btnTriggerDaily = document.getElementById('btnTriggerDailyBroadcast');
+    if (btnTriggerDaily) {
+      btnTriggerDaily.addEventListener('click', () => {
+        if (window.TeklimakanWhatsApp) {
+          window.TeklimakanWhatsApp.triggerDailyBroadcast(true);
         }
       });
     }

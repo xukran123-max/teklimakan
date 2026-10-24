@@ -3,20 +3,24 @@
  * 🚀 تەكلىماكان سۇپىسى — مەركىزىي WhatsApp گۇرۇپپا ئاپتوماتىك ئۇقتۇرۇش سىستېمىسى
  * Teklimakan Central WhatsApp Group Broadcaster (1-Click & Automated Cloud)
  * ================================================================
- * يېڭى تاۋار ئېلان قىلىنغاندا ياكى ھەركۈنى كەچ سائەت 8:30 (20:30) دا،
- * تاۋارنىڭ تولۇق تەپسىلاتى ۋە مەجبۇرىي ئورگان ئۇچۇرلىرى بىلەن گۇرۇپپىغا يوللايدۇ.
+ * 1. 30 كۈن ئىچىدە تەكرارلانماسلىق كاپالىتى (30-Day Anti-Duplicate Engine).
+ * 2. ئەگەر 30 كۈن ئىچىدە ئېلان قىلىپ بولۇنغان بولسا ئەسكەرتىش بېرىش (Exhaustion Alert).
+ * 3. بىر كۈن ئۇيغۇرچە (teklimakan.com)، ئەتىسى تۈركچە (teklimakan.online) نۆۋەتلىشىش.
+ * 4. مەجبۇرىي ئورگان ئاخىرقى خەتلىرى (Mandatory Official Footers).
+ * 5. ھەركۈنى كەچ سائەت 20:30 دا قەرەللىك ئېلان چىقىرىش.
  */
 
 (function(window) {
   'use strict';
 
-  const SITE_BASE_URL = 'https://teklimakan.com';
+  const SITE_UG_URL = 'https://teklimakan.com';
+  const SITE_TR_URL = 'https://www.teklimakan.online';
   const DEFAULT_WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/HSer7ggKO9iCvjUShuCmmW';
-  const DEFAULT_INSTAGRAM_URL = 'https://www.instagram.com/teklimakancom';
-  const DEFAULT_PHONE_1 = '05551609999';
-  const DEFAULT_PHONE_2 = '05550716031';
+  const STORAGE_KEY_HISTORY = 'teklimakan_whatsapp_broadcast_history';
+  const STORAGE_KEY_LAST_DAILY = 'teklimakan_last_daily_broadcast';
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-  // 🔤 ئۇيغۇرچە / تۈركچە ھەرپلەرنى ئىنگلىزچە پاكىز slug غا ئايلاندۇرۇش
+  // 🔤 ھەرپلەرنى پاكىز slug غا ئايلاندۇرۇش
   function transliterateToSlug(text) {
     if (!text) return '';
     const map = {
@@ -43,15 +47,21 @@
       .slice(0, 75);
   }
 
-  function getProductCanonicalUrl(product) {
-    if (!product || !product.id) return SITE_BASE_URL;
-    const name = product.name || (product.translations && product.translations.ug && product.translations.ug.name) || '';
+  function getProductCanonicalUrl(product, lang = 'ug') {
+    if (!product || !product.id) return lang === 'tr' ? SITE_TR_URL : SITE_UG_URL;
+    const base = lang === 'tr' ? SITE_TR_URL : SITE_UG_URL;
+    let name = '';
+    if (lang === 'tr') {
+      name = (product.translations && product.translations.tr && product.translations.tr.name) || product.name || '';
+    } else {
+      name = product.name || (product.translations && product.translations.ug && product.translations.ug.name) || '';
+    }
     const slug = transliterateToSlug(name);
     const pid = String(product.id).toLowerCase();
     if (slug) {
-      return `${SITE_BASE_URL}/p/${slug}-${pid}`;
+      return `${base}/p/${slug}-${pid}`;
     }
-    return `${SITE_BASE_URL}/p/${pid}`;
+    return `${base}/p/${pid}`;
   }
 
   function cleanDescription(desc) {
@@ -61,95 +71,261 @@
       .replace(/&nbsp;/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-    if (clean.length > 200) {
-      clean = clean.slice(0, 195).trim() + '...';
+    if (clean.length > 220) {
+      clean = clean.slice(0, 215).trim() + '...';
     }
     return clean;
   }
 
   /**
-   * 📝 مەجبۇرىي ئورگان ئاخىرقى خەتلىرى (Mandatory Official Footer)
-   * ئىشلەتكۈچى تەلەپ قىلغان ئۆلچەم بويىچە 100% تولۇق، كېسىلمەيدىغان، كەسپىي تېكىست:
+   * 📜 مەجبۇرىي ئۇيغۇرچە ئاخىرقى خەتلەر (Mandatory Uyghur Footer)
    */
-  function getMandatoryFooter() {
+  function getMandatoryUyghurFooter() {
     return [
-      '🎁 *مۇكاپاتلىق پائالىيەتلەر سەھىپىمىزدە:*',
+      'مۇكاپاتلىق پائالىيەتلەر سەھىپىمىزدە ',
       'instagram.com/teklimakancom',
       '',
-      '🌐 *تور بېكەت ئادىرسىمىز:*',
+      'تور بېكەت ئادىرسىمىز ',
       'www.teklimakan.com',
       '',
-      '📞 *ئالاقىلىشىش ۋاتساپ ۋە تېلېفون:*',
-      DEFAULT_PHONE_1,
-      DEFAULT_PHONE_2,
+      'ئالاقىلىشىش ۋاتساپ ۋە تېلېفون ',
+      '05551609999',
+      '05550716031',
       '',
       '#تەكلىماكان_سودا_تورى'
     ].join('\n');
   }
 
   /**
-   * 📝 WhatsApp توپى ئۈچۈن قايىل قىلارلىق، سېتىشنى تېزلىتىدىغان ئۇيغۇرچە تەييار تېكىست قۇرۇش
+   * 📜 مەجبۇرىي تۈركچە ئاخىرقى خەتلەر (Mandatory Turkish Footer)
+   */
+  function getMandatoryTurkishFooter() {
+    return [
+      'Kampanyalar için takipte kalın ',
+      '',
+      'instagram.com/teklimakan.online',
+      '',
+      'Destek ve satış hattımız ',
+      '05551609999',
+      '',
+      'www.teklimakan.online',
+      '',
+      '#teklimakan_online'
+    ].join('\n');
+  }
+
+  // ==================== 🛡️ 30 كۈنلۈك تارىخ ۋە تەكرارلىقنى توسۇش مۇلازىمىتى ====================
+
+  function getBroadcastHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_HISTORY);
+      if (!raw) return [];
+      const list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      console.warn('[WhatsAppBroadcaster] History read error:', e);
+      return [];
+    }
+  }
+
+  function saveBroadcastHistory(history) {
+    try {
+      localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history.slice(-150)));
+    } catch (e) {
+      console.warn('[WhatsAppBroadcaster] History save error:', e);
+    }
+  }
+
+  function recordBroadcast(product, lang = 'ug') {
+    if (!product || !product.id) return;
+    const history = getBroadcastHistory();
+    const entry = {
+      product_id: product.id,
+      product_name: product.name || product.id,
+      lang: lang,
+      date: new Date().toISOString().slice(0, 10),
+      timestamp: Date.now()
+    };
+    history.push(entry);
+    saveBroadcastHistory(history);
+  }
+
+  /**
+   * 🔍 تاۋارنىڭ يېقىنقى 30 كۈن ئىچىدە يوللانغان ياكى يوللانمىغانلىقىنى تەكشۈرۈش
+   */
+  function isProductBroadcastedRecently(productId, daysLimit = 30) {
+    if (!productId) return false;
+    const history = getBroadcastHistory();
+    const limitMs = daysLimit * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    for (let i = history.length - 1; i >= 0; i--) {
+      const h = history[i];
+      if (h.product_id === productId) {
+        if (now - (h.timestamp || 0) < limitMs) {
+          return true; // 30 كۈن ئىچىدە يوللانغان، تەكرارلاش مەنئى قىلىنىدۇ!
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 🔄 كېيىنكى قېتىملىق تىلنى ئاپتوماتىك نۆۋەتلەشتۈرۈش (بىر كۈن ئۇيغۇرچە، ئەتىسى تۈركچە)
+   */
+  function getNextBroadcastLanguage() {
+    const history = getBroadcastHistory();
+    // ئاخىرقى كۈندىلىك ئېلاننىڭ تىلىنى تېپىش
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].lang) {
+        return history[i].lang === 'ug' ? 'tr' : 'ug';
+      }
+    }
+    // تارىخ بوش بولسا كۈن بويىچە نۆۋەتلەشتۈرۈش
+    const day = new Date().getDate();
+    return (day % 2 === 1) ? 'ug' : 'tr';
+  }
+
+  /**
+   * 📦 30 كۈن ئىچىدە تېخى ئېلان قىلىنمىغان لاياقەتلىك تاۋارلار تىزىملىكىنى ئېلىش
+   */
+  function getEligibleProducts(targetLang = null) {
+    if (!window.appStore || typeof window.appStore.getProducts !== 'function') {
+      return { eligible: [], total: 0, broadcastedCount: 0, exhausted: true };
+    }
+
+    const allProducts = window.appStore.getProducts().filter(p => {
+      const isApproved = (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى';
+      const hasStock = Number(p.stock) > 0;
+      return isApproved && hasStock;
+    });
+
+    const eligible = [];
+    let broadcastedCount = 0;
+
+    allProducts.forEach(prod => {
+      if (isProductBroadcastedRecently(prod.id, 30)) {
+        broadcastedCount++;
+      } else {
+        eligible.push(prod);
+      }
+    });
+
+    return {
+      eligible,
+      total: allProducts.length,
+      broadcastedCount,
+      exhausted: eligible.length === 0
+    };
+  }
+
+  /**
+   * 📝 تىل بويىچە سېتىشنى تېزلىتىدىغان، مەجبۇرىي ئاخىرقى خەتلەر تولۇق بولغان WhatsApp ئېلان تېكىستى
    */
   function formatProductBroadcastText(product, customOptions = {}) {
     if (!product) return '';
 
-    const name = product.name || (product.translations && product.translations.ug && product.translations.ug.name) || 'يېڭى مەھسۇلات';
-    const brand = product.brand || 'تەكلىماكان كىلاسسىك';
-    const category = product.category || 'ئۇيغۇر تىبابىتى';
+    const lang = customOptions.lang || (customOptions.isTurkish ? 'tr' : 'ug');
+    const isDaily = customOptions.isDaily !== false;
     const price = product.price ? Number(product.price).toLocaleString('en-US') : '0';
     const oldPrice = product.oldPrice || product.old_price;
-    const unit = product.unit || '1 دانە';
-    const desc = cleanDescription(product.description || (product.translations && product.translations.ug && product.translations.ug.description));
-    const url = getProductCanonicalUrl(product);
 
-    let priceText = `₺${price}`;
-    if (oldPrice && Number(oldPrice) > Number(product.price)) {
-      priceText = `₺${price}  ~(ئەسلى باھاسى: ₺${Number(oldPrice).toLocaleString('en-US')})~`;
-    }
+    if (lang === 'tr') {
+      // 🇹🇷 TÜRKÇE MESAJ METNİ
+      const trData = (product.translations && product.translations.tr) || {};
+      const name = trData.name || product.name || 'Özel Doğal Ürün';
+      const brand = product.brand || 'Teklimakan Online';
+      const category = trData.category || product.category || 'Doğal Şifa Ürünleri';
+      const unit = trData.unit || product.unit || '1 Adet';
+      const desc = cleanDescription(trData.description || product.description);
+      const url = getProductCanonicalUrl(product, 'tr');
 
-    const isDaily = customOptions.isDaily === true;
-    const headline = isDaily
-      ? '🌟 *تەكلىماكان كۈندىلىك كەچلىك تەۋسىيەسى (سائەت 20:30)* 🌿'
-      : '🌿 *تەكلىماكان سۇپىسى — يېڭى تەبىئىي مەھسۇلات ئېلان قىلىندى!*';
+      let priceText = `₺${price}`;
+      if (oldPrice && Number(oldPrice) > Number(product.price)) {
+        priceText = `₺${price}  ~(Eski Fiyat: ₺${Number(oldPrice).toLocaleString('en-US')})~`;
+      }
 
-    const lines = [
-      headline,
-      '',
-      `📦 *مەھسۇلات:* ${name}`,
-      `🏷️ *ماركىسى:* ${brand}`,
-      `💰 *باھاسى:* ${priceText}`,
-      `⚖️ *ئۆلچىمى:* ${unit}`,
-      `📂 *تۈرى:* ${category}`,
-      ''
-    ];
+      const headline = isDaily
+        ? '🌟 *Teklimakan Günlük Akşam Önerisi (Saat 20:30)* 🌿'
+        : '🌿 *Teklimakan Online — Yeni Doğal Ürün Yayında!*';
 
-    if (desc) {
-      lines.push('✨ *ئالاھىدىلىكى ۋە ئۈنۈمى:*');
-      lines.push(desc);
+      const lines = [
+        headline,
+        '',
+        `📦 *Ürün:* ${name}`,
+        `🏷️ *Marka:* ${brand}`,
+        `💰 *Fiyat:* ${priceText}`,
+        `⚖️ *Birim:* ${unit}`,
+        `📂 *Kategori:* ${category}`,
+        ''
+      ];
+
+      if (desc) {
+        lines.push('✨ *Özellikleri ve Faydaları:*');
+        lines.push(desc);
+        lines.push('');
+      }
+
+      lines.push('🛒 *Detaylar ve Doğrudan Sipariş:*');
+      lines.push(url);
       lines.push('');
+      lines.push('🚚 *Türkiye geneli hızlı ve güvenli kargo garantisi!*');
+      lines.push('----------------------------------------');
+      lines.push(getMandatoryTurkishFooter());
+
+      return lines.join('\n');
+    } else {
+      // 🌿 ئۇيغۇرچە ئۇچۇر تېكىستى
+      const ugData = (product.translations && product.translations.ug) || {};
+      const name = ugData.name || product.name || 'يېڭى مەھسۇلات';
+      const brand = product.brand || 'تەكلىماكان كىلاسسىك';
+      const category = ugData.category || product.category || 'ئۇيغۇر تىبابىتى';
+      const unit = ugData.unit || product.unit || '1 دانە';
+      const desc = cleanDescription(ugData.description || product.description);
+      const url = getProductCanonicalUrl(product, 'ug');
+
+      let priceText = `₺${price}`;
+      if (oldPrice && Number(oldPrice) > Number(product.price)) {
+        priceText = `₺${price}  ~(ئەسلى باھاسى: ₺${Number(oldPrice).toLocaleString('en-US')})~`;
+      }
+
+      const headline = isDaily
+        ? '🌟 *تەكلىماكان كۈندىلىك كەچلىك تەۋسىيەسى (سائەت 20:30)* 🌿'
+        : '🌿 *تەكلىماكان سۇپىسى — يېڭى تەبىئىي مەھسۇلات ئېلان قىلىندى!*';
+
+      const lines = [
+        headline,
+        '',
+        `📦 *مەھسۇلات:* ${name}`,
+        `🏷️ *ماركىسى:* ${brand}`,
+        `💰 *باھاسى:* ${priceText}`,
+        `⚖️ *ئۆلچىمى:* ${unit}`,
+        `📂 *تۈرى:* ${category}`,
+        ''
+      ];
+
+      if (desc) {
+        lines.push('✨ *ئالاھىدىلىكى ۋە ئۈنۈمى:*');
+        lines.push(desc);
+        lines.push('');
+      }
+
+      lines.push('🛒 *تەپسىلاتىنى كۆرۈش ۋە بىۋاستە زاكاز قىلىش:*');
+      lines.push(url);
+      lines.push('');
+      lines.push('🚚 *تۈركىيە بويىچە تېز ھەم ئىشەنچلىك يەتكۈزۈش كاپالىتى بار!*');
+      lines.push('----------------------------------------');
+      lines.push(getMandatoryUyghurFooter());
+
+      return lines.join('\n');
     }
-
-    lines.push('🛒 *تەپسىلاتىنى كۆرۈش ۋە بىۋاستە زاكاز قىلىش:*');
-    lines.push(url);
-    lines.push('');
-    lines.push('🚚 *تۈركىيە بويىچە تېز ھەم ئىشەنچلىك يەتكۈزۈش كاپالىتى بار!*');
-    lines.push('----------------------------------------');
-    lines.push(getMandatoryFooter());
-
-    return lines.join('\n');
   }
 
-  /**
-   * 📲 WhatsApp Share URL ھاسىللاش
-   */
   function getWhatsAppShareUrl(text) {
     const encoded = encodeURIComponent(text);
     return `https://api.whatsapp.com/send?text=${encoded}`;
   }
 
-  /**
-   * 🚀 1-چېكىش بىلەن WhatsApp گۇرۇپپىسىغا يوللاش بەتنى ئېچىش
-   */
   function openGroupShare(productOrId, options = {}) {
     let product = productOrId;
     if (typeof productOrId === 'string' && window.appStore && typeof window.appStore.getProductById === 'function') {
@@ -161,13 +337,11 @@
     }
 
     const text = formatProductBroadcastText(product, options);
+    recordBroadcast(product, options.lang || 'ug');
     const url = getWhatsAppShareUrl(text);
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
-  /**
-   * 🌐 ئارقا سەپتە مۇلازىمېتىر ئارقىلىق توپقا ئەۋەتىش (Green-API / UltraMsg / Webhook)
-   */
   async function sendBackgroundGroupNotify(product, options = {}) {
     let settings = {};
     if (window.appStore && typeof window.appStore.getSettings === 'function') {
@@ -180,8 +354,9 @@
     const chatId = options.chatId || settings.whatsappGroupId || DEFAULT_WHATSAPP_GROUP_LINK;
     const webhookUrl = options.webhookUrl || settings.whatsappWebhookUrl || '';
 
+    const lang = options.lang || 'ug';
     const text = options.text || formatProductBroadcastText(product, options);
-    const imageUrl = product.image ? (product.image.startsWith('http') ? product.image : `${SITE_BASE_URL}/${product.image.replace(/^\/+/, '')}`) : '';
+    const imageUrl = product.image ? (product.image.startsWith('http') ? product.image : `${SITE_UG_URL}/${product.image.replace(/^\/+/, '')}`) : '';
 
     try {
       const resp = await fetch('/api/whatsapp-group', {
@@ -200,6 +375,9 @@
       });
 
       const resData = await resp.json().catch(() => ({}));
+      if (resData.success) {
+        recordBroadcast(product, lang);
+      }
       return resData;
     } catch (err) {
       console.error('[WhatsAppBroadcaster] Server API error:', err);
@@ -208,8 +386,26 @@
   }
 
   /**
-   * 🪟 WhatsApp كۆرۈنمە سۆزلەشكۈنى ئېچىش (Modal Preview & Send)
+   * ⚠️ تاۋارلار تۈگەپ كەتكەندە بېرىلىدىغان ئاگاھلاندۇرۇش (Inventory Exhaustion Alert)
    */
+  function handleExhaustedAlert(lang = 'ug') {
+    const alertMsg = '⚠️ دىققەت: بارلىق مەھسۇلاتلار يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولدى! تەكرارلىقنىڭ ئالدىنى ئېلىش سەۋەبىدىن بۈگۈنكى ئېلان توختىتىلدى. يېڭى تاۋار ئېلان قىلىڭ ياكى تارىخنى تەڭشەڭ.';
+
+    if (typeof window.showAdminToast === 'function') {
+      window.showAdminToast(alertMsg, 'error', 8000);
+    }
+
+    // Telegram ئارقىلىق ساھىبخانغا ئەسكەرتىش ئەۋەتىش
+    try {
+      if (window.TeklimakanTelegram && typeof window.TeklimakanTelegram.sendDirectMessage === 'function') {
+        const tgMsg = `⚠️ <b>تەكلىماكان سۇپىسى: WhatsApp كۈندىلىك ئېلان ئەسكەرتىشى</b>\n\nبارلىق تاۋارلىرىڭىز يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولغانلىقى ئۈچۈن، تەكرار ئېلان بېرىشنىڭ ئالدىنى ئېلىش مەقسىتىدە بۈگۈنكى (${lang.toUpperCase()}) ئېلان قىلىش توختىتىلدى.\nيېڭى تاۋار قوشسىڭىز ئاپتوماتىك داۋاملىشىدۇ!`;
+        window.TeklimakanTelegram.sendDirectMessage(tgMsg);
+      }
+    } catch (tgErr) {
+      console.warn('Telegram exhaustion alert failed:', tgErr);
+    }
+  }
+
   function openBroadcastModal(productOrId, options = {}) {
     let product = productOrId;
     if (typeof productOrId === 'string' && window.appStore && typeof window.appStore.getProductById === 'function') {
@@ -235,13 +431,13 @@
     const thumbEl = document.getElementById('whatsappBroadcastModalThumb');
     const sendApiBtn = document.getElementById('btnSendWhatsAppApi');
 
+    const lang = options.lang || 'ug';
     const formattedText = formatProductBroadcastText(product, options);
 
     if (textarea) textarea.value = formattedText;
     if (titleEl) {
-      titleEl.textContent = options.isDaily
-        ? `⏰ كۈندىلىك كەچ سائەت 8:30 ئېلانى: ${product.name || product.id}`
-        : `WhatsApp گۇرۇپپىسىغا يوللاش: ${product.name || product.id}`;
+      const langBadge = lang === 'tr' ? '🇹🇷 Türkçe (teklimakan.online)' : '🌿 ئۇيغۇرچە (teklimakan.com)';
+      titleEl.innerHTML = `<i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp توپىغا يوللاش [${langBadge}]`;
     }
     if (thumbEl) {
       thumbEl.src = product.image || 'images/default_product.jpg';
@@ -249,6 +445,7 @@
     }
 
     modal.dataset.currentProductId = product.id;
+    modal.dataset.currentLang = lang;
 
     let settings = {};
     if (window.appStore && typeof window.appStore.getSettings === 'function') {
@@ -270,70 +467,60 @@
   }
 
   /**
-   * 🌟 كۈندىلىك تەۋسىيەلىك تاۋارنى ئاپتوماتىك تاللاش (Featured / Daily Rotating Product)
-   */
-  function getTodayFeaturedProduct() {
-    if (!window.appStore || typeof window.appStore.getProducts !== 'function') return null;
-    const prods = window.appStore.getProducts().filter(p => (p.approvalStatus || 'تەستىقلاندى') === 'تەستىقلاندى' && p.stock > 0);
-    if (!prods || prods.length === 0) return null;
-
-    // ئالدى بىلەن كۆز ئاسراش مەجۇنى (PRD-226) ياكى يېڭى تاۋارلارغا ئالدىنقى ئورۇن بېرىلىدۇ
-    const eyeProduct = prods.find(p => p.id === 'PRD-226');
-    if (eyeProduct) return eyeProduct;
-
-    // كۈن بويىچە نۆۋەتلىشىپ تاۋار ئايلاندۇرۇش (Deterministic daily rotation)
-    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-    const idx = dayOfYear % prods.length;
-    return prods[idx];
-  }
-
-  /**
-   * ⏰ ھەركۈنى كەچ سائەت 20:30 (8:30 PM) دا ئاپتوماتىك ئېلان چىقىرىشنى قوزغىتىش
+   * ⏰ ھەركۈنى كەچ سائەت 20:30 (8:30 PM) قەرەللىك ئېلان ئىجراچىسى
    */
   function triggerDailyBroadcast(force = false) {
     const todayStr = new Date().toISOString().slice(0, 10);
-    const lastBroadcast = localStorage.getItem('teklimakan_last_daily_broadcast');
+    const lastBroadcast = localStorage.getItem(STORAGE_KEY_LAST_DAILY);
 
     if (!force && lastBroadcast === todayStr) {
       console.log('[WhatsAppBroadcaster] Today\'s 20:30 broadcast already executed:', todayStr);
       return;
     }
 
-    const prod = getTodayFeaturedProduct();
-    if (!prod) return;
+    // 1. كېيىنكى قېتىملىق تىلنى ئېنىقلاش (بىر كۈن ئۇيغۇرچە، ئەتىسى تۈركچە)
+    const targetLang = getNextBroadcastLanguage();
 
-    localStorage.setItem('teklimakan_last_daily_broadcast', todayStr);
+    // 2. 30 كۈن ئىچىدە ئېلان قىلىنمىغان تاۋارلارنى تاللاش
+    const res = getEligibleProducts(targetLang);
+    if (res.exhausted || res.eligible.length === 0) {
+      handleExhaustedAlert(targetLang);
+      return;
+    }
+
+    // لاياقەتلىك تاۋارلار ئىچىدىن ئالدىنقى ئورۇندىكىنى تاللاش
+    const prod = res.eligible[0];
+
+    localStorage.setItem(STORAGE_KEY_LAST_DAILY, todayStr);
 
     let settings = {};
     if (window.appStore && typeof window.appStore.getSettings === 'function') {
       settings = window.appStore.getSettings() || {};
     }
 
-    // ئارقا سەپتە API تەڭشەلگەن بولسا، بىۋاستە ئەۋەتىدۇ
+    // بۇلۇت دەرۋازىسى ئارقىلىق يوللاش
     if (settings.whatsappEnabled !== false && settings.whatsappAutoBroadcast && (settings.whatsappToken || settings.whatsappWebhookUrl)) {
-      sendBackgroundGroupNotify(prod, { isDaily: true }).then(res => {
-        if (res && res.success) {
+      sendBackgroundGroupNotify(prod, { lang: targetLang, isDaily: true }).then(apiRes => {
+        if (apiRes && apiRes.success) {
           if (typeof window.showAdminToast === 'function') {
-            window.showAdminToast('⏰ كۈندىلىك كەچ سائەت 8:30 ئېلانى WhatsApp توپىغا ئاپتوماتىك يوللاندى! 🌟', 'success');
+            const langName = targetLang === 'tr' ? 'Türkçe' : 'ئۇيغۇرچە';
+            window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:30 [${langName}] ئېلانى WhatsApp توپىغا ئاپتوماتىك يوللاندى! 🌟`, 'success');
           }
         } else {
-          openBroadcastModal(prod, { isDaily: true });
+          openBroadcastModal(prod, { lang: targetLang, isDaily: true });
         }
       }).catch(() => {
-        openBroadcastModal(prod, { isDaily: true });
+        openBroadcastModal(prod, { lang: targetLang, isDaily: true });
       });
     } else {
-      // 1-چېكىش مودالىنى چىقىرىپ بېرىدۇ
-      openBroadcastModal(prod, { isDaily: true });
+      openBroadcastModal(prod, { lang: targetLang, isDaily: true });
       if (typeof window.showAdminToast === 'function') {
-        window.showAdminToast('⏰ كۈندىلىك كەچ سائەت 8:30 ئېلان ۋاقتى كەلدى! تاۋار توپقا تەييارلاندى.', 'info');
+        const langName = targetLang === 'tr' ? 'Türkçe (teklimakan.online)' : 'ئۇيغۇرچە (teklimakan.com)';
+        window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:30 [${langName}] ئېلان ۋاقتى كەلدى!`, 'info');
       }
     }
   }
 
-  /**
-   * ⏱️ كۈندىلىك 20:30 ۋاقىت تەكشۈرگۈچىسىنى باشلاش (Timer)
-   */
   function initDailyBroadcastScheduler() {
     function checkTime() {
       try {
@@ -341,7 +528,7 @@
         const hours = now.getHours();
         const minutes = now.getMinutes();
 
-        // سائەت 20:30 بولغاندا (20:30 تىن 20:59 ئارىلىقىدا تۇنجى قېتىم)
+        // تۈركىيە ۋاقتى كەچ سائەت 20:30 بولغاندا
         if (hours === 20 && minutes >= 30) {
           triggerDailyBroadcast(false);
         }
@@ -350,15 +537,10 @@
       }
     }
 
-    // ھەر 60 سېكۇنتتا بىر قېتىم تەكشۈرۈپ تۇرىدۇ
     setInterval(checkTime, 60000);
-    // بەت ئېچىلغاندا بىر قېتىم تەكشۈرىدۇ
     setTimeout(checkTime, 3000);
   }
 
-  /**
-   * 📢 يېڭى تاۋار ئېلان قىلىنغاندا ئاپتوماتىك چاقىرىلىدىغان ئۇقتۇرۇش
-   */
   async function notifyNewProduct(product, context = {}) {
     if (!product) return;
 
@@ -369,7 +551,7 @@
 
     if (settings.whatsappEnabled !== false && settings.whatsappAutoBroadcast && (settings.whatsappToken || settings.whatsappWebhookUrl)) {
       try {
-        const res = await sendBackgroundGroupNotify(product);
+        const res = await sendBackgroundGroupNotify(product, { lang: 'ug' });
         if (res && res.success) {
           if (typeof window.showAdminToast === 'function') {
             window.showAdminToast('WhatsApp توپىغا يېڭى تاۋار ئۇچۇرى ئاپتوماتىك ئەۋەتىلدى! 🚀', 'success');
@@ -383,12 +565,11 @@
 
     if (settings.whatsappEnabled !== false) {
       setTimeout(() => {
-        openBroadcastModal(product);
+        openBroadcastModal(product, { lang: 'ug' });
       }, 500);
     }
   }
 
-  // ئاپتوماتىك ۋاقىت كۆزەتكۈچىنى باشلاش
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initDailyBroadcastScheduler);
@@ -399,21 +580,25 @@
 
   // ئاشكارا قىلىش (Export to window)
   window.TeklimakanWhatsApp = {
-    SITE_BASE_URL,
+    SITE_UG_URL,
+    SITE_TR_URL,
     DEFAULT_WHATSAPP_GROUP_LINK,
-    DEFAULT_INSTAGRAM_URL,
-    DEFAULT_PHONE_1,
-    DEFAULT_PHONE_2,
     transliterateToSlug,
     getProductCanonicalUrl,
-    getMandatoryFooter,
+    getMandatoryUyghurFooter,
+    getMandatoryTurkishFooter,
+    getBroadcastHistory,
+    recordBroadcast,
+    isProductBroadcastedRecently,
+    getNextBroadcastLanguage,
+    getEligibleProducts,
     formatProductBroadcastText,
     getWhatsAppShareUrl,
     openGroupShare,
     sendBackgroundGroupNotify,
+    handleExhaustedAlert,
     openBroadcastModal,
     closeBroadcastModal,
-    getTodayFeaturedProduct,
     triggerDailyBroadcast,
     notifyNewProduct
   };

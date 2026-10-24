@@ -7648,6 +7648,47 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // 🌐 WhatsApp تىل ئالماشتۇرۇش (ئۇيغۇرچە / Türkçe)
+    const btnWaLangUg = document.getElementById('btnWaLangUg');
+    const btnWaLangTr = document.getElementById('btnWaLangTr');
+
+    function updateModalLangView(lang) {
+      const modal = document.getElementById('modalWhatsAppBroadcast');
+      const pid = modal?.dataset?.currentProductId;
+      const prod = pid ? window.appStore.getProductById(pid) : null;
+      if (!prod || !window.TeklimakanWhatsApp) return;
+
+      modal.dataset.currentLang = lang;
+      const txt = window.TeklimakanWhatsApp.formatProductBroadcastText(prod, { lang: lang, isDaily: true });
+      const txtArea = document.getElementById('whatsappBroadcastText');
+      if (txtArea) txtArea.value = txt;
+
+      if (btnWaLangUg && btnWaLangTr) {
+        if (lang === 'ug') {
+          btnWaLangUg.style.background = '#ffffff';
+          btnWaLangUg.style.color = '#15803d';
+          btnWaLangUg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          btnWaLangTr.style.background = 'transparent';
+          btnWaLangTr.style.color = '#475569';
+          btnWaLangTr.style.boxShadow = 'none';
+        } else {
+          btnWaLangTr.style.background = '#ffffff';
+          btnWaLangTr.style.color = '#0284c7';
+          btnWaLangTr.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          btnWaLangUg.style.background = 'transparent';
+          btnWaLangUg.style.color = '#475569';
+          btnWaLangUg.style.boxShadow = 'none';
+        }
+      }
+    }
+
+    if (btnWaLangUg) {
+      btnWaLangUg.addEventListener('click', () => updateModalLangView('ug'));
+    }
+    if (btnWaLangTr) {
+      btnWaLangTr.addEventListener('click', () => updateModalLangView('tr'));
+    }
+
     const btnTestWa = document.getElementById('btnTestWhatsappBroadcast');
     if (btnTestWa) {
       btnTestWa.addEventListener('click', () => {

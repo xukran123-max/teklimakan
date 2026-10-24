@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/(google[a-zA-Z0-9_-]+\\.html)",
+      "destination": "/$1"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },

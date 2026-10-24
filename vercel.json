@@ -2,8 +2,12 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/(google0665b7e663873c46(?:\\.html)?)",
+      "destination": "/api/google-verify"
+    },
+    {
       "source": "/(google[a-zA-Z0-9_-]+\\.html)",
-      "destination": "/$1"
+      "destination": "/api/google-verify"
     },
     {
       "source": "/sitemap.xml",

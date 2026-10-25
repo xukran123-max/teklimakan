@@ -1,5 +1,5 @@
 // ================================================================
-// 🚀 تەكلىماكان سۇپىسى — كۈندىلىك كەچ سائەت 20:30 WhatsApp ئېلان مۇلازىمىتى
+// 🚀 تەكلىماكان سۇپىسى — كۈندىلىك كەچ سائەت 20:00 WhatsApp ئېلان مۇلازىمىتى
 // Teklimakan Daily WhatsApp Broadcast Serverless Cron Handler
 // ================================================================
 // 1. ھەرئىككىلا ئەھۋالدا (ئۇيغۇرچە / تۈركچە) رەسىم چوقۇم بولۇش كېرەك!
@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
       }
 
       broadcastText = [
-        '🌟 *Teklimakan Günlük Akşam Önerisi (Saat 20:30)* 🌿',
+        '🌟 *Teklimakan Günlük Akşam Önerisi (Saat 20:00)* 🌿',
         '',
         `📦 *Ürün:* ${name}`,
         `🏷️ *Marka:* ${brand}`,
@@ -196,7 +196,7 @@ module.exports = async function handler(req, res) {
       }
 
       broadcastText = [
-        '🌟 *تەكلىماكان كۈندىلىك كەچلىك تەۋسىيەسى (سائەت 20:30)* 🌿',
+        '🌟 *تەكلىماكان كۈندىلىك كەچلىك تەۋسىيەسى (سائەت 20:00)* 🌿',
         '',
         `📦 *مەھسۇلات:* ${name}`,
         `🏷️ *ماركىسى:* ${brand}`,

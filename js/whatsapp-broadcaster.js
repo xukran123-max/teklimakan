@@ -301,13 +301,7 @@
         priceText = `₺${price}  ~(Eski Fiyat: ₺${Number(oldPrice).toLocaleString('en-US')})~`;
       }
 
-      const headline = isDaily
-        ? '🌟 *Teklimakan Günlük Akşam Önerisi (Saat 20:00)* 🌿'
-        : '🌿 *Teklimakan Online — Yeni Doğal Ürün Yayında!*';
-
       const lines = [
-        headline,
-        '',
         `📦 *Ürün:* ${name}`,
         `🏷️ *Marka:* ${brand}`,
         `💰 *Fiyat:* ${priceText}`,
@@ -345,13 +339,7 @@
         priceText = `₺${price}  ~(ئەسلى باھاسى: ₺${Number(oldPrice).toLocaleString('en-US')})~`;
       }
 
-      const headline = isDaily
-        ? '🌟 *تەكلىماكان كۈندىلىك كەچلىك تەۋسىيەسى (سائەت 20:00)* 🌿'
-        : '🌿 *تەكلىماكان سۇپىسى — يېڭى تەبىئىي مەھسۇلات ئېلان قىلىندى!*';
-
       const lines = [
-        headline,
-        '',
         `📦 *مەھسۇلات:* ${name}`,
         `🏷️ *ماركىسى:* ${brand}`,
         `💰 *باھاسى:* ${priceText}`,
@@ -560,7 +548,7 @@
         if (apiRes && apiRes.success) {
           if (typeof window.showAdminToast === 'function') {
             const langName = targetLang === 'tr' ? 'Türkçe' : 'ئۇيغۇرچە';
-            window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:00 [${langName}] ئېلانى WhatsApp توپىغا ئاپتوماتىك يوللاندى! 🌟`, 'success');
+            window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:30 [${langName}] ئېلانى WhatsApp توپىغا ئاپتوماتىك يوللاندى! 🌟`, 'success');
           }
         } else {
           openBroadcastModal(prod, { lang: targetLang, isDaily: true });
@@ -572,7 +560,7 @@
       openBroadcastModal(prod, { lang: targetLang, isDaily: true });
       if (typeof window.showAdminToast === 'function') {
         const langName = targetLang === 'tr' ? 'Türkçe (teklimakan.online)' : 'ئۇيغۇرچە (teklimakan.com)';
-        window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:00 [${langName}] ئېلان ۋاقتى كەلدى!`, 'info');
+        window.showAdminToast(`⏰ كۈندىلىك كەچ سائەت 8:30 [${langName}] ئېلان ۋاقتى كەلدى!`, 'info');
       }
     }
   }
@@ -584,8 +572,8 @@
         const hours = now.getHours();
         const minutes = now.getMinutes();
 
-        // كەچ سائەت 20:00 بولغاندا
-        if (hours === 20 && minutes >= 0) {
+        // كەچ سائەت 20:30 بولغاندا
+        if (hours === 20 && minutes >= 30) {
           triggerDailyBroadcast(false);
         }
       } catch (err) {

@@ -7884,6 +7884,34 @@ class StoreManager {
       }
     }
 
+    // 🚀 İyi Seçenek سىستېمىسىغا خېرىدار زاكازلىرىنى ئارقا سۇپىدا ئاپتوماتىك چىقىرىش
+    try {
+      const settings = this.getSettings() || {};
+      let iyiEmail = settings.iyisecenekEmail || '';
+      let iyiPass = settings.iyisecenekPassword || '';
+      try {
+        const rawCreds = localStorage.getItem('teklimakan_iyisecenek_credentials_v1');
+        if (rawCreds) {
+          const parsed = JSON.parse(rawCreds);
+          if (!iyiEmail && parsed.email) iyiEmail = parsed.email;
+          if (!iyiPass && parsed.password) iyiPass = parsed.password;
+        }
+      } catch (e) {}
+
+      if (iyiEmail && iyiPass && typeof fetch !== 'undefined') {
+        fetch('/api/iyisecenek-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'sync_order',
+            email: iyiEmail,
+            password: iyiPass,
+            order: newOrder
+          })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+
     // 🚀 Vercel بۇلۇت مۇلازىمېتىرى ئارقىلىق تېلېفونغا ئاۋازلىق تېلېفون چېلىش ۋە جىددىي ئۇقتۇرۇش
     try {
       if (typeof fetch !== 'undefined') {

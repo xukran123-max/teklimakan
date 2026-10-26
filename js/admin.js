@@ -9103,6 +9103,138 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    // 🤖 İyi Seçenek ئاپتوماتىك مۇلازىمېتىر ئۇلاش ۋە يوللاش كۇنۇپكىلىرى
+    const statusBadge = document.getElementById('iyiSecenekStatusBadge');
+    const configPanel = document.getElementById('iyiSecenekConfigPanel');
+    const btnToggleCfg = document.getElementById('btnToggleIyiSecenekConfig');
+    const emailInp = document.getElementById('iyiSecenekEmailInput');
+    const passInp = document.getElementById('iyiSecenekPassInput');
+    const btnSaveCreds = document.getElementById('btnSaveIyiSecenekCreds');
+    const btnAutoSyncNow = document.getElementById('btnAutoSyncToIyiSecenekNow');
+    const syncResultBox = document.getElementById('iyiSecenekSyncResultBox');
+
+    function refreshIyiSecenekBadge() {
+      const creds = window.TeklimakanCargoBridge ? window.TeklimakanCargoBridge.getIyiSecenekCredentials() : { hasCredentials: false };
+      if (emailInp && creds.email) emailInp.value = creds.email;
+      if (passInp && creds.password) passInp.value = creds.password;
+      if (statusBadge) {
+        if (creds.hasCredentials) {
+          statusBadge.style.background = '#dcfce7';
+          statusBadge.style.color = '#166534';
+          statusBadge.style.borderColor = '#86efac';
+          statusBadge.innerHTML = '✅ ئۇلاندى: ' + creds.email;
+          if (configPanel) configPanel.style.display = 'none';
+        } else {
+          statusBadge.style.background = '#fef3c7';
+          statusBadge.style.color = '#b45309';
+          statusBadge.style.borderColor = '#fde68a';
+          statusBadge.innerHTML = '⚙️ ھېسابات ئۇلانمىغان';
+          if (configPanel) configPanel.style.display = 'block';
+        }
+      }
+    }
+
+    if (syncResultBox) {
+      syncResultBox.style.display = 'none';
+      syncResultBox.innerHTML = '';
+    }
+    refreshIyiSecenekBadge();
+
+    if (btnToggleCfg && configPanel) {
+      btnToggleCfg.onclick = function() {
+        configPanel.style.display = configPanel.style.display === 'none' ? 'block' : 'none';
+      };
+    }
+
+    if (btnSaveCreds) {
+      btnSaveCreds.onclick = async function() {
+        const em = (emailInp ? emailInp.value : '').trim();
+        const pw = passInp ? passInp.value : '';
+        if (!em || !pw) {
+          showAdminToast('İyi Seçenek ئىمائىل ۋە مەخپىي نومۇرىنى تولۇق كىرگۈزۈڭ!', 'warning');
+          return;
+        }
+        btnSaveCreds.disabled = true;
+        btnSaveCreds.innerHTML = '<i class="fas fa-spinner fa-spin"></i> iyisecenek.com غا باغلىنىۋاتىدۇ...';
+        try {
+          window.TeklimakanCargoBridge.saveIyiSecenekCredentials(em, pw, true);
+          const testRes = await window.TeklimakanCargoBridge.testIyiSecenekConnection(em, pw);
+          refreshIyiSecenekBadge();
+          if (syncResultBox) {
+            syncResultBox.style.display = 'block';
+            if (testRes && testRes.success) {
+              syncResultBox.style.background = '#dcfce7';
+              syncResultBox.style.color = '#166534';
+              syncResultBox.style.border = '1px solid #86efac';
+              syncResultBox.innerHTML = testRes.message || '✅ ھېسابات مۇۋەپپەقىيەتلىك ئۇلاندى!';
+              showAdminToast('İyi Seçenek ھېساباتى مۇۋەپپەقىيەتلىك ئۇلاندى! 🎉', 'success');
+            } else {
+              syncResultBox.style.background = '#fee2e2';
+              syncResultBox.style.color = '#991b1b';
+              syncResultBox.style.border = '1px solid #fca5a5';
+              syncResultBox.innerHTML = (testRes && testRes.message) || '❌ كىرىش مەغلۇپ بولدى، ئىمائىل ياكى مەخپىي نومۇرنى تەكشۈرۈڭ.';
+            }
+          }
+        } catch (err) {
+          showAdminToast('باغلاشتا خاتالىق: ' + err.message, 'error');
+        } finally {
+          btnSaveCreds.disabled = false;
+          btnSaveCreds.innerHTML = '<i class="fas fa-plug"></i> ھېساباتنى ساقلاش ۋە باغلىنىشنى تەكشۈرۈش (Bağla & Test Et)';
+        }
+      };
+    }
+
+    if (btnAutoSyncNow) {
+      btnAutoSyncNow.onclick = async function() {
+        const creds = window.TeklimakanCargoBridge ? window.TeklimakanCargoBridge.getIyiSecenekCredentials() : { hasCredentials: false };
+        if (!creds.hasCredentials) {
+          if (configPanel) configPanel.style.display = 'block';
+          if (emailInp) emailInp.focus();
+          showAdminToast('ئاۋۋال İyi Seçenek ئىمائىل ۋە مەخپىي نومۇرىڭىزنى بىر قېتىم كىرگۈزۈپ ساقلاڭ!', 'warning');
+          return;
+        }
+
+        btnAutoSyncNow.disabled = true;
+        btnAutoSyncNow.innerHTML = '<i class="fas fa-spinner fa-spin"></i> İyi Seçenek بېتىگە ئاپتوماتىك يوللىنىۋاتىدۇ...';
+        try {
+          const syncRes = await window.TeklimakanCargoBridge.autoSyncOrderToIyiSecenek(order);
+          if (syncResultBox) {
+            syncResultBox.style.display = 'block';
+            if (syncRes && syncRes.success) {
+              syncResultBox.style.background = '#dcfce7';
+              syncResultBox.style.color = '#166534';
+              syncResultBox.style.border = '1px solid #86efac';
+              const sc = syncRes.syncedCustomer || {};
+              syncResultBox.innerHTML = 
+                '<div>' + (syncRes.message || '✅ مۇۋەپپەقىيەتلىك يوللاندى!') + '</div>' +
+                '<div style="font-size: 0.75rem; margin-top: 4px; color: #15803d;">' +
+                '📍 <b>İl:</b> ' + (sc.city || '-') + ' (Plaka: ' + (sc.ilId || '-') + ') | <b>İlçe:</b> ' + (sc.district || '-') + ' (ID: ' + (sc.ilceId || '-') + ')<br>' +
+                '📦 <b>Kargo Tipi:</b> GÖNDEREN ÖDEMELİ (BENİM ADIMA)' +
+                (syncRes.detectedTrackingCode ? '<br>🔢 <b>PTT الكود:</b> <code>' + syncRes.detectedTrackingCode + '</code>' : '') +
+                '</div>';
+              if (syncRes.detectedTrackingCode && noInput) {
+                noInput.value = syncRes.detectedTrackingCode;
+              }
+              showAdminToast('زاكاز İyi Seçenek بېتىگە ئاپتوماتىك چىقىرىلدى! 🚀', 'success');
+            } else {
+              syncResultBox.style.background = '#fee2e2';
+              syncResultBox.style.color = '#991b1b';
+              syncResultBox.style.border = '1px solid #fca5a5';
+              syncResultBox.innerHTML = (syncRes && syncRes.message) || '❌ يوللاش مەغلۇپ بولدى.';
+              if (syncRes && (syncRes.needsCredentials || syncRes.authFailed) && configPanel) {
+                configPanel.style.display = 'block';
+              }
+            }
+          }
+        } catch (err) {
+          showAdminToast('ئاپتوماتىك يوللاشتا خاتالىق: ' + err.message, 'error');
+        } finally {
+          btnAutoSyncNow.disabled = false;
+          btnAutoSyncNow.innerHTML = '<i class="fas fa-paper-plane"></i> بۇ زاكازنى ھازىرلا İyi Seçenek بېتىگە ئاپتوماتىك چىقىرىش';
+        }
+      };
+    }
+
     window.showModal('orderTrackingModal');
     setTimeout(() => { if (noInput) noInput.focus(); }, 150);
   }
@@ -9649,7 +9781,25 @@ document.addEventListener('DOMContentLoaded', () => {
             renderRecentOrders();
             renderCustomersTable();
 
-            showAdminToast(`🎉 يېڭى زاكاز (#${res.order.id}) مۇۋەپپەقىيەتلىك قۇرۇلدى ۋە بۇلۇتقا ساقلاندى!`, 'success');
+            const autoSyncIyi = document.getElementById('manualOrderAutoSyncIyiSecenek')?.checked !== false;
+            if (autoSyncIyi && window.TeklimakanCargoBridge) {
+              const creds = window.TeklimakanCargoBridge.getIyiSecenekCredentials();
+              if (creds.hasCredentials) {
+                showAdminToast(`🎉 زاكاز (#${res.order.id}) ساقلاندى! İyi Seçenek بېتىگە ئاپتوماتىك چىقىرىلىۋاتىدۇ... 🚀`, 'success');
+                window.TeklimakanCargoBridge.autoSyncOrderToIyiSecenek(res.order).then(syncRes => {
+                  if (syncRes && syncRes.success) {
+                    showAdminToast(syncRes.message || '✅ زاكاز İyi Seçenek بېتىگە ئاپتوماتىك چىقىرىلدى!', 'success');
+                  } else if (syncRes && syncRes.message) {
+                    showAdminToast(syncRes.message, 'warning');
+                  }
+                }).catch(() => {});
+              } else {
+                showAdminToast(`🎉 زاكاز (#${res.order.id}) ساقلاندى! İyi Seçenek ھېساباتىڭىزنى بىر قېتىم باغلىۋېلىڭ.`, 'info');
+                setTimeout(() => openOrderTrackingModal(res.order.id), 400);
+              }
+            } else {
+              showAdminToast(`🎉 يېڭى زاكاز (#${res.order.id}) مۇۋەپپەقىيەتلىك قۇرۇلدى ۋە بۇلۇتقا ساقلاندى!`, 'success');
+            }
           } else {
             showAdminToast(res?.message || 'زاكاز ساقلاش مەغلۇپ بولدى', 'error');
           }

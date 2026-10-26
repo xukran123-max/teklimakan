@@ -399,7 +399,127 @@
     printWin.document.close();
   }
 
-  // ==================== 9. Export to Global Scope ====================
+  // ==================== 9. İyi Seçenek ئاپتوماتىك مۇلازىمېتىر ئۇلاش كۆۋرۈكى (Auto-Sync Engine) ====================
+  const IYISECENEK_STORAGE_KEY = 'teklimakan_iyisecenek_credentials_v1';
+
+  function getIyiSecenekCredentials() {
+    let email = '';
+    let password = '';
+    let autoSync = true;
+
+    try {
+      const raw = localStorage.getItem(IYISECENEK_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.email) email = parsed.email.trim();
+        if (parsed.password) password = parsed.password;
+        if (parsed.autoSync !== undefined) autoSync = parsed.autoSync !== false;
+      }
+    } catch (e) {}
+
+    try {
+      if (window.appStore && typeof window.appStore.getSettings === 'function') {
+        const s = window.appStore.getSettings() || {};
+        if (!email && s.iyisecenekEmail) email = s.iyisecenekEmail.trim();
+        if (!password && s.iyisecenekPassword) password = s.iyisecenekPassword;
+        if (s.iyisecenekAutoSync !== undefined) autoSync = s.iyisecenekAutoSync !== false;
+      }
+    } catch (e) {}
+
+    return { email, password, autoSync, hasCredentials: !!(email && password) };
+  }
+
+  function saveIyiSecenekCredentials(email, password, autoSync = true) {
+    const cleanEmail = (email || '').trim();
+    const cleanPass = password || '';
+    const payload = { email: cleanEmail, password: cleanPass, autoSync: autoSync !== false, updatedAt: new Date().toISOString() };
+
+    try {
+      localStorage.setItem(IYISECENEK_STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {}
+
+    try {
+      if (window.appStore && typeof window.appStore.getSettings === 'function') {
+        const s = window.appStore.getSettings() || {};
+        s.iyisecenekEmail = cleanEmail;
+        s.iyisecenekPassword = cleanPass;
+        s.iyisecenekAutoSync = autoSync !== false;
+        if (typeof window.appStore.saveSettings === 'function') {
+          window.appStore.saveSettings(s);
+        } else {
+          localStorage.setItem('teklimakan_settings_v4', JSON.stringify(s));
+        }
+      }
+    } catch (e) {}
+
+    return payload;
+  }
+
+  async function testIyiSecenekConnection(email, password) {
+    const creds = (email && password) ? { email, password } : getIyiSecenekCredentials();
+    if (!creds.email || !creds.password) {
+      return { success: false, needsCredentials: true, message: 'İyi Seçenek ئىمائىل ۋە مەخپىي نومۇرنى كىرگۈزۈڭ!' };
+    }
+
+    try {
+      const resp = await fetch('/api/iyisecenek-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'test_login',
+          email: creds.email,
+          password: creds.password
+        })
+      });
+      return await resp.json();
+    } catch (err) {
+      return { success: false, error: err.message, message: 'تور ئۇلىنىشىدا خاتالىق: ' + err.message };
+    }
+  }
+
+  async function autoSyncOrderToIyiSecenek(order, options = {}) {
+    if (!order) return { success: false, message: 'زاكاز تېپىلمىدى' };
+    const creds = getIyiSecenekCredentials();
+
+    if (!creds.hasCredentials) {
+      return {
+        success: false,
+        needsCredentials: true,
+        message: 'İyi Seçenek ھېساباتى تېخى باغلانمىغان. ئىمائىل ۋە مەخپىي نومۇرىڭىزنى بىر قېتىم كىرگۈزۈپ ساقلاڭ.'
+      };
+    }
+
+    try {
+      const resp = await fetch('/api/iyisecenek-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync_order',
+          email: creds.email,
+          password: creds.password,
+          order: order
+        })
+      });
+      const result = await resp.json();
+
+      // ئەگەر ئاپتوماتىك PTT كودى قايتىپ كەلگەن بولسا، زاكازغا بىۋاسىتە ساقلاش
+      if (result && result.success && result.detectedTrackingCode && window.appStore && order.id) {
+        try {
+          window.appStore.updateOrderTracking(order.id, 'PTT Kargo', result.detectedTrackingCode);
+        } catch (e) {}
+      }
+
+      return result;
+    } catch (err) {
+      return {
+        success: false,
+        error: err.message,
+        message: 'İyi Seçenek سىستېمىسىغا يوللاشتا خاتالىق: ' + err.message
+      };
+    }
+  }
+
+  // ==================== 10. Export to Global Scope ====================
   window.TeklimakanCargoBridge = {
     generateCode128Svg,
     copyToClipboard,
@@ -408,7 +528,11 @@
     getFullCargoClipboardText,
     getCustomerWhatsAppText,
     openShippingLabelModal,
-    printShippingLabel
+    printShippingLabel,
+    getIyiSecenekCredentials,
+    saveIyiSecenekCredentials,
+    testIyiSecenekConnection,
+    autoSyncOrderToIyiSecenek
   };
 
 })(window);

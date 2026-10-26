@@ -7778,6 +7778,17 @@ class StoreManager {
       console.warn('Telegram order alert failed:', tgOrderErr);
     }
 
+    // 🚀 Vercel بۇلۇت مۇلازىمېتىرى ئارقىلىق تېلېفونغا ئاۋازلىق تېلېفون چېلىش ۋە جىددىي ئۇقتۇرۇش
+    try {
+      if (typeof fetch !== 'undefined') {
+        fetch('/api/order-notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOrder)
+        }).catch(err => console.warn('Order notify cloud trigger error:', err));
+      }
+    } catch (apiErr) {}
+
     // 📬 2. خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا دەسلەپكى ئۇقتۇرۇشنى قوشۇش (Order Inbox Notification)
     try {
       this.addCustomerInboxNotification({

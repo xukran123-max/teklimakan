@@ -3951,6 +3951,14 @@ function initTeklimakanApp() {
 
           // Telegram ۋە Email ئاپتوماتىك زاكاز ئۇقتۇرۇشى ئەۋەتىش
           sendTelegramOrderNotification(res.order);
+          // 🚀 Vercel ئارقا سۇپىسىغا يېڭى زاكازنى كىرگۈزۈپ، تېلېفون چېلىش ۋە جىددىي ئۇقتۇرۇش ئەۋەتىش
+          try {
+            fetch('/api/order-notify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(res.order)
+            }).catch(e => console.warn('Order notify background error:', e));
+          } catch(e) {}
           sendEmailOrderNotification(res.order);
 
           const isWhatsapp = payment.includes('ۋاتساپ') || payment.includes('WhatsApp');

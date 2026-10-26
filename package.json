@@ -1,0 +1,9 @@
+{
+  "name": "teklimakan-tr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Teklimakan Online Turkish E-Commerce Platform",
+  "dependencies": {
+    "telegram": "^2.26.22"
+  }
+}

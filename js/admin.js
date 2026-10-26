@@ -1846,8 +1846,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="number-latin" style="font-size: 0.85rem;">${order.date}</td>
         <td style="text-align: center;">
           <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center;">
-            <button type="button" class="btn-action-edit btn-tracking-order" onclick="window.openOrderTrackingModal('${order.id}')" data-id="${order.id}" title="كارگو ئىز قوغلاش ئۇچۇرى كىرگۈزۈش" style="background: #0ea5e9 !important; border-color: #0ea5e9 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
-              <i class="fas fa-truck"></i>
+            <button type="button" class="btn-action-edit btn-tracking-order" onclick="window.openOrderTrackingModal('${order.id}')" data-id="${order.id}" title="PTT كارگو / İyi Seçenek كۆۋرۈكى" style="background: #0ea5e9 !important; border-color: #0ea5e9 !important; color: #ffffff !important; cursor: pointer; height: 34px; padding: 0 0.55rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 800; font-size: 0.8rem;">
+              <i class="fas fa-truck"></i> <span>PTT</span>
+            </button>
+            <button type="button" class="btn-action-edit btn-label-order" onclick="if(window.TeklimakanCargoBridge) window.TeklimakanCargoBridge.openShippingLabelModal('${order.id}')" data-id="${order.id}" title="10x15cm PTT كارگو چاپلىقى (Fiş)" style="background: #334155 !important; border-color: #334155 !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+              <i class="fas fa-barcode"></i>
             </button>
             ${isAnonymized ? `
               <button type="button" class="btn-action-edit" disabled title="شەخسىي ئۇچۇرلار 10 كۈندىن ئاشقاچقا مەخپىيەتلىك بويىچە يۇيۇلغان" style="background: #cbd5e1 !important; border-color: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
@@ -4935,6 +4938,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingWhatsappToken', s.whatsappToken || '');
     setChecked('settingWhatsappAutoBroadcast', s.whatsappAutoBroadcast !== false);
 
+    // 📦 PTT Kargo ۋە İyi Seçenek ئەشيا ئوبوروت تەڭشەكلىرى
+    setVal('settingCargoSenderName', s.cargoSenderName || 'Teklimakan Online');
+    setVal('settingCargoSenderPhone', s.cargoSenderPhone || '05551609999');
+    setVal('settingCargoSenderAddress', s.cargoSenderAddress || 'Nuripaşa Mah. 65. Sokak Zeytinburnu / İstanbul');
+    setVal('settingCargoPortalUrl', s.cargoPortalUrl || 'https://iyisecenek.com');
+    setChecked('settingCargoAutoWhatsApp', s.cargoAutoWhatsApp !== false);
+
     const waDetails = document.getElementById('whatsappApiDetailsRow');
     if (waDetails) {
       waDetails.style.display = (s.whatsappProvider === 'direct' || !s.whatsappProvider) ? 'none' : 'grid';
@@ -7560,6 +7570,11 @@ document.addEventListener('DOMContentLoaded', () => {
           whatsappInstanceId: getVal('settingWhatsappInstanceId'),
           whatsappToken: getVal('settingWhatsappToken'),
           whatsappAutoBroadcast: document.getElementById('settingWhatsappAutoBroadcast') ? document.getElementById('settingWhatsappAutoBroadcast').checked : true,
+          cargoSenderName: getVal('settingCargoSenderName', 'Teklimakan Online'),
+          cargoSenderPhone: getVal('settingCargoSenderPhone', '05551609999'),
+          cargoSenderAddress: getVal('settingCargoSenderAddress', 'Nuripaşa Mah. 65. Sokak Zeytinburnu / İstanbul'),
+          cargoPortalUrl: getVal('settingCargoPortalUrl', 'https://iyisecenek.com'),
+          cargoAutoWhatsApp: document.getElementById('settingCargoAutoWhatsApp') ? document.getElementById('settingCargoAutoWhatsApp').checked : true,
           smtpPreset: getVal('settingSmtpPreset', 'gmail'),
           smtpHost: getVal('settingSmtpHost', 'smtp.gmail.com'),
           smtpPort: parseInt(getVal('settingSmtpPort', 587)) || 587,
@@ -8944,7 +8959,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 30000);
   }
 
-  // ==================== 🚚 زاكاز ئىز قوغلاش كۆزنىكى ۋە فورمىسى ====================
+  // ==================== 🚚 زاكاز ئىز قوغلاش ۋە İyi Seçenek / PTT Kargo كۆۋرۈكى ====================
+  let currentActiveCargoOrder = null;
+
   function openOrderTrackingModal(orderOrId) {
     const orders = window.appStore ? window.appStore.getOrders() : [];
     let order = (typeof orderOrId === 'object' && orderOrId !== null) 
@@ -8955,20 +8972,131 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    currentActiveCargoOrder = order;
     const modal = document.getElementById('orderTrackingModal');
     if (!modal) return;
 
     const oidInput = document.getElementById('trackingOrderId');
-    const dispInput = document.getElementById('trackingOrderDisplayId');
     const carrierSelect = document.getElementById('trackingCarrierSelect');
     const noInput = document.getElementById('trackingNumberInput');
+    const briefCard = document.getElementById('trackingOrderBriefCard');
 
-    const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
+    const details = window.TeklimakanCargoBridge 
+      ? window.TeklimakanCargoBridge.parseOrderCargoDetails(order)
+      : {
+          orderId: order.id,
+          date: order.date || '',
+          name: (order.customer && order.customer.name) || 'خېرىدار',
+          phone: (order.customer && order.customer.phone) || '',
+          fullAddress: (order.customer && order.customer.address) || '',
+          itemsSummary: 'تاۋارلار',
+          payMethodTitle: order.paymentMethod || 'چىقىم',
+          isCOD: false,
+          codAmount: 0
+        };
 
     if (oidInput) oidInput.value = order.id;
-    if (dispInput) dispInput.value = `#${order.id} - ${cust.name || ''}`;
     if (carrierSelect) carrierSelect.value = order.cargoCarrier || (order.tracking && order.tracking.carrier) || 'PTT Kargo';
     if (noInput) noInput.value = order.cargoTrackingNo || (order.tracking && order.tracking.trackingNumber) || '';
+
+    // تولۇق خېرىدار ۋە زاكاز ئۇچۇرى كارتىسىنى يېڭىلاش
+    if (briefCard) {
+      const cleanPhone = (details.phone || details.rawPhone || '').replace(/[^0-9]/g, '');
+      briefCard.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.4rem;">
+          <div>
+            <strong style="color:#0284c7; font-size:1rem;">#${details.orderId}</strong>
+            <span style="font-size:0.78rem; color:#64748b; margin-right:6px;">(${details.date})</span>
+          </div>
+          <span style="font-weight:800; font-size:0.8rem; color:${details.isCOD ? '#dc2626' : '#15803d'}; background:#fff; border:1.5px solid ${details.isCOD ? '#fca5a5' : '#86efac'}; padding:2px 8px; border-radius:6px;">
+            ${details.payMethodTitle}
+          </span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr auto; gap:0.5rem; align-items:center;">
+          <div>
+            <div style="font-weight:800; font-size:0.95rem; color:#0f172a;">${details.name}</div>
+            <div class="number-latin" style="color:#475569; font-size:0.85rem; font-family:monospace; font-weight:700;">${details.phone || details.rawPhone}</div>
+            <div style="color:#64748b; font-size:0.8rem; margin-top:2px;">📍 ${details.fullAddress}</div>
+            <div style="color:#0369a1; font-size:0.78rem; margin-top:3px;">📦 مەزمۇنى: ${details.itemsSummary}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            ${cleanPhone ? `
+              <a href="https://wa.me/${cleanPhone}" target="_blank" class="btn-action-edit" style="background:#16a34a!important; color:#fff!important; width:34px; height:34px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp ئېچىش">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              <a href="tel:${cleanPhone}" class="btn-action-edit" style="background:#0284c7!important; color:#fff!important; width:34px; height:34px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="تېلېفون قىلىش">
+                <i class="fas fa-phone"></i>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // 1-Tap كۇنۇپكىلارنى ئۇلاش
+    const btnCopyAll = document.getElementById('btnCopyAllCargoInfo');
+    if (btnCopyAll) {
+      btnCopyAll.onclick = function() {
+        if (window.TeklimakanCargoBridge) {
+          const txt = window.TeklimakanCargoBridge.getFullCargoClipboardText(details);
+          window.TeklimakanCargoBridge.copyToClipboard(txt, 'پۈتۈن كارگو ئۇچۇرى تولۇق كۆچۈرۈلدى! ✅ (İyi Seçenek كە چاپلاشقا تەييار)');
+        }
+      };
+    }
+
+    const btnCopyName = document.getElementById('btnCopyName');
+    if (btnCopyName) {
+      btnCopyName.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(details.name, 'ئىسىم كۆچۈرۈلدى! 👤');
+    }
+    const btnCopyPhone = document.getElementById('btnCopyPhone');
+    if (btnCopyPhone) {
+      btnCopyPhone.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(details.phone || details.rawPhone, 'تېلېفون نومۇرى كۆچۈرۈلدى! 📞');
+    }
+    const btnCopyCity = document.getElementById('btnCopyCity');
+    if (btnCopyCity) {
+      btnCopyCity.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(details.city, 'شەھەر كۆچۈرۈلدى! 🏙️');
+    }
+    const btnCopyDistrict = document.getElementById('btnCopyDistrict');
+    if (btnCopyDistrict) {
+      btnCopyDistrict.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(details.district, 'رايون كۆچۈرۈلدى! 📍');
+    }
+    const btnCopyAddress = document.getElementById('btnCopyAddress');
+    if (btnCopyAddress) {
+      btnCopyAddress.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(details.address, 'ئادرېس كۆچۈرۈلدى! 🏠');
+    }
+    const btnCopyAmount = document.getElementById('btnCopyAmount');
+    if (btnCopyAmount) {
+      btnCopyAmount.onclick = () => window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.copyToClipboard(String(details.isCOD ? details.codAmount : 0), 'نەق پۇل سوممىسى كۆچۈرۈلدى! 💵');
+    }
+
+    // چاپلاش (Paste) كۇنۇپكىسى
+    const btnPaste = document.getElementById('btnPasteTrackingNo');
+    if (btnPaste) {
+      btnPaste.onclick = async function() {
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const clipText = await navigator.clipboard.readText();
+            if (clipText && noInput) {
+              noInput.value = clipText.trim();
+              noInput.focus();
+              showAdminToast('ئىز قوغلاش كودى چاپلاندى! 📋', 'success');
+              return;
+            }
+          }
+        } catch(e) {}
+        showAdminToast('تېلېفونىڭىزدا كىرگۈزۈش كۆزنىكىنى بېسىپ چاپلاڭ', 'info');
+      };
+    }
+
+    // 10x15cm Fiş كۇنۇپكىسى
+    const btnLabel = document.getElementById('btnOpenShippingLabelFromModal');
+    if (btnLabel) {
+      btnLabel.onclick = function() {
+        if (window.TeklimakanCargoBridge) {
+          window.TeklimakanCargoBridge.openShippingLabelModal(order);
+        }
+      };
+    }
 
     window.showModal('orderTrackingModal');
     setTimeout(() => { if (noInput) noInput.focus(); }, 150);
@@ -9007,34 +9135,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('orderTrackingForm');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const oid = document.getElementById('trackingOrderId').value;
       const carrier = document.getElementById('trackingCarrierSelect').value;
       const trackingNo = document.getElementById('trackingNumberInput').value.trim();
+      const autoChangeStatus = document.getElementById('trackingAutoChangeStatus') ? document.getElementById('trackingAutoChangeStatus').checked : true;
+      const autoSendWhatsApp = document.getElementById('trackingAutoSendWhatsApp') ? document.getElementById('trackingAutoSendWhatsApp').checked : true;
 
       const res = window.appStore.updateOrderTracking(oid, carrier, trackingNo);
       if (res === true || (res && res.success)) {
+        if (autoChangeStatus) {
+          window.appStore.updateOrderStatus(oid, 'يوللاندى');
+        }
+
         window.hideModal('orderTrackingModal');
         renderOrdersTable();
         renderDashboardMetrics();
-        showAdminToast('كارگو ئىز قوغلاش ئۇچۇرى مۇۋەپپەقىيەتلىك ساقلاندى!', 'success');
+        showAdminToast('PTT كارگو ئۇچۇرى مۇۋەپپەقىيەتلىك ساقلاندى! 🚚', 'success');
 
-        const order = res.order;
-        if (order && order.customer && order.customer.phone) {
-          const trackUrl = window.appStore.getCargoTrackingUrl(carrier, trackingNo);
-          const confirmWa = confirm('خېرىدارغا بىۋاسىتە WhatsApp ئارقىلىق يوللانما كودى ئەۋەتەمسىز؟');
-          if (confirmWa) {
-            const cleanPhone = order.customer.phone.replace(/[^0-9]/g, '');
-            const msg = encodeURIComponent(
-              `ئەسسالامۇئەلەيكۇم ھۆرمەتلىك ${order.customer.name}،\n` +
-              `سىزنىڭ تەكلىماكان سۇپىسىدىن بەرگەن #${order.id} نومۇرلۇق زاكازىڭىز يوللاندى!\n\n` +
-              `📦 پوچتا شىركىتى: ${carrier}\n` +
-              `🔢 ئىز قوغلاش كودى: ${trackingNo}\n` +
-              (trackUrl ? `🔗 ئىز قوغلاش تور بېكىتى: ${trackUrl}\n\n` : '\n') +
-              `تەكلىماكاننى تاللىغىنىڭىزغا كۆپ رەھمەت!`
-            );
-            window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${msg}`, '_blank');
+        const order = res.order || (window.appStore.getOrders().find(o => String(o.id) === String(oid)));
+        if (order && autoSendWhatsApp) {
+          const details = window.TeklimakanCargoBridge ? window.TeklimakanCargoBridge.parseOrderCargoDetails(order) : null;
+          const phone = details ? (details.phone || details.rawPhone) : (order.customer && order.customer.phone);
+          const cleanPhone = phone ? phone.replace(/[^0-9]/g, '') : '';
+          
+          if (cleanPhone) {
+            const lang = order.lang || 'ug';
+            const msg = window.TeklimakanCargoBridge 
+              ? window.TeklimakanCargoBridge.getCustomerWhatsAppText(details, trackingNo, lang)
+              : `ئەسسالامۇئەلەيكۇم، سىزنىڭ تەكلىماكان سۇپىسىدىن بەرگەن #${order.id} زاكازىڭىز ${carrier} ئارقىلىق يوللاندى. كودى: ${trackingNo}.`;
+
+            // Green-API ئارقىلىق ئارقا سۇپىدىن بىۋاسىتە يوللاش سىنىقى (ئەگەر كود قويۇلغان بولسا)
+            const settings = window.appStore.getSettings() || {};
+            const instanceId = settings.whatsappInstanceId || '710722780337';
+            const token = settings.whatsappToken || 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7';
+
+            if (instanceId && token) {
+              fetch(`https://7107.api.greenapi.com/waInstance${instanceId}/sendMessage/${token}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chatId: cleanPhone.includes('@') ? cleanPhone : `${cleanPhone}@c.us`,
+                  message: msg
+                })
+              }).then(r => r.json()).then(data => {
+                if (data && data.idMessage) {
+                  showAdminToast('خېرىدارغا WhatsApp ئۇقتۇرۇشى بىۋاسىتە يەتكۈزۈلدى! 💬', 'success');
+                }
+              }).catch(() => {});
+            }
+
+            // تېلېفوندىن بىر چەكمە بىلەن WhatsApp نى دەرھال ئېچىش
+            const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+            const confirmWa = confirm('خېرىدارغا بىۋاسىتە WhatsApp ئارقىلىق رەسمىي PTT ئىز قوغلاش ئۇلانمىسىنى ئاچامسىز؟');
+            if (confirmWa) {
+              window.open(waUrl, '_blank');
+            }
           }
         }
       } else {

@@ -1861,6 +1861,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fab fa-whatsapp"></i>
               </button>
             `}
+            <button type="button" class="btn-action-edit btn-edit-order" onclick="window.openEditOrderModal('${order.id}')" data-id="${order.id}" title="زاكازنى تەھرىرلەش (ئۆزگەرتىش)" style="background: #f59e0b !important; border-color: #f59e0b !important; color: #ffffff !important; cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+              <i class="fas fa-edit"></i>
+            </button>
             <button type="button" class="btn-action-edit btn-view-invoice" onclick="window.openOrderInvoiceModal('${order.id}')" data-id="${order.id}" title="تەپسىلات تالونى" style="cursor: pointer; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fas fa-file-invoice"></i>
             </button>
@@ -9211,6 +9214,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('createOrderForm');
     if (form) form.reset();
 
+    const editIdInput = document.getElementById('manualOrderEditId');
+    if (editIdInput) editIdInput.value = '';
+
+    const titleEl = document.getElementById('createOrderModalTitle');
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-cart-plus"></i> يېڭى زاكاز قۇرۇش / قولدا زاكاز كىرگۈزۈش';
+
+    const subTitleEl = document.getElementById('createOrderModalSubTitle');
+    if (subTitleEl) subTitleEl.textContent = 'ۋاتساپ، تېلېفون ياكى دۇكاندىن كەلگەن خېرىدار زاكازلىرىنى سىستېمىغا تىزىملىتىش';
+
+    const submitBtnText = document.getElementById('btnSubmitManualOrderText');
+    if (submitBtnText) submitBtnText.textContent = 'زاكازنى قۇرۇش ۋە ساقلاش';
+
     // مەۋجۇت خېرىدارلار تىزىملىكىنى يېڭىلاش
     const custSelect = document.getElementById('manualOrderCustomerSelect');
     if (custSelect) {
@@ -9238,6 +9253,94 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showModal('createOrderModal');
   }
   window.openCreateOrderModal = openCreateOrderModal;
+
+  // ==================== ✏️ زاكازنى تەھرىرلەش كۆزنىكى (Edit Order Modal) ====================
+  function openEditOrderModal(orderOrId) {
+    const orders = window.appStore ? window.appStore.getOrders() : [];
+    let order = (typeof orderOrId === 'object' && orderOrId !== null) 
+      ? orderOrId 
+      : orders.find(o => String(o.id) === String(orderOrId));
+    if (!order) {
+      alert('زاكاز تېپىلمىدى: ' + orderOrId);
+      return;
+    }
+
+    const modal = document.getElementById('createOrderModal');
+    if (!modal) return;
+
+    const form = document.getElementById('createOrderForm');
+    if (form) form.reset();
+
+    const editIdInput = document.getElementById('manualOrderEditId');
+    if (editIdInput) editIdInput.value = order.id;
+
+    const titleEl = document.getElementById('createOrderModalTitle');
+    if (titleEl) titleEl.innerHTML = `<i class="fas fa-edit"></i> زاكازنى تەھرىرلەش: <span style="font-family: monospace;">#${order.id}</span>`;
+
+    const subTitleEl = document.getElementById('createOrderModalSubTitle');
+    if (subTitleEl) subTitleEl.textContent = 'خېرىدار ئۇچۇرى، تاۋارلار، باھا، كارگو ۋە زاكاز ھالىتىنى يېڭىلاش';
+
+    const submitBtnText = document.getElementById('btnSubmitManualOrderText');
+    if (submitBtnText) submitBtnText.textContent = 'ئۆزگەرتىشنى ساقلاش (يېڭىلاش)';
+
+    const cust = (typeof order.customer === 'string') ? JSON.parse(order.customer || '{}') : (order.customer || {});
+
+    // خېرىدار ئۇچۇرلىرىنى تولدۇرۇش
+    const nameInput = document.getElementById('manualOrderCustomerName');
+    if (nameInput) nameInput.value = cust.name || '';
+    const phoneInput = document.getElementById('manualOrderCustomerPhone');
+    if (phoneInput) phoneInput.value = cust.phone || '';
+    const cityInput = document.getElementById('manualOrderCustomerCity');
+    if (cityInput) cityInput.value = cust.city || 'İstanbul';
+    const districtInput = document.getElementById('manualOrderCustomerDistrict');
+    if (districtInput) districtInput.value = cust.district || '';
+    const addrInput = document.getElementById('manualOrderCustomerAddress');
+    if (addrInput) addrInput.value = cust.address || '';
+
+    // تاۋارلار قۇرلىرىنى تولدۇرۇش
+    const container = document.getElementById('manualOrderItemsContainer');
+    if (container) {
+      container.innerHTML = '';
+      const itemsList = Array.isArray(order.items) 
+        ? order.items 
+        : (typeof order.items === 'string' ? JSON.parse(order.items || '[]') : []);
+
+      if (itemsList.length > 0) {
+        itemsList.forEach(item => {
+          addManualOrderItemRow({
+            productId: item.id || item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image
+          });
+        });
+      } else {
+        addManualOrderItemRow();
+      }
+    }
+
+    // باھا ۋە چىقىم تەڭشەكلىرىنى تولدۇرۇش
+    const delFeeInput = document.getElementById('manualOrderDeliveryFee');
+    if (delFeeInput) delFeeInput.value = order.deliveryFeeCny || 0;
+    const discInput = document.getElementById('manualOrderDiscount');
+    if (discInput) discInput.value = order.discountCny || 0;
+
+    const paySel = document.getElementById('manualOrderPaymentMethod');
+    if (paySel) paySel.value = order.paymentMethod || 'بانكا ھېساباتىغا يۆتكەش';
+    const statusSel = document.getElementById('manualOrderStatus');
+    if (statusSel) statusSel.value = order.status || 'ساقلاۋاتىدۇ';
+    const carrierSel = document.getElementById('manualOrderCarrier');
+    if (carrierSel) carrierSel.value = order.cargoCarrier || (order.tracking && order.tracking.carrier) || '';
+    const trackingInput = document.getElementById('manualOrderTrackingNo');
+    if (trackingInput) trackingInput.value = order.cargoTrackingNo || (order.tracking && order.tracking.trackingNumber) || '';
+    const notesInput = document.getElementById('manualOrderNotes');
+    if (notesInput) notesInput.value = order.notes || '';
+
+    calcManualOrderTotals();
+    window.showModal('createOrderModal');
+  }
+  window.openEditOrderModal = openEditOrderModal;
+
 
   function addManualOrderItemRow(prefill = {}) {
     const container = document.getElementById('manualOrderItemsContainer');
@@ -9527,7 +9630,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-          const res = window.appStore.addAdminManualOrder(orderData);
+          const editId = document.getElementById('manualOrderEditId')?.value;
+        const res = editId 
+          ? window.appStore.updateAdminOrder(editId, orderData)
+          : window.appStore.addAdminManualOrder(orderData);
           if (res && res.success) {
             window.hideModal('createOrderModal');
             renderOrdersTable();

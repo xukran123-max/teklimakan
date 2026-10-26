@@ -7806,6 +7806,80 @@ class StoreManager {
     return { success: true, order: newOrder };
   }
 
+  updateAdminOrder(orderId, orderData) {
+    if (!orderId || !orderData) {
+      return { success: false, message: 'زاكاز ئۇچۇرى تولۇق ئەمەس!' };
+    }
+    const orders = this.getOrders();
+    const order = orders.find(o => String(o.id) === String(orderId));
+    if (!order) {
+      return { success: false, message: 'زاكاز تېپىلمىدى: ' + orderId };
+    }
+
+    const products = this.getProducts();
+    const items = (orderData.items || []).map(it => {
+      const prodId = it.id || it.productId;
+      const matchedProd = products.find(p => p.id === prodId);
+      return {
+        id: prodId,
+        productId: prodId,
+        name: it.name || (matchedProd ? matchedProd.name : 'نامەلۇم مەھسۇلات'),
+        price: Number(it.price) || (matchedProd ? Number(matchedProd.price) : 0),
+        quantity: Math.max(1, Number(it.quantity) || 1),
+        image: it.image || (matchedProd ? matchedProd.image : 'images/default_product.jpg'),
+        agentId: it.agentId || (matchedProd ? matchedProd.agentId : null)
+      };
+    });
+
+    const subtotal = items.reduce((s, it) => s + (it.price * it.quantity), 0);
+    const deliveryFee = Math.max(0, Number(orderData.deliveryFeeCny) || 0);
+    const discount = Math.max(0, Number(orderData.discountCny) || 0);
+    const total = Math.max(0, subtotal + deliveryFee - discount);
+
+    // خېرىدار ئۇچۇرلىرىنى يېڭىلاش
+    const cust = orderData.customer || {};
+    order.customer = {
+      ...(typeof order.customer === 'object' ? order.customer : {}),
+      name: (cust.name || '').trim(),
+      phone: (cust.phone || '').trim(),
+      city: (cust.city || '').trim(),
+      district: (cust.district || '').trim(),
+      address: (cust.address || '').trim(),
+      email: (cust.email || '').trim()
+    };
+
+    order.items = items;
+    order.subtotalCny = subtotal;
+    order.discountCny = discount;
+    order.deliveryFeeCny = deliveryFee;
+    order.totalCny = total;
+    order.total = total;
+    order.totalFormatted = this.formatPrice(total);
+    if (orderData.paymentMethod) order.paymentMethod = orderData.paymentMethod;
+    if (orderData.status) order.status = orderData.status;
+    if (orderData.notes !== undefined) order.notes = orderData.notes;
+    if (orderData.cargoCarrier !== undefined) {
+      order.cargoCarrier = orderData.cargoCarrier;
+      order.trackingCarrier = orderData.cargoCarrier;
+    }
+    if (orderData.cargoTrackingNo !== undefined) {
+      order.cargoTrackingNo = orderData.cargoTrackingNo;
+      order.trackingNumber = orderData.cargoTrackingNo;
+    }
+    order.updatedAt = new Date().toISOString();
+
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    this.notifyDataChange('orders');
+
+    // ☁️ Supabase بۇلۇت ئامبىرىغا يۈكلەش
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.insertOrder === 'function') {
+      this.trackCloudWrite(window.TeklimakanSupabase.insertOrder(order), 'admin update order');
+    }
+
+    return { success: true, order };
+  }
+
+
   recordCustomerChatMessage(chatMsg) {
     try {
       const KEY = 'teklimakan_admin_chat_inbox';

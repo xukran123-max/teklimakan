@@ -4942,6 +4942,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingCargoSenderName', s.cargoSenderName || 'Teklimakan Online');
     setVal('settingCargoSenderPhone', s.cargoSenderPhone || '05551609999');
     setVal('settingCargoSenderAddress', s.cargoSenderAddress || 'Nuripaşa Mah. 65. Sokak Zeytinburnu / İstanbul');
+    setVal('settingCargoAccountEmail', s.cargoAccountEmail || '');
     setVal('settingCargoPortalUrl', s.cargoPortalUrl || 'https://iyisecenek.com');
     setChecked('settingCargoAutoWhatsApp', s.cargoAutoWhatsApp !== false);
 
@@ -7573,6 +7574,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cargoSenderName: getVal('settingCargoSenderName', 'Teklimakan Online'),
           cargoSenderPhone: getVal('settingCargoSenderPhone', '05551609999'),
           cargoSenderAddress: getVal('settingCargoSenderAddress', 'Nuripaşa Mah. 65. Sokak Zeytinburnu / İstanbul'),
+          cargoAccountEmail: getVal('settingCargoAccountEmail', ''),
           cargoPortalUrl: getVal('settingCargoPortalUrl', 'https://iyisecenek.com'),
           cargoAutoWhatsApp: document.getElementById('settingCargoAutoWhatsApp') ? document.getElementById('settingCargoAutoWhatsApp').checked : true,
           smtpPreset: getVal('settingSmtpPreset', 'gmail'),

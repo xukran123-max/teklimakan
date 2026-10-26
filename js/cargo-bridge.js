@@ -201,8 +201,9 @@
       `İl: ${details.city}`,
       `İlçe: ${details.district}`,
       `Açık Adres: ${details.address}`,
-      `Ödeme Tipi: ${details.isCOD ? 'Kapıda Nakit Tahsilat' : 'Peşin / Ödendi'}`,
-      `Tahsilat Tutarı: ${details.isCOD ? details.codAmount + ' TL' : '0 TL'}`,
+      `Kargo Ücreti: GÖNDEREN ÖDEMELİ (Gönderici Tarafından Peşin Ödenir)`,
+      `Ödeme Tipi: ${details.isCOD ? 'Kapıda Nakit Tahsilat (Ürün Bedeli)' : 'Peşin / Önceden Ödendi'}`,
+      `Tahsil Edilecek Tutar: ${details.isCOD ? details.codAmount + ' TL' : '0 TL (Müşteriden Ücret Alınmayacak)'}`,
       `Sipariş No: #${details.orderId} (Teklimakan Online)`,
       `Paket İçeriği: ${details.itemsSummary}`
     ].join('\n');
@@ -273,7 +274,7 @@
         box-shadow: 0 4px 14px rgba(0,0,0,0.08);
       ">
         <!-- 1. Header (Logo & Carrier) -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 6px;">
           <div>
             <div style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.5px;">TEKLİMAKAN ONLINE</div>
             <div style="font-size: 0.72rem; color: #333;">www.teklimakan.online · Tel: 0555 160 9999</div>
@@ -281,6 +282,11 @@
           <div style="text-align: right;">
             <span style="display: inline-block; background: #000; color: #fff; font-weight: 900; font-size: 0.85rem; padding: 3px 8px; border-radius: 4px;">PTT KARGO</span>
           </div>
+        </div>
+
+        <!-- 🚚 KARGO ÜCRETİ: GÖNDEREN ÖDEMELİ (PEŞİN) -->
+        <div style="background: #0f172a; color: #ffffff; text-align: center; padding: 4px; font-weight: 900; font-size: 0.82rem; letter-spacing: 0.5px; border-radius: 4px; margin-bottom: 8px;">
+          KARGO ÜCRETİ: GÖNDEREN ÖDEMELİ (PEŞİN)
         </div>
 
         <!-- 2. Gönderici (Sender) -->

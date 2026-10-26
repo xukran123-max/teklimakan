@@ -2376,29 +2376,64 @@ img {
 }
 
 /* ==================== ✍️ باشقۇرغۇچى مەخسۇس زاكاز قوشۇش كۆزنىكى تېلېفون ۋە ئۈستەلئۈستى ماسلىشىشى ==================== */
+#createOrderModal.modal-backdrop {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 1.25rem 0.5rem 3rem 0.5rem !important;
+}
+
 #createOrderModal .modal-content {
+  display: block !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  margin: 0.5rem auto 2.5rem auto !important;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4) !important;
+}
+
+#createOrderModal form#createOrderForm {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  flex: none !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: 92vh !important;
-  overflow: hidden !important;
+  gap: 1.25rem !important;
 }
 
 .manual-order-item-row {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 0.85rem !important;
+  margin-bottom: 0.65rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
   transition: all 0.2s ease;
 }
 
+select.form-control,
+.item-product-select,
+#manualOrderCustomerCity,
+#manualOrderPaymentMethod,
+#manualOrderStatus,
+#manualOrderCarrier {
+  direction: rtl !important;
+  text-align: right !important;
+  unicode-bidi: plaintext !important;
+}
+
 @media (max-width: 640px) {
-  #createOrderModal {
-    padding: 0.5rem !important;
+  #createOrderModal.modal-backdrop {
+    padding: 0.5rem 0.35rem 3rem 0.35rem !important;
   }
   #createOrderModal .modal-content {
     width: 100% !important;
-    max-height: 96vh !important;
     border-radius: 16px !important;
+    margin: 0.25rem auto 2rem auto !important;
   }
   #createOrderModal form {
     padding: 1rem 0.85rem !important;
@@ -2408,11 +2443,6 @@ img {
   #createOrderModal select,
   #createOrderModal textarea {
     font-size: 16px !important;
-  }
-  .manual-order-item-row {
-    background: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    padding: 0.75rem !important;
   }
 }
 

@@ -9247,53 +9247,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const row = document.createElement('div');
     row.id = rowId;
     row.className = 'manual-order-item-row';
-    row.style.cssText = 'background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.75rem; display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; transition: all 0.2s ease;';
 
     const products = window.appStore ? window.appStore.getProducts() : [];
 
     let optionsHtml = '<option value="">-- تاۋار تاللاڭ --</option>';
     products.forEach(p => {
-      const stockBadge = (p.stock !== undefined && p.stock !== null) ? ` (ئامبار: ${p.stock})` : '';
-      const priceText = ` - ${p.price} ₺`;
+      const stockBadge = (p.stock !== undefined && p.stock !== null) ? ` · قالدى: ${p.stock}` : '';
+      const priceText = ` · ${p.price} ₺`;
       const selected = prefill.productId === p.id ? 'selected' : '';
       optionsHtml += `<option value="${p.id}" ${selected} data-price="${p.price}" data-stock="${p.stock || 0}" data-image="${p.image || ''}" data-agent="${p.agentId || ''}" data-name="${(p.name || '').replace(/"/g, '&quot;')}">${p.name}${priceText}${stockBadge}</option>`;
     });
 
     row.innerHTML = `
-      <!-- تاۋار رەسىمى كىچىك ئالدىن كۆرۈنۈشى -->
-      <div class="item-img-preview" style="width: 42px; height: 42px; border-radius: 8px; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #cbd5e1;">
-        <img src="${prefill.image || 'images/default_product.jpg'}" alt="تاۋار" style="width: 100%; height: 100%; object-fit: cover;">
+      <!-- 1-قۇر: تاۋار رەسىمى ۋە چوڭ تاللاش كۆزنىكى -->
+      <div style="display: flex; align-items: center; gap: 0.65rem; width: 100%;">
+        <div class="item-img-preview" style="width: 44px; height: 44px; border-radius: 8px; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1.5px solid #cbd5e1;">
+          <img src="${prefill.image || 'images/default_product.jpg'}" alt="تاۋار" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <select class="form-control item-product-select" dir="rtl" style="font-size: 0.88rem; height: 40px; font-weight: 700; width: 100%; direction: rtl; text-align: right;" required>
+            ${optionsHtml}
+          </select>
+        </div>
       </div>
 
-      <!-- تاۋار تاللاش تىزىملىكى -->
-      <div style="flex: 2; min-width: 180px;">
-        <select class="form-control item-product-select" style="font-size: 0.84rem; height: 38px; font-weight: 700;" required>
-          ${optionsHtml}
-        </select>
-      </div>
+      <!-- 2-قۇر: بىرلىك باھاسى، سانى (+/-)، ئومۇمىي قۇر پۇلى، ئۆچۈرۈش -->
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dashed #cbd5e1;">
+        <!-- بىرلىك باھاسى -->
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">بىرلىك:</span>
+          <div style="width: 95px; position: relative;">
+            <input type="number" class="form-control number-latin item-unit-price" placeholder="باھاسى" value="${prefill.price !== undefined ? prefill.price : ''}" min="0" step="0.5" style="font-size: 0.86rem; height: 36px; font-weight: 800; padding-left: 1.4rem;" title="بىرلىك باھاسى" required>
+            <span style="position: absolute; left: 0.45rem; top: 50%; transform: translateY(-50%); font-size: 0.82rem; color: #64748b; font-weight: 800;">₺</span>
+          </div>
+        </div>
 
-      <!-- بىرلىك باھاسى (تەھرىرلىگىلى بولىدۇ) -->
-      <div style="width: 105px; position: relative;">
-        <input type="number" class="form-control number-latin item-unit-price" placeholder="باھاسى" value="${prefill.price !== undefined ? prefill.price : ''}" min="0" step="0.5" style="font-size: 0.84rem; height: 38px; font-weight: 700; padding-left: 1.5rem;" title="بىرلىك باھاسى" required>
-        <span style="position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: #64748b; font-weight: 700;">₺</span>
-      </div>
+        <!-- سانى (+ / -) -->
+        <div style="display: flex; align-items: center; gap: 0.2rem;">
+          <button type="button" class="btn-qty-minus btn btn-sm" style="width: 28px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 6px; font-weight: 900; font-size: 1.05rem; cursor: pointer;">-</button>
+          <input type="number" class="form-control number-latin item-quantity" value="${prefill.quantity || 1}" min="1" max="999" style="width: 44px; height: 36px; text-align: center; font-size: 0.9rem; font-weight: 800; padding: 0.2rem; border-radius: 6px;" required>
+          <button type="button" class="btn-qty-plus btn btn-sm" style="width: 28px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 6px; font-weight: 900; font-size: 1.05rem; cursor: pointer;">+</button>
+        </div>
 
-      <!-- سانى -->
-      <div style="display: flex; align-items: center; gap: 0.2rem; width: 95px;">
-        <button type="button" class="btn-qty-minus btn btn-sm" style="width: 26px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 4px; font-weight: 900; cursor: pointer;">-</button>
-        <input type="number" class="form-control number-latin item-quantity" value="${prefill.quantity || 1}" min="1" max="999" style="width: 42px; height: 36px; text-align: center; font-size: 0.85rem; font-weight: 800; padding: 0.2rem;" required>
-        <button type="button" class="btn-qty-plus btn btn-sm" style="width: 26px; height: 36px; padding: 0; background: #e2e8f0; border: none; border-radius: 4px; font-weight: 900; cursor: pointer;">+</button>
-      </div>
+        <!-- قۇر ئومۇمىي پۇلى -->
+        <div class="item-line-total number-latin" style="font-weight: 900; font-size: 1.05rem; color: #15803d; min-width: 75px; text-align: left;">
+          0.00 ₺
+        </div>
 
-      <!-- قۇر ئومۇمىي پۇلى -->
-      <div class="item-line-total number-latin" style="width: 85px; text-align: left; font-weight: 800; font-size: 0.92rem; color: #059669; white-space: nowrap;">
-        0.00 ₺
+        <!-- ئۆچۈرۈش كۇنۇپكىسى -->
+        <button type="button" class="btn-remove-item-row" style="background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s;" title="بۇ تاۋارنى چىقىرىۋېتىش">
+          <i class="fas fa-trash-alt" style="font-size: 0.88rem;"></i>
+        </button>
       </div>
-
-      <!-- ئۆچۈرۈش كۇنۇپكىسى -->
-      <button type="button" class="btn-remove-item-row" style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s;" title="بۇ تاۋارنى چىقىرىۋېتىش">
-        <i class="fas fa-trash-alt" style="font-size: 0.82rem;"></i>
-      </button>
     `;
 
     container.appendChild(row);

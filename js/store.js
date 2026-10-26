@@ -1420,6 +1420,9 @@ const INITIAL_SETTINGS = {
   telegramEnabled: true,
   telegramBotToken: '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM',
   telegramChatId: '7077223578',
+  whatsappEnabled: true,
+  whatsappInstanceId: '710722780337',
+  whatsappToken: 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7',
   emailNotificationEnabled: true,
   notificationEmail: 'uyghurmedicine.com@gmail.com',
   smtpPreset: 'gmail',
@@ -1676,6 +1679,9 @@ class StoreManager {
         const curSet = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {};
         curSet.telegramBotToken = curSet.telegramBotToken || INITIAL_SETTINGS.telegramBotToken;
         curSet.telegramChatId = curSet.telegramChatId || INITIAL_SETTINGS.telegramChatId;
+        curSet.whatsappInstanceId = curSet.whatsappInstanceId || INITIAL_SETTINGS.whatsappInstanceId;
+        curSet.whatsappToken = curSet.whatsappToken || INITIAL_SETTINGS.whatsappToken;
+        if (curSet.whatsappEnabled === undefined) curSet.whatsappEnabled = true;
         if (curSet.telegramEnabled === undefined) {
           curSet.telegramEnabled = INITIAL_SETTINGS.telegramEnabled !== false;
         }
@@ -4874,6 +4880,69 @@ class StoreManager {
     });
   }
 
+  toWhatsAppChatId(phoneStr) {
+    if (!phoneStr) return '';
+    let digits = String(phoneStr).replace(/\D/g, '');
+    if (digits.startsWith('0090')) digits = digits.slice(4);
+    else if (digits.startsWith('90') && digits.length >= 12) digits = digits.slice(2);
+    else if (digits.startsWith('0')) digits = digits.slice(1);
+    
+    if (digits.length === 10 && digits.startsWith('5')) {
+      return '90' + digits + '@c.us';
+    }
+    if (digits.length >= 10) {
+      return digits + '@c.us';
+    }
+    return '';
+  }
+
+  toCleanWhatsAppPhone(phoneStr) {
+    const chatId = this.toWhatsAppChatId(phoneStr);
+    return chatId ? chatId.replace('@c.us', '') : '';
+  }
+
+  // ==================== 💬 مەركىزىي WhatsApp ئاپتوماتىك خېرىدار ئۇقتۇرۇشى (Green-API) ====================
+  async sendWhatsAppCustomerMessage(phoneStr, message) {
+    try {
+      const chatId = this.toWhatsAppChatId(phoneStr);
+      if (!chatId) {
+        console.warn('sendWhatsAppCustomerMessage: invalid phone number:', phoneStr);
+        return { success: false, error: 'invalid_phone' };
+      }
+
+      const settings = this.getSettings() || {};
+      const instanceId = settings.whatsappInstanceId || '710722780337';
+      const token = settings.whatsappToken || 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7';
+      const enabled = settings.whatsappEnabled !== false;
+
+      if (!enabled || !instanceId || !token) {
+        return { success: false, error: 'disabled_or_missing_credentials' };
+      }
+
+      const url = `https://7107.api.greenapi.com/waInstance${instanceId}/sendMessage/${token}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: chatId,
+          message: message
+        })
+      });
+
+      const data = await res.json();
+      const ok = !!(data && data.idMessage);
+      if (ok) {
+        console.log('[WhatsApp API] Message sent successfully to', chatId, 'ID:', data.idMessage);
+      } else {
+        console.warn('[WhatsApp API] Failed to send message:', data);
+      }
+      return { success: ok, data };
+    } catch (err) {
+      console.warn('sendWhatsAppCustomerMessage error:', err);
+      return { success: false, error: err.message };
+    }
+  }
+
   // ==================== 🤖 مەركىزىي Telegram دەل ۋاقتىدا ئۇقتۇرۇش ئەۋەتكۈچى ====================
   async sendTelegramAlert({ title, message, isUrgent = false, extraData = null }) {
     try {
@@ -7197,6 +7266,23 @@ class StoreManager {
       console.warn('Telegram tracking alert failed:', tgErr);
     }
 
+    // 💬 WhatsApp ئارقىلىق خېرىدارغا رەسمىي PTT كارگو ئۇقتۇرۇشىنى ئاپتوماتىك يوللاش
+    if (ord.customer && ord.customer.phone && ord.cargoTrackingNo) {
+      try {
+        const details = (typeof window !== 'undefined' && window.TeklimakanCargoBridge)
+          ? window.TeklimakanCargoBridge.parseOrderCargoDetails(ord)
+          : null;
+        const lang = ord.language || ord.lang || 'ug';
+        const msg = (details && window.TeklimakanCargoBridge)
+          ? window.TeklimakanCargoBridge.getCustomerWhatsAppText(details, ord.cargoTrackingNo, lang)
+          : `ھۆرمەتلىك ${(ord.customer && ord.customer.name) || 'خېرىدار'}، سېتىۋالغان مېلىڭىز (#${ord.id}) رەتلەپ قاچىلىنىپ، پوسۇلكىڭىز ${ord.cargoCarrier} ئارقىلىق يوللاندى. پوچتا ئىز قوغلاش نومۇرى: ${ord.cargoTrackingNo}.`;
+
+        this.sendWhatsAppCustomerMessage(ord.customer.phone, msg);
+      } catch (waCargoErr) {
+        console.warn('WhatsApp cargo tracking alert failed:', waCargoErr);
+      }
+    }
+
     // 📬 خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا كارگو ئۇقتۇرۇشى قوشۇش
     try {
       this.addCustomerInboxNotification({
@@ -7778,6 +7864,26 @@ class StoreManager {
       console.warn('Telegram order alert failed:', tgOrderErr);
     }
 
+    // 💬 WhatsApp ئارقىلىق خېرىدارغا دەرھال ئاپتوماتىك زاكاز ئۇقتۇرۇشى ئەۋەتىش
+    if (customerData && customerData.phone) {
+      try {
+        const custName = customerData.name || 'خېرىدار';
+        const itemsSummary = (cartData.items || []).map(it => `• ${it.product.name} (${it.quantity} دانە)`).join('\n');
+        const waMsg = 
+          `ئەسسالامۇئەلەيكۇم ھۆرمەتلىك ${custName}،\n\n` +
+          `تەكلىماكان تور دۇكىنىمىزدىن بەرگەن #${newOrder.id} نومۇرلۇق زاكازىڭىز مۇۋەپپەقىيەتلىك قوبۇل قىلىندى! ✅\n\n` +
+          `💰 ئومۇمىي سومما: ${this.formatPrice(finalTotalCny)}\n` +
+          `📦 تاۋارلار:\n${itemsSummary}\n\n` +
+          `ئامبىرىمىز ماللىرىڭىزنى ئەستايىدىل قاچىلاپ، كارگوغا تاپشۇرۇشقا تەييارلىماقتا.\n\n` +
+          `تەكلىماكان سودا سۇپىسى\n` +
+          `🌐 www.teklimakan.com`;
+
+        this.sendWhatsAppCustomerMessage(customerData.phone, waMsg);
+      } catch (waErr) {
+        console.warn('WhatsApp storefront order alert failed:', waErr);
+      }
+    }
+
     // 🚀 Vercel بۇلۇت مۇلازىمېتىرى ئارقىلىق تېلېفونغا ئاۋازلىق تېلېفون چېلىش ۋە جىددىي ئۇقتۇرۇش
     try {
       if (typeof fetch !== 'undefined') {
@@ -8160,6 +8266,31 @@ class StoreManager {
       this.trackCloudWrite(window.TeklimakanSupabase.insertOrder(newOrder), 'admin manual order');
     }
 
+    // 🤖 Telegram ئارقىلىق باشقۇرغۇچىغا دەل ۋاقتىدا زاكاز ئۇقتۇرۇشى ئەۋەتىش
+    try {
+      const itemsList = (items || []).map((it, idx) => 
+        `${idx + 1}. <b>${it.name || 'تاۋار'}</b> × ${it.quantity} (${this.formatPrice(it.price * it.quantity)})`
+      ).join('\n');
+
+      const tgOrderMsg = 
+        `🆔 <b>زاكاز نومۇرى:</b> <code>#${newOrder.id}</code> (قولدا قۇرۇلدى)\n` +
+        `👤 <b>خېرىدار:</b> ${newOrder.customer.name || 'نامەلۇم'}\n` +
+        `📞 <b>تېلېفون:</b> <code>${newOrder.customer.phone || '-'}</code>\n` +
+        `📍 <b>ئادرېس:</b> ${(newOrder.customer.city || '')} ${(newOrder.customer.district || '')} ${newOrder.customer.address || ''}\n` +
+        `💳 <b>تۆلەش شەكلى:</b> ${newOrder.paymentMethod}\n` +
+        `💰 <b>ئومۇمىي سومما:</b> <b>${this.formatPrice(total)}</b>\n\n` +
+        `📦 <b>تاۋارلار تىزىملىكى (${items.length} خىل):</b>\n${itemsList}\n` +
+        (newOrder.notes ? `\n📝 <b>ئىزاھات:</b> ${newOrder.notes}\n` : '');
+
+      this.sendTelegramAlert({
+        title: `✍️ يېڭى زاكاز قولدا قوشۇلدى! #${newOrder.id}`,
+        message: tgOrderMsg,
+        isUrgent: true
+      });
+    } catch (tgOrderErr) {
+      console.warn('Telegram manual order alert failed:', tgOrderErr);
+    }
+
     // 📬 خېرىدارنىڭ سۇپا ئىچى زاكاز ساندۇقىغا ئۇقتۇرۇش ئەۋەتىش
     if (orderData.sendNotification !== false && newOrder.customer && newOrder.customer.phone) {
       try {
@@ -8172,6 +8303,24 @@ class StoreManager {
           timestamp: formattedDate
         });
       } catch (e) {}
+
+      // 💬 WhatsApp ئارقىلىق خېرىدارغا ئاپتوماتىك زاكاز تىزىملىنىش ئۇقتۇرۇشى ئەۋەتىش
+      try {
+        const custName = newOrder.customer.name || 'خېرىدار';
+        const itemsSummary = items.map(it => `• ${it.name || 'تاۋار'} (${it.quantity} دانە)`).join('\n');
+        const waMsg = 
+          `ئەسسالامۇئەلەيكۇم ھۆرمەتلىك ${custName}،\n\n` +
+          `تەكلىماكان سۇپىسىدىن بەرگەن #${newOrder.id} نومۇرلۇق زاكازىڭىز مۇۋەپپەقىيەتلىك تىزىملاندى. ✅\n\n` +
+          `💰 زاكاز سوممىسى: ${this.formatPrice(total)}\n` +
+          `📦 تاۋارلار:\n${itemsSummary}\n\n` +
+          `ئامبىرىمىز مېلىڭىزنى رەتلەپ قاچىلاۋاتىدۇ. پوسۇلكا كارگوغا چىقىرىلغاندا سىزگە ئىز قوغلاش نومۇرى ئەۋەتىلىدۇ.\n\n` +
+          `تەكلىماكاننى تاللىغىنىڭىزغا رەھمەت!\n` +
+          `🌐 www.teklimakan.com`;
+
+        this.sendWhatsAppCustomerMessage(newOrder.customer.phone, waMsg);
+      } catch (waErr) {
+        console.warn('WhatsApp manual order alert failed:', waErr);
+      }
     }
 
     return { success: true, order: newOrder };

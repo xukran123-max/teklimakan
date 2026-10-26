@@ -9163,7 +9163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (order && autoSendWhatsApp) {
           const details = window.TeklimakanCargoBridge ? window.TeklimakanCargoBridge.parseOrderCargoDetails(order) : null;
           const phone = details ? (details.phone || details.rawPhone) : (order.customer && order.customer.phone);
-          const cleanPhone = phone ? phone.replace(/[^0-9]/g, '') : '';
+          const cleanPhone = window.appStore ? window.appStore.toCleanWhatsAppPhone(phone) : (phone ? phone.replace(/\D/g, '') : '');
           
           if (cleanPhone) {
             const lang = order.lang || 'ug';
@@ -9171,29 +9171,18 @@ document.addEventListener('DOMContentLoaded', () => {
               ? window.TeklimakanCargoBridge.getCustomerWhatsAppText(details, trackingNo, lang)
               : `ئەسسالامۇئەلەيكۇم، سىزنىڭ تەكلىماكان سۇپىسىدىن بەرگەن #${order.id} زاكازىڭىز ${carrier} ئارقىلىق يوللاندى. كودى: ${trackingNo}.`;
 
-            // Green-API ئارقىلىق ئارقا سۇپىدىن بىۋاسىتە يوللاش سىنىقى (ئەگەر كود قويۇلغان بولسا)
-            const settings = window.appStore.getSettings() || {};
-            const instanceId = settings.whatsappInstanceId || '710722780337';
-            const token = settings.whatsappToken || 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7';
-
-            if (instanceId && token) {
-              fetch(`https://7107.api.greenapi.com/waInstance${instanceId}/sendMessage/${token}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  chatId: cleanPhone.includes('@') ? cleanPhone : `${cleanPhone}@c.us`,
-                  message: msg
-                })
-              }).then(r => r.json()).then(data => {
-                if (data && data.idMessage) {
-                  showAdminToast('خېرىدارغا WhatsApp ئۇقتۇرۇشى بىۋاسىتە يەتكۈزۈلدى! 💬', 'success');
+            // Green-API ئارقىلىق ئارقا سۇپىدىن بىۋاسىتە ئاپتوماتىك خېرىدارغا يوللاش
+            if (window.appStore && typeof window.appStore.sendWhatsAppCustomerMessage === 'function') {
+              window.appStore.sendWhatsAppCustomerMessage(cleanPhone, msg).then(waRes => {
+                if (waRes && waRes.success) {
+                  showAdminToast('خېرىدارغا PTT WhatsApp ئۇقتۇرۇشى ئاپتوماتىك ئەۋەتىلدى! 💬', 'success');
                 }
               }).catch(() => {});
             }
 
-            // تېلېفوندىن بىر چەكمە بىلەن WhatsApp نى دەرھال ئېچىش
+            // تېلېفوندىن بىر چەكمە بىلەن WhatsApp نى دەرھال ئېچىش (كاپالەت ئۇلانما)
             const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
-            const confirmWa = confirm('خېرىدارغا بىۋاسىتە WhatsApp ئارقىلىق رەسمىي PTT ئىز قوغلاش ئۇلانمىسىنى ئاچامسىز؟');
+            const confirmWa = confirm('خېرىدارغا WhatsApp ئارقىلىق رەسمىي PTT ئىز قوغلاش كارتىسىنى ئاچامسىز؟');
             if (confirmWa) {
               window.open(waUrl, '_blank');
             }

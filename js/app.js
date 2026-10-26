@@ -615,7 +615,9 @@ function initTeklimakanApp() {
     const cPhoneLabel = document.getElementById('checkoutCustPhoneLabel');
     if (cPhoneLabel) cPhoneLabel.innerHTML = `${i18n.t('custPhone')} <span style="color: var(--danger-color);">*</span>`;
     const cCityLabel = document.getElementById('checkoutCustCityLabel');
-    if (cCityLabel) cCityLabel.innerHTML = `${i18n.t('custCity')} <span style="color: var(--danger-color);">*</span>`;
+    if (cCityLabel) cCityLabel.innerHTML = `İl (${lang === 'tr' ? 'Şehir' : (lang === 'en' ? 'Province' : 'ۋىلايەت / شەھەر')}) <span style="color: var(--danger-color);">*</span>`;
+    const cDistLabel = document.getElementById('checkoutCustDistrictLabel');
+    if (cDistLabel) cDistLabel.innerHTML = `İlçe (${lang === 'tr' ? 'İlçe' : (lang === 'en' ? 'District' : 'رايون / ناھىيە')}) <span style="color: var(--danger-color);">*</span>`;
 
 
     const cAddrLabel = document.getElementById('checkoutCustAddressLabel');
@@ -998,52 +1000,13 @@ function initTeklimakanApp() {
     const fbRet = document.getElementById('footerBadgeReturn');
     if (fbRet) fbRet.textContent = i18n.t('footerBadgeReturn');
 
-    // شەھەر تاللانمىلىرىنى تىل بويىچە يېڭىلاش (تۈركىيە شەھەرلىرى)
+    // شەھەر ۋە رايون تاللانمىلىرىنى تۈركىيە 81 ۋىلايىتىگە دەل ئۇلاش
     const citySelect = document.getElementById('checkoutCustCity');
-    if (citySelect) {
-      const turkeyCities = [
-        { val: 'İstanbul', ug: 'İstanbul (ئىستانبۇل)', tr: 'İstanbul', en: 'Istanbul' },
-        { val: 'Ankara', ug: 'Ankara (ئەنقەرە)', tr: 'Ankara', en: 'Ankara' },
-        { val: 'İzmir', ug: 'İzmir (ئىزمىر)', tr: 'İzmir', en: 'Izmir' },
-        { val: 'Bursa', ug: 'Bursa (بۇرسا)', tr: 'Bursa', en: 'Bursa' },
-        { val: 'Antalya', ug: 'Antalya (ئانتاليا)', tr: 'Antalya', en: 'Antalya' },
-        { val: 'Konya', ug: 'Konya (كونيا)', tr: 'Konya', en: 'Konya' },
-        { val: 'Kayseri', ug: 'Kayseri (قەيسەرى)', tr: 'Kayseri', en: 'Kayseri' },
-        { val: 'Kocaeli', ug: 'Kocaeli (كوجائېلى)', tr: 'Kocaeli', en: 'Kocaeli' },
-        { val: 'Gaziantep', ug: 'Gaziantep (گازىئانتەپ)', tr: 'Gaziantep', en: 'Gaziantep' },
-        { val: 'Adana', ug: 'Adana (ئادانا)', tr: 'Adana', en: 'Adana' },
-        { val: 'Mersin', ug: 'Mersin (مەرسىن)', tr: 'Mersin', en: 'Mersin' },
-        { val: 'Samsun', ug: 'Samsun (سامسۇن)', tr: 'Samsun', en: 'Samsun' },
-        { val: 'Trabzon', ug: 'Trabzon (ترابزون)', tr: 'Trabzon', en: 'Trabzon' },
-        { val: 'Eskişehir', ug: 'Eskişehir (ئەسكىشەھەر)', tr: 'Eskişehir', en: 'Eskisehir' },
-        { val: 'Diyarbakır', ug: 'Diyarbakır (دىياربەكىر)', tr: 'Diyarbakır', en: 'Diyarbakir' },
-        { val: 'Şanlıurfa', ug: 'Şanlıurfa (شانلىئۇرفا)', tr: 'Şanlıurfa', en: 'Sanliurfa' },
-        { val: 'Malatya', ug: 'Malatya (مالاتيا)', tr: 'Malatya', en: 'Malatya' },
-        { val: 'Kahramanmaraş', ug: 'Kahramanmaraş (ماراش)', tr: 'Kahramanmaraş', en: 'Kahramanmaras' },
-        { val: 'Denizli', ug: 'Denizli (دېڭىزلى)', tr: 'Denizli', en: 'Denizli' },
-        { val: 'Sakarya', ug: 'Sakarya (ساكاريا)', tr: 'Sakarya', en: 'Sakarya' },
-        { val: 'Balıkesir', ug: 'Balıkesir (بالىكەسىر)', tr: 'Balıkesir', en: 'Balikesir' },
-        { val: 'Manisa', ug: 'Manisa (مانىسا)', tr: 'Manisa', en: 'Manisa' },
-        { val: 'Aydın', ug: 'Aydın (ئايدىن)', tr: 'Aydın', en: 'Aydin' },
-        { val: 'Tekirdağ', ug: 'Tekirdağ (تەكىرداغ)', tr: 'Tekirdağ', en: 'Tekirdag' },
-        { val: 'Muğla', ug: 'Muğla (مۇغلا)', tr: 'Muğla', en: 'Mugla' },
-        { val: 'Hatay', ug: 'Hatay (خاتاي)', tr: 'Hatay', en: 'Hatay' },
-        { val: 'Sivas', ug: 'Sivas (سىۋاس)', tr: 'Sivas', en: 'Sivas' },
-        { val: 'Erzurum', ug: 'Erzurum (ئەرزۇرۇم)', tr: 'Erzurum', en: 'Erzurum' },
-        { val: 'Van', ug: 'Van (ۋان)', tr: 'Van', en: 'Van' },
-        { val: 'Batman', ug: 'Batman (باتمان)', tr: 'Batman', en: 'Batman' },
-        { val: 'Elazığ', ug: 'Elazığ (ئەلازىغ)', tr: 'Elazığ', en: 'Elazig' },
-        { val: 'Diğer Şehirler', ug: 'Diğer İller (باشقا شەھەرلەر)', tr: 'Diğer Şehirler', en: 'Other Cities' }
-      ];
-      const savedVal = citySelect.value || 'İstanbul';
-      citySelect.innerHTML = '';
-      turkeyCities.forEach(city => {
-        const opt = document.createElement('option');
-        opt.value = city.val;
-        opt.textContent = city[lang] || city.tr;
-        if (city.val === savedVal) opt.selected = true;
-        citySelect.appendChild(opt);
-      });
+    const distSelect = document.getElementById('checkoutCustDistrict');
+    if (window.TeklimakanLocations && citySelect && distSelect) {
+      const savedCity = citySelect.value || 'İSTANBUL';
+      const savedDist = distSelect.value || '';
+      window.TeklimakanLocations.setupLinkedCityDistrict('checkoutCustCity', 'checkoutCustDistrict', savedCity, savedDist);
     }
 
     // تىل يۆنىلىشىگە قاراپ Hero كۇنۇپكىسىنىڭ يا ئوقىنى توغرىلاش
@@ -3140,6 +3103,16 @@ function initTeklimakanApp() {
     const igBtnEl = document.getElementById('instaGiftFollowBtn');
     if (igBtnEl) igBtnEl.href = checkoutInstaUrl;
 
+    if (window.TeklimakanLocations) {
+      const cityEl = document.getElementById('checkoutCustCity');
+      const distEl = document.getElementById('checkoutCustDistrict');
+      if (cityEl && distEl) {
+        const savedCity = cityEl.value || 'İSTANBUL';
+        const savedDist = distEl.value || '';
+        window.TeklimakanLocations.setupLinkedCityDistrict('checkoutCustCity', 'checkoutCustDistrict', savedCity, savedDist);
+      }
+    }
+
     closeCartDrawer();
     modal.classList.add('active');
   }
@@ -3829,7 +3802,8 @@ function initTeklimakanApp() {
         e.preventDefault();
         const name = document.getElementById('checkoutCustName').value.trim();
         const phone = document.getElementById('checkoutCustPhone').value.trim();
-        const city = document.getElementById('checkoutCustCity').value.trim();
+        const city = (document.getElementById('checkoutCustCity')?.value || '').trim();
+        const district = (document.getElementById('checkoutCustDistrict')?.value || '').trim();
         const address = document.getElementById('checkoutCustAddress').value.trim();
         const payment = document.querySelector('input[name="checkoutPayment"]:checked')?.value || 'بانكا ياكى خەلقئارالىق كارتا';
         const notes = document.getElementById('checkoutCustNotes')?.value.trim() || '';
@@ -3904,15 +3878,15 @@ function initTeklimakanApp() {
               submitBtn.disabled = false;
               submitBtn.innerHTML = '<i class="fas fa-lock"></i> <span>كارتىدىن بىخەتەر چىقىم قىلىش</span>';
             }
-            proceedOrderCreation(name, phone, city, address, 'بانكا ياكى خەلقئارالىق كارتا (3D Secure مۇۋەپپەقىيەتلىك)', notes, lang);
+            proceedOrderCreation(name, phone, city, district, address, 'بانكا ياكى خەلقئارالىق كارتا (3D Secure مۇۋەپپەقىيەتلىك)', notes, lang);
           }, 800);
           return;
         }
 
-        proceedOrderCreation(name, phone, city, address, payment, notes, lang);
+        proceedOrderCreation(name, phone, city, district, address, payment, notes, lang);
       });
 
-      function proceedOrderCreation(name, phone, city, address, payment, notes, lang) {
+      function proceedOrderCreation(name, phone, city, district, address, payment, notes, lang) {
         // خېرىدار ئۇچۇرلىرىنى كەلگۈسىدىكى پاراڭ ۋە زاكازلار ئۈچۈن مەڭگۈلۈك ساقلاش
         try {
           if (name) {
@@ -3937,7 +3911,7 @@ function initTeklimakanApp() {
         const instagramGiftData = instaChecked ? { requested: true, username: instaUser } : null;
 
         const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
-        const res = window.appStore.createOrder({ name, phone, city, address }, payment, notes, discountVal, lang, instagramGiftData);
+        const res = window.appStore.createOrder({ name, phone, city, district, address }, payment, notes, discountVal, lang, instagramGiftData);
 
         if (res.success) {
           if (typeof playChime === 'function') playChime('success');

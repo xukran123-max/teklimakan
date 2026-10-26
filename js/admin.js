@@ -9249,6 +9249,10 @@ document.addEventListener('DOMContentLoaded', () => {
       addManualOrderItemRow();
     }
 
+    if (window.TeklimakanLocations) {
+      window.TeklimakanLocations.setupLinkedCityDistrict('manualOrderCustomerCity', 'manualOrderCustomerDistrict', 'İstanbul', 'Zeytinburnu');
+    }
+
     calcManualOrderTotals();
     window.showModal('createOrderModal');
   }
@@ -9290,10 +9294,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nameInput) nameInput.value = cust.name || '';
     const phoneInput = document.getElementById('manualOrderCustomerPhone');
     if (phoneInput) phoneInput.value = cust.phone || '';
-    const cityInput = document.getElementById('manualOrderCustomerCity');
-    if (cityInput) cityInput.value = cust.city || 'İstanbul';
-    const districtInput = document.getElementById('manualOrderCustomerDistrict');
-    if (districtInput) districtInput.value = cust.district || '';
+    if (window.TeklimakanLocations) {
+      window.TeklimakanLocations.setupLinkedCityDistrict(
+        'manualOrderCustomerCity',
+        'manualOrderCustomerDistrict',
+        cust.city || 'İstanbul',
+        cust.district || ''
+      );
+    } else {
+      const cityInput = document.getElementById('manualOrderCustomerCity');
+      if (cityInput) cityInput.value = cust.city || 'İstanbul';
+      const districtInput = document.getElementById('manualOrderCustomerDistrict');
+      if (districtInput) districtInput.value = cust.district || '';
+    }
     const addrInput = document.getElementById('manualOrderCustomerAddress');
     if (addrInput) addrInput.value = cust.address || '';
 
@@ -9514,6 +9527,10 @@ document.addEventListener('DOMContentLoaded', () => {
       btnQuick.addEventListener('click', openCreateOrderModal);
     }
 
+    if (window.TeklimakanLocations) {
+      window.TeklimakanLocations.setupLinkedCityDistrict('manualOrderCustomerCity', 'manualOrderCustomerDistrict', 'İstanbul', 'Zeytinburnu');
+    }
+
     // 2. مەۋجۇت خېرىداردىن تاللاش ۋە ئاپتوماتىك تولدۇرۇش
     const custSelect = document.getElementById('manualOrderCustomerSelect');
     if (custSelect) {
@@ -9527,7 +9544,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           if (nameInput) nameInput.value = opt.dataset.name || '';
           if (phoneInput) phoneInput.value = opt.value || '';
-          if (cityInput && opt.dataset.city) {
+          if (window.TeklimakanLocations && opt.dataset.city) {
+            window.TeklimakanLocations.setupLinkedCityDistrict('manualOrderCustomerCity', 'manualOrderCustomerDistrict', opt.dataset.city, opt.dataset.district || '');
+          } else if (cityInput && opt.dataset.city) {
             cityInput.value = opt.dataset.city;
           }
           if (addrInput) addrInput.value = opt.dataset.address || '';

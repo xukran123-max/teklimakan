@@ -1439,10 +1439,6 @@ function initTeklimakanApp() {
             <i class="fas fa-shopping-bag"></i>
             <span>${product.stock <= 0 ? i18n.t('outOfStock') : i18n.t('addToCart')}</span>
           </button>
-          <button class="btn-quick-buy" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''} title="${i18n.t('quickBuyTitle') || '15 سېكۇنتتا تېز زاكاز قىلىش'}">
-            <i class="fas fa-bolt"></i>
-            <span>${i18n.t('quickBuy') || '⚡ دەرھال'}</span>
-          </button>
         </div>
       </div>
     `;
@@ -1545,9 +1541,6 @@ function initTeklimakanApp() {
             <div class="shelf-card-actions">
                 <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
                   <i class="fas fa-shopping-bag"></i> <span>${currentLang === 'tr' ? 'Sepete' : (currentLang === 'en' ? 'Cart' : 'سېۋەتكە')}</span>
-                </button>
-                <button type="button" class="shelf-card-quick-buy-btn" data-id="${product.id}" title="15 سېكۇنتتا تېز زاكاز">
-                  <i class="fas fa-bolt"></i> <span>${currentLang === 'tr' ? 'Hızlı Al' : (currentLang === 'en' ? 'Buy Now' : '⚡ دەرھال')}</span>
                 </button>
               </div>
           </div>

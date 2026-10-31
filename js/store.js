@@ -1987,12 +1987,19 @@ class StoreManager {
             window.normalizeProductUnit = normalizeUnit;
             const initMatch = INITIAL_PRODUCTS.find(ip => ip.id === rp.id);
 
-            const safeName = isCorrupted(rp.name) ? (localItem?.name && !isCorrupted(localItem.name) ? localItem.name : initMatch?.name || rp.name) : rp.name;
+            const ugTrans = (rp.translations && rp.translations.ug) ? rp.translations.ug : null;
+            const safeName = (ugTrans && ugTrans.name && !isCorrupted(ugTrans.name)) 
+              ? ugTrans.name 
+              : (initMatch?.name || (localItem?.name && /[؀-ۿ]/.test(localItem.name) ? localItem.name : rp.name));
             const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
-            const safeCat = isCorrupted(rp.category) ? (localItem?.category && !isCorrupted(localItem.category) ? localItem.category : initMatch?.category || 'ئۇيغۇر تىبابىتى') : (rp.category || 'ئۇيغۇر تىبابىتى');
+            const safeCat = (ugTrans && ugTrans.category)
+              ? ugTrans.category
+              : (initMatch?.category || (window.appI18n ? window.appI18n.getCategoryName(rp.category, 'ug') : 'ئۇيغۇر تىبابىتى'));
             const rawUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
             const safeUnit = normalizeUnit(rawUnit);
-            const safeDesc = isCorrupted(rp.description) ? (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : initMatch?.description || '') : (rp.description || '');
+            const safeDesc = (ugTrans && ugTrans.description)
+              ? ugTrans.description
+              : (initMatch?.description || (localItem?.description && !isCorrupted(localItem.description) ? localItem.description : rp.description || ''));
 
             const safeTranslations = (rp.translations && typeof rp.translations === 'object') ? rp.translations : (localItem?.translations || initMatch?.translations || {});
             safeTranslations.unit = safeUnit;
@@ -5793,6 +5800,21 @@ class StoreManager {
       if (trObj.badge) badge = trObj.badge;
     }
 
+    // 🛡️ ئۇيغۇرچە توربېكەتتە مەھسۇلات نامى ۋە تۈرىنىڭ تۈركچە چىقىپ قېلىشىنى 100% قوغداش
+    if (lang === 'ug') {
+      if (!/[؀-ۿ]/.test(name) || /Doğal|Şifalı|Uygur Tıbbı|Geleneksel|Kantaron|Çekirdeği|Mantarı|Uçucu|Zeytinyağı|Karanfil|Macunu|Ansiklopedisi|Baharat|Kuru Üzüm|Kozası|Hünnap|Badem|Susam|Uşma/i.test(name)) {
+        if (p.translations && p.translations.ug && p.translations.ug.name) {
+          name = p.translations.ug.name;
+        } else if (typeof INITIAL_PRODUCTS !== 'undefined') {
+          const match = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
+          if (match && match.name) name = match.name;
+        }
+      }
+      if (window.appI18n && typeof window.appI18n.getCategoryName === 'function') {
+        category = window.appI18n.getCategoryName(category, 'ug');
+      }
+    }
+
     // تۈركچە ياكى ئىنگلىزچە سەھىپىدە ئەگەر تەرجىمە كەم قالغان بولسا دەل جايىدا ئاپتوماتىك تەرجىمە قىلىش
     if (lang !== 'ug' && window.appI18n) {
       if (typeof window.appI18n.autoTranslateUyghur === 'function') {
@@ -6854,8 +6876,11 @@ class StoreManager {
       if (raw) categories = JSON.parse(raw);
     } catch(e) {}
 
-    if (!Array.isArray(categories) || categories.length <= 1) {
+    // 🛡️ تۈركچە بىلەن بۇلغانغان كونا كاشنى (Şifalı, Yağlar, Kuruyemişler) دەرھال پاكىز تازىلاش
+    const hasCorruptTr = Array.isArray(categories) && categories.some(c => c && c.id && (/Şifa|Bitki|Yağlar|Kuruyemiş|Geleneksel|Uygur Tıbbı Mirası/i.test(c.id) || /Şifa|Bitki|Yağlar|Kuruyemiş/i.test(c.name)));
+    if (hasCorruptTr || !Array.isArray(categories) || categories.length <= 1) {
       categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
+      try { localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories)); } catch(e) {}
     }
 
     // 🛡️ كېرەكسىز ياكى قايتىلانغان ساختا تۈرلەرنى (بارلىق تۈرلەر، Tüm Kategoriler) دەسلەپتىلا چىقىرىۋېتىش (پەقەت تۈپ 'all' قالىدۇ)
@@ -6935,6 +6960,10 @@ class StoreManager {
         displayName = (window.appI18n && typeof window.appI18n.t === 'function')
           ? window.appI18n.t('allCategories', lang)
           : (lang === 'tr' ? 'Tüm Kategoriler' : (lang === 'en' ? 'All Categories' : 'بارلىق تۈرلەر'));
+      } else if (lang === 'ug') {
+        displayName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function')
+          ? window.appI18n.getCategoryName(c.name || c.id, 'ug')
+          : (c.translations?.ug || c.name);
       } else if (c.translations && c.translations[lang]) {
         displayName = c.translations[lang];
       } else if (window.appI18n && typeof window.appI18n.getCategoryName === 'function') {

@@ -1,4 +1,5 @@
 const { getConfig, isConfigured, sendTestEmail } = require('../lib/email-notifications');
+const { relayNotification } = require('../lib/notification-relay');
 
 const attempts = new Map();
 const WINDOW_MS = 15 * 60 * 1000;
@@ -24,12 +25,23 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET') {
     const config = getConfig();
-    return res.status(200).json({ configured: isConfigured(config) });
+    if (isConfigured(config)) return res.status(200).json({ configured: true });
+    try {
+      const { response, data } = await relayNotification('/api/email-notify', null, 'GET');
+      return res.status(response.ok ? 200 : response.status).json({ ...data, relayed: true });
+    } catch (error) {
+      return res.status(200).json({ configured: false, relayAvailable: false });
+    }
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
   if (!allowRequest(req, res)) return res.status(429).json({ error: 'Too many email test attempts' });
 
   try {
+    const config = getConfig();
+    if (!isConfigured(config)) {
+      const { response, data } = await relayNotification('/api/email-notify', req.body || {});
+      return res.status(response.ok ? 200 : response.status).json({ ...data, relayed: true });
+    }
     const result = await sendTestEmail();
     if (!result.configured) return res.status(503).json({ success: false, configured: false, error: 'Email notifications are not configured' });
     return res.status(200).json({ success: true, configured: true });

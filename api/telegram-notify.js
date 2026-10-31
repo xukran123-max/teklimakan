@@ -1,4 +1,5 @@
 const attempts = new Map();
+const { relayNotification } = require('../lib/notification-relay');
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 20;
 
@@ -35,7 +36,15 @@ module.exports = async function handler(req, res) {
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
   const chatId = process.env.TELEGRAM_TARGET_CHAT_ID || '';
-  if (!botToken || !chatId) return res.status(503).json({ error: 'Telegram notifications are not configured' });
+  if (!botToken || !chatId) {
+    try {
+      const { response, data } = await relayNotification('/api/telegram-notify', req.body || {});
+      return res.status(response.ok ? 200 : response.status).json({ ...data, relayed: true });
+    } catch (error) {
+      console.error('Telegram notification relay failed:', error.message);
+      return res.status(502).json({ error: 'Notification relay failed' });
+    }
+  }
 
   const title = String(req.body?.title || '').trim().slice(0, 200);
   const message = String(req.body?.message || '').trim().slice(0, 3500);

@@ -5,6 +5,7 @@ const TELEGRAM_API_ID = Number(process.env.TELEGRAM_API_ID || 0);
 const TELEGRAM_API_HASH = process.env.TELEGRAM_API_HASH || '';
 const TELEGRAM_TARGET_USERNAME = process.env.TELEGRAM_TARGET_USERNAME || '';
 const { sendOrderEmail } = require('../lib/email-notifications');
+const { relayNotification } = require('../lib/notification-relay');
 
 module.exports = async function handler(req, res) {
   const origin = String(req.headers.origin || '');
@@ -30,7 +31,13 @@ module.exports = async function handler(req, res) {
   }
 
   if (!BOT_TOKEN || !TARGET_CHAT_ID) {
-    return res.status(503).json({ error: 'Telegram notifications are not configured' });
+    try {
+      const { response, data } = await relayNotification('/api/order-notify', req.body || {});
+      return res.status(response.ok ? 200 : response.status).json({ ...data, relayed: true });
+    } catch (error) {
+      console.error('Order notification relay failed:', error.message);
+      return res.status(502).json({ error: 'Notification relay failed' });
+    }
   }
 
   try {

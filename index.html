@@ -672,6 +672,111 @@
     </div>
   </div>
 
+  
+  <!-- ⚡ تېز سېتىۋېلىش كۆزنىكى (1-Click Quick Buy Modal) -->
+  <div class="modal-backdrop" id="quickBuyModal" style="z-index: 10040;">
+    <div class="modal-content" style="max-width: 520px; border-radius: 20px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 1.1rem 1.4rem;">
+        <h4 class="modal-title" id="quickBuyModalTitle" style="color: #ffffff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          <i class="fas fa-bolt" style="color: #fef08a;"></i>
+          <span>⚡ 15 سېكۇنتتا تېز سېتىۋېلىش</span>
+        </h4>
+        <button class="btn-close-drawer btn-modal-close" style="color: #ffffff; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem;"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem 1.4rem; max-height: 80vh; overflow-y: auto;">
+        <!-- مەھسۇلات قىسقىچە كارتىسى -->
+        <div id="quickBuyProductSummary" style="display: flex; align-items: center; gap: 0.85rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 0.75rem 0.9rem; margin-bottom: 1.1rem;">
+          <img id="quickBuyProdImage" src="images/default_product.jpg" alt="Product" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #cbd5e1; flex-shrink: 0;">
+          <div style="flex: 1; min-width: 0;">
+            <h5 id="quickBuyProdName" style="margin: 0 0 0.25rem 0; font-size: 0.95rem; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">مەھسۇلات نامى</h5>
+            <div style="display: flex; align-items: baseline; gap: 0.4rem;">
+              <span id="quickBuyProdPrice" style="font-size: 1.2rem; font-weight: 900; color: #dc2626;">0 TL</span>
+              <span id="quickBuyProdOldPrice" style="font-size: 0.82rem; color: #94a3b8; text-decoration: line-through;"></span>
+            </div>
+          </div>
+          <!-- مىقدار كۇنۇپكىسى -->
+          <div style="display: flex; align-items: center; border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden; height: 34px;">
+            <button type="button" id="quickBuyQtyMinus" style="background: none; border: none; width: 28px; height: 100%; font-weight: 900; cursor: pointer; font-size: 1rem; color: #475569;">-</button>
+            <input type="text" id="quickBuyQtyInput" value="1" readonly style="width: 32px; border: none; text-align: center; font-weight: 800; font-size: 0.95rem; background: transparent;">
+            <button type="button" id="quickBuyQtyPlus" style="background: none; border: none; width: 28px; height: 100%; font-weight: 900; cursor: pointer; font-size: 1rem; color: #475569;">+</button>
+          </div>
+        </div>
+
+        <form id="quickBuyForm">
+          <input type="hidden" id="quickBuyProdId" value="">
+
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.3rem;">
+              <span id="quickBuyNameLabel">ئىسىم-فامىلىڭىز (Ad Soyad)</span> <span style="color: #dc2626;">*</span>
+            </label>
+            <input type="text" id="quickBuyCustName" class="form-control" placeholder="مەسىلەن: Ahmet Yılmaz" required style="font-size: 0.9rem; height: 40px;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.3rem;">
+              <span id="quickBuyPhoneLabel">تېلېفون نومۇرىڭىز (Telefon)</span> <span style="color: #dc2626;">*</span>
+            </label>
+            <input type="tel" id="quickBuyCustPhone" class="form-control number-latin" placeholder="05XX XXX XX XX" required style="font-size: 0.9rem; height: 40px;">
+          </div>
+
+          <!-- ۋىلايەت ۋە ناھىيە تاللاش -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.75rem;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0.3rem;">
+                <span id="quickBuyCityLabel">ۋىلايەت / شەھەر (İl)</span> <span style="color: #dc2626;">*</span>
+              </label>
+              <select id="quickBuyCustCity" class="form-control" required style="font-size: 0.86rem; height: 40px; font-weight: 600;">
+                <option value="">-- تاللاڭ --</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0.3rem;">
+                <span id="quickBuyDistrictLabel">رايون / ناھىيە (İlçe)</span> <span style="color: #dc2626;">*</span>
+              </label>
+              <select id="quickBuyCustDistrict" class="form-control" required style="font-size: 0.86rem; height: 40px; font-weight: 600;">
+                <option value="">-- تاللاڭ --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.3rem;">
+              <span id="quickBuyAddressLabel">ئادرېسىڭىز (Mahalle, Cadde, Sokak, Kapı No)</span> <span style="color: #dc2626;">*</span>
+            </label>
+            <textarea id="quickBuyCustAddress" class="form-control" rows="2" placeholder="Sümer Mah. 28/2 Sok. No:5 D:3..." required style="font-size: 0.86rem; resize: none;"></textarea>
+          </div>
+
+          <!-- چىقىم شەكلى -->
+          <div style="background: #f1f5f9; border-radius: 10px; padding: 0.65rem 0.85rem; margin-bottom: 1.1rem;">
+            <div style="font-size: 0.8rem; font-weight: 800; color: #475569; margin-bottom: 0.4rem;">چىقىم ئۇسۇلى:</div>
+            <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                <input type="radio" name="quickBuyPayment" value="بانكا ھېساباتىغا يۆتكەش" checked>
+                <span>🏦 بانكا يۆتكەش (Havale / FAST)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                <input type="radio" name="quickBuyPayment" value="ئىشىك ئالدىدا نەق پۇل">
+                <span>🚪 ئىشىك ئالدىدا تاپشۇرۇش (Kapıda Ödeme)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- ئومۇمىي سومما ۋە سېتىۋېلىش كۇنۇپكىسى -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; padding: 0.5rem 0; border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1;">
+            <span style="font-size: 0.95rem; font-weight: 800; color: #334155;">جەمئىي تۆلەيدىغىنىڭىز:</span>
+            <span id="quickBuyFinalTotal" style="font-size: 1.35rem; font-weight: 900; color: #dc2626;">0 TL</span>
+          </div>
+
+          <button type="submit" id="btnSubmitQuickBuy" style="width: 100%; height: 48px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); transition: all 0.2s;">
+            <i class="fas fa-bolt"></i>
+            <span id="btnSubmitQuickBuyText">زاكازنى دەرھال تاماملاش</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- چىقىم ۋە زاكاز كۆزنىكى (Checkout Modal) -->
   <div class="modal-backdrop" id="checkoutModal">
     <div class="modal-content" style="max-width: 560px;">

@@ -2846,6 +2846,11 @@ function initTeklimakanApp() {
               <input type="text" id="modalQtyInput" class="qty-input" value="1" readonly style="height: 100%; text-align: center; font-weight: 700; font-size: 1rem;">
               <button class="qty-btn" id="modalQtyPlus" style="height: 100%; width: 34px; font-size: 1.1rem;">+</button>
             </div>
+            <!-- ⚡ تېز سېتىۋېلىش كۇنۇپكىسى (Quick Buy) -->
+            <button type="button" id="modalQuickBuyBtn" class="btn-quick-buy-modal" style="width: 100%; min-height: 44px; margin-bottom: 0.6rem; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.98rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);" ${product.stock <= 0 ? 'disabled' : ''}>
+              <i class="fas fa-bolt" style="color: #fef08a;"></i>
+              <span>${(window.appI18n && window.appI18n.t('quickBuy')) || '⚡ تېز سېتىۋېلىش'}</span>
+            </button>
             <button id="modalAddToCartBtn" class="btn-add-cart" style="flex: 1; min-height: 44px; height: 44px; min-width: 0; padding: 0 1rem; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; gap: 0.55rem; line-height: 1;" ${product.stock <= 0 ? 'disabled' : ''}>
               <i class="fas fa-cart-plus" style="font-size: 1.1rem;"></i>
               <span style="display: inline-block;">${window.appI18n.t('addToCart')}</span>
@@ -2889,6 +2894,17 @@ function initTeklimakanApp() {
         qtyInput.value = currentQty;
       }
     });
+
+    const modalQbBtn = document.getElementById('modalQuickBuyBtn');
+    if (modalQbBtn) {
+      modalQbBtn.addEventListener('click', () => {
+        if (product.stock <= 0) return;
+        modal.classList.remove('active');
+        if (typeof openQuickBuyModal === 'function') {
+          openQuickBuyModal(product.id, currentQty);
+        }
+      });
+    }
 
     document.getElementById('modalAddToCartBtn').addEventListener('click', () => {
       const res = window.appStore.addToCart(product.id, currentQty);
@@ -11091,4 +11107,199 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
     });
   });
 }
+
+
+
+  // ==================== ⚡ 15 سېكۇنتتا تېز سېتىۋېلىش كۆزنىكى (1-Click Quick Buy Engine) ====================
+  let currentQuickBuyProduct = null;
+  let currentQuickBuyQty = 1;
+
+  function openQuickBuyModal(productId, qty = 1) {
+    if (!productId || !window.appStore) return;
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    const prod = window.appStore.getProductById(productId, lang);
+    if (!prod || prod.stock <= 0) {
+      if (typeof showToast === 'function') showToast(window.appI18n ? window.appI18n.t('outOfStock') : 'بۇ مەھسۇلات تۈگەپتۇ!', 'warning');
+      return;
+    }
+
+    currentQuickBuyProduct = prod;
+    currentQuickBuyQty = Math.max(1, Math.min(qty, prod.stock));
+
+    const modal = document.getElementById('quickBuyModal');
+    if (!modal) return;
+
+    // Fill Product Info
+    const imgEl = document.getElementById('quickBuyProdImage');
+    const nameEl = document.getElementById('quickBuyProdName');
+    const priceEl = document.getElementById('quickBuyProdPrice');
+    const oldPriceEl = document.getElementById('quickBuyProdOldPrice');
+    const idEl = document.getElementById('quickBuyProdId');
+    const qtyInput = document.getElementById('quickBuyQtyInput');
+
+    if (imgEl) imgEl.src = prod.image || 'images/default_product.jpg';
+    if (nameEl) nameEl.textContent = prod.name;
+    if (idEl) idEl.value = prod.id;
+    if (qtyInput) qtyInput.value = currentQuickBuyQty;
+
+    const singlePrice = Number(prod.price) || 0;
+    const oldPrice = prod.oldPrice ? Number(prod.oldPrice) : 0;
+    if (priceEl) priceEl.textContent = window.appStore.formatPrice(singlePrice);
+    if (oldPriceEl) oldPriceEl.textContent = oldPrice > singlePrice ? window.appStore.formatPrice(oldPrice) : '';
+
+    updateQuickBuyTotal();
+
+    // Setup 81 Provinces & Districts
+    if (window.TeklimakanLocations) {
+      window.TeklimakanLocations.setupLinkedCityDistrict('quickBuyCustCity', 'quickBuyCustDistrict', 'İSTANBUL', 'Zeytinburnu');
+    }
+
+    modal.classList.add('active');
+    setTimeout(() => {
+      document.getElementById('quickBuyCustName')?.focus();
+    }, 200);
+  }
+  window.openQuickBuyModal = openQuickBuyModal;
+
+  function updateQuickBuyTotal() {
+    if (!currentQuickBuyProduct) return;
+    const singlePrice = Number(currentQuickBuyProduct.price) || 0;
+    const total = singlePrice * currentQuickBuyQty;
+    const totalEl = document.getElementById('quickBuyFinalTotal');
+    if (totalEl) totalEl.textContent = window.appStore.formatPrice(total);
+  }
+
+  // Setup QuickBuy Form & Listeners
+  (function setupQuickBuyListeners() {
+    const qMinus = document.getElementById('quickBuyQtyMinus');
+    const qPlus = document.getElementById('quickBuyQtyPlus');
+    const qInput = document.getElementById('quickBuyQtyInput');
+
+    if (qMinus && qPlus && qInput) {
+      qMinus.addEventListener('click', () => {
+        if (currentQuickBuyQty > 1) {
+          currentQuickBuyQty--;
+          qInput.value = currentQuickBuyQty;
+          updateQuickBuyTotal();
+        }
+      });
+      qPlus.addEventListener('click', () => {
+        if (currentQuickBuyProduct && currentQuickBuyQty < currentQuickBuyProduct.stock) {
+          currentQuickBuyQty++;
+          qInput.value = currentQuickBuyQty;
+          updateQuickBuyTotal();
+        }
+      });
+    }
+
+    const form = document.getElementById('quickBuyForm');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentQuickBuyProduct) return;
+
+        const name = document.getElementById('quickBuyCustName')?.value.trim();
+        const phone = document.getElementById('quickBuyCustPhone')?.value.trim();
+        const city = document.getElementById('quickBuyCustCity')?.value.trim();
+        const district = document.getElementById('quickBuyCustDistrict')?.value.trim();
+        const address = document.getElementById('quickBuyCustAddress')?.value.trim();
+        const payment = document.querySelector('input[name="quickBuyPayment"]:checked')?.value || 'بانكا ھېساباتىغا يۆتكەش';
+        const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+
+        // Validation
+        const arabicRegex = /[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+        if (arabicRegex.test(name)) {
+          showToast(window.appI18n ? window.appI18n.t('valNameLatin') : '⚠️ كارگو توغرا يەتكۈزۈشى ئۈچۈن ئىسىم چوقۇم تۈركچە (لاتىنچە) بولسۇن!', 'warning');
+          document.getElementById('quickBuyCustName')?.focus();
+          return;
+        }
+
+        const cleanPhone = (phone || '').replace(/[^\d+]/g, '');
+        if (cleanPhone.length < 10) {
+          showToast(window.appI18n ? window.appI18n.t('valPhone') : '⚠️ تېلېفون نومۇرىنى تولۇق كىرگۈزۈڭ (05XX XXX XX XX)!', 'warning');
+          document.getElementById('quickBuyCustPhone')?.focus();
+          return;
+        }
+
+        if (arabicRegex.test(address) || address.length < 5) {
+          showToast(window.appI18n ? window.appI18n.t('valAddressLatin') : '⚠️ ئادرېسنى تۈركچە لاتىن ھەرپلىرى بىلەن تولۇق كىرگۈزۈڭ!', 'warning');
+          document.getElementById('quickBuyCustAddress')?.focus();
+          return;
+        }
+
+        const submitBtn = document.getElementById('btnSubmitQuickBuy');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> زاكاز بېرىلىۋاتىدۇ...';
+        }
+
+        // Direct Order Creation in Store
+        const orderData = {
+          customer: { name, phone, city, district, address },
+          items: [{
+            id: currentQuickBuyProduct.id,
+            name: currentQuickBuyProduct.name,
+            price: Number(currentQuickBuyProduct.price) || 0,
+            quantity: currentQuickBuyQty,
+            image: currentQuickBuyProduct.image
+          }],
+          paymentMethod: payment,
+          status: 'ساقلاۋاتىدۇ',
+          notes: '⚡ تېز سېتىۋېلىش (1-Click Quick Buy) ئارقىلىق بېرىلدى',
+          language: lang,
+          deductStock: true
+        };
+
+        try {
+          const res = window.appStore.addAdminManualOrder(orderData);
+          if (res && res.success) {
+            document.getElementById('quickBuyModal')?.classList.remove('active');
+            if (typeof playChime === 'function') playChime('success');
+            
+            // Show Success Modal
+            const succModal = document.getElementById('orderSuccessModal');
+            const succContent = document.getElementById('orderSuccessModalContent');
+            if (succModal && succContent) {
+              succContent.innerHTML = `
+                <div style="text-align: center; padding: 1.5rem 0.5rem;">
+                  <div style="width: 70px; height: 70px; background: #ecfdf5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.1rem auto;">
+                    <i class="fas fa-check"></i>
+                  </div>
+                  <h3 style="font-size: 1.35rem; font-weight: 900; color: #065f46; margin-bottom: 0.5rem;">${(window.appI18n && window.appI18n.t('quickBuySuccess')) || 'تېز زاكاز مۇۋەپپەقىيەتلىك بېرىلدى!'}</h3>
+                  <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.25rem;">زاكاز نومۇرىڭىز: <b class="number-latin" style="color: #0284c7;">#${res.order.id}</b><br>تېلېفونىڭىزغا (${phone}) دەل ۋاقتىدا ئۇقتۇرۇش يوللاندى.</p>
+                  <button type="button" class="btn-checkout" onclick="document.getElementById('orderSuccessModal').classList.remove('active')" style="padding: 0.75rem 2.2rem; font-size: 1rem; border-radius: 12px;">چۈشەندىم</button>
+                </div>
+              `;
+              succModal.classList.add('active');
+            } else {
+              showToast(window.appI18n ? window.appI18n.t('quickBuySuccess') : 'زاكاز مۇۋەپپەقىيەتلىك بېرىلدى!', 'success');
+            }
+
+            // Sync to İyi Seçenek & WhatsApp/Telegram Alert in Background
+            try {
+              if (window.TeklimakanCargoBridge && window.TeklimakanCargoBridge.getIyiSecenekCredentials().hasCredentials) {
+                window.TeklimakanCargoBridge.autoSyncOrderToIyiSecenek(res.order).catch(() => {});
+              }
+              fetch('/api/order-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(res.order)
+              }).catch(() => {});
+            } catch (e) {}
+
+          } else {
+            showToast(res?.message || 'زاكاز چىقىرىش مەغلۇپ بولدى', 'error');
+          }
+        } catch (err) {
+          console.error('QuickBuy error:', err);
+          showToast('خاتالىق كۆرۈلدى: ' + err.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-bolt"></i> <span>زاكازنى دەرھال تاماملاش</span>';
+          }
+        }
+      });
+    }
+  })();
 

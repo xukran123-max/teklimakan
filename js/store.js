@@ -6828,6 +6828,24 @@ class StoreManager {
     return clone;
   }
 
+  getCategoryIcon(catIdOrName) {
+    if (!catIdOrName || catIdOrName === 'all') return 'fas fa-border-all';
+    const c = String(catIdOrName).toLowerCase().trim();
+    if (c.includes('tıbb') || c.includes('تىبابەت') || c.includes('apothecary') || c.includes('medicine')) return 'fas fa-mortar-pestle';
+    if (c.includes('şifa') || c.includes('ilaç') || c.includes('دورا') || c.includes('remedy') || c.includes('hap') || c.includes('capsul')) return 'fas fa-capsules';
+    if (c.includes('bitki') || c.includes('ot') || c.includes('ئۆسۈملۈك') || c.includes('herb')) return 'fas fa-leaf';
+    if (c.includes('yağ') || c.includes('ياغ') || c.includes('oil')) return 'fas fa-droplet';
+    if (c.includes('güzellik') || c.includes('bakım') || c.includes('sağlık') || c.includes('گۈزەللىك') || c.includes('beauty')) return 'fas fa-spa';
+    if (c.includes('reçel') || c.includes('gülkand') || c.includes('macun') || c.includes('قەنت') || c.includes('گۈل') || c.includes('jam')) return 'fas fa-jar';
+    if (c.includes('meyve') || c.includes('yemiş') || c.includes('kuruyemiş') || c.includes('قۇرۇق') || c.includes('fruit') || c.includes('baharat')) return 'fas fa-basket-shopping';
+    if (c.includes('sanat') || c.includes('مەدەنىيەت') || c.includes('kültür') || c.includes('craft') || c.includes('eşya')) return 'fas fa-gem';
+    if (c.includes('kitap') || c.includes('كىتاپ') || c.includes('كىتاب') || c.includes('book')) return 'fas fa-book-open';
+    if (c.includes('halı') || c.includes('گىلەم') || c.includes('carpet')) return 'fas fa-rug';
+    if (c.includes('çay') || c.includes('چاي') || c.includes('tea')) return 'fas fa-mug-hot';
+    if (c.includes('bal') || c.includes('ھەسەل') || c.includes('honey')) return 'fas fa-cube';
+    return 'fas fa-tag';
+  }
+
   // ==================== تۈرلەر ====================
   getCategories(lang = 'ug') {
     let categories = [];

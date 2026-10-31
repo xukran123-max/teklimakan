@@ -6701,3 +6701,366 @@ body.dark-mode .cart-charity-badge {
 
 
 
+
+
+/* ==================== 📱 1-پىلان: بىردىنبىر ئەقىللىق بىرىكمە ئالاقە كۇنۇپكىسى (Single Smart Contact Hub) ==================== */
+.floating-contact-hub {
+  position: fixed !important;
+  bottom: 5.2rem !important;
+  right: 1.25rem !important;
+  z-index: 1040 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 0.5rem !important;
+}
+
+html[dir="rtl"] .floating-contact-hub {
+  right: auto !important;
+  left: 1.25rem !important;
+  align-items: flex-start !important;
+}
+
+.contact-hub-trigger {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.35rem !important;
+  cursor: pointer !important;
+  position: relative !important;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease !important;
+}
+
+.contact-hub-trigger:hover {
+  transform: scale(1.08) translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4) !important;
+}
+
+.contact-hub-menu {
+  display: none;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+  animation: hubFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.floating-contact-hub.active .contact-hub-menu {
+  display: flex !important;
+}
+
+.floating-contact-hub.active .hub-icon-open {
+  display: none !important;
+}
+
+.floating-contact-hub.active .hub-icon-close {
+  display: inline-block !important;
+}
+
+@keyframes hubFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hub-menu-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  padding: 0.55rem 0.95rem !important;
+  border-radius: 50px !important;
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.hub-menu-item:hover {
+  transform: scale(1.04) !important;
+}
+
+.hub-item-whatsapp {
+  background: #25d366 !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4) !important;
+}
+
+.hub-item-whatsapp i {
+  font-size: 1.15rem !important;
+}
+
+.hub-item-chat {
+  background: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important;
+}
+
+.hub-item-chat i {
+  font-size: 1.05rem !important;
+}
+
+@media (max-width: 768px) {
+  .floating-contact-hub {
+    bottom: 5.2rem !important;
+    right: 0.85rem !important;
+  }
+  html[dir="rtl"] .floating-contact-hub {
+    left: 0.85rem !important;
+    right: auto !important;
+  }
+  .contact-hub-trigger {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.2rem !important;
+  }
+}
+
+/* سېۋەت ياكى كۆزنەك ئوچۇق ۋاقتىدا لەيلىمە كۇنۇپكا ئاپتوماتىك قوغدىنىدۇ */
+body.cart-drawer-open .floating-contact-hub,
+body:has(.cart-overlay.active) .floating-contact-hub,
+body:has(.modal-backdrop[style*="display: flex"]) .floating-contact-hub,
+body:has(.modal-backdrop[style*="display: block"]) .floating-contact-hub,
+body:has(#adminLiveChatBox[style*="display: block"]) .floating-contact-hub,
+body:has(#adminLiveChatBox[style*="display: flex"]) .floating-contact-hub {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.8) !important;
+}
+
+/* ==================== 🎡 1-پىلان: كىچىك يۇمىلاق ئامەت چاقى تۈگمىسى (Sleek Circular Wheel) ==================== */
+.floating-lucky-wheel-btn {
+  position: fixed !important;
+  bottom: 5.2rem !important;
+  left: 1.25rem !important;
+  right: auto !important;
+  z-index: 1040 !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 30% 30%, #f59e0b 0%, #ef4444 100%) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+html[dir="rtl"] .floating-lucky-wheel-btn {
+  left: auto !important;
+  right: 1.25rem !important;
+}
+
+.floating-lucky-wheel-btn:hover {
+  transform: scale(1.1) translateY(-2px) !important;
+  box-shadow: 0 8px 22px rgba(239, 68, 68, 0.5) !important;
+}
+
+.floating-lucky-wheel-btn .lucky-wheel-icon-wrap {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.35rem !important;
+  box-shadow: none !important;
+  animation: wheelIconSpin 14s linear infinite !important;
+}
+
+.wheel-free-badge {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  background: #10b981 !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  border: 2px solid #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+html[dir="rtl"] .wheel-free-badge {
+  right: auto !important;
+  left: -4px !important;
+}
+
+.lucky-wheel-tooltip {
+  position: absolute !important;
+  bottom: 120% !important;
+  right: 0 !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: #ffffff !important;
+  padding: 5px 10px !important;
+  border-radius: 6px !important;
+  font-size: 0.76rem !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+  transform: translateY(4px) !important;
+  z-index: 1050 !important;
+}
+
+html[dir="rtl"] .lucky-wheel-tooltip {
+  right: auto !important;
+  left: 0 !important;
+}
+
+.floating-lucky-wheel-btn:hover .lucky-wheel-tooltip {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+@media (max-width: 768px) {
+  .floating-lucky-wheel-btn {
+    bottom: 5.2rem !important;
+    left: 0.85rem !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+  html[dir="rtl"] .floating-lucky-wheel-btn {
+    left: auto !important;
+    right: 0.85rem !important;
+  }
+  .lucky-wheel-tooltip {
+    display: none !important;
+  }
+}
+
+/* ==================== 🏷️ مەھسۇلات كارتىسى بەلگىلىرىنىڭ كەسپىي ئۆلچەملىك كۆرۈنۈشى (Professional Product Card Chips) ==================== */
+.product-category-row {
+  margin-bottom: 0.45rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  flex-wrap: wrap !important;
+  min-height: 22px !important;
+}
+
+.product-category-tag {
+  font-size: 0.74rem !important;
+  color: var(--text-muted, #64748b) !important;
+  font-weight: 700 !important;
+  background: rgba(148, 163, 184, 0.12) !important;
+  padding: 0 7px !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+}
+
+.product-category-tag i {
+  font-size: 0.68rem !important;
+  opacity: 0.75 !important;
+}
+
+.product-category-tag:hover {
+  color: var(--primary-color, #2563eb) !important;
+  border-color: var(--primary-color, #2563eb) !important;
+  background: rgba(37, 99, 235, 0.08) !important;
+}
+
+.product-merchant-tag {
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  padding: 0 7px !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+}
+
+.product-merchant-tag i {
+  font-size: 0.72rem !important;
+}
+
+.product-agent-badge {
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  padding: 0 7px !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+  background: rgba(37, 99, 235, 0.08) !important;
+  color: #1e3a8a !important;
+  border: 1px solid rgba(37, 99, 235, 0.25) !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+  user-select: none !important;
+}
+
+.product-agent-badge i {
+  font-size: 0.72rem !important;
+}
+
+.product-agent-badge.compact {
+  font-size: 0.72rem !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  padding: 0 6px !important;
+  border-radius: 6px !important;
+}
+
+@media (max-width: 768px) {
+  .product-category-row {
+    gap: 0.25rem !important;
+    margin-bottom: 0.35rem !important;
+    min-height: 20px !important;
+  }
+  .product-category-tag,
+  .product-brand-tag,
+  .product-merchant-tag,
+  .product-agent-badge,
+  .product-agent-badge.compact {
+    font-size: 0.68rem !important;
+    height: 20px !important;
+    line-height: 18px !important;
+    padding: 0 5px !important;
+    border-radius: 5px !important;
+    gap: 3px !important;
+  }
+}
+

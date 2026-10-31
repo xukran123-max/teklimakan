@@ -1409,7 +1409,7 @@ function initTeklimakanApp() {
         <h3 class="product-title" title="${product.name}">${product.name}</h3>
 
         <div class="product-category-row" style="margin-bottom: 0.45rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-          <span class="product-category-tag">${i18n.getCategoryName(product.category)}</span>
+          <span class="product-category-tag" title="${i18n.getCategoryName(product.category)}"><i class="${window.appStore && typeof window.appStore.getCategoryIcon === 'function' ? window.appStore.getCategoryIcon(product.category) : 'fas fa-tag'}"></i> <span>${i18n.getCategoryName(product.category)}</span></span>
           ${getMerchantBadgeHtml(product)}
           ${getAgentBadgeHtml(product, true)}
         </div>
@@ -8809,8 +8809,24 @@ function initTeklimakanApp() {
 
   // ==================== 💬 ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش مەركىزى (Customer Live Chat) ====================
   function initCustomerLiveChat() {
+    const hub = document.getElementById('floatingContactHub');
+    const hubTrigger = document.getElementById('contactHubTrigger');
     const toggleBtn = document.getElementById('adminLiveChatToggleBtn');
     const chatBox = document.getElementById('adminLiveChatBox');
+
+    // 📱 ئەقىللىق بىرىكمە كۇنۇپكىنى ئېچىش / تاقاش (Toggle Contact Hub Menu)
+    if (hubTrigger && hub) {
+      hubTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hub.classList.toggle('active');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#floatingContactHub')) {
+          hub.classList.remove('active');
+        }
+      });
+    }
     const btnClose = document.getElementById('btnCloseChatBox');
     const btnClear = document.getElementById('btnClearChatHistory');
     const messagesContainer = document.getElementById('adminChatMessagesContainer');
@@ -9473,6 +9489,7 @@ function initTeklimakanApp() {
     // كۆزنەكنى ئېچىش / تاقاش
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (hub) hub.classList.remove('active');
       const isVisible = chatBox.style.display !== 'none';
       if (isVisible) {
         chatBox.style.display = 'none';
@@ -10748,6 +10765,12 @@ ${text}
     const check = (window.appStore && typeof window.appStore.canCustomerSpinToday === 'function')
       ? window.appStore.canCustomerSpinToday()
       : { canSpin: true };
+
+    const flBadge = document.getElementById('luckyWheelFloatingBadge');
+    if (flBadge) {
+      flBadge.style.display = check.canSpin ? 'flex' : 'none';
+      flBadge.textContent = '1';
+    }
 
     if (check.canSpin) {
       if (btnSpin) {

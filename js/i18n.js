@@ -1195,15 +1195,26 @@ const CATEGORY_LOCALIZATIONS = {
   'پىششىق دورىلار': { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
   'ئۆسۈملۈك دورىلار': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
   'تەبىئىي ياغلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
+  'تەبىئىي شىپالىق ياغلار': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'Doğal & Şifalı Yağlar': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'Dogal & Sifali Yaglar': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'Doğal Yağlar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal Yağlar', en: 'Natural Oils' },
   'گۈزەللىك ۋە ساغلاملىق': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
   'گۈلقەنتلەر': { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' },
   'گۈلقەنت': { ug: 'گۈلقەنت', tr: 'Gül Reçeli', en: 'Rose Jam' },
   'قۇرۇق يەل-يېمىشلەر': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' },
   'مەدەنىيەت بۇيۇملىرى': { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' },
-  'كىتاپ ۋە مەدەنىيەت': { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
+  'كىتاپ ۋە مەدەنىيەت': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
+  'كىتاب ۋە مەدەنىيەت': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
+  'Kitap & Kültür': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
+  'Kitap ve Kültür': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
   'كىتابلار': { ug: 'كىتابلار', tr: 'Kitaplar', en: 'Books' },
+  'Kitaplar': { ug: 'كىتابلار', tr: 'Kitaplar', en: 'Books' },
+  'Kitap': { ug: 'كىتاب', tr: 'Kitap', en: 'Book' },
   'مىللىي تەبىئىي مەھسۇلاتلار': { ug: 'مىللىي تەبىئىي مەھسۇلاتلار', tr: 'Doğal Yöresel Ürünler', en: 'Heritage Natural Products' },
+  'Doğal Yöresel Ürünler': { ug: 'مىللىي تەبىئىي مەھسۇلاتلار', tr: 'Doğal Yöresel Ürünler', en: 'Heritage Natural Products' },
   'تەبىئىي مەھسۇلاتلار': { ug: 'تەبىئىي مەھسۇلاتلار', tr: 'Doğal Ürünler', en: 'Natural Products' },
+  'Doğal Ürünler': { ug: 'تەبىئىي مەھسۇلاتلار', tr: 'Doğal Ürünler', en: 'Natural Products' },
   'مىللىي گىلەملەر': { ug: 'مىللىي گىلەملەر', tr: 'Geleneksel Halılar', en: 'Traditional Carpets' },
   'مىللىي گىلەم': { ug: 'مىللىي گىلەم', tr: 'Geleneksel Halı', en: 'Traditional Carpet' },
   'گىلەملەر': { ug: 'گىلەملەر', tr: 'Halılar', en: 'Carpets' },
@@ -1232,9 +1243,26 @@ const CATEGORY_LOCALIZATIONS = {
   'گۈزەللىك ۋە ساقلىق': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
   'تۇرمۇش لازىمەتلىكلىرى': { ug: 'تۇرمۇش لازىمەتلىكلىرى', tr: 'Ev & Yaşam', en: 'Home & Living' },
   'ئۆي بېزەكچىلىكى': { ug: 'ئۆي بېزەكچىلىكى', tr: 'Ev Dekorasyonu', en: 'Home Decor' },
-  'كىتاب-مەدەنىيەت': { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
-  'كىتاب ۋە مەدەنىيەت': { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
+  'كىتاب-مەدەنىيەت': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
   'ئەنئەنىۋى بۇيۇملار': { ug: 'ئەنئەنىۋى بۇيۇملار', tr: 'Geleneksel Ürünler', en: 'Traditional Products' },
+  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Şifa Ürünleri': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Sifa Urunleri': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Şifa Ürünleri': { ug: 'شىپالىق مەھسۇلاتلار', tr: 'Şifa Ürünleri', en: 'Healing Products' },
+  'Uygur Tıbbı': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tibbi': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Hazır & İşlenmiş İlaçlar': { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
+  'Şifalı Bitkiler & Otlar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
+  'Güzellik & Sağlık': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
+  'Gül Reçelleri & Macunlar': { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' },
+  'Gül Reçeli': { ug: 'گۈلقەنت', tr: 'Gül Reçeli', en: 'Rose Jam' },
+  'Kuru Meyve & Yemişler': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' },
+  'Kültür & Sanat Eşyaları': { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' },
+  'Geleneksel Halılar': { ug: 'مىللىي گىلەملەر', tr: 'Geleneksel Halılar', en: 'Traditional Carpets' },
+  'Geleneksel Takı & Mücevher': { ug: 'مىللىي زىبۇ-زىننەت', tr: 'Geleneksel Takı & Mücevher', en: 'Traditional Jewelry' },
+  'Geleneksel Kıyafetler': { ug: 'مىللىي كىيىملەر', tr: 'Geleneksel Kıyafetler', en: 'Traditional Clothing' },
+  'Şifalı Çaylar': { ug: 'چايلار', tr: 'Şifalı Çaylar', en: 'Herbal & Green Teas' },
+  'Doğal Bal Ürünleri': { ug: 'ھەسەل مەھسۇلاتلىرى', tr: 'Doğal Bal Ürünleri', en: 'Pure Honey Products' },
   'سوۋغاتلىق بۇيۇملار': { ug: 'سوۋغاتلىق بۇيۇملار', tr: 'Hediyelik Eşyalar', en: 'Gift Items' },
   'يېمەك-ئىچمەك': { ug: 'يېمەك-ئىچمەك', tr: 'Yiyecek & İçecek', en: 'Food & Beverage' },
   'تازىلىق بۇيۇملىرى': { ug: 'تازىلىق بۇيۇملىرى', tr: 'Temizlik & Bakım', en: 'Cleaning & Care' }
@@ -1595,16 +1623,42 @@ class I18nManager {
     if (category === 'all' || isPseudoCategory(category)) {
       return this.t('allCategories', lang);
     }
-    const direct = CATEGORY_LOCALIZATIONS[category];
+    const cleanCat = String(category).trim();
+
+    // 1. بىۋاسىتە ئاچقۇچلۇق سۆز بويىچە تەكشۈرۈش
+    const direct = CATEGORY_LOCALIZATIONS[cleanCat];
     if (direct && direct[lang]) {
       return direct[lang];
     }
+
+    // 2. تۈركچە، ئىنگلىزچە ۋە ئۇيغۇرچە بارلىق ئۆلچەملىك نام بويىچە تولۇق دەل كېلىش (Case-insensitive)
+    const lower = cleanCat.toLowerCase();
     for (const [key, map] of Object.entries(CATEGORY_LOCALIZATIONS)) {
-      if (category.includes(key) || key.includes(brandKeyClean(category))) {
-        return map[lang] || category;
+      if (
+        key.toLowerCase() === lower ||
+        (map.ug && map.ug.toLowerCase() === lower) ||
+        (map.tr && map.tr.toLowerCase() === lower) ||
+        (map.en && map.en.toLowerCase() === lower)
+      ) {
+        return map[lang] || map.ug || cleanCat;
       }
     }
-    return this.autoTranslateUyghur(category, lang);
+
+    // 3. بىرىكمە ياكى بۆلەكلىك ماسلىشىش (ئەگەر كاتېگورىيەدە قوشۇمچە تېكىست ياكى پەرقلەر بولسا)
+    for (const [key, map] of Object.entries(CATEGORY_LOCALIZATIONS)) {
+      const ugK = (map.ug || key).toLowerCase();
+      const trK = (map.tr || '').toLowerCase();
+      const enK = (map.en || '').toLowerCase();
+      if (
+        (trK && (lower.includes(trK) || trK.includes(lower))) ||
+        (ugK && (lower.includes(ugK) || ugK.includes(lower))) ||
+        (enK && (lower.includes(enK) || enK.includes(lower)))
+      ) {
+        return map[lang] || map.ug || cleanCat;
+      }
+    }
+
+    return this.autoTranslateUyghur(cleanCat, lang);
   }
 
   getBadgeName(badge, targetLang = null) {

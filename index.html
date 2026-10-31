@@ -2155,15 +2155,13 @@
     </div>
   </div>
 
-  <!-- 🎡 ئامەت چاقى لەيلىمە تۈگمىسى (Floating Lucky Wheel Button) -->
-  <button type="button" id="btnOpenLuckyWheel" class="floating-lucky-wheel-btn" onclick="openLuckyWheelModal()" title="ئامەت چاقى — كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!">
+  <!-- 🎡 سىپتا يۇمىلاق ئامەت چاقى لەيلىمە تۈگمىسى (Sleek Circular Floating Wheel) -->
+  <button type="button" id="btnOpenLuckyWheel" class="floating-lucky-wheel-btn" onclick="openLuckyWheelModal()" title="ئامەت چاقى — كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!" aria-label="ئامەت چاقى">
     <div class="lucky-wheel-icon-wrap">
       <i class="fas fa-dharmachakra"></i>
     </div>
-    <div class="lucky-wheel-btn-texts">
-      <span class="lucky-wheel-btn-title">🎡 ئامەت چاقى</span>
-      <span class="lucky-wheel-btn-sub">1 قېتىم ھەقسىز!</span>
-    </div>
+    <span class="wheel-free-badge" id="luckyWheelFloatingBadge" title="1 قېتىم ھەقسىز پۇرسىتىڭىز بار">1</span>
+    <span class="floating-contact-tooltip lucky-wheel-tooltip">🎡 ئامەت چاقى — 1 قېتىم ھەقسىز!</span>
   </button>
 
 
@@ -2174,14 +2172,26 @@
     </div>
   </div>
 
-  <!-- 📱 لەيلىمە تېز ئالاقە كۇنۇپكىلىرى (Floating Quick Contact Buttons) -->
-  <div class="floating-contact-wrap">
-    <!-- ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش كۇنۇپكىسى -->
-    <button type="button" id="adminLiveChatToggleBtn" class="floating-contact-btn floating-btn-chat" title="ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش">
-      <i class="fas fa-comments"></i>
+  <!-- 📱 بىردىنبىر ئەقىللىق بىرىكمە ئالاقە كۇنۇپكىسى (Single Smart Floating Contact Hub) -->
+  <div class="floating-contact-hub" id="floatingContactHub">
+    <!-- ئېچىلىدىغان تاللاش تىزىملىكى (Popup Menu) -->
+    <div class="contact-hub-menu" id="contactHubMenu">
+      <a href="https://wa.me/905551609999?text=%D8%A6%DB%95%D8%B3%D8%B3%D8%A7%D9%84%D8%A7%D9%85%DB%8Byte%20%D8%A6%DB%95%D9%84%DB%95%D9%8A%D9%83%DB%89%D9%85%D8%8C%20%D8%AA%DB%95%D9%83%D9%84%D9%89%D9%85%D8%A7%D9%83%D8%A7%D9%86%20%D8%AA%D9%88%D8%B1%20%D8%AA%D8%A7%D9%84%D9%84%D8%A7%20%D8%A8%D8%A7%D8%B2%D9%89%D8%B1%D9%89%20%D9%85%DB%95%DA%BE%D8%B3%DB%89%D9%84%D8%A7%D8%AA%D9%84%D9%89%D8%B1%D9%89%20%D8%AA%D9%88%D8%BA%D8%B1%D9%89%D8%B3%D9%89%D8%AF%D8%A7%20%D9%85%DB%95%D8%B3%D9%84%D9%90%DA%BE%DB%95%D8%AA%20%D8%B3%D9%88%D8%B1%D9%89%D9%85%D8%A7%D9%82%DA%89%D9%89%20%D8%A6%D9%89%D8%AF%D9%89%D9%85." target="_blank" rel="noopener noreferrer" class="hub-menu-item hub-item-whatsapp" title="WhatsApp بىۋاسىتە ئالاقە لىنىيەسى">
+        <i class="fab fa-whatsapp"></i>
+        <span>WhatsApp ئالاقە</span>
+      </a>
+      <button type="button" id="adminLiveChatToggleBtn" class="hub-menu-item hub-item-chat" title="ئالىي باشقۇرغۇچى بىلەن بىۋاسىتە پاراڭلىشىش">
+        <i class="fas fa-comments"></i>
+        <span>بىۋاسىتە پاراڭلىشىش</span>
+      </button>
+    </div>
+
+    <!-- تاشقى ئاساسىي كۇنۇپكا (توسۇۋالمايدىغان كىچىك بىرىكمە تۈگمە) -->
+    <button type="button" class="contact-hub-trigger" id="contactHubTrigger" aria-label="بىۋاسىتە پاراڭ ۋە WhatsApp ئالاقە" title="تېز ئالاقە ۋە پاراڭلىشىش">
+      <i class="fas fa-headset hub-icon-open"></i>
+      <i class="fas fa-times hub-icon-close" style="display: none;"></i>
       <span class="chat-online-dot" title="ھازىر توردا"></span>
       <span class="chat-unread-badge" id="chatUnreadBadge" style="display: none;">0</span>
-      <span class="floating-contact-tooltip">ئالىي باشقۇرغۇچى بىلەن پاراڭلىشىش</span>
     </button>
   </div>
 

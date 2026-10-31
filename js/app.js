@@ -266,6 +266,7 @@ function initTeklimakanApp() {
     try { renderCharityTrustBanner(); } catch (e) {}
     try { initSmartHeroScroll(); } catch (e) { console.error('initSmartHeroScroll error:', e); }
     try { initSmartScrollToggle(); } catch (e) { console.error('initSmartScrollToggle error:', e); }
+    try { renderRecentlyViewedShelf(); } catch (e) {}
 
     if (window.appStore && typeof window.appStore.syncWithSupabase === 'function') {
       window.appStore.syncWithSupabase({ force: true }).then(() => {
@@ -1401,8 +1402,11 @@ function initTeklimakanApp() {
         <div class="product-badges">
           ${badgeHtml}
         </div>
-        <button class="product-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="Wishlist">
+        <button class="product-wish-btn ${isWish ? 'active' : ''}" data-id="${product.id}" title="ياقتۇرغانلارغا قوشۇش">
           <i class="${isWish ? 'fas' : 'far'} fa-heart"></i>
+        </button>
+        <button type="button" class="product-share-btn" data-id="${product.id}" title="ھەمبەھىرلەش">
+          <i class="fas fa-share-nodes"></i>
         </button>
       </div>
       <div class="product-card-body">
@@ -1431,9 +1435,13 @@ function initTeklimakanApp() {
         </div>
 
         <div class="product-card-actions">
-          <button class="btn-add-cart" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''}>
+          <button class="btn-add-cart" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''} title="${i18n.t('addToCart')}">
             <i class="fas fa-shopping-bag"></i>
             <span>${product.stock <= 0 ? i18n.t('outOfStock') : i18n.t('addToCart')}</span>
+          </button>
+          <button class="btn-quick-buy" data-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''} title="${i18n.t('quickBuyTitle') || '15 سېكۇنتتا تېز زاكاز قىلىش'}">
+            <i class="fas fa-bolt"></i>
+            <span>${i18n.t('quickBuy') || '⚡ دەرھال'}</span>
           </button>
         </div>
       </div>
@@ -1534,9 +1542,14 @@ function initTeklimakanApp() {
               ${formattedOldPrice ? `<span class="shelf-card-old-price number-latin">${formattedOldPrice}</span>` : ''}
             </div>
 
-            <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
-                <i class="fas fa-shopping-bag"></i> <span>${currentLang === 'tr' ? 'Sepete Ekle' : (currentLang === 'en' ? 'Add to Cart' : 'سېۋەتكە')}</span>
-              </button>
+            <div class="shelf-card-actions">
+                <button type="button" class="shelf-card-add-btn" data-id="${product.id}">
+                  <i class="fas fa-shopping-bag"></i> <span>${currentLang === 'tr' ? 'Sepete' : (currentLang === 'en' ? 'Cart' : 'سېۋەتكە')}</span>
+                </button>
+                <button type="button" class="shelf-card-quick-buy-btn" data-id="${product.id}" title="15 سېكۇنتتا تېز زاكاز">
+                  <i class="fas fa-bolt"></i> <span>${currentLang === 'tr' ? 'Hızlı Al' : (currentLang === 'en' ? 'Buy Now' : '⚡ دەرھال')}</span>
+                </button>
+              </div>
           </div>
         </div>
       `;
@@ -1560,6 +1573,15 @@ function initTeklimakanApp() {
           if (typeof playChime === 'function') playChime('click');
           const msg = added ? 'ياقتۇرغانلارغا قوشۇلدى!' : 'ياقتۇرغانلاردىن ئۆچۈرۈلدى!';
           if (typeof showToast === 'function') showToast(msg, 'success');
+        });
+      }
+
+      // Shelf Quick Buy button click
+      const quickBtn = card.querySelector('.shelf-card-quick-buy-btn');
+      if (quickBtn) {
+        quickBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (typeof openQuickBuyModal === 'function') openQuickBuyModal(product.id, 1);
         });
       }
 
@@ -1697,6 +1719,26 @@ function initTeklimakanApp() {
         const card = title.closest('.product-card');
         const id = card ? card.dataset.id : null;
         if (id) openQuickView(id);
+      });
+    });
+
+    grid.querySelectorAll('.btn-quick-buy').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pid = btn.dataset.id;
+        if (pid && typeof openQuickBuyModal === 'function') {
+          openQuickBuyModal(pid, 1);
+        }
+      });
+    });
+
+    grid.querySelectorAll('.product-share-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pid = btn.dataset.id;
+        if (pid && typeof window.shareProduct === 'function') {
+          window.shareProduct(pid, e);
+        }
       });
     });
 
@@ -1967,11 +2009,68 @@ function initTeklimakanApp() {
       }
     }
 
-    // 🚚 1000 لىرا ھەقسىز يەتكۈزۈش پىرسەنتى
+    // 🚚 1000 لىرا ھەقسىز يەتكۈزۈش پىرسەنتى ۋە ئەقىللىق تاۋار تەكلىپى
     const threshold = cartData.threshold;
     const currentSub = cartData.convertedSubtotal;
     const percent = Math.min(100, Math.round((currentSub / threshold) * 100));
     if (freeShippingBar) freeShippingBar.style.width = `${percent}%`;
+
+    const upsellWrap = document.getElementById('cartFreeShippingUpsell');
+    if (freeShippingText) {
+      if (percent >= 100) {
+        freeShippingText.innerHTML = `<span style="color: #16a34a; font-weight: 800;">🎉 ${lang === 'tr' ? 'Tebrikler! Kargo Tamamen Ücretsiz!' : (lang === 'en' ? 'Congratulations! Shipping is Free!' : 'تەبرىكلەيمىز! زاكازىڭىز پۈتۈنلەي ھەقسىز يەتكۈزۈلىدۇ!')}</span>`;
+        if (upsellWrap) upsellWrap.style.display = 'none';
+      } else {
+        const diff = threshold - currentSub;
+        const diffFormatted = store.formatPrice(diff);
+        freeShippingText.innerHTML = `🚚 ${lang === 'tr' ? `Sepetinize <b style="color: #ef4444;">${diffFormatted}</b> daha ekleyin, <b>Kargo Bedava</b> olsun!` : (lang === 'en' ? `Add <b style="color: #ef4444;">${diffFormatted}</b> more for <b>Free Shipping</b>!` : `يەنە <b style="color: #ef4444;">${diffFormatted}</b> لىك مال قوشسىڭىز، <b>ھەقسىز يەتكۈزۈلىدۇ!</b>`)}`;
+
+        // ئەقىللىق تاۋارلارنى تاللاپ كۆرسىتىش
+        if (upsellWrap) {
+          const allProds = store.getProductsByLang(lang) || [];
+          const cartIds = (cartData.items || []).map(i => i.product.id);
+          const addOnMatches = allProds
+            .filter(p => !cartIds.includes(p.id) && p.stock > 0 && Number(p.price) <= Math.max(diff * 1.5, 180))
+            .slice(0, 3);
+
+          if (addOnMatches.length > 0) {
+            upsellWrap.style.display = 'block';
+            upsellWrap.innerHTML = `
+              <div class="cart-shipping-upsell-title">
+                <i class="fas fa-sparkles" style="color: #f59e0b;"></i>
+                <span>${lang === 'tr' ? 'Kargoyu bedava yapmak için önerilenler:' : (lang === 'en' ? 'Recommended items to reach free shipping:' : 'ھەقسىز يەتكۈزۈشكە يېتىش ئۈچۈن قوشۇۋېلىشقا ئەڭ قولايلىق:')}</span>
+              </div>
+              <div class="cart-upsell-row">
+                ${addOnMatches.map(p => `
+                  <div class="cart-upsell-item" title="${p.name}">
+                    <img src="${p.image || 'images/default_product.jpg'}" alt="${p.name}">
+                    <div class="cart-upsell-meta">
+                      <span class="cart-upsell-name">${p.name}</span>
+                      <span class="cart-upsell-price">${store.formatPrice(p.price)}</span>
+                    </div>
+                    <button type="button" class="cart-upsell-btn" data-id="${p.id}" title="سېۋەتكە قوشۇش">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            upsellWrap.querySelectorAll('.cart-upsell-btn').forEach(b => {
+              b.addEventListener('click', () => {
+                const addId = b.dataset.id;
+                const r = store.addToCart(addId, 1);
+                if (r && r.success) {
+                  if (typeof playChime === 'function') playChime('click');
+                  updateCartUI();
+                }
+              });
+            });
+          } else {
+            upsellWrap.style.display = 'none';
+          }
+        }
+      }
+    }
 
     const info = store.getCurrencyInfo();
     if (freeShippingText) {
@@ -2551,28 +2650,34 @@ function initTeklimakanApp() {
             </div>
           ` : ''}
 
-          <!-- 4-Step Progress Tracker -->
+          <!-- 5-Step Connected Progress Tracker -->
           <div style="margin: 1.25rem 0;">
-            <div class="track-timeline" style="display: flex; justify-content: space-between; position: relative; gap: 0.5rem;">
-              ${[
-                { step: 1, title: curSteps[0], icon: 'fa-clipboard-check' },
-                { step: 2, title: curSteps[1], icon: 'fa-box-open' },
-                { step: 3, title: curSteps[2], icon: 'fa-truck-fast' },
-                { step: 4, title: curSteps[3], icon: 'fa-house-circle-check' }
-              ].map(s => {
-                const isActive = !isCancelled && currentStep >= s.step;
-                const isCurrent = !isCancelled && currentStep === s.step;
-                return `
-                  <div class="track-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}" style="flex: 1; text-align: center; position: relative; z-index: 1;">
-                    <div class="track-step-circle" style="width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 0.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; transition: all 0.3s; background: ${isActive ? '#0284c7' : '#f1f5f9'}; color: ${isActive ? '#ffffff' : '#94a3b8'}; border: 2px solid ${isActive ? '#0284c7' : '#e2e8f0'};">
-                      <i class="fas ${s.icon}"></i>
+            <div class="track-timeline-wrap">
+              <div class="track-timeline-bar-bg">
+                <div class="track-timeline-bar-fill" style="width: ${isCancelled ? '0%' : (currentStep <= 1 ? '10%' : (currentStep === 2 ? '35%' : (currentStep === 3 ? '65%' : (currentStep >= 4 ? '100%' : '10%'))))};"></div>
+              </div>
+              <div class="track-timeline" style="display: flex; justify-content: space-between; position: relative; z-index: 1;">
+                ${[
+                  { step: 1, title: lang === 'tr' ? 'Alındı' : (lang === 'en' ? 'Received' : 'زاكاز ئېلىندى'), icon: 'fa-file-invoice' },
+                  { step: 2, title: lang === 'tr' ? 'Onaylandı' : (lang === 'en' ? 'Confirmed' : 'تەستىقلاندى'), icon: 'fa-check' },
+                  { step: 3, title: lang === 'tr' ? 'Paketlendi' : (lang === 'en' ? 'Packed' : 'كورو قاچىلاندى'), icon: 'fa-box' },
+                  { step: 4, title: lang === 'tr' ? 'Kargoda' : (lang === 'en' ? 'Shipped' : 'يولدا'), icon: 'fa-truck-fast' },
+                  { step: 5, title: lang === 'tr' ? 'Teslim' : (lang === 'en' ? 'Delivered' : 'يەتكۈزۈلدى'), icon: 'fa-house-circle-check' }
+                ].map(s => {
+                  const isActive = !isCancelled && currentStep >= (s.step === 5 ? 4 : s.step);
+                  const isCurrent = !isCancelled && (currentStep === s.step || (currentStep >= 4 && s.step === 5));
+                  return `
+                    <div class="track-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}" style="flex: 1; text-align: center;">
+                      <div class="track-step-circle" style="width: 34px; height: 34px; border-radius: 50%; margin: 0 auto 0.35rem; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; transition: all 0.3s; background: ${isActive ? '#0284c7' : '#ffffff'}; color: ${isActive ? '#ffffff' : '#94a3b8'}; border: 2px solid ${isActive ? '#0284c7' : '#cbd5e1'};">
+                        <i class="fas ${s.icon}"></i>
+                      </div>
+                      <div style="font-size: 0.72rem; font-weight: ${isActive ? '800' : '600'}; color: ${isActive ? '#0f172a' : '#94a3b8'}; line-height: 1.2;">
+                        ${s.title}
+                      </div>
                     </div>
-                    <div style="font-size: 0.76rem; font-weight: ${isActive ? '800' : '600'}; color: ${isActive ? '#0f172a' : '#94a3b8'}; line-height: 1.3;">
-                      ${s.title}
-                    </div>
-                  </div>
-                `;
-              }).join('')}
+                  `;
+                }).join('')}
+              </div>
             </div>
             ${isCancelled ? `
               <div style="margin-top: 0.85rem; padding: 0.5rem; background: #fee2e2; border-radius: 8px; text-align: center; color: #ef4444; font-weight: 700; font-size: 0.85rem;">
@@ -2734,6 +2839,7 @@ function initTeklimakanApp() {
 
   // ==================== تېز كۆرۈش ====================
   function openQuickView(productId) {
+    try { trackRecentlyViewed(productId); } catch(e) {}
     if (!productId) return;
     const cleanId = String(productId).replace(/^#/, '').trim();
     const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
@@ -10629,6 +10735,47 @@ ${text}
         initDailyFlashSaleShelf();
       }
     });
+
+    // 🎁 كۈندە پەقەت 1 قېتىم سىپتا كۇپون تەكلىپى قىلىش (Gentle Daily Toast)
+    try {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const lastPromptDate = localStorage.getItem('teklimakan_wheel_prompt_date');
+      const checkSpin = window.appStore.canCustomerSpinToday ? window.appStore.canCustomerSpinToday() : { canSpin: true };
+
+      if (checkSpin.canSpin && lastPromptDate !== todayStr && wheelCfg.enabled !== false) {
+        setTimeout(() => {
+          const toast = document.getElementById('wheelInviteToast');
+          const btnAccept = document.getElementById('btnAcceptWheelInvite');
+          const btnDismiss = document.getElementById('btnDismissWheelInvite');
+
+          if (!toast) return;
+          const i18n = window.appI18n;
+          const lang = i18n ? i18n.getLang() : 'ug';
+          const titleEl = document.getElementById('wheelInviteTitle');
+          const descEl = document.getElementById('wheelInviteDesc');
+
+          if (titleEl) titleEl.textContent = lang === 'tr' ? '🎁 Bugün 1 defa ücretsiz hakkınız var!' : (lang === 'en' ? '🎁 You have 1 free spin today!' : '🎁 بۈگۈنكى ھەقسىز كۇپون پۇرسىتىڭىز بار!');
+          if (descEl) descEl.textContent = lang === 'tr' ? 'Çarkı çevirerek anında hediye kupon kazanın' : (lang === 'en' ? 'Spin the wheel to win your coupon' : 'چاقنى ئايلاندۇرۇپ پۇل كۇپونى ئۇتۇۋېلىڭ');
+          if (btnAccept) btnAccept.textContent = lang === 'tr' ? 'Çevir' : (lang === 'en' ? 'Spin' : 'ئايلاندۇرۇش');
+
+          toast.classList.remove('hide');
+          localStorage.setItem('teklimakan_wheel_prompt_date', todayStr);
+
+          const closeInvite = () => {
+            toast.classList.add('hide');
+          };
+
+          if (btnAccept) btnAccept.onclick = () => {
+            closeInvite();
+            openLuckyWheelModal();
+          };
+          if (btnDismiss) btnDismiss.onclick = closeInvite;
+
+          // 8 سېكۇنتتىن كېيىن ئۆزى يىغىلىش
+          setTimeout(closeInvite, 8000);
+        }, 12000);
+      }
+    } catch(e) {}
   }
 
   function openLuckyWheelModal() {
@@ -11033,6 +11180,139 @@ ${text}
   window.showToast = showToast;
   window.openTrackOrderModal = openTrackOrderModal;
   window.doTrackOrder = doTrackOrder;
+  // ==================== 📤 بىر چېكىپ ھەمبەھىرلەش (Viral 1-Tap Share) ====================
+  window.shareProduct = async function(productId, event) {
+    if (event) event.stopPropagation();
+    if (!productId || !window.appStore) return;
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    const prod = window.appStore.getProduct(productId);
+    if (!prod) return;
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productId}`;
+    const shareTitle = prod.name;
+    const shareText = lang === 'tr' 
+      ? `${prod.name} (${window.appStore.formatPrice(prod.price)}) - Teklimakan Online'da inceleyin!`
+      : (lang === 'en'
+        ? `Check out ${prod.name} (${window.appStore.formatPrice(prod.price)}) on Teklimakan!`
+        : `تەكلىماكان تورىدىكى «${prod.name}» (${window.appStore.formatPrice(prod.price)}) مەھسۇلاتىنى كۆرۈپ بېقىڭ!`);
+
+    if (navigator.share && /mobile|android|iphone/i.test(navigator.userAgent)) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') console.warn('navigator.share fallback', err);
+      }
+    }
+
+    // Fallback: Copy link and open WhatsApp share option
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
+        const copyMsg = lang === 'tr' ? 'Ürün bağlantısı panoya kopyalandı!' : (lang === 'en' ? 'Product link copied to clipboard!' : 'مەھسۇلات ئۇلانمىسى كۆچۈرۈلدى!');
+        if (typeof showToast === 'function') showToast(copyMsg, 'success');
+      });
+    }
+
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    window.open(waUrl, '_blank');
+  };
+
+  // ==================== 👀 يېقىندا كۆرگەنلىرىڭىز (Recently Viewed Tracking & Shelf) ====================
+  function trackRecentlyViewed(productId) {
+    if (!productId) return;
+    try {
+      let list = JSON.parse(localStorage.getItem('teklimakan_recently_viewed') || '[]');
+      list = list.filter(id => id !== productId);
+      list.unshift(productId);
+      if (list.length > 8) list = list.slice(0, 8);
+      localStorage.setItem('teklimakan_recently_viewed', JSON.stringify(list));
+      renderRecentlyViewedShelf();
+    } catch(e) {}
+  }
+  window.trackRecentlyViewed = trackRecentlyViewed;
+
+  function renderRecentlyViewedShelf() {
+    const container = document.getElementById('recentlyViewedContainer');
+    const track = document.getElementById('recentlyViewedTrack');
+    const btnClear = document.getElementById('btnClearRecent');
+    if (!container || !track || !window.appStore) return;
+
+    const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+    let recentIds = [];
+    try {
+      recentIds = JSON.parse(localStorage.getItem('teklimakan_recently_viewed') || '[]');
+    } catch(e) {}
+
+    if (!Array.isArray(recentIds) || recentIds.length < 2) {
+      container.style.display = 'none';
+      return;
+    }
+
+    const prods = recentIds.map(id => window.appStore.getProduct(id)).filter(Boolean);
+    if (prods.length < 2) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    track.innerHTML = prods.map(p => {
+      const priceStr = window.appStore.formatPrice(p.price);
+      return `
+        <div class="shelf-product-card" data-id="${p.id}" style="cursor: pointer;">
+          <div class="shelf-card-thumb-wrap">
+            <img class="shelf-card-img" src="${p.image || 'images/default_product.jpg'}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
+          </div>
+          <div class="shelf-card-body">
+            <div>
+              <div class="shelf-card-brand"><span>${p.brand || 'تەكلىماكان'}</span></div>
+              <h4 class="shelf-card-title" title="${p.name}">${p.name}</h4>
+            </div>
+            <div>
+              <div class="shelf-card-pricing">
+                <span class="shelf-card-price number-latin">${priceStr}</span>
+              </div>
+              <button type="button" class="shelf-card-add-btn" data-id="${p.id}">
+                <i class="fas fa-shopping-bag"></i> <span>${lang === 'tr' ? 'Sepete' : (lang === 'en' ? 'Add' : 'سېۋەتكە')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    track.querySelectorAll('.shelf-product-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.shelf-card-add-btn')) return;
+        const pid = card.dataset.id;
+        if (pid) openQuickView(pid);
+      });
+      const addBtn = card.querySelector('.shelf-card-add-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const r = window.appStore.addToCart(card.dataset.id, 1);
+          if (r && r.success) {
+            if (typeof playChime === 'function') playChime('success');
+            if (typeof showToast === 'function') showToast(r.message, 'success');
+            if (typeof updateCartUI === 'function') updateCartUI();
+          }
+        });
+      }
+    });
+
+    if (btnClear) {
+      btnClear.onclick = () => {
+        localStorage.removeItem('teklimakan_recently_viewed');
+        container.style.display = 'none';
+      };
+    }
+  }
+  window.renderRecentlyViewedShelf = renderRecentlyViewedShelf;
+
   window.openQuickView = openQuickView;
   window.checkUrlForProduct = checkUrlForProduct;
   window.openLuckyWheelModal = openLuckyWheelModal;

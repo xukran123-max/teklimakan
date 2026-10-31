@@ -518,6 +518,7 @@
           <div class="shipping-progress">
             <div class="shipping-progress-fill" id="cartShippingProgressFill" style="width: 0%;"></div>
           </div>
+          <div id="cartFreeShippingUpsell" class="cart-shipping-upsell" style="display: none;"></div>
         </div>
 
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
@@ -2156,6 +2157,21 @@
   </div>
 
   <!-- 🎡 سىپتا يۇمىلاق ئامەت چاقى لەيلىمە تۈگمىسى (Sleek Circular Floating Wheel) -->
+  <!-- 🎁 كۈندىلىك سىپتا كۇپون تەكلىپى (Daily Gentle Wheel Invitation Toast) -->
+  <div class="wheel-invite-toast hide" id="wheelInviteToast">
+    <div class="wheel-invite-content">
+      <span class="wheel-invite-icon">🎁</span>
+      <div class="wheel-invite-text">
+        <strong id="wheelInviteTitle">كۈندىلىك ھەقسىز كۇپون پۇرسىتىڭىز بار!</strong>
+        <small id="wheelInviteDesc">چاقنى ئايلاندۇرۇپ پۇل كۇپونى ئۇتۇڭ</small>
+      </div>
+    </div>
+    <div class="wheel-invite-actions">
+      <button type="button" class="wheel-invite-btn" id="btnAcceptWheelInvite">ئايلاندۇرۇش</button>
+      <button type="button" class="wheel-invite-close" id="btnDismissWheelInvite" aria-label="تاقاش"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
   <button type="button" id="btnOpenLuckyWheel" class="floating-lucky-wheel-btn" onclick="openLuckyWheelModal()" title="ئامەت چاقى — كۈندە 1 قېتىم ھەقسىز كۇپون ئۇتۇڭ!" aria-label="ئامەت چاقى">
     <div class="lucky-wheel-icon-wrap">
       <i class="fas fa-dharmachakra"></i>
@@ -2269,6 +2285,17 @@
       </div>
     </div>
   </div>
+
+  <!-- 👀 يېقىندا كۆرگەنلىرىڭىز (Recently Viewed Showcase Shelf) -->
+  <section class="recently-viewed-section container" id="recentlyViewedContainer" style="display: none; margin-bottom: 2.5rem;">
+    <div class="showcase-shelf-header" style="margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between;">
+      <h3 class="showcase-shelf-title" id="recentlyViewedTitle">👀 يېقىندا كۆرگەنلىرىڭىز</h3>
+      <button type="button" class="btn-clear-recent" id="btnClearRecent" style="background: transparent; border: none; color: var(--text-muted); font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <i class="fas fa-trash-alt"></i> <span>تازىلاش</span>
+      </button>
+    </div>
+    <div class="recently-viewed-track showcase-shelf-track" id="recentlyViewedTrack" style="display: flex; gap: 0.85rem; overflow-x: auto; padding-bottom: 0.75rem;"></div>
+  </section>
 
   <!-- تۆۋەنكى پۇت قىسمى (Footer) -->
   <footer class="main-footer">

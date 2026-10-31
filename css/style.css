@@ -7064,3 +7064,419 @@ html[dir="rtl"] .lucky-wheel-tooltip {
   }
 }
 
+
+
+/* ==================== ⚡ قوش تېز مەشغۇلات كۇنۇپكىسى (Dual Card Action Buttons) ==================== */
+.product-card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  width: 100% !important;
+  margin-top: 0.45rem !important;
+}
+
+.product-card-actions .btn-add-cart {
+  flex: 2 1 62% !important;
+  width: auto !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 0.4rem 0.5rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2) !important;
+}
+
+.product-card-actions .btn-quick-buy {
+  flex: 1 1 38% !important;
+  width: auto !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 0.4rem 0.45rem !important;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+  font-size: 0.8rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.product-card-actions .btn-quick-buy:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.shelf-card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  margin-top: 0.35rem !important;
+  width: 100% !important;
+}
+
+.shelf-card-actions .shelf-card-add-btn {
+  margin-top: 0 !important;
+  flex: 2 1 65% !important;
+  min-height: 32px !important;
+  padding: 0.3rem 0.35rem !important;
+  font-size: 0.74rem !important;
+}
+
+.shelf-card-quick-buy-btn {
+  flex: 1 1 35% !important;
+  min-height: 32px !important;
+  padding: 0.3rem 0.25rem !important;
+  border-radius: 8px !important;
+  border: 1px solid #a7f3d0 !important;
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.2rem !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+}
+
+.shelf-card-quick-buy-btn:hover {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+  .product-card-actions .btn-add-cart {
+    flex: 2 1 62% !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: 0.76rem !important;
+    padding: 0.3rem 0.35rem !important;
+  }
+  .product-card-actions .btn-quick-buy {
+    flex: 1 1 38% !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: 0.74rem !important;
+    padding: 0.3rem 0.3rem !important;
+  }
+}
+
+/* ==================== 📤 بىر چېكىپ ھەمبەھىرلەش تۈگمىسى (1-Tap Viral Share Button) ==================== */
+.product-share-btn {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  color: #64748b !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  z-index: 4 !important;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+html[dir="rtl"] .product-share-btn {
+  left: auto !important;
+  right: 10px !important;
+}
+
+html[dir="rtl"] .product-wish-btn {
+  right: auto !important;
+  left: 10px !important;
+}
+
+.product-share-btn:hover {
+  transform: scale(1.12) !important;
+  color: #0284c7 !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2) !important;
+}
+
+/* ==================== 🚚 سېۋەت ھەقسىز يەتكۈزۈش تاۋار تەكلىپى (Cart Free Shipping Upsell) ==================== */
+.cart-shipping-upsell {
+  margin-top: 0.75rem !important;
+  background: rgba(240, 253, 244, 0.8) !important;
+  border: 1px dashed #86efac !important;
+  border-radius: 10px !important;
+  padding: 0.55rem 0.65rem !important;
+}
+
+.cart-shipping-upsell-title {
+  font-size: 0.76rem !important;
+  font-weight: 800 !important;
+  color: #166534 !important;
+  margin-bottom: 0.45rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+}
+
+.cart-upsell-row {
+  display: flex !important;
+  gap: 0.45rem !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  padding-bottom: 2px !important;
+}
+
+.cart-upsell-row::-webkit-scrollbar {
+  display: none !important;
+}
+
+.cart-upsell-item {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  background: #ffffff !important;
+  border: 1px solid #bbf7d0 !important;
+  border-radius: 8px !important;
+  padding: 3px 6px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.cart-upsell-item img {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+}
+
+.cart-upsell-meta {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cart-upsell-name {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  max-width: 90px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.cart-upsell-price {
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  color: #059669 !important;
+}
+
+.cart-upsell-btn {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  width: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.75rem !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease !important;
+}
+
+.cart-upsell-btn:hover {
+  transform: scale(1.15) !important;
+}
+
+/* ==================== 🎁 كۈندىلىك سىپتا ئامەت چاقى تەكلىپى (Daily Gentle Wheel Toast) ==================== */
+.wheel-invite-toast {
+  position: fixed !important;
+  bottom: 5.5rem !important;
+  z-index: 1039 !important;
+  background: #ffffff !important;
+  border: 1.5px solid #fde68a !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25) !important;
+  padding: 0.65rem 0.85rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  max-width: 320px !important;
+  animation: slideToastUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+html[dir="rtl"] .wheel-invite-toast {
+  right: 4.8rem !important;
+  left: auto !important;
+}
+
+html[dir="ltr"] .wheel-invite-toast {
+  left: 4.8rem !important;
+  right: auto !important;
+}
+
+@keyframes slideToastUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wheel-invite-toast.hide {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px) scale(0.95) !important;
+}
+
+.wheel-invite-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.wheel-invite-icon {
+  font-size: 1.45rem !important;
+  line-height: 1 !important;
+}
+
+.wheel-invite-text strong {
+  display: block !important;
+  font-size: 0.8rem !important;
+  color: #0f172a !important;
+}
+
+.wheel-invite-text small {
+  display: block !important;
+  font-size: 0.72rem !important;
+  color: #64748b !important;
+}
+
+.wheel-invite-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  margin-inline-start: auto !important;
+}
+
+.wheel-invite-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 8px !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.wheel-invite-close {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  padding: 2px !important;
+  font-size: 0.8rem !important;
+}
+
+@media (max-width: 768px) {
+  .wheel-invite-toast {
+    bottom: 5.6rem !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  html[dir="rtl"] .wheel-invite-toast {
+    right: 1rem !important;
+    left: 1rem !important;
+  }
+  html[dir="ltr"] .wheel-invite-toast {
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+}
+
+/* ==================== 🛣️ زاكاز ئىز قوغلاش تۇتاش سىزىقى (5-Step Visual Timeline) ==================== */
+.track-timeline-wrap {
+  position: relative !important;
+  padding: 0.5rem 0 1rem !important;
+}
+
+.track-timeline-bar-bg {
+  position: absolute !important;
+  top: 24px !important;
+  left: 20px !important;
+  right: 20px !important;
+  height: 4px !important;
+  background: #e2e8f0 !important;
+  border-radius: 2px !important;
+  z-index: 0 !important;
+}
+
+.track-timeline-bar-fill {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, #0284c7 0%, #10b981 100%) !important;
+  border-radius: 2px !important;
+  transition: width 0.4s ease !important;
+}
+
+html[dir="rtl"] .track-timeline-bar-fill {
+  left: auto !important;
+  right: 0 !important;
+}
+
+.track-step.current .track-step-circle {
+  box-shadow: 0 0 0 5px rgba(2, 132, 199, 0.25) !important;
+  animation: pulseCurrentStep 2s infinite !important;
+}
+
+@keyframes pulseCurrentStep {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ==================== 👀 يېقىندا كۆرگەنلىرىڭىز بۆلىكى (Recently Viewed Shelf) ==================== */
+.recently-viewed-section {
+  padding: 1.5rem 1rem !important;
+  background: var(--bg-card, #ffffff) !important;
+  border: 1px solid var(--border-color, #e2e8f0) !important;
+  border-radius: 16px !important;
+}
+
+.recently-viewed-track .shelf-product-card {
+  flex: 0 0 160px !important;
+  width: 160px !important;
+}
+
+@media (max-width: 768px) {
+  .recently-viewed-track .shelf-product-card {
+    flex: 0 0 135px !important;
+    width: 135px !important;
+  }
+}
+

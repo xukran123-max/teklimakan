@@ -1,260 +1,199 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <!-- باش بەت (Homepage) -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://teklimakan.com/</loc>
-    <lastmod>2026-10-20</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  <!-- سەھىپە: ئۇيغۇر تىبابىتى -->
   <url>
-    <loc>https://teklimakan.com/?category=%D8%A6%DB%87%D9%8A%D8%BA%DB%87%D8%B1%20%D8%AA%D9%89%D8%A8%D8%A7%D8%A8%D9%89%D8%AA%D9%89</loc>
-    <lastmod>2026-10-20</lastmod>
+    <loc>https://teklimakan.com/p/koz-asrash-mejuni-koz-nuri-melhimi-prd-226</loc>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/koz_asrash_mejuni.webp</image:loc>
+      <image:title>كۆز ئاسراش مەجۇنى (كۆز نۇرى مەلھىمى)</image:title>
+    </image:image>
   </url>
-  <!-- سەھىپە: تەييار دورىلار -->
   <url>
-    <loc>https://teklimakan.com/?category=%D8%AA%DB%95%D9%8A%D9%8A%D8%A7%D8%B1%20%D8%AF%D9%88%D8%B1%D9%89%D9%84%D8%A7%D8%B1</loc>
-    <lastmod>2026-10-20</lastmod>
+    <loc>https://teklimakan.com/p/qara-mor-prd-420</loc>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: شىپالىق ئۆسۈملۈك -->
-  <url>
-    <loc>https://teklimakan.com/?category=%D8%B4%D9%89%D9%BE%D8%A7%D9%84%D9%89%D9%82%20%D8%A6%DB%86%D8%B3%DB%88%D9%85%D9%84%DB%88%D9%83</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: تەبىئىي مايلار -->
-  <url>
-    <loc>https://teklimakan.com/?category=%D8%AA%DB%95%D8%A8%D9%89%D8%A6%D9%89%D9%8A%20%D9%85%D8%A7%D9%8A%D9%84%D8%A7%D8%B1</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: گۈزەللىك ۋە ساغلاملىق -->
-  <url>
-    <loc>https://teklimakan.com/?category=%DA%AF%DB%88%D8%B2%DB%95%D9%84%D9%84%D9%89%D9%83%20%DB%8B%DB%95%20%D8%B3%D8%A7%D8%BA%D9%84%D8%A7%D9%85%D9%84%D9%89%D9%82</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: گۈلقەنتلەر -->
-  <url>
-    <loc>https://teklimakan.com/?category=%DA%AF%DB%88%D9%84%D9%82%DB%95%D9%86%D8%AA%D9%84%DB%95%D8%B1</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: قۇرۇق يەل-يېمىشلەر -->
-  <url>
-    <loc>https://teklimakan.com/?category=%D9%82%DB%87%D8%B1%DB%87%D9%82%20%D9%8A%DB%95%D9%84-%D9%8A%DB%90%D9%85%D9%89%D8%B4%D9%84%DB%95%D8%B1</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: ئۇيغۇرچە كىيىملەر -->
-  <url>
-    <loc>https://teklimakan.com/?category=%D8%A6%DB%87%D9%8A%D8%BA%DB%87%D8%B1%DA%86%DB%95%20%D9%83%D9%89%D9%8A%D9%89%D9%85%D9%84%DB%95%D8%B1</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- سەھىپە: كىتاپ ۋە مەدەنىيەت -->
-  <url>
-    <loc>https://teklimakan.com/?category=%D9%83%D9%89%D8%AA%D8%A7%D9%BE%20%DB%8B%DB%95%20%D9%85%DB%95%D8%AF%DB%95%D9%86%D9%89%D9%8A%DB%95%D8%AA</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-420.jpg</image:loc>
+      <image:title>قارا مور</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/zighir-yeghi-5-litir-prd-754</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/pinne-gulqenti-prd-325</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/seriq-ot-prd-840</loc>
-    <lastmod>2026-10-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-754.jpg</image:loc>
+      <image:title>زىغىر يېغى 5 لىتىر</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/qizigul-gulqenti-prd-119</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/yangaq-prd-988</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/zarangza-miyi-prd-358</loc>
-    <lastmod>2026-10-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-119.jpg</image:loc>
+      <image:title>قىزىگۈل گۈلقەنتى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/kawap-tetitqu-yurushluki-prd-128</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-128.jpg</image:loc>
+      <image:title>كاۋاپ تېتىتقۇ يۈرۈشلۈكى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/turpan-yeshil-uzumi-prd-103</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-103.jpg</image:loc>
+      <image:title>تۇرپان يېشىل ئۈزۈمى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/osma-meyi-prd-759</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/zarangza-chechiki-prd-218</loc>
-    <lastmod>2026-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-759.jpg</image:loc>
+      <image:title>ئوسما مېيى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/chach-asrash-yurushliki-prd-132</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/maddatulhayat-prd-451</loc>
-    <lastmod>2026-10-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/maddatulhayat-prd-701</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/zepe-prd-612</loc>
-    <lastmod>2026-10-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/gul-meyi-prd-341</loc>
-    <lastmod>2026-09-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/qeghez-badam-prd-755</loc>
-    <lastmod>2026-10-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/xushpuraq-tebiiy-qelempur-prd-114</loc>
-    <lastmod>2026-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/pinne-gulqenti-prd-100</loc>
-    <lastmod>2026-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/qara-kunjut-prd-910</loc>
-    <lastmod>2026-10-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/qeghez-yangaq-prd-789</loc>
-    <lastmod>2026-10-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-132.jpg</image:loc>
+      <image:title>چاچ ئاسراش يۈرۈشلىكى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/zeytun-meyi-prd-120</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-120.jpg</image:loc>
+      <image:title>زەيتۇن مېيى</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teklimakan.com/p/gul-meyi-prd-341</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-341.jpg</image:loc>
+      <image:title>گۈل مېيى</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teklimakan.com/p/xushpuraq-tebiiy-qelempur-prd-114</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-114.jpg</image:loc>
+      <image:title>خۇشپۇراق تەبىئىي قەلەمپۇر</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teklimakan.com/p/pinne-gulqenti-prd-100</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-100.jpg</image:loc>
+      <image:title>پىننە گۈلقەنتى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/abdimilik-yeghi-prd-292</loc>
-    <lastmod>2026-09-29</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-292.jpg</image:loc>
+      <image:title>ئابدىمىلىك يېغى</image:title>
+    </image:image>
   </url>
   <url>
-    <loc>https://teklimakan.com/p/qara-mor-prd-450</loc>
-    <lastmod>2026-09-30</lastmod>
+    <loc>https://teklimakan.com/p/enjur-uruqi-meyi-prd-474</loc>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/qeghez-yangaq-prd-185</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-474.jpg</image:loc>
+      <image:title>ئەنجۈر ئۇرۇقى مېيى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/qizil-uzum-500-giram-prd-113</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/enjur-uruqi-meyi-prd-537</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/uyghur-tibabet-qamusi-prd-121</loc>
-    <lastmod>2026-09-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://teklimakan.com/p/tuxum-yeghi-25ml-prd-225</loc>
-    <lastmod>2026-10-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-113.jpg</image:loc>
+      <image:title>قىزىل ئۈزۈم 500 گىرام</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/qeghez-yangaq-prd-458</loc>
-    <lastmod>2026-09-23</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-458.jpg</image:loc>
+      <image:title>قەغەز ياڭاق</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teklimakan.com/p/uyghur-tibabet-qamusi-prd-121</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-121.jpg</image:loc>
+      <image:title>ئۇيغۇر تىبابەت قامۇسى</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/kichik-chilan-prd-125</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-125.jpg</image:loc>
+      <image:title>كىچىك  چىلان</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://teklimakan.com/p/pile-ghozisi-prd-131</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teklimakan.com/images/products/PRD-131.jpg</image:loc>
+      <image:title>پىلە غوزىسى</image:title>
+    </image:image>
   </url>
 </urlset>

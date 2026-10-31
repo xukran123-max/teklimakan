@@ -2740,6 +2740,7 @@ function initTeklimakanApp() {
     const product = window.appStore.getProductById(cleanId, lang) ||
                     window.appStore.getProductById('PRD-' + cleanId, lang);
     if (!product) return;
+    updateProductJsonLd(product);
     // 🎯 Meta (Facebook & Instagram) Pixel: ViewContent
     try {
       if (typeof window.fbq === 'function') {
@@ -11365,4 +11366,57 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
       localStorage.setItem('teklimakan_pwa_dismissed', Date.now());
     });
   })();
+
+
+
+  // ==================== 🌐 Google Search & Images Rich Snippets (Schema.org Product) ====================
+  function updateProductJsonLd(product) {
+    if (!product) return;
+    try {
+      let script = document.getElementById('productDynamicJsonLd');
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'productDynamicJsonLd';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+
+      const lang = window.appI18n ? window.appI18n.getLang() : 'ug';
+      const price = Number(product.price) || 0;
+      const currency = (window.appStore && window.appStore.currentCurrency) || 'TRY';
+      const cleanImg = product.image ? (product.image.startsWith('http') ? product.image : 'https://teklimakan.com/' + product.image.replace(/^\/+/, '')) : 'https://teklimakan.com/images/logo_circle.png';
+      const prodUrl = 'https://teklimakan.com/?id=' + encodeURIComponent(product.id);
+
+      const schemaData = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        'name': product.name,
+        'image': [cleanImg],
+        'description': (product.description || product.name).replace(/<[^>]*>/g, ' ').slice(0, 300).trim(),
+        'sku': String(product.id),
+        'mpn': String(product.id),
+        'brand': {
+          '@type': 'Brand',
+          'name': (product.brand || 'Teklimakan')
+        },
+        'offers': {
+          '@type': 'Offer',
+          'url': prodUrl,
+          'priceCurrency': currency,
+          'price': price,
+          'priceValidUntil': new Date(Date.now() + 31536000000).toISOString().split('T')[0],
+          'itemCondition': 'https://schema.org/NewCondition',
+          'availability': product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          'seller': {
+            '@type': 'Organization',
+            'name': 'Teklimakan'
+          }
+        }
+      };
+
+      script.textContent = JSON.stringify(schemaData, null, 2);
+    } catch (e) {
+      console.warn('JSON-LD update error:', e);
+    }
+  }
 

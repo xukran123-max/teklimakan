@@ -7126,35 +7126,79 @@ html[dir="rtl"] .lucky-wheel-tooltip {
 }
 
 /* ==================== 📤 بىر چېكىپ ھەمبەھىرلەش تۈگمىسى (1-Tap Viral Share Button) ==================== */
-.product-share-btn {
+.product-wish-btn {
   position: absolute !important;
   top: 10px !important;
   left: 10px !important;
+  right: auto !important;
   width: 32px !important;
   height: 32px !important;
   border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.88rem !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.product-share-btn {
+  position: absolute !important;
+  top: 48px !important;
+  left: 10px !important;
+  right: auto !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   backdrop-filter: blur(4px) !important;
   border: 1px solid rgba(226, 232, 240, 0.8) !important;
   color: #64748b !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 0.85rem !important;
+  font-size: 0.82rem !important;
   cursor: pointer !important;
-  z-index: 4 !important;
+  z-index: 5 !important;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
 }
 
-html[dir="rtl"] .product-share-btn {
-  left: auto !important;
+.product-badges {
+  position: absolute !important;
+  top: 10px !important;
   right: 10px !important;
+  left: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.35rem !important;
+  z-index: 4 !important;
+  max-width: calc(100% - 55px) !important;
+  pointer-events: none !important;
 }
 
 html[dir="rtl"] .product-wish-btn {
-  right: auto !important;
   left: 10px !important;
+  right: auto !important;
+  top: 10px !important;
+}
+
+html[dir="rtl"] .product-share-btn {
+  left: 10px !important;
+  right: auto !important;
+  top: 48px !important;
+}
+
+html[dir="rtl"] .product-badges {
+  right: 10px !important;
+  left: auto !important;
+  top: 10px !important;
 }
 
 .product-share-btn:hover {

@@ -1048,6 +1048,46 @@ const BRAND_LOCALIZATIONS = {
     tr: 'Teklimakan Klasik',
     en: 'Teklimakan Classic'
   },
+  'تەكلىماكان شىپا': {
+    ug: 'تەكلىماكان شىپا',
+    tr: 'Teklimakan Şifa',
+    en: 'Teklimakan Shifa'
+  },
+  'Teklimakan Şifa': {
+    ug: 'تەكلىماكان شىپا',
+    tr: 'Teklimakan Şifa',
+    en: 'Teklimakan Shifa'
+  },
+  'teklimakan sifa': {
+    ug: 'تەكلىماكان شىپا',
+    tr: 'Teklimakan Şifa',
+    en: 'Teklimakan Shifa'
+  },
+  'Teklimakan Sifa': {
+    ug: 'تەكلىماكان شىپا',
+    tr: 'Teklimakan Şifa',
+    en: 'Teklimakan Shifa'
+  },
+  'تەكلىماكان تەبىئىي': {
+    ug: 'تەكلىماكان تەبىئىي',
+    tr: 'Teklimakan Doğal',
+    en: 'Teklimakan Natural'
+  },
+  'Teklimakan Doğal': {
+    ug: 'تەكلىماكان تەبىئىي',
+    tr: 'Teklimakan Doğal',
+    en: 'Teklimakan Natural'
+  },
+  'teklimakan dogal': {
+    ug: 'تەكلىماكان تەبىئىي',
+    tr: 'Teklimakan Doğal',
+    en: 'Teklimakan Natural'
+  },
+  'Teklimakan Dogal': {
+    ug: 'تەكلىماكان تەبىئىي',
+    tr: 'Teklimakan Doğal',
+    en: 'Teklimakan Natural'
+  },
   'خوتەن مىراس': {
     ug: 'خوتەن مىراس',
     tr: 'Hoten Miras',
@@ -1186,18 +1226,62 @@ const PROMO_BADGE_LOCALIZATIONS = {
   'پارقىراقلىق': { ug: 'پارقىراقلىق', tr: 'Parlatıcı Bakım', en: 'Radiant Glow' },
   'ئالتۇن مىراس': { ug: 'ئالتۇن مىراس', tr: 'Altın Miras', en: 'Golden Heritage' },
   'تاتلىق مىراس': { ug: 'تاتلىق مىراس', tr: 'Tatlı Miras', en: 'Sweet Heritage' },
-  'ئالىي كۈچ': { ug: 'ئالىي كۈچ', tr: 'Güç & Enerji', en: 'Vitality Boost' }
+  'ئالىي كۈچ': { ug: 'ئالىي كۈچ', tr: 'Güç & Enerji', en: 'Vitality Boost' },
+  // 🇹🇷 تۈركچە بەلگىلەر (Turkish Badges)
+  'Fırsat Ürünü': { ug: 'ئېتىبار مەھسۇلات', tr: 'Fırsat Ürünü', en: 'Special Deal' },
+  'Firsat Urunu': { ug: 'ئېتىبار مەھسۇلات', tr: 'Fırsat Ürünü', en: 'Special Deal' },
+  'Fırsat': { ug: 'ئېتىبار مەھسۇلات', tr: 'Fırsat', en: 'Deal' },
+  'Doğal %100': { ug: '%100 تەبىئىي', tr: '%100 Doğal', en: '100% Natural' },
+  'Dogal %100': { ug: '%100 تەبىئىي', tr: '%100 Doğal', en: '100% Natural' },
+  '%100 Doğal': { ug: '%100 تەبىئىي', tr: '%100 Doğal', en: '100% Natural' },
+  'Doğal': { ug: 'تەبىئىي', tr: 'Doğal', en: 'Natural' },
+  'Dogal': { ug: 'تەبىئىي', tr: 'Doğal', en: 'Natural' },
+  'Çok Satan': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Best Seller' },
+  'Cok Satan': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Best Seller' },
+  'En Çok Satan': { ug: 'ئەڭ قىزىق', tr: 'En Çok Satan', en: 'Best Seller' },
+  'Tavsiye': { ug: 'تەۋسىيە', tr: 'Tavsiye', en: 'Recommended' },
+  'Yeni': { ug: 'يېڭى كەلگەن', tr: 'Yeni', en: 'New' },
+  'Yeni Gelen': { ug: 'يېڭى كەلگەن', tr: 'Yeni Gelen', en: 'New Arrival' },
+  'Özel Formül': { ug: 'ئالاھىدە رېتسېپ', tr: 'Özel Formül', en: 'Special Formula' },
+  'Ozel Formul': { ug: 'ئالاھىدە رېتسېپ', tr: 'Özel Formül', en: 'Special Formula' },
+  'Şifalı Bitki': { ug: 'شىپالىق ئۆسۈملۈك', tr: 'Şifalı Bitki', en: 'Healing Herb' },
+  'Sifali Bitki': { ug: 'شىپالىق ئۆسۈملۈك', tr: 'Şifalı Bitki', en: 'Healing Herb' },
+  'Şifalı Lezzet': { ug: 'شىپالىق لەززەت', tr: 'Şifalı Lezzet', en: 'Healing Taste' },
+  'Sifali Lezzet': { ug: 'شىپالىق لەززەت', tr: 'Şifalı Lezzet', en: 'Healing Taste' },
+  'Özel Fiyat': { ug: 'ئالاھىدە باھا', tr: 'Özel Fiyat', en: 'Special Price' },
+  'Ozel Fiyat': { ug: 'ئالاھىدە باھا', tr: 'Özel Fiyat', en: 'Special Price' },
+  'Bestseller': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Bestseller' },
+  'Best Seller': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Best Seller' },
+  'Special Deal': { ug: 'ئېتىبار مەھسۇلات', tr: 'Fırsat Ürünü', en: 'Special Deal' },
+  'Featured': { ug: 'تەۋسىيە', tr: 'Tavsiye', en: 'Featured' }
 };
 
 // تۈرلەر ۋە تاۋار ناملىرى ئۈچۈن قوشۇمچە ئۆلچەملىك لۇغەت
 const CATEGORY_LOCALIZATIONS = {
   'ئۇيغۇر تىبابىتى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tıbbı': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tıbbı Mirası': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تىبابىتى مىراسى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى مىراسى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'تەبىئىي ۋە شىپالىق مايلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
+  'Doğal & Şifalı Yağlar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
+  'Dogal & Sifali Yaglar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
+  'تەبىئىي شىپالىق ياغلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
+  'Şifalı Bitkiler & Çaylar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
+  'Sifali Bitkiler & Caylar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
+  'چايلار': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
+  'Gülkand & Reçeller': { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' },
+  'Kuruyemişler': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' },
+  'Kuruyemisler': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' },
   'پىششىق دورىلار': { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
   'ئۆسۈملۈك دورىلار': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
   'تەبىئىي ياغلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
-  'تەبىئىي شىپالىق ياغلار': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
-  'Doğal & Şifalı Yağlar': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
-  'Dogal & Sifali Yaglar': { ug: 'تەبىئىي شىپالىق ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'تەبىئىي شىپالىق ياغلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'Doğal & Şifalı Yağlar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
+  'Dogal & Sifali Yaglar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural & Healing Oils' },
   'Doğal Yağlar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal Yağlar', en: 'Natural Oils' },
   'گۈزەللىك ۋە ساغلاملىق': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
   'گۈلقەنتلەر': { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' },
@@ -1234,7 +1318,7 @@ const CATEGORY_LOCALIZATIONS = {
   'قۇرۇق مېۋىلەر': { ug: 'قۇرۇق مېۋىلەر', tr: 'Kuru Meyveler', en: 'Dried Fruits' },
   'قۇرۇق مېۋە': { ug: 'قۇرۇق مېۋە', tr: 'Kuru Meyve', en: 'Dried Fruit' },
   'مېۋە-چېۋە': { ug: 'مېۋە-چېۋە', tr: 'Taze Meyveler', en: 'Fresh Fruits' },
-  'چايلار': { ug: 'چايلار', tr: 'Şifalı Çaylar', en: 'Herbal & Green Teas' },
+  'چايلار': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Çaylar', en: 'Herbal & Green Teas' },
   'ئورگانىك چايلار': { ug: 'ئورگانىك چايلار', tr: 'Organik Çaylar', en: 'Organic Teas' },
   'ھەسەل مەھسۇلاتلىرى': { ug: 'ھەسەل مەھسۇلاتلىرى', tr: 'Doğal Bal Ürünleri', en: 'Pure Honey Products' },
   'تەبىئىي ھەسەل': { ug: 'تەبىئىي ھەسەل', tr: 'Doğal Bal', en: 'Pure Natural Honey' },
@@ -1245,10 +1329,10 @@ const CATEGORY_LOCALIZATIONS = {
   'ئۆي بېزەكچىلىكى': { ug: 'ئۆي بېزەكچىلىكى', tr: 'Ev Dekorasyonu', en: 'Home Decor' },
   'كىتاب-مەدەنىيەت': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
   'ئەنئەنىۋى بۇيۇملار': { ug: 'ئەنئەنىۋى بۇيۇملار', tr: 'Geleneksel Ürünler', en: 'Traditional Products' },
-  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Geleneksel Şifa Ürünleri': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Geleneksel Sifa Urunleri': { ug: 'ئەنئەنىۋى شىپالىق مەھسۇلاتلار', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Şifa Ürünleri': { ug: 'شىپالىق مەھسۇلاتلار', tr: 'Şifa Ürünleri', en: 'Healing Products' },
+  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Sifa Urunleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Şifa Ürünleri', en: 'Healing Products' },
   'Uygur Tıbbı': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
   'Uygur Tibbi': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
   'Hazır & İşlenmiş İlaçlar': { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
@@ -1615,17 +1699,49 @@ class I18nManager {
     if (!brand) return '';
     const lang = targetLang || this.currentLang;
     if (brand === 'بارلىق ماركىلار') return this.t('allBrands', lang);
-    const direct = BRAND_LOCALIZATIONS[brand];
-    if (direct && direct[this.currentLang]) {
-      return direct[this.currentLang];
+    const cleanBrand = String(brand).trim();
+
+    // 1. بىۋاسىتە دەل كېلىش
+    if (BRAND_LOCALIZATIONS[cleanBrand] && BRAND_LOCALIZATIONS[cleanBrand][lang]) {
+      return BRAND_LOCALIZATIONS[cleanBrand][lang];
     }
+
+    // 2. چوڭ-كىچىك ھەرپ پەرقىسىز تەكشۈرۈش
+    const lower = cleanBrand.toLowerCase();
     for (const [key, map] of Object.entries(BRAND_LOCALIZATIONS)) {
-      if (brand.includes(key) || key.includes(brand)) {
-        return map[this.currentLang] || brand;
+      if (
+        key.toLowerCase() === lower ||
+        (map.ug && map.ug.toLowerCase() === lower) ||
+        (map.tr && map.tr.toLowerCase() === lower) ||
+        (map.en && map.en.toLowerCase() === lower)
+      ) {
+        return map[lang] || map.ug || cleanBrand;
       }
     }
-    // ئاپتوماتىك تەرجىمە قىلىش
-    return this.autoTranslateUyghur(brand, this.currentLang);
+
+    // 3. بىرىكمە ياكى بۆلەكلىك تەكشۈرۈش
+    for (const [key, map] of Object.entries(BRAND_LOCALIZATIONS)) {
+      const kLow = key.toLowerCase();
+      const trLow = (map.tr || '').toLowerCase();
+      const ugLow = (map.ug || '').toLowerCase();
+      if ((kLow && (lower.includes(kLow) || kLow.includes(lower))) ||
+          (trLow && (lower.includes(trLow) || trLow.includes(lower))) ||
+          (ugLow && (lower.includes(ugLow) || ugLow.includes(lower)))) {
+        return map[lang] || map.ug || cleanBrand;
+      }
+    }
+
+    // 4. ئۇيغۇرچە سەھىپىدە تۈركچە ماركا قالسا دەرھال ئايلاندۇرۇش
+    if (lang === 'ug') {
+      if (/şifa|sifa/i.test(cleanBrand)) return 'تەكلىماكان شىپا';
+      if (/doğal|dogal/i.test(cleanBrand)) return 'تەكلىماكان تەبىئىي';
+      if (/klasik|classic/i.test(cleanBrand)) return 'تەكلىماكان كىلاسسىك';
+      if (/online|pazaryeri/i.test(cleanBrand)) return 'تەكلىماكان تورى';
+      if (/teklimakan/i.test(cleanBrand)) return 'تەكلىماكان تورى';
+      return cleanBrand;
+    }
+
+    return this.autoTranslateUyghur(cleanBrand, lang);
   }
 
   getCategoryName(category, targetLang = null) {
@@ -1675,20 +1791,46 @@ class I18nManager {
   getBadgeName(badge, targetLang = null) {
     if (!badge) return '';
     const lang = targetLang || this.currentLang;
-    if (lang === 'ug') return badge;
-    if (PROMO_BADGE_LOCALIZATIONS && PROMO_BADGE_LOCALIZATIONS[badge] && PROMO_BADGE_LOCALIZATIONS[badge][lang]) {
-      return PROMO_BADGE_LOCALIZATIONS[badge][lang];
+    const clean = String(badge).trim();
+
+    // 1. بىۋاسىتە بارلىق ئاچقۇچ بويىچە تەكشۈرۈش
+    if (PROMO_BADGE_LOCALIZATIONS && PROMO_BADGE_LOCALIZATIONS[clean] && PROMO_BADGE_LOCALIZATIONS[clean][lang]) {
+      return PROMO_BADGE_LOCALIZATIONS[clean][lang];
     }
-    if (badge === 'ئەڭ قىزىق') return this.t('badgeHot');
-    if (badge === 'ئېتىباردا') return this.t('badgeSale');
-    if (badge === 'تەۋسىيە') return this.t('badgeFeatured');
-    if (badge === 'يېڭى كەلگەن') return this.t('badgeNew');
+
+    // 2. چوڭ-كىچىك ھەرپ پەرقىسىز تەكشۈرۈش
+    const lower = clean.toLowerCase();
     for (const [k, v] of Object.entries(PROMO_BADGE_LOCALIZATIONS || {})) {
-      if (badge.includes(k) || k.includes(badge)) {
-        return v[lang] || badge;
+      if (
+        k.toLowerCase() === lower ||
+        (v.tr && v.tr.toLowerCase() === lower) ||
+        (v.en && v.en.toLowerCase() === lower) ||
+        (v.ug && v.ug.toLowerCase() === lower)
+      ) {
+        return v[lang] || v.ug || clean;
       }
     }
-    return this.autoTranslateUyghur(badge, lang);
+
+    // 3. قىسمەن ماسلىشىش (Sub-string match)
+    for (const [k, v] of Object.entries(PROMO_BADGE_LOCALIZATIONS || {})) {
+      const trK = (v.tr || k).toLowerCase();
+      const ugK = (v.ug || '').toLowerCase();
+      if ((trK && (lower.includes(trK) || trK.includes(lower))) || (ugK && (lower.includes(ugK) || ugK.includes(lower)))) {
+        return v[lang] || v.ug || clean;
+      }
+    }
+
+    if (lang === 'ug') {
+      // ئەگەر ئۇيغۇرچىدا تۈركچە ئاتالغۇلار قېلىپ قالسا ئۇنى تەرجىمە قىلىش
+      if (/Fırsat|Firsat/i.test(clean)) return 'ئېتىبار مەھسۇلات';
+      if (/Doğal|Dogal/i.test(clean)) return '%100 تەبىئىي';
+      if (/Satan|Çok/i.test(clean)) return 'ئەڭ قىزىق';
+      if (/Tavsiye/i.test(clean)) return 'تەۋسىيە';
+      if (/Yeni/i.test(clean)) return 'يېڭى كەلگەن';
+      return clean;
+    }
+
+    return this.autoTranslateUyghur(clean, lang);
   }
 
   // 🛡️ سودىگەر ئىناۋەت دەرىجىسى بەلگىسىنى تەرجىمە قىلىش

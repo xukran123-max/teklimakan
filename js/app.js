@@ -1192,11 +1192,15 @@ function initTeklimakanApp() {
 
     if (container) {
       container.innerHTML = '';
+      const seenPills = new Set();
       categories.forEach(cat => {
         if (cat.id !== 'all' && (isPseudoCategory(cat.id) || isPseudoCategory(cat.name))) return;
+        const name = (cat.displayName || cat.name || '').trim();
+        if (seenPills.has(name)) return;
+        seenPills.add(name);
         const pill = document.createElement('button');
         pill.className = `category-pill ${currentCategory === cat.id ? 'active' : ''}`;
-        pill.innerHTML = `<i class="${cat.icon}"></i> <span>${cat.displayName}</span>`;
+        pill.innerHTML = `<i class="${cat.icon}"></i> <span>${name}</span>`;
         pill.addEventListener('click', () => {
           currentCategory = cat.id;
           document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
@@ -1210,11 +1214,16 @@ function initTeklimakanApp() {
 
     if (select) {
       select.innerHTML = `<option value="all">${window.appI18n.t('allCategories')}</option>`;
+      const seenOpts = new Set();
+      seenOpts.add(window.appI18n.t('allCategories'));
       categories.forEach(cat => {
         if (cat.id !== 'all' && !isPseudoCategory(cat.id) && !isPseudoCategory(cat.name)) {
+          const name = (cat.displayName || cat.name || '').trim();
+          if (seenOpts.has(name)) return;
+          seenOpts.add(name);
           const opt = document.createElement('option');
           opt.value = cat.id;
-          opt.textContent = cat.displayName;
+          opt.textContent = name;
           if (cat.id === currentCategory) opt.selected = true;
           select.appendChild(opt);
         }

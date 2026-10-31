@@ -56,7 +56,7 @@ const STORAGE_KEYS = {
   DELETED_PRODUCTS: 'teklimakan_ecom_deleted_products_v1',
   DELETED_AGENTS: 'teklimakan_ecom_deleted_agents_v1',
   ORDERS: 'teklimakan_ecom_orders_v4',
-  CATEGORIES: 'teklimakan_ecom_categories_v8',
+  CATEGORIES: 'teklimakan_ecom_categories_v9',
   BRANDS: 'teklimakan_ecom_brands_v4',
   AGENTS: 'teklimakan_ecom_agents_v1',
   REPUTATION_BADGES: 'teklimakan_ecom_reputation_badges_v1',
@@ -246,872 +246,1234 @@ const INITIAL_BRANDS = [
 // دەسلەپكى تاۋارلار تىزىملىكى (ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
 const INITIAL_PRODUCTS = [
   {
-    "id": "PRD-226",
-    "brand": "Teklimakan Online",
+    "id": "PRD-100",
+    "brand": "تەكلىماكان شىپا",
     "languageScope": "all",
-    "name": "كۆز ئاسراش مەجۇنى (كۆز نۇرى مەلھىمى)",
-    "category": "ئۇيغۇر تىبابىتى",
-    "price": 280,
-    "oldPrice": 350,
-    "stock": 100,
-    "sales": 42,
-    "rating": 5.0,
-    "ratingCount": 36,
+    "name": "ئەنئەنىۋى نانكېنى (500g)",
+    "category": "گۈلقەنت ۋە مۇراببالار",
+    "price": 390,
+    "oldPrice": 488,
+    "stock": 28,
+    "sales": 40,
+    "rating": 5,
+    "ratingCount": 18,
     "featured": true,
-    "badge": "تەۋسىيە",
-    "image": "images/products/koz_asrash_mejuni.webp",
-    "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەبىئىي تاغ ھەسىلى، زەپە، گۈلسامساق ۋە ئەبرىشەم كۈلى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. كۆز قۇرغاقلىشىش، چارچاش، تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز سېزىمى تۆۋەنلەشنى تۈگىتىدۇ؛ كۆرۈش قۇۋۋىتىنى ئاشۇرۇپ، كۆز نېرۋىلىرى ۋە قان ئايلىنىشنى ياخشىلايدۇ. %100 تەبىئىي، كونسېرۋانتسىز ساپ مەھسۇلات.",
+    "badge": "شىپالىق لەززەت",
+    "image": "images/products/PRD-100.jpg",
+    "description": "پىننە ۋە گۈل بەرگىنىڭ كۈچلۈك بىرىكمىسىدىن تەييارلانغان ئەنئەنىۋى نانكېنى.",
+    "unit": "500g قاچا",
     "translations": {
-      "en": {
-        "name": "Natural Herbal Eye Care & Vision Support Paste (250g)",
-        "unit": "Jar (250g)",
-        "badge": "Best Seller",
-        "category": "Uyghur Traditional Medicine",
-        "description": "Formulated using traditional Uyghur botanical wisdom with pure mountain honey, saffron, eyebright, and natural silk cocoon essence. Relieves digital eye strain, dryness, and fatigue while promoting visual clarity and microcirculation. 100% natural, additive-free, and chemical-free."
+      "ug": {
+        "name": "ئەنئەنىۋى نانكېنى (500g)",
+        "category": "گۈلقەنت ۋە مۇراببالار",
+        "description": "پىننە ۋە گۈل بەرگىنىڭ كۈچلۈك بىرىكمىسىدىن تەييارلانغان ئەنئەنىۋى نانكېنى.",
+        "unit": "500g قاچا",
+        "badge": "شىپالىق لەززەت"
       },
       "tr": {
-        "name": "Doğal Göz Bakım & Görme Destek Macunu (250g)",
-        "unit": "Kutu (250g)",
-        "badge": "Çok Satan",
-        "category": "Uygur Tıbbı",
-        "description": "Geleneksel Uygur tıbbının bin yıllık reçetesiyle; saf dağ balı, safran, gözotu ve ipek kozası özü gibi şifalı bitkilerden özenle hazırlanmıştır. Ekran ışığı, yorgunluk ve kuruluğa bağlı göz zayıflığını giderir, görme netliğini ve göz damarlarındaki kan dolaşımını destekler. %100 doğal, katkısız ve koruyucusuzdur."
+        "name": "Geleneksel Nanekani (500g)",
+        "category": "Gülkand & Reçeller",
+        "description": "Ferahlatıcı doğal nane ve gül yapraklarının şifalı birlikteliğiyle hazırlanan kadim geleneksel Nanekani.",
+        "unit": "Adet",
+        "badge": "Şifalı Lezzet"
       },
-      "ug": {
-        "name": "كۆز ئاسراش مەجۇنى (كۆز نۇرى مەلھىمى)",
-        "unit": "قۇتا (250g)",
-        "badge": "تەۋسىيە",
-        "category": "ئۇيغۇر تىبابىتى",
-        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەبىئىي تاغ ھەسىلى، زەپە، گۈلسامساق ۋە ئەبرىشەم كۈلى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. كۆز قۇرغاقلىشىش، چارچاش، تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز سېزىمى تۆۋەنلەشنى تۈگىتىدۇ؛ كۆرۈش قۇۋۋىتىنى ئاشۇرۇپ، كۆز نېرۋىلىرى ۋە قان ئايلىنىشنى ياخشىلايدۇ. %100 تەبىئىي، كونسېرۋانتسىز ساپ مەھسۇلات."
+      "en": {
+        "name": "Traditional Nanekani (500g)",
+        "category": "Gulkand & Natural Jams",
+        "description": "Ancient traditional Nanekani prepared from aromatic mint and mountain rose petals.",
+        "unit": "500g Jar",
+        "badge": "Healing Herbal"
       }
     }
   },
   {
-    "id": "PRD-420",
-    "brand": "Teklimakan Online",
-    "languageScope": "ug",
-    "name": "قارا مور",
-    "category": "قۇرۇق يەل-يېمىشلەر",
-    "price": 1500,
-    "oldPrice": 2000,
-    "stock": 20,
-    "sales": 0,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-420.jpg",
-    "description": "تەبىئىي قارا مور",
-    "translations": {
-      "en": {
-        "name": "Black Fungus (Wood Ear Mushroom)",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Dried Fruits & Nuts",
-        "description": "Natural Qara Mor"
-      },
-      "tr": {
-        "name": "Siyah Ağaç Mantarı (Kara Mor)",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Kuru Meyve & Yemişler",
-        "description": "Doğal Kara Mor"
-      },
-      "ug": {
-        "name": "قارا مور",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
-        "category": "قۇرۇق يەل-يېمىشلەر",
-        "description": "تەبىئىي قارا مور"
-      },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-26T21:27:50.782Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": "AGT-792",
-    "agentName": "Dilara öztürk (merhaba94310@gmail.com)"
-  },
-  {
-    "id": "PRD-754",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "زىغىر يېغى 5 لىتىر",
-    "category": "تەبىئىي ياغلار",
-    "price": 1200,
-    "oldPrice": 1300,
-    "stock": 30,
-    "sales": 0,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-754.jpg",
-    "description": "تەبىئىي ۋە ساپ",
-    "translations": {
-      "en": {
-        "name": "Zighir Yeghi 5 Litir",
-        "unit": "box",
-        "badge": "",
-        "category": "Natural Oils",
-        "description": "Natural Ve Pure"
-      },
-      "tr": {
-        "name": "Aspir Yağı 5 Lt",
-        "unit": "kutu",
-        "badge": "",
-        "category": "Doğal & Şifalı Yağlar",
-        "description": "Doğal Ve Saf"
-      },
-      "ug": {
-        "name": "زىغىر يېغى 5 لىتىر",
-        "unit": "قۇتا",
-        "badge": "",
-        "category": "تەبىئىي ياغلار",
-        "description": "تەبىئىي ۋە ساپ"
-      },
-      "unit": "قۇتا",
-      "updatedAt": "2026-09-26T21:15:33.826Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": "AGT-502",
-    "agentName": "ئۇيغۇر تىبابىتى (xukran123@gmail.com)"
-  },
-  {
-    "id": "PRD-119",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "قىزىگۈل گۈلقەنتى",
-    "category": "گۈلقەنتلەر",
-    "price": 850,
-    "oldPrice": 800,
-    "stock": 90,
-    "sales": 24,
-    "rating": 4.9,
-    "ratingCount": 28,
-    "image": "images/products/PRD-119.jpg",
-    "description": "خوتەننىڭكىدەك  يېڭى دەستە قىزىگۈل بەرگىلىرىدىن ئەنئەنىۋى ئۇسۇلدا قاينىتىلغان ساپ گۈلقەنت . ئىسسىق كەيپىيات ۋە راھ��تلىك ئاتا قىلىدۇ.",
-    "translations": {
-      "en": {
-        "name": "Qizigül Rose Jami",
-        "unit": "kg",
-        "badge": "Öne Çıkan",
-        "category": "Gül Reçelleri & Macunlar",
-        "description": "Khotenningkidek  Yengi Deste Qizigül Bergiliridin Traditional Usulda Qaynitilghan Pure Rose Jam . Issiq Keypiyat Ve Rahetlik Ata Qilidu."
-      },
-      "tr": {
-        "name": "Kizigül Gül Reçelii",
-        "unit": "kg",
-        "badge": "Öne Çıkan",
-        "category": "Gül Reçelleri & Macunlar",
-        "description": "Hotenningkidek  Yengi Deste Kizigül Bergiliridin Geleneksel Usulda Kaynitilgan Saf Gül Reçeli . İssik Keypiyat Ve Rahetlik Ata Kilidu."
-      },
-      "ug": {
-        "name": "قىزىگۈل گۈلقەنتى",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
-        "category": "گۈلقەنتلەر",
-        "description": "خوتەننىڭكىدەك  يېڭى دەستە قىزىگۈل بەرگىلىرىدىن ئەنئەنىۋى ئۇسۇلدا قاينىتىلغان ساپ گۈلقەنت . ئىسسىق كەيپىيات ۋە راھەتلىك ئاتا قىلىدۇ."
-      },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-29T20:15:55.931Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-128",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "كاۋاپ تېتىتقۇ يۈرۈشلۈكى",
-    "category": "قۇرۇق يەل-يېمىشلەر",
-    "price": 100,
-    "oldPrice": 120,
-    "stock": 75,
-    "sales": 88,
-    "rating": 5,
-    "ratingCount": 94,
-    "image": "images/products/PRD-128.jpg",
-    "description": "ساپ زىرە، لازا، قارىمۇچ ۋە مەخسۇس ئۆسۈملۈك گۈل ئۇرۇقلىرى يانجىلغان ئەسلى ئۇيغۇرچە كاۋاپ دورا تېتىتقۇسى.",
-    "translations": {
-      "en": {
-        "name": "Kavap Tetitqu Set",
-        "unit": "box",
-        "badge": "يېڭى كەلگەن",
-        "category": "Dried Fruits & Nuts",
-        "description": "Authentic blend of wild mountain cumin, ground chili peppers, and aromatic botanical herbs."
-      },
-      "tr": {
-        "name": "Kavap Tetitku Seti",
-        "unit": "kutu",
-        "badge": "يېڭى كەلگەن",
-        "category": "Kuru Meyve & Yemişler",
-        "description": "Hakiki tane kimyon, özel biber ve şifalı tohumlarla hazırlanmış geleneksel lezzet harmanı."
-      },
-      "ug": {
-        "name": "كاۋاپ تېتىتقۇ يۈرۈشلۈكى",
-        "unit": "قۇتا",
-        "badge": "يېڭى كەلگەن",
-        "category": "قۇرۇق يەل-يېمىشلەر",
-        "description": "ساپ زىرە، لازا، قارىمۇچ ۋە مەخسۇس ئۆسۈملۈك گۈل ئۇرۇقلىرى يانجىلغان ئەسلى ئۇيغۇرچە كاۋاپ دورا تېتىتقۇسى."
-      },
-      "unit": "قۇتا",
-      "updatedAt": "2026-09-27T03:27:27.606Z",
-      "isUserEdited": true
-    },
-    "badge": "يېڭى كەلگەن",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
     "id": "PRD-103",
-    "brand": "Teklimakan Online",
+    "brand": "تەكلىماكان تورى",
     "languageScope": "all",
-    "name": "تۇرپان يېشىل ئۈزۈمى",
+    "name": "تۇرپان تەبىئىي يېشىل ئۈزۈمى (500g)",
     "category": "قۇرۇق يەل-يېمىشلەر",
-    "price": 650,
-    "oldPrice": 750,
+    "price": 320,
+    "oldPrice": 400,
     "stock": 150,
     "sales": 580,
     "rating": 5,
-    "ratingCount": 215,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ساپ تەبىئىي",
     "image": "images/products/PRD-103.jpg",
-    "description": "تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى.",
+    "description": "تۇرپان يالقۇن تېغى ئېتىكىدىكى تەبىئىي ئۈزۈملۈكلەردىن ئۈزۈلۈپ، سايىدا قۇرۇتۇلغان نۇقسانسىز يېشىل ئۈزۈم.",
+    "unit": "500 گرام خالتا",
     "translations": {
-      "en": {
-        "name": "Turpan Yeshil Üzümi",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Dried Fruits & Nuts",
-        "description": "Sun-and-wind cured green raisins from the famous Turpan Depression vineyards."
-      },
-      "tr": {
-        "name": "Turpan Yeşil Üzümi",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Kuru Meyve & Yemişler",
-        "description": "Turpan vadisinde rüzgar kurutma kulelerinde doğal olarak kurutulmuş tatlı yeşil çekirdeksiz üzüm."
-      },
       "ug": {
-        "name": "تۇرپان يېشىل ئۈزۈمى",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
+        "name": "تۇرپان تەبىئىي يېشىل ئۈزۈمى (500g)",
         "category": "قۇرۇق يەل-يېمىشلەر",
-        "description": "تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى."
-      },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-26T21:50:28.047Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-759",
-    "brand": "تەكلىماكان كىلاسسىك",
-    "languageScope": "ug",
-    "name": "ئوسما مېيى",
-    "category": "تەبىئىي ياغلار",
-    "price": 250,
-    "oldPrice": 300,
-    "stock": 48,
-    "sales": 2,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-759.jpg",
-    "description": "چاچنىڭ يىلتىزىنى قۇۋۋەتلەش \nچاچ چۈشۈشنىڭ ئالدىنى ئېلىش\nچاچ نى قارايتىش \nداۋاملىق ئىشلىتىپ بەگەندە چاچ چىقىرىش ئۈنۈمىگە ئىگە.",
-    "translations": {
-      "en": {
-        "name": "Osma Meyi",
-        "unit": "pcs",
-        "badge": "ئېتىباردا",
-        "category": "Natural Oils",
-        "description": "Chachning Yiltizini Quvvetlesh \nChach Chüshüshning Aldini Elish\nChach Ni Qaraytish \nDavamliq Ishlitip Begende Chach Chiqirish Ünümige Ige."
+        "description": "تۇرپان يالقۇن تېغى ئېتىكىدىكى تەبىئىي ئۈزۈملۈكلەردىن ئۈزۈلۈپ، سايىدا قۇرۇتۇلغان نۇقسانسىز يېشىل ئۈزۈم.",
+        "unit": "500 گرام خالتا",
+        "badge": "ساپ تەبىئىي"
       },
       "tr": {
-        "name": "Osma Meyi",
-        "unit": "adet",
-        "badge": "ئېتىباردا",
-        "category": "Doğal & Şifalı Yağlar",
-        "description": "Çaçning Yiltizini Kuvvetleş \nÇaç Çüşüşning Aldini Eliş\nÇaç Ni Karaytiş \nDavamlik İşlitip Begende Çaç Çikiriş Ünümige İge."
+        "name": "Doğal Yeşil Kuru Üzüm (500g)",
+        "category": "Kuruyemişler",
+        "description": "تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى.",
+        "unit": "Adet",
+        "badge": "Fırsat Ürünü"
       },
-      "ug": {
-        "name": "ئوسما مېيى",
-        "unit": "دانە",
-        "badge": "ئېتىباردا",
-        "category": "تەبىئىي ياغلار",
-        "description": "چاچنىڭ يىلتىزىنى قۇۋۋەتلەش \nچاچ چۈشۈشنىڭ ئالدىنى ئېلىش\nچاچ نى قارايتىش \nداۋاملىق ئىشلىتىپ بەگەندە چاچ چىقىرىش ئۈنۈمىگە ئىگە."
-      },
-      "unit": "دانە",
-      "updatedAt": "2026-09-27T17:58:36.385Z",
-      "isUserEdited": true
-    },
-    "badge": "ئېتىباردا",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": "AGT-792",
-    "agentName": "ئالمىگۇل ئىمىننىياز (almagulemin541@gmail.com)"
-  },
-  {
-    "id": "PRD-132",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "چاچ ئاسراش يۈرۈشلىكى",
-    "category": "گۈزەللىك ۋە ساغلاملىق",
-    "price": 95,
-    "oldPrice": 125,
-    "stock": 35,
-    "sales": 48,
-    "rating": 5,
-    "ratingCount": 29,
-    "image": "images/products/PRD-132.jpg",
-    "description": "چاچ ئاسراش ۋە قۇۋۋەتلەش",
-    "translations": {
       "en": {
-        "name": "Chach Asrash Yürüshliki",
-        "unit": "pack",
-        "badge": "Yeni Gelen",
-        "category": "Güzellik & Sağlık",
-        "description": "Chach Asrash Ve Quvvetlesh"
-      },
-      "tr": {
-        "name": "Çaç Asraş Yürüşliki",
-        "unit": "paket",
-        "badge": "Yeni Gelen",
-        "category": "Güzellik & Sağlık",
-        "description": "Çaç Asraş Ve Kuvvetleş"
-      },
-      "ug": {
-        "name": "چاچ ئاسراش يۈرۈشلىكى",
-        "unit": "بولاق",
-        "badge": "يېڭى كەلگەن",
-        "category": "گۈزەللىك ۋە ساغلاملىق",
-        "description": "چاچ ئاسراش ۋە قۇۋۋەتلەش"
-      },
-      "unit": "بولاق",
-      "updatedAt": "2026-09-29T20:23:18.197Z",
-      "isUserEdited": true
-    },
-    "badge": "يېڭى كەلگەن",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-120",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "زەيتۇن مېيى",
-    "category": "تەبىئىي ياغلار",
-    "price": 130,
-    "oldPrice": 160,
-    "stock": 450,
-    "sales": 38,
-    "rating": 5,
-    "ratingCount": 42,
-    "image": "images/products/PRD-120.jpg",
-    "description": "ساپ قارا تىرىك (قارا ئۇرۇق) ئۇرۇقىدىن سوغۇق پىرىسلاپ ئېلىنغان بىرىنچى قول تېبابەت مېيى. بەدەن كۈچىنى ئاشۇرىدۇ.",
-    "translations": {
-      "en": {
-        "name": "Zeytun Meyi",
-        "unit": "100 ml",
-        "badge": "ئەڭ قىزىق",
-        "category": "Natural Oils",
-        "description": "100% pure cold-pressed nigella sativa black cumin seed oil for immunity and holistic wellness."
-      },
-      "tr": {
-        "name": "Zeytun Meyi",
-        "unit": "100 ml",
-        "badge": "ئەڭ قىزىق",
-        "category": "Doğal & Şifalı Yağlar",
-        "description": "Geleneksel soğuk pres yöntemiyle elde edilen saf ve katkısız şifalı çörek otu tohumu yağı."
-      },
-      "ug": {
-        "name": "زەيتۇن مېيى",
-        "unit": "100ml",
-        "badge": "ئەڭ قىزىق",
-        "category": "تەبىئىي ياغلار",
-        "description": "ساپ قارا تىرىك (قارا ئۇرۇق) ئۇرۇقىدىن سوغۇق پىرىسلاپ ئېلىنغان بىرىنچى قول تېبابەت مېيى. بەدەن كۈچىنى ئاشۇرىدۇ."
-      },
-      "unit": "100ml",
-      "updatedAt": "2026-09-27T04:27:21.059Z",
-      "isUserEdited": true
-    },
-    "badge": "ئەڭ قىزىق",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-341",
-    "brand": "تەكلىماكان كىلاسسىك",
-    "languageScope": "ug",
-    "name": "گۈل مېيى",
-    "category": "تەبىئىي ياغلار",
-    "price": 200,
-    "oldPrice": 250,
-    "stock": 48,
-    "sales": 2,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-341.jpg",
-    "description": "ئىششىق ياندۇرۇش ،ئاغرىق پەسەيتىش ،ياللۇغ قايتۇرۇش ،قىچىشىشنى توختىتىش ،باش ئاغرىقى\nقۇلاق ئاغرىقى ،بوغۇم ياللۇغى \nۋە ھەرخىل تىرە كىسەللىكلىرى گە مەنپەئەت قىلىدۇ.",
-    "translations": {
-      "en": {
-        "name": "Gül Meyi",
-        "unit": "pcs",
-        "badge": "يېڭى كەلگەن",
-        "category": "Natural Oils",
-        "description": "Ishshiq Yandurush ،Aghriq Peseytish ،yallugh Qayturush ،qichishishni Tokhtitish ،bash Aghriqi\nQulaq Aghriqi ،boghum Yallughi \nVe Herkhil Tire Kisellikliri Ge MenpeEt Qilidu."
-      },
-      "tr": {
-        "name": "Gül Meyi",
-        "unit": "adet",
-        "badge": "يېڭى كەلگەن",
-        "category": "Doğal & Şifalı Yağlar",
-        "description": "İşşik Yanduruş ،Agrik Peseytiş ،yallug Kayturuş ،kiçişişni Tohtitiş ،baş Agriki\nKulak Agriki ،bogum Yallugi \nVe Herhil Tire Kisellikliri Ge MenpeEt Kilidu."
-      },
-      "ug": {
-        "name": "گۈل مېيى",
-        "unit": "دانە",
-        "badge": "يېڭى كەلگەن",
-        "category": "تەبىئىي ياغلار",
-        "description": "ئىششىق ياندۇرۇش ،ئاغرىق پەسەيتىش ،ياللۇغ قايتۇرۇش ،قىچىشىشنى توختىتىش ،باش ئاغرىقى\nقۇلاق ئاغرىقى ،بوغۇم ياللۇغى \nۋە ھەرخىل تىرە كىسەللىكلىرى گە مەنپەئەت قىلىدۇ."
-      },
-      "unit": "دانە",
-      "updatedAt": "2026-09-27T10:19:12.066Z",
-      "isUserEdited": true
-    },
-    "badge": "يېڭى كەلگەن",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": "AGT-792",
-    "agentName": "ئالمىگۇل ئىمىننىياز (almagulemin541@gmail.com)"
-  },
-  {
-    "id": "PRD-114",
-    "brand": "تەكلىماكان كىلاسسىك",
-    "languageScope": "all",
-    "name": "خۇشپۇراق تەبىئىي قەلەمپۇر",
-    "category": "ئۆسۈملۈك دورىلار",
-    "price": 550,
-    "oldPrice": 700,
-    "stock": 80,
-    "sales": 240,
-    "rating": 5,
-    "ratingCount": 112,
-    "image": "images/products/PRD-114.jpg",
-    "description": "خوتەن دەريا بويىنىڭ خۇشپۇراق ئەتىرگۈل غۇنچىلىرىدىن قۇرۇتۇلغان، تىنچلاندۇرۇش ۋە گۈزەللىككە پايدىلىق ئالىي چاي.",
-    "translations": {
-      "en": {
-        "name": "Khushpuraq Natural Qelempur",
-        "unit": "100 g",
-        "badge": "ئېتىباردا",
-        "category": "Herbal Medicines",
-        "description": "Delicate hand-picked sun-dried pink Damask rosebuds for an aromatic relaxing floral infusion."
-      },
-      "tr": {
-        "name": "Huşpurak Doğal Kelempur",
-        "unit": "100 g",
-        "badge": "ئېتىباردا",
-        "category": "Şifalı Bitkiler & Otlar",
-        "description": "Özenle toplanmış pembe gül tomurcuklarından taze kokulu ve şifalı bitkisel çay."
-      },
-      "ug": {
-        "name": "خۇشپۇراق تەبىئىي قەلەمپۇر",
-        "unit": "100 گرام",
-        "badge": "ئېتىباردا",
-        "category": "ئۆسۈملۈك دورىلار",
-        "description": "خوتەن دەريا بويىنىڭ خۇشپۇراق ئەتىرگۈل غۇنچىلىرىدىن قۇرۇتۇلغان، تىنچلاندۇرۇش ۋە گۈزەللىككە پايدىلىق ئالىي چاي."
-      },
-      "unit": "100 گرام",
-      "updatedAt": "2026-09-26T21:45:21.836Z",
-      "isUserEdited": true
-    },
-    "badge": "ئېتىباردا",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-100",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "پىننە گۈلقەنتى",
-    "category": "ئۇيغۇر تىبابىتى",
-    "price": 900,
-    "oldPrice": 950,
-    "stock": 100,
-    "sales": 128,
-    "rating": 5,
-    "ratingCount": 76,
-    "image": "images/products/PRD-100.jpg",
-    "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى مىراس رېتسېپى بويىچە تەييارلانغان ،  ئاشقازان ۋە ھەزىمنى كۈچەيتىدۇ، چىشنى ساغلاملاشتۇرۇشقا ياردەم بېرىدۇ، يەلنى ھەيدەپ ئىسسىقنى تارقىتىدۇ. ساپ ئېغىرلىقى 1 كىلوگرام.",
-    "translations": {
-      "en": {
-        "name": "Pinne Rose Jami",
-        "unit": "kg",
-        "badge": "Öne Çıkan",
-        "category": "Uygur Tıbbı",
-        "description": "Uyghur Traditional Tebabitining Traditional Miras Retsepi Boyiche Teyyarlanghan ، Ashqazan Ve Hezimni Kücheytidu، Chishni Saghlamlashturushqa Yardem Beridu، Yelni Heydep Issiqni Tarqitidu. Pure Eghirliqi 1 Kilogram."
-      },
-      "tr": {
-        "name": "Nanekâni (Nane Kani)",
-        "unit": "kg",
-        "badge": "Öne Çıkan",
-        "category": "Uygur Tıbbı",
-        "description": "Uygur Geleneksel Tebabitining Geleneksel Miras Retsepi Boyiçe Teyyarlangan ، Aşkazan Ve Hezimni Küçeytidu، Çişni Saglamlaşturuşka Yardem Beridu، Yelni Heydep İssikni Tarkitidu. Saf Egirliki 1 Kilogram."
-      },
-      "ug": {
-        "name": "پىننە گۈلقەنتى",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
-        "category": "ئۇيغۇر تىبابىتى",
-        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى مىراس رېتسېپى بويىچە تەييارلانغان ،  ئاشقازان ۋە ھەزىمنى كۈچەيتىدۇ، چىشنى ساغلاملاشتۇرۇشقا ياردەم بېرىدۇ، يەلنى ھەيدەپ ئىسسىقنى تارقىتىدۇ. ساپ ئېغىرلىقى 1 كىلوگرام."
-      },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-29T20:28:27.656Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-292",
-    "brand": "Teklimakan Online",
-    "languageScope": "all",
-    "name": "ئابدىمىلىك يېغى",
-    "category": "ئۇيغۇر تىبابىتى",
-    "price": 150,
-    "oldPrice": 200,
-    "stock": 100,
-    "sales": 0,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-292.jpg",
-    "description": "چاچ يىلتىزىنى ئوزۇقلاندۇرۇپ، تۆكۈلۈشنىڭ ئالدىنى ئالىدۇ، چاچنى تېز ھەم قېلىن ئۆستۈرىدۇ.\n شالاڭلاشقان قاش ۋە تۈكۈلۈۋاتقان كىرپىكلەرنى تېز سۈرئەتتە زىچ، ئۇزۇن ۋە توم قىلىپ چىقىرىدۇ. قۇرغاق، يېرىلغان تېرىلەرنى ئەسلىگە كەلتۈرۈپ، تېرىنىڭ ئېلاستىكىلىقىنى ئاشۇرىدۇ ۋە قورۇق چۈشۈشنى كېچىكتۈرىدۇ. باكتېرىيەگە قارشى ئۈنۈمى يۇقىرى.",
-    "translations": {
-      "en": {
-        "name": "Abdimilik Oil",
-        "unit": "bottle",
-        "badge": "Öne Çıkan",
-        "category": "Uygur Tıbbı",
-        "description": "Promotes Hair Growth: Nourishes hair follicles, reduces breakage, and accelerates thicker, healthier hair growth.\nEnhances Eyebrows & Lashes: Naturally strengthens and thickens thinning eyebrows and promotes longer, fuller eyelashes.\nDeep Skin Hydration: Packed with essential fatty acids that lock in moisture, soften dry skin, and improve elasticity.\nStrengthens Nails & Cuticles: Conditions brittle, cracking nails and softens rough cuticle beds.\nSoothes & Protects: Possesses natural anti-inflammatory properties that calm minor skin irritation and redness."
-      },
-      "tr": {
-        "name": "Hint yağı",
-        "unit": "şişe",
-        "badge": "Öne Çıkan",
-        "category": "Uygur Tıbbı",
-        "description": "Saç köklerini derinlemesine besleyerek dökülmeyi önler, daha hızlı ve dolgun uzamasını destekler. Zayıflamış kaş ve kirpikleri güçlendirir, doğal olarak gürleşmesini ve uzamasını sağlar.\nYoğun Cilt Nemlendirme: Zengin yağ asitleri sayesinde kuru ve çatlamış cildi derinlemesine nemlendirir, elastikiyet kazandırır.\nTırnak Güçlendirme: Kolay kırılan tırnakları sertleştirir ve tırnak etlerini besleyerek pürüzsüz görünüm sunar. Doğal antioksidan ve iltihap önleyici özellikleri sayesinde cilt tahrişlerini yatıştırır. 25ml"
-      },
-      "ug": {
-        "name": "ئابدىمىلىك يېغى",
-        "unit": "بوتۇلكا",
-        "badge": "تەۋسىيە",
-        "category": "ئۇيغۇر تىبابىتى",
-        "description": "چاچ يىلتىزىنى ئوزۇقلاندۇرۇپ، تۆكۈلۈشنىڭ ئالدىنى ئالىدۇ، چاچنى تېز ھەم قېلىن ئۆستۈرىدۇ.\n شالاڭلاشقان قاش ۋە تۈكۈلۈۋاتقان كىرپىكلەرنى تېز سۈرئەتتە زىچ، ئۇزۇن ۋە توم قىلىپ چىقىرىدۇ. قۇرغاق، يېرىلغان تېرىلەرنى ئەسلىگە كەلتۈرۈپ، تېرىنىڭ ئېلاستىكىلىقىنى ئاشۇرىدۇ ۋە قورۇق چۈشۈشنى كېچىكتۈرىدۇ. باكتېرىيەگە قارشى ئۈنۈمى يۇقىرى."
-      },
-      "unit": "بوتۇلكا",
-      "updatedAt": "2026-09-29T23:08:08.021Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
-  },
-  {
-    "id": "PRD-474",
-    "brand": "Teklimakan Online",
-    "languageScope": "ug",
-    "name": "ئەنجۈر ئۇرۇقى مېيى",
-    "category": "تەبىئىي ياغلار",
-    "price": 110,
-    "oldPrice": 150,
-    "stock": 100,
-    "sales": 0,
-    "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-474.jpg",
-    "description": "",
-    "translations": {
-      "en": {
-        "name": "Fig Uruqi Meyi",
-        "unit": "bottle",
-        "badge": "ئەڭ قىزىق",
-        "category": "Natural Oils",
-        "description": "Natural and pure cold-pressed fig seed oil."
-      },
-      "tr": {
-        "name": "İncir Uruki Meyi",
-        "unit": "şişe",
-        "badge": "ئەڭ قىزىق",
-        "category": "Doğal & Şifalı Yağlar",
-        "description": "Doğal, saf soğuk sıkım incir çekirdeği yağı."
-      },
-      "ug": {
-        "name": "ئەنجۈر ئۇرۇقى مېيى",
-        "unit": "بوتۇلكا",
-        "badge": "ئەڭ قىزىق",
-        "category": "تەبىئىي ياغلار",
-        "description": ""
-      },
-      "unit": "بوتۇلكا",
-      "updatedAt": "2026-09-26T20:47:38.566Z",
-      "isUserEdited": true
-    },
-    "badge": "ئەڭ قىزىق",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": "AGT-792",
-    "agentName": "Dilara öztürk (merhaba94310@gmail.com)"
+        "name": "Doğal Yeşil Kuru Üzüm (500g)",
+        "category": "Kuruyemişler",
+        "description": "تۇرپان ئۈزۈمچىلىك بازىسىنىڭ شامال كۈپىدە تەبىئىي قۇرۇتۇلغان ساپ يېشىل رەڭلىك، تاتلىق ھەم مېغىزلىق مەھسۇلاتى.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
   },
   {
     "id": "PRD-113",
     "brand": "تۇرپان يېشىل",
     "languageScope": "all",
-    "name": "قىزىل ئۈزۈم 500 گىرام",
+    "name": "تەبىئىي قىزىل كىشمىش ئۈزۈم (500g)",
     "category": "قۇرۇق يەل-يېمىشلەر",
-    "price": 250,
-    "oldPrice": 300,
+    "price": 270,
+    "oldPrice": 338,
     "stock": 160,
     "sales": 610,
     "rating": 4.9,
-    "ratingCount": 195,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "تاتلىق نېئمەت",
     "image": "images/products/PRD-113.jpg",
-    "description": "تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى.",
+    "description": "شەربەتكە تويۇنغان ئېسىل قىزىل ئۈزۈم قۇرۇقى، تەبىئىي قۇۋۋەت مەنبەسى.",
+    "unit": "500 گرام خالتا",
     "translations": {
-      "en": {
-        "name": "Qizil Üzüm 500 Giram",
-        "unit": "500 g",
-        "badge": "تەۋسىيە",
-        "category": "Dried Fruits & Nuts",
-        "description": "Natural Aptapta Dried، Terkibide Tömür Ve Mineral Maddilar Mol Bolghan Aliy Quality Tatliq Qizil Currants Üzüm Producti."
+      "ug": {
+        "name": "تەبىئىي قىزىل كىشمىش ئۈزۈم (500g)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "شەربەتكە تويۇنغان ئېسىل قىزىل ئۈزۈم قۇرۇقى، تەبىئىي قۇۋۋەت مەنبەسى.",
+        "unit": "500 گرام خالتا",
+        "badge": "تاتلىق نېئمەت"
       },
       "tr": {
-        "name": "Kizil Üzüm 500 Giram",
-        "unit": "500 g",
-        "badge": "تەۋسىيە",
-        "category": "Kuru Meyve & Yemişler",
-        "description": "Doğal Aptapta Kurutulmuş، Terkibide Tömür Ve Mineral Maddilar Mol Bolgan Aliy Kaliteli Tatlik Kizil Kuşüzümü Üzüm Ürüni."
+        "name": "Kırmızı Kuru Üzüm (500g)",
+        "category": "Kuruyemişler",
+        "description": "تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى.",
+        "unit": "Adet",
+        "badge": "Fırsat Ürünü"
       },
-      "ug": {
-        "name": "قىزىل ئۈزۈم 500 گىرام",
-        "unit": "500 گرام",
-        "badge": "تەۋسىيە",
-        "category": "قۇرۇق يەل-يېمىشلەر",
-        "description": "تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى."
-      },
-      "unit": "500 گرام",
-      "updatedAt": "2026-09-26T21:40:20.685Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
+      "en": {
+        "name": "Kırmızı Kuru Üzüm (500g)",
+        "category": "Kuruyemişler",
+        "description": "تەبىئىي ئاپتاپتا قۇرۇتۇلغان، تەركىبىدە تۆمۈر ۋە مىنېرال ماددىلار مول بولغان ئالىي سۈپەتلىك تاتلىق قىزىل كىشمىش ئۈزۈم مەھسۇلاتى.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
   },
   {
-    "id": "PRD-458",
-    "brand": "Teklimakan Online",
+    "id": "PRD-114",
+    "brand": "تەكلىماكان كىلاسسىك",
     "languageScope": "all",
-    "name": "قەغەز ياڭاق",
-    "category": "قۇرۇق يەل-يېمىشلەر",
-    "price": 500,
-    "oldPrice": 500,
-    "stock": 30,
-    "sales": 0,
+    "name": "خۇشپۇراق تەبىئىي قەلەمپۇر (100g)",
+    "category": "ئۆسۈملۈك دورىلار",
+    "price": 220,
+    "oldPrice": 275,
+    "stock": 80,
+    "sales": 240,
     "rating": 5,
-    "ratingCount": 1,
-    "image": "images/products/PRD-458.jpg",
-    "description": "1 كىلو",
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "تەۋسىيە",
+    "image": "images/products/PRD-114.jpg",
+    "description": "خۇش پۇراقلىق، ئىرى دانىلىك، ساپ ۋە تەبىئىي دانە قەلەمپۇر.",
+    "unit": "100 گرام خالتا",
     "translations": {
-      "en": {
-        "name": "Thin Shell Paper Walnuts",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Dried Fruits & Nuts",
-        "description": "Premium thin-shell organic paper walnuts."
+      "ug": {
+        "name": "خۇشپۇراق تەبىئىي قەلەمپۇر (100g)",
+        "category": "ئۆسۈملۈك دورىلار",
+        "description": "خۇش پۇراقلىق، ئىرى دانىلىك، ساپ ۋە تەبىئىي دانە قەلەمپۇر.",
+        "unit": "100 گرام خالتا",
+        "badge": "تەۋسىيە"
       },
       "tr": {
-        "name": "İnce Kabuklu Doğal Ceviz",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Kuru Meyve & Yemişler",
-        "description": "Yüksek kaliteli ince kabuklu doğal ince kabuklu ceviz."
+        "name": "Doğal Tane Karanfil (100g)",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "خوتەن دەريا بويىنىڭ خۇشپۇراق ئەتىرگۈل غۇنچىلىرىدىن قۇرۇتۇلغان، تىنچلاندۇرۇش ۋە گۈزەللىككە پايدىلىق ئالىي چاي.",
+        "unit": "Adet",
+        "badge": "Tavsiye"
       },
+      "en": {
+        "name": "Doğal Tane Karanfil (100g)",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "خوتەن دەريا بويىنىڭ خۇشپۇراق ئەتىرگۈل غۇنچىلىرىدىن قۇرۇتۇلغان، تىنچلاندۇرۇش ۋە گۈزەللىككە پايدىلىق ئالىي چاي.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
+  },
+  {
+    "id": "PRD-119",
+    "brand": "تەكلىماكان تەبىئىي",
+    "languageScope": "all",
+    "name": "ئەنئەنىۋى گۈلكەنى - گۈلقەنتى (500g)",
+    "category": "گۈلقەنت ۋە مۇراببالار",
+    "price": 380,
+    "oldPrice": 475,
+    "stock": 40,
+    "sales": 55,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "قۇياش پىشقى",
+    "image": "images/products/PRD-119.jpg",
+    "description": "خوتەن داغ قىزىلگۈلىنىڭ يېڭى پىشقان ساپ بەرگىلىرى ۋە تەبىئىي تاغ ھەسىلى بىلەن 2500 يىللىق ئەنئەنىۋى رېتسىپ ئاساسىدا قۇياش نۇرىدا 40 كۈن ئاستا پىشۇرۇلغان شىپالىق تەبىئىي گۈلكەنى ۋە گۈلقەنت. ئاشقازان ئوتىنى پەسەيتىپ، ھەزىمنى ياخشىلايدۇ ۋە جىسمانىي كۈچ-قۇۋۋەتنى ئاشۇرىدۇ.",
+    "unit": "500g قاچا",
+    "translations": {
       "ug": {
-        "name": "قەغەز ياڭاق",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
-        "category": "قۇرۇق يەل-يېمىشلەر",
-        "description": "1 كىلو"
+        "name": "ئەنئەنىۋى گۈلكەنى - گۈلقەنتى (500g)",
+        "category": "گۈلقەنت ۋە مۇراببالار",
+        "description": "خوتەن داغ قىزىلگۈلىنىڭ يېڭى پىشقان ساپ بەرگىلىرى ۋە تەبىئىي تاغ ھەسىلى بىلەن 2500 يىللىق ئەنئەنىۋى رېتسىپ ئاساسىدا قۇياش نۇرىدا 40 كۈن ئاستا پىشۇرۇلغان شىپالىق تەبىئىي گۈلكەنى ۋە گۈلقەنت. ئاشقازان ئوتىنى پەسەيتىپ، ھەزىمنى ياخشىلايدۇ ۋە جىسمانىي كۈچ-قۇۋۋەتنى ئاشۇرىدۇ.",
+        "unit": "500g قاچا",
+        "badge": "قۇياش پىشقى"
       },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-26T07:53:50.801Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
+      "tr": {
+        "name": "Geleneksel Gülkani & Gülkand (500g)",
+        "category": "Gülkand & Reçeller",
+        "description": "Doğal Hotan dağ güllerinin taze taç yapraklarından, saf dağ balı ile geleneksel 2500 yıllık yöntemle güneşte 40 gün olgunlaştırılarak hazırlanan katkısız, şifalı Gülkani & Gülkand (Gülbeşeker). Mide hararetini dengeler, sindirimi rahatlatır ve vücuda doğal zindelik kazandırır.",
+        "unit": "Adet",
+        "badge": "Güneşte Pişen"
+      },
+      "en": {
+        "name": "Traditional Sun-Cured Damask Rose Preserve - Gülkani & Gülkand (500g)",
+        "category": "Gulkand & Natural Jams",
+        "description": "Authentic sun-cured Damask rose preserve (Gülkani & Gülkand 500g). Prepared with wild mountain rose petals and pure honey using traditional 2500-year-old herbal recipes.",
+        "unit": "500g Jar",
+        "badge": "Sun-Cured"
+      }
+    }
+  },
+  {
+    "id": "PRD-120",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ساپ سىقىلغان زەيتۇن مېيى (500ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 420,
+    "oldPrice": 525,
+    "stock": 450,
+    "sales": 38,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ئەلا سۈپەت",
+    "image": "images/products/PRD-120.jpg",
+    "description": "دەسلەپكى سوغۇق سىقىش بىلەن ئېلىنغان %100 ساپ ۋە سۈزۈك ئاشپەزلىك ۋە شىپالىق زەيتۇن مېيى.",
+    "unit": "500ml بوتۇلكا",
+    "translations": {
+      "ug": {
+        "name": "ساپ سىقىلغان زەيتۇن مېيى (500ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "دەسلەپكى سوغۇق سىقىش بىلەن ئېلىنغان %100 ساپ ۋە سۈزۈك ئاشپەزلىك ۋە شىپالىق زەيتۇن مېيى.",
+        "unit": "500ml بوتۇلكا",
+        "badge": "ئەلا سۈپەت"
+      },
+      "tr": {
+        "name": "Saf Sızma Zeytinyağı (500ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "ساپ قارا تىرىك (قارا ئۇرۇق) ئۇرۇقىدىن سوغۇق پىرىسلاپ ئېلىنغان بىرىنچى قول تېبابەت مېيى. بەدەن كۈچىنى ئاشۇرىدۇ.",
+        "unit": "Adet",
+        "badge": "Tavsiye"
+      },
+      "en": {
+        "name": "Saf Sızma Zeytinyağı (500ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "ساپ قارا تىرىك (قارا ئۇرۇق) ئۇرۇقىدىن سوغۇق پىرىسلاپ ئېلىنغان بىرىنچى قول تېبابەت مېيى. بەدەن كۈچىنى ئاشۇرىدۇ.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
   },
   {
     "id": "PRD-121",
-    "brand": "Teklimakan Online",
+    "brand": "تەكلىماكان تورى",
     "languageScope": "all",
-    "name": "ئۇيغۇر تىبابەت قامۇسى",
-    "category": "كىتاپ ۋە مەدەنىيەت",
-    "price": 2800,
-    "oldPrice": 3000,
+    "name": "ئۇيغۇر تېبابەت قامۇسى",
+    "category": "كىتاب ۋە مەدەنىيەت",
+    "price": 850,
+    "oldPrice": 1063,
     "stock": 20,
     "sales": 15,
     "rating": 4.9,
-    "ratingCount": 19,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "مەدەنىيەت مىراسى",
     "image": "images/products/PRD-121.jpg",
-    "description": "ئەجدادلاردىن مىراس قالغان ئۇيغۇر مىللىي تېبابەت رېتسىپلىرى، ئۆسۈملۈك ۋە مىجەز ئىلمىنى ئۆز ئىچىگە ئالغان نوپۇزلۇق توپلام.",
+    "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ مىڭ يىللىق تەجرىبىلىرى ۋە شىپالىق رېتسىپلىرى جەملەنگەن نوپۇزلۇق قامۇس.",
+    "unit": "توم",
     "translations": {
-      "en": {
-        "name": "Uyghur Tibabet Encyclopediai",
-        "unit": "set",
-        "badge": "Öne Çıkan",
-        "category": "Books & Culture",
-        "description": "An authoritative reference book collecting ancient Uyghur healing treatises, herbal pharmacology, and humoral therapy."
+      "ug": {
+        "name": "ئۇيغۇر تېبابەت قامۇسى",
+        "category": "كىتاب ۋە مەدەنىيەت",
+        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ مىڭ يىللىق تەجرىبىلىرى ۋە شىپالىق رېتسىپلىرى جەملەنگەن نوپۇزلۇق قامۇس.",
+        "unit": "توم",
+        "badge": "مەدەنىيەت مىراسى"
       },
       "tr": {
-        "name": "Uygur Tibabet Ansiklopedii",
-        "unit": "set",
-        "badge": "Öne Çıkan",
+        "name": "Uygur Tıbbı Ansiklopedisi",
         "category": "Kitap & Kültür",
-        "description": "Kadim Uygur hekimlerinin miras bıraktığı şifalı reçeteler ve mizaç ilmini anlatan kapsamlı başvuru eseri."
+        "description": "ئەجدادلاردىن مىراس قالغان ئۇيغۇر مىللىي تېبابەت رېتسىپلىرى، ئۆسۈملۈك ۋە مىجەز ئىلمىنى ئۆز ئىچىگە ئالغان نوپۇزلۇق توپلام.",
+        "unit": "Adet",
+        "badge": "Kültür Mirası"
       },
-      "ug": {
-        "name": "ئۇيغۇر تىبابەت قامۇسى",
-        "unit": "يۈرۈش",
-        "badge": "تەۋسىيە",
-        "category": "كىتاپ ۋە مەدەنىيەت",
-        "description": "ئەجدادلاردىن مىراس قالغان ئۇيغۇر مىللىي تېبابەت رېتسىپلىرى، ئۆسۈملۈك ۋە مىجەز ئىلمىنى ئۆز ئىچىگە ئالغان نوپۇزلۇق توپلام."
-      },
-      "unit": "يۈرۈش",
-      "updatedAt": "2026-09-28T02:39:55.854Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
-    "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
+      "en": {
+        "name": "Uygur Tıbbı Ansiklopedisi",
+        "category": "Kitap & Kültür",
+        "description": "ئەجدادلاردىن مىراس قالغان ئۇيغۇر مىللىي تېبابەت رېتسىپلىرى، ئۆسۈملۈك ۋە مىجەز ئىلمىنى ئۆز ئىچىگە ئالغان نوپۇزلۇق توپلام.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
   },
   {
     "id": "PRD-125",
-    "brand": "Teklimakan Online",
+    "brand": "تەكلىماكان تورى",
     "languageScope": "all",
-    "name": "كىچىك  چىلان",
+    "name": "تەبىئىي شىپالىق چىلان (500g)",
     "category": "ئۆسۈملۈك دورىلار",
-    "price": 550,
-    "oldPrice": 600,
+    "price": 240,
+    "oldPrice": 300,
     "stock": 80,
     "sales": 95,
     "rating": 4.9,
-    "ratingCount": 110,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "شىپالىق مېۋە",
     "image": "images/products/PRD-125.jpg",
-    "description": "قۇياش نۇرىدا تەبىئىي قۇرۇتۇلغان،  دانىلىق،  يۇمشاق ۋە شېرىن تىببىي چىلىنى.",
+    "description": "ئېمۇنىتېتنى كۈچەيتىدىغان، ۋىتامىنغا باي تەبىئىي قۇرۇتۇلغان كىچىك شىپالىق چىلان (500g).",
+    "unit": "500g بولاق",
     "translations": {
-      "en": {
-        "name": "Kichik  Jujube Dates",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Herbal Medicines",
-        "description": "Quyash Nurida Natural Dried،  Daniliq،  Yumshaq Ve Sherin Tibbiy Chilini."
+      "ug": {
+        "name": "تەبىئىي شىپالىق چىلان (500g)",
+        "category": "ئۆسۈملۈك دورىلار",
+        "description": "ئېمۇنىتېتنى كۈچەيتىدىغان، ۋىتامىنغا باي تەبىئىي قۇرۇتۇلغان كىچىك شىپالىق چىلان (500g).",
+        "unit": "500g بولاق",
+        "badge": "شىپالىق مېۋە"
       },
       "tr": {
-        "name": "Kiçik  Hünnap",
-        "unit": "kg",
-        "badge": "تەۋسىيە",
-        "category": "Şifalı Bitkiler & Otlar",
-        "description": "Kuyaş Nurida Doğal Kurutulmuş،  Danilik،  Yumşak Ve Şerin Tibbiy Çilini."
+        "name": "Doğal Şifalı Hünnap (500g)",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "قۇياش نۇرىدا تەبىئىي قۇرۇتۇلغان،  دانىلىق،  يۇمشاق ۋە شېرىن تىببىي چىلىنى.",
+        "unit": "Adet",
+        "badge": "Şifalı Meyve"
       },
-      "ug": {
-        "name": "كىچىك  چىلان",
-        "unit": "كىلو",
-        "badge": "تەۋسىيە",
-        "category": "ئۆسۈملۈك دورىلار",
-        "description": "قۇياش نۇرىدا تەبىئىي قۇرۇتۇلغان،  دانىلىق،  يۇمشاق ۋە شېرىن تىببىي چىلىنى."
-      },
-      "unit": "كىلو",
-      "updatedAt": "2026-09-27T04:04:14.754Z",
-      "isUserEdited": true
-    },
-    "badge": "تەۋسىيە",
+      "en": {
+        "name": "Natural Healing Jujube (500g)",
+        "category": "Medicinal Herbs & Teas",
+        "description": "Sun-dried natural healing jujube dates rich in vitamins and immune-boosting nutrients (500g).",
+        "unit": "Pack (500g)",
+        "badge": "Healing Fruit"
+      }
+    }
+  },
+  {
+    "id": "PRD-128",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ئەنئەنىۋى كاۋاپ تېتىتقۇ يۈرۈشلۈكى (250g)",
+    "category": "قۇرۇق يەل-يېمىشلەر",
+    "price": 260,
+    "oldPrice": 325,
+    "stock": 75,
+    "sales": 88,
+    "rating": 5,
+    "ratingCount": 18,
     "featured": false,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
+    "badge": "ئالاھىدە تەم",
+    "image": "images/products/PRD-128.jpg",
+    "description": "ئۇيغۇر كىلاسسىك كاۋاپ ۋە گۆش تائاملىرى ئۈچۈن مەخسۇس ئارىلاشتۇرۇلغان تەبىئىي پۇراقلىق تېتىتقۇلار.",
+    "unit": "250 گرام قۇتا",
+    "translations": {
+      "ug": {
+        "name": "ئەنئەنىۋى كاۋاپ تېتىتقۇ يۈرۈشلۈكى (250g)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "ئۇيغۇر كىلاسسىك كاۋاپ ۋە گۆش تائاملىرى ئۈچۈن مەخسۇس ئارىلاشتۇرۇلغان تەبىئىي پۇراقلىق تېتىتقۇلار.",
+        "unit": "250 گرام قۇتا",
+        "badge": "ئالاھىدە تەم"
+      },
+      "tr": {
+        "name": "Geleneksel Kebap Baharat Seti (250g)",
+        "category": "Kuruyemişler",
+        "description": "ساپ زىرە، لازا، قارىمۇچ ۋە مەخسۇس ئۆسۈملۈك گۈل ئۇرۇقلىرى يانجىلغان ئەسلى ئۇيغۇرچە كاۋاپ دورا تېتىتقۇسى.",
+        "unit": "Adet",
+        "badge": "Tavsiye"
+      },
+      "en": {
+        "name": "Geleneksel Kebap Baharat Seti (250g)",
+        "category": "Kuruyemişler",
+        "description": "ساپ زىرە، لازا، قارىمۇچ ۋە مەخسۇس ئۆسۈملۈك گۈل ئۇرۇقلىرى يانجىلغان ئەسلى ئۇيغۇرچە كاۋاپ دورا تېتىتقۇسى.",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
   },
   {
     "id": "PRD-131",
-    "brand": "Teklimakan Online",
+    "brand": "تەكلىماكان تورى",
     "languageScope": "all",
-    "name": "پىلە غوزىسى",
+    "name": "ساپ تەبىئىي پىلە غوزىسى (30 دانە)",
     "category": "ئۇيغۇر تىبابىتى",
-    "price": 450,
-    "oldPrice": 600,
+    "price": 190,
+    "oldPrice": 238,
     "stock": 40,
     "sales": 65,
     "rating": 4.9,
-    "ratingCount": 38,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "تەبىئىي گۈزەللىك",
     "image": "images/products/PRD-131.jpg",
-    "description": "يۈرەك ۋە مېڭىگە پايدىلىق",
+    "description": "تەبىئىي يىپەك پىلە غوزىسى، تېرىنى چوڭقۇر تازىلاش، ئاقارتىش ۋە كوللاگېننى ئاشۇرۇش ئۈچۈن قەدىمىي تەبىئىي چارە.",
+    "unit": "30 دانە قۇتا",
     "translations": {
-      "en": {
-        "name": "Pile Ghozisi",
-        "unit": "100 g",
-        "badge": "يېڭى كەلگەن",
-        "category": "Uyghur Medicine",
-        "description": "Yürek Ve Mengige Beneficial"
+      "ug": {
+        "name": "ساپ تەبىئىي پىلە غوزىسى (30 دانە)",
+        "category": "ئۇيغۇر تىبابىتى",
+        "description": "تەبىئىي يىپەك پىلە غوزىسى، تېرىنى چوڭقۇر تازىلاش، ئاقارتىش ۋە كوللاگېننى ئاشۇرۇش ئۈچۈن قەدىمىي تەبىئىي چارە.",
+        "unit": "30 دانە قۇتا",
+        "badge": "تەبىئىي گۈزەللىك"
       },
       "tr": {
-        "name": "Pile Gozisi",
-        "unit": "100 g",
-        "badge": "يېڭى كەلگەن",
-        "category": "Uygur Tıbbı",
-        "description": "Yürek Ve Mengige Faydalı"
+        "name": "Saf Doğal İpek Kozası (30 Adet)",
+        "category": "Uygur Tıbbı Mirası",
+        "description": "يۈرەك ۋە مېڭىگە پايدىلىق",
+        "unit": "Adet",
+        "badge": "Doğal Bakım"
       },
-      "ug": {
-        "name": "پىلە غوزىسى",
-        "unit": "100 گرام",
-        "badge": "يېڭى كەلگەن",
-        "category": "ئۇيغۇر تىبابىتى",
-        "description": "يۈرەك ۋە مېڭىگە پايدىلىق"
-      },
-      "unit": "100 گرام",
-      "updatedAt": "2026-09-27T03:25:52.474Z",
-      "isUserEdited": true
-    },
-    "badge": "يېڭى كەلگەن",
+      "en": {
+        "name": "Saf Doğal İpek Kozası (30 Adet)",
+        "category": "Uygur Tıbbı Mirası",
+        "description": "يۈرەك ۋە مېڭىگە پايدىلىق",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
+  },
+  {
+    "id": "PRD-132",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ئۆسۈملۈك چاچ ئاسراش يۈرۈشلۈكى",
+    "category": "گۈزەللىك ۋە ساغلاملىق",
+    "price": 650,
+    "oldPrice": 813,
+    "stock": 35,
+    "sales": 48,
+    "rating": 5,
+    "ratingCount": 18,
     "featured": true,
-    "approvalStatus": "تەستىقلاندى",
-    "agentId": null,
-    "agentName": null
+    "badge": "گۈزەللىك سىرى",
+    "image": "images/products/PRD-132.jpg",
+    "description": "ئوسما، ياڭاق پوستى ۋە شىپالىق ئۆسۈملۈك جەۋھەرلىرىدىن تەييارلانغان چاچ يىلتىزىنى چىڭىتىش يۈرۈشلۈكى.",
+    "unit": "يۈرۈشلۈك",
+    "translations": {
+      "ug": {
+        "name": "ئۆسۈملۈك چاچ ئاسراش يۈرۈشلۈكى",
+        "category": "گۈزەللىك ۋە ساغلاملىق",
+        "description": "ئوسما، ياڭاق پوستى ۋە شىپالىق ئۆسۈملۈك جەۋھەرلىرىدىن تەييارلانغان چاچ يىلتىزىنى چىڭىتىش يۈرۈشلۈكى.",
+        "unit": "يۈرۈشلۈك",
+        "badge": "گۈزەللىك سىرى"
+      },
+      "tr": {
+        "name": "Bitkisel Saç Bakım Seti",
+        "category": "Doğal Bakım & Güzellik",
+        "description": "چاچ ئاسراش ۋە قۇۋۋەتلەش",
+        "unit": "Adet",
+        "badge": "Özel Seçim"
+      },
+      "en": {
+        "name": "Bitkisel Saç Bakım Seti",
+        "category": "Doğal Bakım & Güzellik",
+        "description": "چاچ ئاسراش ۋە قۇۋۋەتلەش",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
+  },
+  {
+    "id": "PRD-218",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "زاراڭزا چېچىكى",
+    "category": "ئۆسۈملۈك دورىلار",
+    "price": 200,
+    "oldPrice": 250,
+    "stock": 300,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "تەبىئىي چېچەك",
+    "image": "images/products/zarangza-chechiki.jpg",
+    "description": "قان ئايلىنىشنى جانلاندۇرۇش ۋە توسالغۇلارنى ئېچىش، قاننى سۇيۇلدۇرۇپ، قان تومۇرلاردىكى ئۇيۇشۇپ قالغان ماددىلارنى تارقىتىدۇ.",
+    "unit": "100 گرام",
+    "translations": {
+      "ug": {
+        "name": "زاراڭزا چېچىكى",
+        "category": "ئۆسۈملۈك دورىلار",
+        "description": "قان ئايلىنىشنى جانلاندۇرۇش ۋە توسالغۇلارنى ئېچىش، قاننى سۇيۇلدۇرۇپ، قان تومۇرلاردىكى ئۇيۇشۇپ قالغان ماددىلارنى تارقىتىدۇ.",
+        "unit": "100 گرام",
+        "badge": "تەبىئىي چېچەك"
+      },
+      "tr": {
+        "name": "Şifalı Aspir Çiçeği",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "قان ئايلىنىشنى جانلاندۇرۇش ۋە توسالغۇلارنى ئېچىش، قاننى سۇيۇلدۇرۇپ، قان تومۇرلاردىكى ئۇيۇشۇپ قالغان ماددىلارنى تارقىتىدۇ، جىگەر ۋە تالدىكى توسالغۇلارنى راۋانلاشتۇرىدۇ.\nھەيىز ۋە سۈيدۈكنى راۋان قىلىش: ئاياللاردىكى ھەيىز تۇتۇلۇش، ھەيىزنىڭ تولا ئاغرىتىپ كېلىشى، \nبەدەندىكى ئارتۇقچە ھۆللۈك ۋە يەللەرنى ھەيدەيدۇ، بەلغەمنى بوشىتىدۇ.",
+        "unit": "Adet",
+        "badge": ""
+      },
+      "en": {
+        "name": "Herbal Safflower Petals",
+        "category": "Herbal Medicines",
+        "description": "Invigorates blood circulation, supports cardiovascular health and relieves systemic inflammation naturally.",
+        "unit": "100g Pack",
+        "badge": "Pure Botanical"
+      }
+    }
+  },
+  {
+    "id": "PRD-225",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "تۇخۇم سېرىقى يېغى (25ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 250,
+    "oldPrice": 313,
+    "stock": 50,
+    "sales": 18,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ساپ ۋە تەبىئىي",
+    "image": "images/products/tuxum-yeghi.webp",
+    "description": "ئەنئەنىۋى ساپ تۇخۇم سېرىقى يېغى (25ml تامچىلىق قۇتىدا). چاچ يىلتىزىنى كۈچلەندۈرۈپ، چاچ چۈشۈشنى توختىتىش، تېرە كۆيۈكى ۋە جاراھەتلەرنى ئەسلىگە كەلتۈرۈشكە تەبىئىي شىپا.",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "تۇخۇم سېرىقى يېغى (25ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "ئەنئەنىۋى ساپ تۇخۇم سېرىقى يېغى (25ml تامچىلىق قۇتىدا). چاچ يىلتىزىنى كۈچلەندۈرۈپ، چاچ چۈشۈشنى توختىتىش، تېرە كۆيۈكى ۋە جاراھەتلەرنى ئەسلىگە كەلتۈرۈشكە تەبىئىي شىپا.",
+        "unit": "25ml قۇتا",
+        "badge": "ساپ ۋە تەبىئىي"
+      },
+      "tr": {
+        "name": "Yumurta Sarısı Yağı (25ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "ئەنئەنىۋى ساپ تۇخۇم سېرىقى يېغى (25ml تامچىلىق قۇتىدا). چاچ يىلتىزىنى كۈچلەندۈرۈپ، چاچ چۈشۈشنى توختىتىش، تېرە كۆيۈكى ۋە جاراھەتلەرنى ئەسلىگە كەلتۈرۈشكە تەبىئىي شىپا.",
+        "unit": "Adet",
+        "badge": "Saf & Doğal"
+      },
+      "en": {
+        "name": "Egg Yolk Oil (25ml)",
+        "category": "Natural & Therapeutic Oils",
+        "description": "Traditional pure egg yolk oil (25ml dropper bottle). Deeply nourishes hair follicles, prevents loss, and accelerates skin and wound regeneration.",
+        "unit": "25ml Bottle",
+        "badge": "Pure & Natural"
+      }
+    }
+  },
+  {
+    "id": "PRD-226",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "كۆز ئاسراش مەجۈنى (250g)",
+    "category": "پىششىق دورىلار",
+    "price": 280,
+    "oldPrice": 350,
+    "stock": 100,
+    "sales": 42,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ئالاھىدە رېتسېپ",
+    "image": "images/products/koz_asrash_mejuni.webp",
+    "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە ساپ تاغ ھەسىلى، زەپە، كۆز ئوتى، كۆك بۆلجۈرگەن ۋە بۆرە مېۋىسى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز قۇرغاقلىشىش، چارچاش ۋە تۇتۇقلىشىشنى تۈگىتىپ، كۆرۈش قۇۋۋىتى ۋە كۆز قان ئايلىنىشىنى ياخشىلايدۇ. %100 تە��ىئىي، ساپ مەھسۇلات.",
+    "unit": "250g قۇتا",
+    "translations": {
+      "ug": {
+        "name": "كۆز ئاسراش مەجۈنى (250g)",
+        "category": "پىششىق دورىلار",
+        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە ساپ تاغ ھەسىلى، زەپە، كۆز ئوتى، كۆك بۆلجۈرگەن ۋە بۆرە مېۋىسى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز قۇرغاقلىشىش، چارچاش ۋە تۇتۇقلىشىشنى تۈگىتىپ، كۆرۈش قۇۋۋىتى ۋە كۆز قان ئايلىنىشىنى ياخشىلايدۇ. %100 تە��ىئىي، ساپ مەھسۇلات.",
+        "unit": "250g قۇتا",
+        "badge": "ئالاھىدە رېتسېپ"
+      },
+      "tr": {
+        "name": "Göz Bakım Macunu (250g)",
+        "category": "Geleneksel Şifa Ürünleri",
+        "description": "ئۇيغۇر مىللىي تېبابىتىنىڭ ئەنئەنىۋى رېتسېپى بويىچە تەبىئىي تاغ ھەسىلى، زەپە، گۈلسامساق ۋە ئەبرىشەم كۈلى قاتارلىق ئەتىۋارلىق ئۆسۈملۈكلەردىن ئالاھىدە پىششىقلاپ ئىشلەنگەن. كۆز قۇرغاقلىشىش، چارچاش، تېلېفون ۋە كومپيۇتېر نۇرىدىن كۆز سېزىمى تۆۋەنلەشنى تۈگىتىدۇ؛ كۆرۈش قۇۋۋىتىنى ئاشۇرۇپ، كۆز نېرۋىلىرى ۋە قان ئايلىنىشنى ياخشىلايدۇ. %100 تەبىئىي، كونسېرۋانتسىز ساپ مەھسۇلات.",
+        "unit": "Adet",
+        "badge": "Özel Formül"
+      },
+      "en": {
+        "name": "Herbal Eye Care Paste (250g)",
+        "category": "Traditional Remedies",
+        "description": "Formulated with pure mountain honey, saffron, eyebright, wild bilberry, and wolfberry extracts based on traditional botanical wisdom. Relieves digital eye strain, dryness, and fatigue while supporting visual clarity and microcirculation. 100% natural, additive-free.",
+        "unit": "250g Jar",
+        "badge": "Special Formula"
+      }
+    }
+  },
+  {
+    "id": "PRD-227",
+    "brand": "تەكلىماكان شىپا",
+    "languageScope": "all",
+    "name": "زېھىن مەجۇنى (100g)",
+    "category": "ئۇيغۇر تىبابىتى",
+    "price": 190,
+    "oldPrice": 238,
+    "stock": 50,
+    "sales": 18,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ئالاھىدە رېتسىپ",
+    "image": "images/products/zihin_macunu.webp",
+    "description": "ئەنئەنىۋى يىپەك يولى تېبابەت رېتسىپى بويىچە مېڭە ھۈجەيرىلىرىنى قۇۋۋەتلەش، زېھىننى ئېچىش، ئەستە تۇتۇش قابىلىيىتىنى كۈچەيتىش ۋە تەپەككۇرنى جانلاندۇرۇش ئۈچۈن تەييارلانغان ساپ تەبىئىي مەجۇن (100g).",
+    "unit": "100g قاچا",
+    "translations": {
+      "ug": {
+        "name": "زېھىن مەجۇنى (100g)",
+        "category": "ئۇيغۇر تىبابىتى",
+        "description": "ئەنئەنىۋى يىپەك يولى تېبابەت رېتسىپى بويىچە مېڭە ھۈجەيرىلىرىنى قۇۋۋەتلەش، زېھىننى ئېچىش، ئەستە تۇتۇش قابىلىيىتىنى كۈچەيتىش ۋە تەپەككۇرنى جانلاندۇرۇش ئۈچۈن تەييارلانغان ساپ تەبىئىي مەجۇن (100g).",
+        "unit": "100g قاچا",
+        "badge": "ئالاھىدە رېتسىپ"
+      },
+      "tr": {
+        "name": "Zihin Macunu (100g)",
+        "category": "Geleneksel Şifa Ürünleri",
+        "description": "ئەنئەنىۋى يىپەك يولى تېبابەت رېتسىپى بويىچە مېڭە ھۈجەيرىلىرىنى قۇۋۋەتلەش، زېھىننى ئېچىش، ئەستە تۇتۇش قابىلىيىتىنى كۈچەيتىش ۋە تەپەككۇرنى جانلاندۇرۇش ئۈچۈن تەييارلانغان ساپ تەبىئىي مەجۇن (100g).",
+        "unit": "Adet",
+        "badge": "Özel Formül"
+      },
+      "en": {
+        "name": "Herbal Memory Paste (100g)",
+        "category": "Traditional Herbal Remedies",
+        "description": "Traditional Silk Road herbal remedy formulated to enhance cognitive function, mental clarity, and focus (100g). Prepared with premium organic botanical extracts.",
+        "unit": "100g Jar",
+        "badge": "Special Formula"
+      }
+    }
+  },
+  {
+    "id": "PRD-228",
+    "brand": "تەكلىماكان شىپا",
+    "languageScope": "all",
+    "name": "قۇۋۋەت مەجۇنى (100g)",
+    "category": "ئۇيغۇر تىبابىتى",
+    "price": 500,
+    "oldPrice": 625,
+    "stock": 45,
+    "sales": 22,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "ئالاھىدە رېتسىپ",
+    "image": "images/products/kuvvet_macunu.webp",
+    "description": "ئەنئەنىۋى كىلاسسىك رېتسىپ بويىچە ساپ تاغ ھەسىلى ۋە ئالىي قۇۋۋەت ئۇرۇقلىرى بىلەن تەييارلانغان، بەل-بۆرەك قۇۋۋىتى ۋە جىسمانىي ھاياتى كۈچنى ئاشۇرغۇچى تەبىئىي قۇۋۋەت مەجۇنى (100g).",
+    "unit": "100g قاچا",
+    "translations": {
+      "ug": {
+        "name": "قۇۋۋەت مەجۇنى (100g)",
+        "category": "ئۇيغۇر تىبابىتى",
+        "description": "ئەنئەنىۋى كىلاسسىك رېتسىپ بويىچە ساپ تاغ ھەسىلى ۋە ئالىي قۇۋۋەت ئۇرۇقلىرى بىلەن تەييارلانغان، بەل-بۆرەك قۇۋۋىتى ۋە جىسمانىي ھاياتى كۈچنى ئاشۇرغۇچى تەبىئىي قۇۋۋەت مەجۇنى (100g).",
+        "unit": "100g قاچا",
+        "badge": "ئالاھىدە رېتسىپ"
+      },
+      "tr": {
+        "name": "Kuvvet Macunu (100g)",
+        "category": "Uygur Tıbbı Mirası",
+        "description": "ئەنئەنىۋى كىلاسسىك رېتسىپ بويىچە ساپ تاغ ھەسىلى ۋە ئالىي قۇۋۋەت ئۇرۇقلىرى بىلەن تەييارلانغ��ن، بەل-بۆرەك قۇۋۋىتى ۋە جىسمانىي ھاياتى كۈچنى ئاشۇرغۇچى تەبىئىي قۇۋۋەت مەجۇنى (100g).",
+        "unit": "Adet",
+        "badge": "Özel Formül"
+      },
+      "en": {
+        "name": "Herbal Vitality Paste (100g)",
+        "category": "Uyghur Medicine Heritage",
+        "description": "Traditional Silk Road herbal vitality remedy formulated with pure mountain honey and precious botanical extracts to support stamina, vigor, and physical wellness (100g).",
+        "unit": "100g Jar",
+        "badge": "Special Formula"
+      }
+    }
+  },
+  {
+    "id": "PRD-292",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ساپ ھىندى يېغى (25ml)",
+    "category": "ئۇيغۇر تېبابىتى مىراسى",
+    "price": 310,
+    "oldPrice": 388,
+    "stock": 100,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "%100 ساپ",
+    "image": "images/products/PRD-292.jpg",
+    "description": "ئەنئەنىۋى سوغۇق پىرىسلانغان ساپ ئابدىمىلىك (ھىندى) يېغى (25ml ئەينەك قۇتىدا). تېرە، چاچ ۋە بوغۇم ئاسراشقا پايدىلىق.",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "ساپ ھىندى يېغى (25ml)",
+        "category": "ئۇيغۇر تېبابىتى مىراسى",
+        "description": "ئەنئەنىۋى سوغۇق پىرىسلانغان ساپ ئابدىمىلىك (ھىندى) يېغى (25ml ئەينەك قۇتىدا). تېرە، چاچ ۋە بوغۇم ئاسراشقا پايدىلىق.",
+        "unit": "25ml قۇتا",
+        "badge": "%100 ساپ"
+      },
+      "tr": {
+        "name": "Saf Hint Yağı (25ml)",
+        "category": "Uygur Tıbbı Mirası",
+        "description": "چاچ يىلتىزىنى ئوزۇقلاندۇرۇپ، تۆكۈلۈشنىڭ ئالدىنى ئالىدۇ، چاچنى تېز ھەم قېلىن ئۆستۈرىدۇ.\n شالاڭلاشقان قاش ۋە تۈكۈلۈۋاتقان كىرپىكلەرنى تېز سۈرئەتتە زىچ، ئۇزۇن ۋە توم قىلىپ چىقىرىدۇ. قۇرغاق، يېرىلغان تېرىلەرنى ئەسلىگە كەلتۈرۈپ، تېرىنىڭ ئېلاستىكىلىقىنى ئاشۇرىدۇ ۋە قورۇق چۈشۈشنى كېچىكتۈرىدۇ. باكتېرىيەگە قارشى ئۈنۈمى يۇقىرى.",
+        "unit": "Adet",
+        "badge": "%100 Saf"
+      },
+      "en": {
+        "name": "Pure Castor Oil (25ml)",
+        "category": "Uyghur Medicine Heritage",
+        "description": "Traditional cold-pressed pure castor oil (25ml glass bottle). Used for centuries for deep hair, skin, and joint nourishment.",
+        "unit": "25ml Bottle",
+        "badge": "100% Pure"
+      }
+    }
+  },
+  {
+    "id": "PRD-325",
+    "brand": "تەكلىماكان تەبىئىي",
+    "languageScope": "all",
+    "name": "ئەنئەنىۋى گۈلكەنى - گۈلقەنتى (1kg)",
+    "category": "گۈلقەنت ۋە مۇراببالار",
+    "price": 900,
+    "oldPrice": 1125,
+    "stock": 100,
+    "sales": 15,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": true,
+    "badge": "قۇياش پىشقى",
+    "image": "images/products/PRD-325.jpg",
+    "description": "ئۇيغۇر مىللىي تې��ابىتىنىڭ 2500 يىللىق ئەنئەنىۋى مىراس رېتسېپى بويىچە ساپ تاغ ھەسىلى ۋە ئەتىرگۈل بەرگىلىرى بىلەن قۇياشتا تەييارلانغان ساپ گۈلكەنى ۋە گۈلقەنت (1 كىلوگرام قاچا).",
+    "unit": "1 كىلو قاچا",
+    "translations": {
+      "ug": {
+        "name": "ئەنئەنىۋى گۈلكەنى - گۈلقەنتى (1kg)",
+        "category": "گۈلقەنت ۋە مۇراببالار",
+        "description": "ئۇيغۇر مىللىي تې��ابىتىنىڭ 2500 يىللىق ئەنئەنىۋى مىراس رېتسېپى بويىچە ساپ تاغ ھەسىلى ۋە ئەتىرگۈل بەرگىلىرى بىلەن قۇياشتا تەييارلانغان ساپ گۈلكەنى ۋە گۈلقەنت (1 كىلوگرام قاچا).",
+        "unit": "1 كىلو قاچا",
+        "badge": "قۇياش پىشقى"
+      },
+      "tr": {
+        "name": "Geleneksel Gülkani & Gülkand (1kg)",
+        "category": "Gülkand & Reçeller",
+        "description": "Geleneksel Uygur tıbbının 2500 yıllık kadim mirasıyla hazırlanan; saf dağ balı ve doğal gül yaprakları içeren, mideyi ve sindirimi kuvvetlendiren şifalı Gülkani & Gülkand (1kg kavanoz).",
+        "unit": "Adet",
+        "badge": "Güneşte Pişen"
+      },
+      "en": {
+        "name": "Traditional Sun-Cured Damask Rose Preserve - Gülkani & Gülkand (1kg)",
+        "category": "Gulkand & Natural Jams",
+        "description": "Authentic sun-cured Damask rose preserve (Gülkani & Gülkand 1kg). Formulated with pure mountain honey and wild rose petals according to 2500-year-old traditional herbal recipes.",
+        "unit": "1kg Jar",
+        "badge": "Sun-Cured"
+      }
+    }
+  },
+  {
+    "id": "PRD-341",
+    "brand": "تەكلىماكان كىلاسسىك",
+    "languageScope": "all",
+    "name": "ساپ تاغ ئەتىرگۈل يېغى (25ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 450,
+    "oldPrice": 563,
+    "stock": 48,
+    "sales": 2,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "%100 تەبىئىي",
+    "image": "images/products/PRD-341.jpg",
+    "description": "تاغ ئەتىرگۈلى گۈل بەرگىلىرىنى ئېرىتىپ ئايرىش ئارقىلىق ئېلىنغان خۇشبۇي تېرە ئاسراش مېيى (25ml ئەينەك قۇتىدا).",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "ساپ تاغ ئەتىرگۈل يېغى (25ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "تاغ ئەتىرگۈلى گۈل بەرگىلىرىنى ئېرىتىپ ئايرىش ئارقىلىق ئېلىنغان خۇشبۇي تېرە ئاسراش مېيى (25ml ئەينەك قۇتىدا).",
+        "unit": "25ml قۇتا",
+        "badge": "%100 تەبىئىي"
+      },
+      "tr": {
+        "name": "Saf Dağ Gülü Uçucu Yağı (25ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "ئىششىق ياندۇرۇش ،ئاغرىق پەسەيتىش ،ياللۇغ قايتۇرۇش ،قىچىشىشنى توختىتىش ،باش ئاغرىقى\nقۇلاق ئاغرىقى ،بوغۇم ياللۇغى \nۋە ھەرخىل تىرە كىسەللىكلىرى گە مەنپەئەت قىلىدۇ.",
+        "unit": "Adet",
+        "badge": "%100 Doğal"
+      },
+      "en": {
+        "name": "Pure Mountain Rose Essential Oil (25ml)",
+        "category": "Natural & Therapeutic Oils",
+        "description": "Distilled from pure mountain rose petals; concentrated essential oil for aromatherapy and skincare (25ml glass bottle).",
+        "unit": "25ml Bottle",
+        "badge": "100% Natural"
+      }
+    }
+  },
+  {
+    "id": "PRD-420",
+    "brand": "تەكلىماكان تەبىئىي",
+    "languageScope": "all",
+    "name": "تەبىئىي قارا قۇلاق (250g)",
+    "category": "قۇرۇق يەل-يېمىشلەر",
+    "price": 1500,
+    "oldPrice": 1875,
+    "stock": 25,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "شىپالىق زەمبۇرۇغ",
+    "image": "images/products/PRD-420.jpg",
+    "description": "تەبىئىي ئورمانلىقتىن تېرىلغان، قان ئايلىنىشنى ياخشىلاپ بەدەن ئىممۇنىتېتىنى ئاشۇرىدىغان قۇرۇتۇلغان ساپ قارا قۇلاق (250g).",
+    "unit": "250g بولاق",
+    "translations": {
+      "ug": {
+        "name": "تەبىئىي قارا قۇلاق (250g)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "تەبىئىي ئورمانلىقتىن تېرىلغان، قان ئايلىنىشنى ياخشىلاپ بەدەن ئىممۇنىتېتىنى ئاشۇرىدىغان قۇرۇتۇلغان ساپ قارا قۇلاق (250g).",
+        "unit": "250g بولاق",
+        "badge": "شىپالىق زەمبۇرۇغ"
+      },
+      "tr": {
+        "name": "Doğal Siyah Ağaç Mantarı (250g)",
+        "category": "Kuruyemişler",
+        "description": "Doğal ortamında yetişen, kan dolaşımını destekleyen ve bağışıklığı güçlendiren kurutulmuş siyah ağaç mantarı (250g).",
+        "unit": "Adet",
+        "badge": ""
+      },
+      "en": {
+        "name": "Natural Black Wood Ear Mushroom (250g)",
+        "category": "Nuts & Dried Fruits",
+        "description": "Naturally harvested dried black fungus rich in minerals and antioxidants (250g).",
+        "unit": "250g Pack",
+        "badge": "Medicinal Mushroom"
+      }
+    }
+  },
+  {
+    "id": "PRD-451",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ماددەتۇلھايات مەجۈنى",
+    "category": "ئۇيغۇر تېبابىتى مىراسى",
+    "price": 550,
+    "oldPrice": 688,
+    "stock": 80,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "كەسپىي رېتسىپ",
+    "image": "images/products/PRD-451.jpg",
+    "description": "2500 يىللىق ئەنئەنىۋى ئۇيغۇر تېبابىتىنىڭ ھاياتلىق جەۋھىرى مەجۈنى. جىسمانىي قۇۋۋەتنى ئاشۇرۇپ چارچاشنى تۈگىتىدۇ.",
+    "unit": "500g قاچا",
+    "translations": {
+      "ug": {
+        "name": "ماددەتۇلھايات مەجۈنى",
+        "category": "ئۇيغۇر تېبابىتى مىراسى",
+        "description": "2500 يىللىق ئەنئەنىۋى ئۇيغۇر تېبابىتىنىڭ ھاياتلىق جەۋھىرى مەجۈنى. جىسمانىي قۇۋۋەتنى ئاشۇرۇپ چارچاشنى تۈگىتىدۇ.",
+        "unit": "500g قاچا",
+        "badge": "كەسپىي رېتسىپ"
+      },
+      "tr": {
+        "name": "Maddetül Hayat Macunu",
+        "category": "Uygur Tıbbı Mirası",
+        "description": "",
+        "unit": "Adet",
+        "badge": "تەۋسىيە"
+      },
+      "en": {
+        "name": "Maddetul Hayat Herbal Vitality Paste",
+        "category": "Uyghur Medicine Heritage",
+        "description": "Ancient 2500-year-old vitality paste formulated with mountain honey and precious herbs to enhance endurance and vitality.",
+        "unit": "500g Jar",
+        "badge": "Ancient Formula"
+      }
+    }
+  },
+  {
+    "id": "PRD-458",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "نېپىز قېپلىق قەغەز ياڭاق (500g)",
+    "category": "قۇرۇق يەل-يېمىشلەر",
+    "price": 290,
+    "oldPrice": 363,
+    "stock": 30,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "قولدا چېقىلىدىغان",
+    "image": "images/products/PRD-458.jpg",
+    "description": "ئاقسۇنىڭ داڭلىق نېپىز قېپلىق ياڭىقى، مايلىق، قۇرۇق، مېغىزى ئاسان ۋە پۈتۈن چىقىدۇ.",
+    "unit": "500 گرام خالتا",
+    "translations": {
+      "ug": {
+        "name": "نېپىز قېپلىق قەغەز ياڭاق (500g)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "ئاقسۇنىڭ داڭلىق نېپىز قېپلىق ياڭىقى، مايلىق، قۇرۇق، مېغىزى ئاسان ۋە پۈتۈن چىقىدۇ.",
+        "unit": "500 گرام خالتا",
+        "badge": "قولدا چېقىلىدىغان"
+      },
+      "tr": {
+        "name": "İnce Kabuklu Ceviz (500g)",
+        "category": "Kuruyemişler",
+        "description": "1 كىلو",
+        "unit": "Adet",
+        "badge": "Çok Satan"
+      },
+      "en": {
+        "name": "İnce Kabuklu Ceviz (500g)",
+        "category": "Kuruyemişler",
+        "description": "1 كىلو",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
+  },
+  {
+    "id": "PRD-474",
+    "brand": "تەكلىماكان تەبىئىي",
+    "languageScope": "all",
+    "name": "تەبىئىي ئەنجۈر ئۇرۇقى مېيى (25ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 540,
+    "oldPrice": 675,
+    "stock": 18,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئالاھىدە تاللانما",
+    "image": "images/products/PRD-474.jpg",
+    "description": "مول ۋىتامىن E ۋە ئومېگا ماي كىسلاتالىرىغا ئىگە، تېرە قېرىشىنى كېچىكتۈرگۈچى ساپ ئەنجۈر ئۇرۇقى مېيى (25ml تامچىلىق ئەينەك قۇتىدا).",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "تەبىئىي ئەنجۈر ئۇرۇقى مېيى (25ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "مول ۋىتامىن E ۋە ئومېگا ماي كىسلاتالىرىغا ئىگە، تېرە قېرىشىنى كېچىكتۈرگۈچى ساپ ئەنجۈر ئۇرۇقى مېيى (25ml تامچىلىق ئەينەك قۇتىدا).",
+        "unit": "25ml قۇتا",
+        "badge": "ئالاھىدە تاللانما"
+      },
+      "tr": {
+        "name": "Doğal İncir Çekirdeği Yağı (25ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "Yüksek E vitamini ve Omega yağ asitleri içeren, yaşlanma karşıtı ve hücre yenileyici saf incir çekirdeği yağı (25ml damlalıklı cam şişe).",
+        "unit": "Adet",
+        "badge": ""
+      },
+      "en": {
+        "name": "Natural Fig Seed Oil (25ml)",
+        "category": "Natural & Therapeutic Oils",
+        "description": "High in Vitamin E and Omega fatty acids; anti-aging, cellular renewing pure cold-pressed fig seed oil (25ml dropper bottle).",
+        "unit": "25ml Bottle",
+        "badge": "Special Selection"
+      }
+    }
+  },
+  {
+    "id": "PRD-520",
+    "brand": "تەكلىماكان شىپا",
+    "languageScope": "all",
+    "name": "قىزىل قانتارون مېيى (25ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 360,
+    "oldPrice": 450,
+    "stock": 45,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئەڭ قىزىق",
+    "image": "images/products/PRD-520.webp",
+    "description": "ئەنئەنىۋى رېتسىپ بويىچە ساپ زەيتۇن مېيىدا تەييارلانغان قىزىل قانتارون مېيى (25ml تامچىلىق ئەينەك قۇتىدا).",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "قىزىل قانتارون مېيى (25ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "ئەنئەنىۋى رېتسىپ بويىچە ساپ زەيتۇن مېيىدا تەييارلانغان قىزىل قانتارون مېيى (25ml تامچىلىق ئەينەك قۇتىدا).",
+        "unit": "25ml قۇتا",
+        "badge": "ئەڭ قىزىق"
+      },
+      "tr": {
+        "name": "Doğal Kırmızı Kantaron Yağı (25ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "Geleneksel soğuk maserasyon yöntemiyle saf zeytinyağında demlenmiş kırmızı kantaron yağı (25ml damlalıklı cam şişe). Cilt yenilenmesini destekler, yara ve yanık izlerinin iyileşmesine yardımcı olur.",
+        "unit": "Adet",
+        "badge": ""
+      },
+      "en": {
+        "name": "Natural St. John's Wort Oil (25ml)",
+        "category": "Natural & Therapeutic Oils",
+        "description": "Traditional St. John's Wort oil macerated in pure olive oil (25ml dropper bottle). Supports skin regeneration and helps soothe burns and scars.",
+        "unit": "25ml Bottle",
+        "badge": "Bestseller"
+      }
+    }
+  },
+  {
+    "id": "PRD-612",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "ئەلا سۈپەتلىك قىزىل زەپە",
+    "category": "ئۆسۈملۈك دورىلار",
+    "price": 700,
+    "oldPrice": 875,
+    "stock": 120,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئالىي دەرىجىلىك",
+    "image": "images/products/PRD-612.jpg",
+    "description": "ساپ يىپەك يولى ئەلا سۈپەتلىك تاللانغان قىزىل زەپە، يۈرەك ۋە كەيپىياتنى ياخشىلاشقا مەنپەئەتلىك.",
+    "unit": "ئەينەك قاچا",
+    "translations": {
+      "ug": {
+        "name": "ئەلا سۈپەتلىك قىزىل زەپە",
+        "category": "ئۆسۈملۈك دورىلار",
+        "description": "ساپ يىپەك يولى ئەلا سۈپەتلىك تاللانغان قىزىل زەپە، يۈرەك ۋە كەيپىياتنى ياخشىلاشقا مەنپەئەتلىك.",
+        "unit": "ئەينەك قاچا",
+        "badge": "ئالىي دەرىجىلىك"
+      },
+      "tr": {
+        "name": "Orijinal Kırmızı Safran",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "ئالاھىدە سۈپەتلىك زەپە",
+        "unit": "Adet",
+        "badge": "ئەڭ قىزىق"
+      },
+      "en": {
+        "name": "Premium Pure Red Saffron",
+        "category": "Herbal Medicines",
+        "description": "Top-grade pure red saffron threads with intense aroma and authentic medicinal quality.",
+        "unit": "Glass Vial",
+        "badge": "Premium Grade"
+      }
+    }
+  },
+  {
+    "id": "PRD-754",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "زەغىر ۋە زەپە مېيى (5L)",
+    "category": "تەبىئىي ياغلار",
+    "price": 1200,
+    "oldPrice": 1500,
+    "stock": 30,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "كۆپ سېتىلغان",
+    "image": "images/products/PRD-754.jpg",
+    "description": "سوغۇق سىقىش ئۇسۇلى بىلەن تەييارلانغان %100 ساپ ۋە تەبىئىي زەغىر ۋە زەپە مېيى (5 لىتىرلىق تۇڭدا).",
+    "unit": "5 لىتىر قۇتا",
+    "translations": {
+      "ug": {
+        "name": "زەغىر ۋە زەپە مېيى (5L)",
+        "category": "تەبىئىي ياغلار",
+        "description": "سوغۇق سىقىش ئۇسۇلى بىلەن تەييارلانغان %100 ساپ ۋە تەبىئىي زەغىر ۋە زەپە مېيى (5 لىتىرلىق تۇڭدا).",
+        "unit": "5 لىتىر قۇتا",
+        "badge": "كۆپ سېتىلغان"
+      },
+      "tr": {
+        "name": "Zığır & Aspir Yağı (5L)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "تەبىئىي ۋە ساپ",
+        "unit": "Adet",
+        "badge": "Çok Satan"
+      },
+      "en": {
+        "name": "Zığır & Aspir Yağı (5L)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "تەبىئىي ۋە ساپ",
+        "unit": "Item",
+        "badge": ""
+      }
+    }
+  },
+  {
+    "id": "PRD-755",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "قەغەز با��ام (500g)",
+    "category": "قۇرۇق يەل-يېمىشلەر",
+    "price": 600,
+    "oldPrice": 750,
+    "stock": 250,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "يېڭى مەھسۇلات",
+    "image": "images/products/qeghez-badam.jpg",
+    "description": "مېڭە ۋە نېرۋىنى قۇۋۋەتلەيدۇ، ئەستە تۇتۇش قابىلىيىتىنى ئاشۇرىدۇ، قول بىلەن ئوڭاي چاقىلىدىغان قەغەز بادام.",
+    "unit": "500g خالتا",
+    "translations": {
+      "ug": {
+        "name": "قەغەز با��ام (500g)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "مېڭە ۋە نېرۋىنى قۇۋۋەتلەيدۇ، ئەستە تۇتۇش قابىلىيىتىنى ئاشۇرىدۇ، قول بىلەن ئوڭاي چاقىلىدىغان قەغەز بادام.",
+        "unit": "500g خالتا",
+        "badge": "يېڭى مەھسۇلات"
+      },
+      "tr": {
+        "name": "İnce Kabuklu Badem (500g)",
+        "category": "Kuruyemişler",
+        "description": "مېڭە ۋە نېرۋىنى قۇۋۋەتلەش: مېڭە يادرولىرىنى ئوزۇقلاندۇرىدۇ، ئەستە تۇتۇش قابىلىيىتىنى ئاشۇرىدۇ ھەم ئۇيقۇسىزلىق ۋە روھىي چارچاشنى پەسەيتىدۇ.\nئۆپكە ۋە كۆكرەكنى يۇمشىتىش: تىنچىق، كۆكرەك قۇرۇقلىقى ۋە سوزۇلما قۇرۇق يۆتەلگە مەنپەئەت قىلىدۇ، ئاۋازنى ياخشىلايدۇ.\nئۈچەينى سىلىقلاش: قۇرۇقلۇقتىن بولغان قەۋزىيەتنى يۇمشىتىپ، ھەزمنى ياخشىلايدۇ.\nئومۇمىي بەدەننى كۈچەيتىش: تەبىئىي ئېنېرگىيە ۋە مەنىينى كۆپەيتىدۇ، ئورۇق بەدەننى سەمرىتىدۇ، تېرىنى نۇرلاندۇرىدۇ.",
+        "unit": "Adet",
+        "badge": "يېڭى كەلگەن"
+      },
+      "en": {
+        "name": "Thin-Shelled Paper Almonds (500g)",
+        "category": "Dried Fruits & Nuts",
+        "description": "Hand-crackable thin-shelled natural almonds rich in essential nutrients and brain-boosting healthy fats.",
+        "unit": "500g Pack",
+        "badge": "Recommended"
+      }
+    }
+  },
+  {
+    "id": "PRD-759",
+    "brand": "تەكلىماكان كىلاسسىك",
+    "languageScope": "all",
+    "name": "ساپ ئۈشمە يېغى (25ml)",
+    "category": "تەبىئىي ياغلار",
+    "price": 280,
+    "oldPrice": 350,
+    "stock": 48,
+    "sales": 2,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئەڭ قىزىق",
+    "image": "images/products/PRD-759.jpg",
+    "description": "قاش، كىرپىك ۋە چاچ يىلتىزلىرىنى كۈچلەندۈرۈپ قۇۋۋەتلەيدىغان %100 ساپ ئۇيغۇر ئۈشمە يېغى (25ml تامچىلىق ئەينەك قۇتىدا).",
+    "unit": "25ml قۇتا",
+    "translations": {
+      "ug": {
+        "name": "ساپ ئۈشمە يېغى (25ml)",
+        "category": "تەبىئىي ياغلار",
+        "description": "قاش، كىرپىك ۋە چاچ يىلتىزلىرىنى كۈچلەندۈرۈپ قۇۋۋەتلەيدىغان %100 ساپ ئۇيغۇر ئۈشمە يېغى (25ml تامچىلىق ئەينەك قۇتىدا).",
+        "unit": "25ml قۇتا",
+        "badge": "ئەڭ قىزىق"
+      },
+      "tr": {
+        "name": "Saf Uşma Yağı (25ml)",
+        "category": "Doğal & Şifalı Yağlar",
+        "description": "چاچنىڭ يىلتىزىنى قۇۋۋەتلەش \nچاچ چۈشۈشنىڭ ئالدىنى ئېلىش\nچاچ نى قارايتىش \nداۋاملىق ئىشلىتىپ بەگەندە چاچ چىقىرىش ئۈنۈمىگە ئىگە.",
+        "unit": "Adet",
+        "badge": "Çok Satan"
+      },
+      "en": {
+        "name": "Pure Usma Oil (25ml)",
+        "category": "Natural & Therapeutic Oils",
+        "description": "100% pure traditional usma oil (25ml dropper bottle). Nourishes and strengthens eyebrows, eyelashes, and hair roots.",
+        "unit": "25ml Bottle",
+        "badge": "Bestseller"
+      }
+    }
+  },
+  {
+    "id": "PRD-840",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "سېرىق ئوت",
+    "category": "ئۆسۈملۈك دورىلار",
+    "price": 300,
+    "oldPrice": 375,
+    "stock": 500,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئېتىباردا",
+    "image": "images/products/seriq-ot.jpg",
+    "description": "ماغدۇرسىزلىق، بەل-پۇت ماغدۇرسىزلىقى ۋە ئاغرىقىنى پەسەيتىدۇ ، جىگەرنى كۈچەيتىپ كۆزنى نۇرلاندۇرۇش، جىگەر ئىقتىدارىنى تەڭشەپ، كۆز قاراڭغۇلىشىش ۋە كۆرۈش قۇۋۋىتى ئاجىزلاشنى ياخشىلايدۇ.",
+    "unit": "100 گرام",
+    "translations": {
+      "ug": {
+        "name": "سېرىق ئوت",
+        "category": "ئۆسۈملۈك دورىلار",
+        "description": "ماغدۇرسىزلىق، بەل-پۇت ماغدۇرسىزلىقى ۋە ئاغرىقىنى پەسەيتىدۇ ، جىگەرنى كۈچەيتىپ كۆزنى نۇرلاندۇرۇش، جىگەر ئىقتىدارىنى تەڭشەپ، كۆز قاراڭغۇلىشىش ۋە كۆرۈش قۇۋۋىتى ئاجىزلاشنى ياخشىلايدۇ.",
+        "unit": "100 گرام",
+        "badge": "ئېتىباردا"
+      },
+      "tr": {
+        "name": "Şifalı Sarı Ot (Coptis)",
+        "category": "Şifalı Bitkiler & Çaylar",
+        "description": "ماغدۇرسىزلىق، بەل-پۇت ماغدۇرسىزلىقى ۋە ئاغرىقىنى پەسەيتىدۇ ،\nجىگەرنى كۈچەيتىپ كۆزنى نۇرلاندۇرۇش، جىگەر ئىقتىدارىنى تەڭشەپ، كۆز قاراڭغۇلىشىش ۋە كۆرۈش قۇۋۋىتى ئاجىزلاشنى ياخشىلايدۇ.\nھۈجەيرىلەرنى ياشارتىش ۋە كۈچ بېرىش، سۈيدۈك تۇتالماسلىق، قېرىشنىڭ ئالدىنى ئېلىش ۋە چاچ بالدۇر ئاقىرىشنىڭ ئالدىنى ئېلىشتا قىممەتلىك جەۋھەر.\nبەدەندىكى زىيادە سەۋدا ۋە بەلغەمنى ھەيدەپ، تەبىئىي ئېنېرگىيە بېرىدۇ.",
+        "unit": "Adet",
+        "badge": "ئېتىباردا"
+      },
+      "en": {
+        "name": "Traditional Yellow Herb - Cuscuta",
+        "category": "Herbal Medicines",
+        "description": "Traditional herbal remedy for vitality, liver support, vision enhancement and restoring body balance.",
+        "unit": "100g Pack",
+        "badge": "Special Deal"
+      }
+    }
+  },
+  {
+    "id": "PRD-910",
+    "brand": "تەكلىماكان تورى",
+    "languageScope": "all",
+    "name": "تەبىئىي قارا كۈنجۈت (1kg)",
+    "category": "قۇرۇق يەل-يېمىشلەر",
+    "price": 1600,
+    "oldPrice": 2000,
+    "stock": 150,
+    "sales": 0,
+    "rating": 5,
+    "ratingCount": 18,
+    "featured": false,
+    "badge": "ئېتىباردا",
+    "image": "images/products/PRD-910.jpg",
+    "description": "قان تولۇقلايدۇ، تەننى كۈچلەندۈرىدۇ، چاچ ۋە سۆڭەك ساغلاملىقىنى قوللايدىغان ساپ قارا كۈنجۈت.",
+    "unit": "1 كىلو خالتا",
+    "translations": {
+      "ug": {
+        "name": "تەبىئىي قارا كۈنجۈت (1kg)",
+        "category": "قۇرۇق يەل-يېمىشلەر",
+        "description": "قان تولۇقلايدۇ، تەننى كۈچلەندۈرىدۇ، چاچ ۋە سۆڭەك ساغلاملىقىنى قوللايدىغان ساپ قارا كۈنجۈت.",
+        "unit": "1 كىلو خالتا",
+        "badge": "ئېتىباردا"
+      },
+      "tr": {
+        "name": "Doğal Kara Susam (1kg)",
+        "category": "Kuruyemişler",
+        "description": "قان تولۇقلايدۇ",
+        "unit": "Adet",
+        "badge": "ئېتىباردا"
+      },
+      "en": {
+        "name": "Natural Black Sesame Seeds (1kg)",
+        "category": "Dried Fruits & Nuts",
+        "description": "Pure raw black sesame seeds, mineral-dense and nutrient-rich for vitality, hair and bone wellness.",
+        "unit": "1kg Pack",
+        "badge": "On Sale"
+      }
+    }
   }
 ];
 
@@ -1125,9 +1487,9 @@ const INITIAL_CATEGORIES = [
   { id: 'گۈلقەنتلەر', name: 'گۈلقەنتلەر', order: 6, icon: 'fas fa-seedling', translations: { ug: 'گۈلقەنتلەر', tr: 'Gül Reçelleri & Macunlar', en: 'Rose Jams & Pastes' } },
   { id: 'قۇرۇق يەل-يېمىشلەر', name: 'قۇرۇق يەل-يېمىشلەر', order: 7, icon: 'fas fa-apple-alt', translations: { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuru Meyve & Yemişler', en: 'Dried Fruits & Nuts' } },
   { id: 'مەدەنىيەت بۇيۇملىرى', name: 'مەدەنىيەت بۇيۇملىرى', order: 8, icon: 'fas fa-landmark', translations: { ug: 'مەدەنىيەت بۇيۇملىرى', tr: 'Kültür & Sanat Eşyaları', en: 'Cultural & Art Artifacts' } },
-  { id: 'كىتاپ ۋە مەدەنىيەت', name: 'كىتاپ ۋە مەدەنىيەت', order: 9, icon: 'fas fa-book-open', translations: { ug: 'كىتاپ ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
-];
-
+  { id: 'كىتاب ۋە مەدەنىيەت', name: 'كىتاب ۋە مەدەنىيەت', order: 9, icon: 'fas fa-book-open', translations: { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' } }
+];
+
 const DEFAULT_MARQUEE_ITEMS = [
   {
     id: 'm1',
@@ -5838,9 +6200,11 @@ class StoreManager {
       if (typeof window.appI18n.getUnitName === 'function') {
         unit = window.appI18n.getUnitName(unit || p.unit || 'دانە', lang);
       }
-      if (typeof window.appI18n.getBadgeName === 'function' && badge) {
-        badge = window.appI18n.getBadgeName(badge, lang);
-      }
+    }
+
+    // 🛡️ ھەر قانداق تىلدا (جۈملىدىن ئۇيغۇرچىدا) بەلگىنى 100% كەسپىي تەرجىمە قىلىش
+    if (window.appI18n && typeof window.appI18n.getBadgeName === 'function' && badge) {
+      badge = window.appI18n.getBadgeName(badge, lang);
     }
 
     return {
@@ -5855,6 +6219,9 @@ class StoreManager {
         if (p.translations && p.translations[lang] && p.translations[lang].brand) {
           return p.translations[lang].brand;
         }
+        if (window.appI18n && typeof window.appI18n.getBrandName === 'function') {
+          return window.appI18n.getBrandName(b, lang);
+        }
         if (lang !== 'ug') {
           if (b.includes('تەكلىماكان كلاسسىك')) return 'Teklimakan Klasik';
           if (b.includes('تەكلىماكان ئالىي')) return 'Teklimakan Premium';
@@ -5862,9 +6229,6 @@ class StoreManager {
           if (b.includes('تۇرپان يېشىل')) return 'Turpan Doğal';
           if (b.includes('خوتەن قاشتېشى')) return 'Hoten Yeşimi';
           if (b.includes('ئىلى')) return 'İli Doğal';
-          if (window.appI18n && typeof window.appI18n.autoTranslateUyghur === 'function') {
-            return window.appI18n.autoTranslateUyghur(b, lang);
-          }
         }
         return b;
       })(),
@@ -6876,85 +7240,27 @@ class StoreManager {
       if (raw) categories = JSON.parse(raw);
     } catch(e) {}
 
-    // 🛡️ تۈركچە بىلەن بۇلغانغان كونا كاشنى (Şifalı, Yağlar, Kuruyemişler) دەرھال پاكىز تازىلاش
-    const hasCorruptTr = Array.isArray(categories) && categories.some(c => c && c.id && (/Şifa|Bitki|Yağlar|Kuruyemiş|Geleneksel|Uygur Tıbbı Mirası/i.test(c.id) || /Şifa|Bitki|Yağlar|Kuruyemiş/i.test(c.name)));
-    if (hasCorruptTr || !Array.isArray(categories) || categories.length <= 1) {
+    // 🛡️ تۈرلەر تىزىملىكى چوقۇم 10 ئاساسىي ئۆلچەملىك تۈر بىلەن دەل ماسلىشىشى، تۈركچە ياكى قايتىلانغان تۈرلەر بولسا دەرھال ئەسلىگە كېلىشى كېرەك
+    const isCorrupt = !Array.isArray(categories) || categories.length < 10 || categories.some(c => 
+      !c || !c.id || /Şifa|Bitki|Yağlar|Kuruyemiş|Geleneksel|Uygur Tıbbı Mirası/i.test(c.id) || /Şifa|Bitki|Yağlar|Kuruyemiş/i.test(c.name)
+    );
+
+    if (isCorrupt) {
       categories = JSON.parse(JSON.stringify(INITIAL_CATEGORIES));
       try { localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories)); } catch(e) {}
     }
 
-    // 🛡️ كېرەكسىز ياكى قايتىلانغان ساختا تۈرلەرنى (بارلىق تۈرلەر، Tüm Kategoriler) دەسلەپتىلا چىقىرىۋېتىش (پەقەت تۈپ 'all' قالىدۇ)
+    // 🛡️ كېرەكسىز ياكى قايتىلانغان ساختا تۈرلەرنى دەسلەپتىلا چىقىرىۋېتىش
     categories = categories.filter(c => c && (c.id === 'all' || (!isPseudoCategory(c.id) && !isPseudoCategory(c.name))));
 
-    const existingIds = new Set(categories.map(c => c.id || c.name));
-
-    // 1. بارلىق ئۆلچەملىك تۈرلەردىن كەم قالغانلىرىنى ئاپتوماتىك تولۇقلاش
-    INITIAL_CATEGORIES.forEach(ic => {
-      if (ic.id && !isPseudoCategory(ic.id) && !existingIds.has(ic.id)) {
-        existingIds.add(ic.id);
-        categories.push(JSON.parse(JSON.stringify(ic)));
-      }
-    });
-
-    // 2. بارلىق مەھسۇلاتلاردىكى تۈرلەرنى ئۆزلۈكىدىن قوشۇپ مۇكەممەللەشتۈرۈش
-    const products = this.getProducts();
-    products.forEach(p => {
-      const cat = p.category ? p.category.trim() : '';
-      if (cat && !isPseudoCategory(cat) && !existingIds.has(cat)) {
-        existingIds.add(cat);
-        const trName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'tr') : cat;
-        const enName = (window.appI18n && typeof window.appI18n.getCategoryName === 'function') ? window.appI18n.getCategoryName(cat, 'en') : cat;
-        categories.push({
-          id: cat,
-          name: cat,
-          icon: 'fas fa-tag',
-          status: 'active',
-          order: categories.length,
-          translations: { ug: cat, tr: trName, en: enName }
-        });
-      }
-    });
-
-    // 🛡️ 'all' تۈرىنىڭ تەرجىمىسىنى ھەر ۋاقىت توغرا قىلىش
-    const allCat = categories.find(c => c.id === 'all');
-    if (allCat) {
-      allCat.name = 'all';
-      allCat.translations = { ug: 'بارلىق تۈرلەر', tr: 'Tüm Kategoriler', en: 'All Categories' };
-    }
-
-    // 3. تەرتىپ سانلىرىنى كاپالەتلەندۈرۈش ۋە رەتلەش
-    let nextOrder = 1;
-    categories.forEach(c => {
-      if (c.id === 'all') {
-        c.order = 0;
-      } else if (typeof c.order !== 'number' || isNaN(c.order) || c.order <= 0) {
-        c.order = nextOrder;
-      }
-      if (c.id !== 'all') nextOrder++;
-    });
-
-    // 'all' ھەمىشە ئالدىدا بولىدۇ، قالغانلىرى تەرتىپ نومۇرى بويىچە رەتلىنىدۇ
+    // 'all' ھەمىشە ئالدىدا بولىدۇ
     categories.sort((a, b) => {
       if (a.id === 'all') return -1;
       if (b.id === 'all') return 1;
       return (a.order || 0) - (b.order || 0);
     });
 
-    // تەرتىپ نومۇرلىرىنى 1، 2، 3 تەرتىپلىك بويىچە پۇختا نورماللاشتۇرۇش
-    let normOrder = 1;
-    categories.forEach(c => {
-      if (c.id === 'all') {
-        c.order = 0;
-      } else {
-        c.order = normOrder++;
-      }
-    });
-
-    try {
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
-    } catch(e) {}
-
-    return categories.map(c => {
+    const mapped = categories.map(c => {
       let displayName = '';
       if (c.id === 'all') {
         displayName = (window.appI18n && typeof window.appI18n.t === 'function')
@@ -6973,6 +7279,18 @@ class StoreManager {
       }
       return { status: 'active', ...c, displayName };
     });
+
+    // 🛡️ تۈرلەر نامىنىڭ قەتئىي قايتىلانماسلىقىغا (Zero duplicates by displayName) %100 كاپالەتلىك قىلىش
+    const seenNames = new Set();
+    const cleanCategories = [];
+    for (const c of mapped) {
+      const key = (c.displayName || c.name || '').trim();
+      if (!key || seenNames.has(key)) continue;
+      seenNames.add(key);
+      cleanCategories.push(c);
+    }
+
+    return cleanCategories;
   }
 
   addCategory(categoryName, icon = 'fas fa-tag', translations = {}, order = null) {

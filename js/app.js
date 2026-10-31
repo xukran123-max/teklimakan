@@ -1507,7 +1507,11 @@ function initTeklimakanApp() {
       if (currentLang === 'ug' && (stripText.includes('Cuma Kap') || !stripText)) {
         stripText = (shelf.translations?.ug?.badgeStripText) || '🚚 ئەتە بوسۇغىڭىزدا';
       }
-      if (stripText) { stripText = stripText.replace(/kupon|coupon|تالون/gi, '').trim(); if (stripText === '75 TL' || stripText === '75TL') stripText = '🎁 75 TL'; }
+      if (stripText && currentLang === 'ug') {
+        if (stripText.includes('75') || stripText.includes('TL') || stripText.includes('لىرا')) {
+          stripText = '🎁 ئالاھىدە ئېتىبار';
+        }
+      }
 
       // Verified badge:
       const verifiedHtml = shelf.showVerifiedBadge ? `<i class="fas fa-check-circle verified-icon" title="تەستىقلانغان ماركا"></i>` : '';

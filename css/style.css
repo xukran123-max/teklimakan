@@ -6122,32 +6122,13 @@ html[dir="ltr"] .floating-lucky-wheel-btn {
 
 @media (max-width: 768px) {
   .shelf-nav-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 0.78rem;
-    top: 36%;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  }
-  .shelf-nav-left, .shelf-nav-next {
-    left: -6px;
-  }
-  .shelf-nav-right, .shelf-nav-prev {
-    right: -6px;
+    display: none !important;
   }
 }
 
 @media (max-width: 480px) {
   .shelf-nav-btn {
-    width: 29px;
-    height: 29px;
-    font-size: 0.72rem;
-    top: 35%;
-  }
-  .shelf-nav-left, .shelf-nav-next {
-    left: -4px;
-  }
-  .shelf-nav-right, .shelf-nav-prev {
-    right: -4px;
+    display: none !important;
   }
 }
 

@@ -182,8 +182,13 @@ Add-Content -Path $historyLog -Value $logEntry -Encoding UTF8
 # 5. 📱 تېلېگراممىغا قىسقىچە ئۇيغۇرچە خۇلاسە ۋە تەپسىلىي دوكلات ئۇلانمىسىنى يوللاش
 if ($SendTelegram) {
     Write-Host "📱 تېلېگراممىغا كۈندىلىك قىسقىچە دوكلات ئەۋەتىلمەكتە..." -ForegroundColor Cyan
-    $botToken = "8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM"
-    $chatId = "7077223578"
+    $botToken = $env:TELEGRAM_BOT_TOKEN
+    $chatId = $env:TELEGRAM_TARGET_CHAT_ID
+
+    if ([string]::IsNullOrWhiteSpace($botToken) -or [string]::IsNullOrWhiteSpace($chatId)) {
+        Write-Warning "Telegram environment variables are missing; the report was generated but not sent."
+        return
+    }
 
     $statusEmoji = if ($issuesFound -eq 0) { "✅" } else { "🔧" }
     $statusText = if ($issuesFound -eq 0) { "بارلىق سىستېما 100% نورمال ۋە بىخەتەر" } else { "$issuesFound مەسىلە بايقالدى ھەم ئاپتوماتىك ئوڭشالدى" }

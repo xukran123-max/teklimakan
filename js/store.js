@@ -68,7 +68,7 @@ const STORAGE_KEYS = {
   CUSTOMER_INBOX: 'teklimakan_customer_inbox_v1',
   COUPONS: 'teklimakan_ecom_coupons_v1',
   HERO_SLIDES: 'teklimakan_ecom_hero_slides_v1',
-  SHOWCASE_SHELVES: 'teklimakan_ecom_showcase_shelves_v1',
+  SHOWCASE_SHELVES: 'teklimakan_ecom_showcase_shelves_v2',
   CHARITY_PAYOUTS: 'teklimakan_charity_payouts_v1'
 };
 
@@ -1751,7 +1751,7 @@ const DEFAULT_SHOWCASE_SHELVES = [
         title: 'ئالاھىدە باھالىق مەھسۇلاتلار',
         subtitle: 'چەكلىك ۋاقىتلىق ئېتىبار ۋە قىزىق نۇقتىدىكى تاللانمىلار',
         linkText: '',
-        badgeStripText: '🎁 75 لىرا'
+        badgeStripText: '🎁 ئالاھىدە ئېتىبار'
       },
       tr: {
         title: "Özel Fiyatlı Ürünler",

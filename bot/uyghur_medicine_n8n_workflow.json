@@ -75,7 +75,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.telegram.org/bot8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM/sendPhoto",
+        "url": "={{ 'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendPhoto' }}",
         "sendBody": true,
         "contentType": "json",
         "body": "={\n  \"chat_id\": $json.chat_id,\n  \"photo\": $json.photoUrl,\n  \"caption\": $json.caption,\n  \"parse_mode\": \"HTML\",\n  \"reply_markup\": $json.reply_markup\n}"

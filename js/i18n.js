@@ -1253,7 +1253,28 @@ const PROMO_BADGE_LOCALIZATIONS = {
   'Bestseller': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Bestseller' },
   'Best Seller': { ug: 'ئەڭ قىزىق', tr: 'Çok Satan', en: 'Best Seller' },
   'Special Deal': { ug: 'ئېتىبار مەھسۇلات', tr: 'Fırsat Ürünü', en: 'Special Deal' },
-  'Featured': { ug: 'تەۋسىيە', tr: 'Tavsiye', en: 'Featured' }
+  'Featured': { ug: 'تەۋسىيە', tr: 'Tavsiye', en: 'Featured' },
+  'Özel Seçim': { ug: 'ئالاھىدە تاللانما', tr: 'Özel Seçim', en: 'Special Selection' },
+  'Ozel Secim': { ug: 'ئالاھىدە تاللانما', tr: 'Özel Seçim', en: 'Special Selection' },
+  'Şifalı Meyve': { ug: 'شىپالىق مېۋە', tr: 'Şifalı Meyve', en: 'Healing Fruit' },
+  'Sifali Meyve': { ug: 'شىپالىق مېۋە', tr: 'Şifalı Meyve', en: 'Healing Fruit' },
+  'Şifalı Lezzet': { ug: 'شىپالىق لەززەت', tr: 'Şifalı Lezzet', en: 'Healing Taste' },
+  'Sifali Lezzet': { ug: 'شىپالىق لەززەت', tr: 'Şifalı Lezzet', en: 'Healing Taste' },
+  'Güneşte Pişen': { ug: 'قۇياش پىشقى', tr: 'Güneşte Pişen', en: 'Sun-Cured' },
+  'Guneste Pisen': { ug: 'قۇياش پىشقى', tr: 'Güneşte Pişen', en: 'Sun-Cured' },
+  'Kültür Mirası': { ug: 'مەدەنىيەت مىراسى', tr: 'Kültür Mirası', en: 'Cultural Heritage' },
+  'Kultur Mirasi': { ug: 'مەدەنىيەت مىراسى', tr: 'Kültür Mirası', en: 'Cultural Heritage' },
+  'Doğal Bakım': { ug: 'تەبىئىي گۈزەللىك', tr: 'Doğal Bakım', en: 'Natural Care' },
+  'Dogal Bakim': { ug: 'تەبىئىي گۈزەللىك', tr: 'Doğal Bakım', en: 'Natural Care' },
+  'Saf & Doğal': { ug: 'ساپ ۋە تەبىئىي', tr: 'Saf & Doğal', en: 'Pure & Natural' },
+  'Saf ve Dogal': { ug: 'ساپ ۋە تەبىئىي', tr: 'Saf & Doğal', en: 'Pure & Natural' },
+  'Şifalı Mantar': { ug: 'شىپالىق زەمبۇرۇغ', tr: 'Şifalı Mantar', en: 'Healing Mushroom' },
+  'Sifali Mantar': { ug: 'شىپالىق زەمبۇرۇغ', tr: 'Şifalı Mantar', en: 'Healing Mushroom' },
+  'Tavsiye Edilen': { ug: 'تەۋسىيە قىلىنغان', tr: 'Tavsiye Edilen', en: 'Recommended' },
+  'İndirimde': { ug: 'ئېتىباردا', tr: 'İndirimde', en: 'On Sale' },
+  'Indirimde': { ug: 'ئېتىباردا', tr: 'İndirimde', en: 'On Sale' },
+  '%100 Saf': { ug: '%100 ساپ', tr: '%100 Saf', en: '100% Pure' },
+  'Saf': { ug: 'ساپ', tr: 'Saf', en: 'Pure' }
 };
 
 // تۈرلەر ۋە تاۋار ناملىرى ئۈچۈن قوشۇمچە ئۆلچەملىك لۇغەت
@@ -1822,11 +1843,21 @@ class I18nManager {
 
     if (lang === 'ug') {
       // ئەگەر ئۇيغۇرچىدا تۈركچە ئاتالغۇلار قېلىپ قالسا ئۇنى تەرجىمە قىلىش
+      if (/Seçim|Secim/i.test(clean)) return 'ئالاھىدە تاللانما';
+      if (/Meyve/i.test(clean)) return 'شىپالىق مېۋە';
+      if (/Lezzet/i.test(clean)) return 'شىپالىق لەززەت';
+      if (/Güneş|Gunes/i.test(clean)) return 'قۇياش پىشقى';
+      if (/Miras/i.test(clean)) return 'مەدەنىيەت مىراسى';
+      if (/Bakım|Bakim/i.test(clean)) return 'تەبىئىي گۈزەللىك';
+      if (/Mantar/i.test(clean)) return 'شىپالىق زەمبۇرۇغ';
       if (/Fırsat|Firsat/i.test(clean)) return 'ئېتىبار مەھسۇلات';
+      if (/Saf & Doğal|Saf ve Dogal/i.test(clean)) return 'ساپ ۋە تەبىئىي';
       if (/Doğal|Dogal/i.test(clean)) return '%100 تەبىئىي';
       if (/Satan|Çok/i.test(clean)) return 'ئەڭ قىزىق';
       if (/Tavsiye/i.test(clean)) return 'تەۋسىيە';
       if (/Yeni/i.test(clean)) return 'يېڭى كەلگەن';
+      if (/İndirim|Indirim/i.test(clean)) return 'ئېتىباردا';
+      if (/Özel|Ozel/i.test(clean)) return 'ئالاھىدە رېتسىپ';
       return clean;
     }
 

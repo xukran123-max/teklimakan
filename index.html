@@ -2506,5 +2506,37 @@
   <script src="js/turkey-locations.js?v=20261026_v1"></script>
   <script src="js/app.js?v=20261008_v153"></script>
   <script src="js/push-manager.js?v=20261004_v180"></script>
+
+  <!-- 📲 PWA تېلېفونغا ئەپ قىلىپ قاچىلاش كارتىسى (PWA Install Banner) -->
+  <div id="pwaInstallBanner" style="display: none; position: fixed; bottom: 75px; left: 16px; right: 16px; max-width: 460px; margin: 0 auto; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-radius: 18px; padding: 0.9rem 1.1rem; box-shadow: 0 12px 35px rgba(0,0,0,0.45); border: 1.5px solid rgba(255,255,255,0.15); z-index: 99998; backdrop-filter: blur(8px); animation: pwaSlideUp 0.35s ease-out;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <img src="images/logo_circle.png" alt="Teklimakan" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); object-fit: cover; flex-shrink: 0;" onerror="this.src='favicon.ico'">
+        <div>
+          <div style="font-size: 0.96rem; font-weight: 800; color: #ffffff; line-height: 1.25;">
+            تەكلىماكان كۆچمە ئەپىنى قاچىلاڭ
+          </div>
+          <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 3px;">
+            1 سېكۇنتتا تېز ئېچىش ۋە زاكازلارنى ئىز قوغلاش ئۈچۈن
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0;">
+        <button type="button" id="btnInstallPwa" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; border: none; padding: 0.5rem 1rem; border-radius: 10px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+          <i class="fas fa-download" style="font-size: 0.8rem;"></i>
+          <span>قاچىلاش</span>
+        </button>
+        <button type="button" id="btnClosePwaBanner" style="background: rgba(255,255,255,0.12); color: #cbd5e1; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem;"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pwaSlideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+
 </body>
 </html>

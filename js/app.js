@@ -11303,3 +11303,66 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
     }
   })();
 
+
+
+  // ==================== 📲 PWA ئاپتوماتىك قاچىلاش باشقۇرغۇچى (PWA Install Prompt Manager) ====================
+  (function setupPwaInstallPrompt() {
+    let deferredPrompt = null;
+    const banner = document.getElementById('pwaInstallBanner');
+    const btnInstall = document.getElementById('btnInstallPwa');
+    const btnClose = document.getElementById('btnClosePwaBanner');
+
+    // ئەگەر ئاللىقاچان قاچىلانغان (Standalone) بولسا ياكى يېقىندا تاقىۋەتكەن بولسا چىقارماسلىق
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isDismissed = localStorage.getItem('teklimakan_pwa_dismissed');
+
+    if (isStandalone) {
+      return;
+    }
+
+    // Android / Chrome: beforeinstallprompt ھادىسىسى
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isDismissed && banner) {
+        setTimeout(() => {
+          banner.style.display = 'block';
+        }, 3500); // 3.5 سېكۇنتتىن كېيىن ئاستا چىقىدۇ
+      }
+    });
+
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('[PWA] User response:', outcome);
+          deferredPrompt = null;
+          if (banner) banner.style.display = 'none';
+        } else {
+          // iOS Safari ياكى باشقا كۆرگۈچلەر ئۈچۈن قاچىلاش يىپ ئۇچى
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          if (isIOS) {
+            alert('📲 ئەپنى تېلېفونىڭىزغا قاچىلاش ئۈچۈن:\n1. Safari نىڭ ئاستىدىكى ھەمبەھىرلەش (Share) كۇنۇپكىسىنى بېسىڭ.\n2. «Ana Ekrana Ekle / باش ئېكرانغا قوشۇش» نى تاللاڭ.');
+          } else {
+            alert('📲 ئەپنى قاچىلاش ئۈچۈن تور كۆرگۈچنىڭ ئوڭ ئۈستىدىكى ئۈچ چېكىتنى بېسىپ «Uygulamayı Yükle / ئەپنى قاچىلاش» نى تاللاڭ.');
+          }
+        }
+      });
+    }
+
+    if (btnClose && banner) {
+      btnClose.addEventListener('click', () => {
+        banner.style.display = 'none';
+        localStorage.setItem('teklimakan_pwa_dismissed', Date.now());
+      });
+    }
+
+    // ئەپ ئوڭۇشلۇق قاچىلانغاندا
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] Application successfully installed!');
+      if (banner) banner.style.display = 'none';
+      localStorage.setItem('teklimakan_pwa_dismissed', Date.now());
+    });
+  })();
+

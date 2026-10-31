@@ -1418,11 +1418,11 @@ const INITIAL_SETTINGS = {
   announcement: '🚚 1000 لىرادىن ئارتۇق مال سېتىۋالسىڭىز يەتكۈزۈپ بېرىش ھەقسىز! | 1000 TL Üzeri Alışverişlerde Kargo Bedava! | Free Shipping on Orders Over 1000 TL!',
   marqueeItems: DEFAULT_MARQUEE_ITEMS,
   telegramEnabled: true,
-  telegramBotToken: '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM',
-  telegramChatId: '7077223578',
+  telegramBotToken: '',
+  telegramChatId: '',
   whatsappEnabled: true,
-  whatsappInstanceId: '710722780337',
-  whatsappToken: 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7',
+  whatsappInstanceId: '',
+  whatsappToken: '',
   emailNotificationEnabled: true,
   notificationEmail: 'uyghurmedicine.com@gmail.com',
   smtpPreset: 'gmail',
@@ -1677,14 +1677,14 @@ class StoreManager {
     } else {
       try {
         const curSet = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {};
-        curSet.telegramBotToken = curSet.telegramBotToken || INITIAL_SETTINGS.telegramBotToken;
-        curSet.telegramChatId = curSet.telegramChatId || INITIAL_SETTINGS.telegramChatId;
-        curSet.whatsappInstanceId = curSet.whatsappInstanceId || INITIAL_SETTINGS.whatsappInstanceId;
-        curSet.whatsappToken = curSet.whatsappToken || INITIAL_SETTINGS.whatsappToken;
+        // Client-side secrets are no longer supported. Purge values that may have
+        // been saved by older builds and use server-side environment variables.
+        curSet.telegramBotToken = '';
+        curSet.telegramChatId = '';
+        if (curSet.telegramEnabled === undefined) curSet.telegramEnabled = true;
+        curSet.whatsappInstanceId = '';
+        curSet.whatsappToken = '';
         if (curSet.whatsappEnabled === undefined) curSet.whatsappEnabled = true;
-        if (curSet.telegramEnabled === undefined) {
-          curSet.telegramEnabled = INITIAL_SETTINGS.telegramEnabled !== false;
-        }
         if (curSet.emailNotificationEnabled === undefined) {
           curSet.emailNotificationEnabled = true;
         }
@@ -4911,26 +4911,16 @@ class StoreManager {
       }
 
       const settings = this.getSettings() || {};
-      const instanceId = settings.whatsappInstanceId || '710722780337';
-      const token = settings.whatsappToken || 'a7553b8575e34896be9b21f845bc0b92ca0fec8744be41fbb7';
-      const enabled = settings.whatsappEnabled !== false;
+      if (settings.whatsappEnabled === false) return { success: false, error: 'disabled' };
 
-      if (!enabled || !instanceId || !token) {
-        return { success: false, error: 'disabled_or_missing_credentials' };
-      }
-
-      const url = `https://7107.api.greenapi.com/waInstance${instanceId}/sendMessage/${token}`;
-      const res = await fetch(url, {
+      const res = await fetch('/api/whatsapp-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId: chatId,
-          message: message
-        })
+        body: JSON.stringify({ phone: phoneStr, message })
       });
 
       const data = await res.json();
-      const ok = !!(data && data.idMessage);
+      const ok = res.ok && data && data.success === true;
       if (ok) {
         console.log('[WhatsApp API] Message sent successfully to', chatId, 'ID:', data.idMessage);
       } else {
@@ -4947,29 +4937,19 @@ class StoreManager {
   async sendTelegramAlert({ title, message, isUrgent = false, extraData = null }) {
     try {
       const settings = this.getSettings() || {};
-      const botToken = (settings.telegramBotToken && settings.telegramBotToken.trim()) || INITIAL_SETTINGS.telegramBotToken || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
-      const chatId = (settings.telegramChatId && String(settings.telegramChatId).trim()) || INITIAL_SETTINGS.telegramChatId || '7077223578';
       const enabled = settings.telegramEnabled !== false;
 
-      if ((!enabled && !isUrgent) || !botToken || !chatId) {
-        console.warn('Telegram alerts disabled or missing credentials');
-        return { success: false, message: 'Telegram disabled or credentials missing' };
+      if (!enabled && !isUrgent) {
+        return { success: false, message: 'Telegram disabled' };
       }
 
-      const urgencyPrefix = isUrgent ? '🚨 <b>[جىددىي ئۇقتۇرۇش / URGENT ALERT]</b>\n' : '📢 <b>[تەكلىماكان سۇپىسى ئۇقتۇرۇشى]</b>\n';
-      const fullText = `${urgencyPrefix}<b>${title}</b>\n\n${message}\n\n⏰ ۋاقتى: ${new Date().toLocaleString()}`;
-
-      const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      const res = await fetch('/api/telegram-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: fullText,
-          parse_mode: 'HTML'
-        })
+        body: JSON.stringify({ title, message, isUrgent, extraData })
       });
       const data = await res.json();
-      return { success: data.ok, data };
+      return { success: res.ok && data.success === true, data };
     } catch (err) {
       console.warn('sendTelegramAlert failed:', err);
       return { success: false, error: err.message };

@@ -4370,8 +4370,9 @@ function initTeklimakanApp() {
     }
     try {
       const settings = window.appStore ? window.appStore.getSettings() : {};
-      const botToken = (settings && settings.telegramBotToken && settings.telegramBotToken.trim()) || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
-      const chatId = (settings && settings.telegramChatId && String(settings.telegramChatId).trim()) || '7077223578';
+      const botToken = (settings && settings.telegramBotToken && settings.telegramBotToken.trim()) || '';
+      const chatId = (settings && settings.telegramChatId && String(settings.telegramChatId).trim()) || '';
+      if (!botToken || !chatId) return false;
 
       let cleanPhone = (agent.phone || '').replace(/[^0-9]/g, '');
       if (cleanPhone.startsWith('0')) cleanPhone = '9' + cleanPhone;

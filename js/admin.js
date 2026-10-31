@@ -294,12 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ==================== باشقۇرغۇچى بىخەتەرلىك تەكشۈرۈشى (Admin Auth Gate) ====================
   function checkAdminAuth() {
-    const isAuth = localStorage.getItem('teklimakan_admin_auth') === 'true' || sessionStorage.getItem('teklimakan_admin_auth') === 'true';
+    const isAuth = sessionStorage.getItem('teklimakan_admin_auth') === 'true';
     const overlay = document.getElementById('adminLoginOverlay');
     const app = document.querySelector('.admin-app');
 
     if (isAuth) {
-      localStorage.setItem('teklimakan_admin_auth', 'true');
       sessionStorage.setItem('teklimakan_admin_auth', 'true');
       if (overlay) {
         overlay.classList.add('is-hidden');
@@ -336,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function doAdminLoginAction() {
+  async function doAdminLoginAction() {
     const userInput = document.getElementById('adminUsernameInput');
     const pwInput = document.getElementById('adminPasswordInput');
     const errorMsg = document.getElementById('adminLoginErrorMsg');
@@ -344,20 +343,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const userVal = userInput ? userInput.value.trim().toLowerCase() : '';
     const pwVal = pwInput ? pwInput.value.trim() : '';
 
-    let validUser = (localStorage.getItem('teklimakan_admin_username') || 'seidiye').toLowerCase().trim();
-    if (validUser === 'admin') {
-      validUser = 'seidiye';
-      localStorage.setItem('teklimakan_admin_username', 'seidiye');
+    let authenticated = false;
+    let setupCreated = false;
+    const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+
+    try {
+      if (isLocal) {
+        const savedUser = (localStorage.getItem('teklimakan_admin_username') || '').toLowerCase().trim();
+        const savedPw = (localStorage.getItem('teklimakan_admin_password') || '').trim();
+        if (!savedUser || !savedPw) {
+          if (userVal.length < 3 || pwVal.length < 12) throw new Error('LOCAL_SETUP_REQUIRED');
+          localStorage.setItem('teklimakan_admin_username', userVal);
+          localStorage.setItem('teklimakan_admin_password', pwVal);
+          setupCreated = true;
+          authenticated = true;
+        } else {
+          authenticated = userVal === savedUser && pwVal === savedPw;
+        }
+      } else {
+        const response = await fetch('/api/admin-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: userVal, password: pwVal })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'AUTH_FAILED');
+        authenticated = result.authenticated === true;
+      }
+    } catch (authError) {
+      if (errorMsg) {
+        errorMsg.textContent = authError.message === 'LOCAL_SETUP_REQUIRED'
+          ? '❌ يەرلىك تۇنجى تەڭشەش ئۈچۈن كەم دېگەندە 3 خانىلىق نام ۋە 12 خانىلىق كۈچلۈك پارول كىرگۈزۈڭ.'
+          : '❌ كىرىش مەغلۇپ بولدى. مۇلازىمېتىر بىخەتەرلىك تەڭشىكىنى تەكشۈرۈڭ.';
+        errorMsg.style.display = 'block';
+      }
+      if (pwInput) pwInput.value = '';
+      return;
     }
-    const validPw = (localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026').trim();
 
-    const isUserOk = userVal === 'seidiye' || userVal === validUser || userVal === 'admin' || userVal === 'teklimakan';
-    const isPwOk = pwVal === validPw || pwVal === 'teklimakan2026';
-
-    if (isUserOk && isPwOk) {
-      localStorage.setItem('teklimakan_admin_auth', 'true');
+    if (authenticated) {
+      localStorage.removeItem('teklimakan_admin_auth');
       sessionStorage.setItem('teklimakan_admin_auth', 'true');
-      localStorage.setItem('teklimakan_admin_device', 'true');
+      localStorage.removeItem('teklimakan_admin_device');
       if (errorMsg) errorMsg.style.display = 'none';
       checkAdminAuth();
       try {
@@ -365,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         console.error('Error during initAdmin:', err);
       }
-      showAdminToast('باشقۇرۇش سىستېمىسىغا مۇۋەپپەقىيەتلىك كىردىڭىز!', 'success');
+      showAdminToast(setupCreated ? 'يەرلىك باشقۇرغۇچى ھېسابى بىخەتەر قۇرۇلدى!' : 'باشقۇرۇش سىستېمىسىغا مۇۋەپپەقىيەتلىك كىردىڭىز!', 'success');
     } else {
       if (errorMsg) {
         errorMsg.textContent = '❌ باشقۇرغۇچى نامى ياكى پارول خاتا!';
@@ -4923,13 +4950,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('settingInstagram', s.instagramUrl || 'https://www.instagram.com/teklimakancom');
     setVal('settingMetaPixelId', s.metaPixelId || localStorage.getItem('teklimakan_meta_pixel_id') || '');
     setVal('settingEmail', s.contactEmail);
-    let curAdminUser = localStorage.getItem('teklimakan_admin_username') || 'seidiye';
-    if (curAdminUser === 'admin') {
-      curAdminUser = 'seidiye';
-      localStorage.setItem('teklimakan_admin_username', 'seidiye');
-    }
+    const curAdminUser = localStorage.getItem('teklimakan_admin_username') || '';
     setVal('settingAdminUsername', curAdminUser);
-    setVal('settingAdminPassword', localStorage.getItem('teklimakan_admin_password') || 'teklimakan2026');
+    setVal('settingAdminPassword', '');
     setVal('settingTelegramBotToken', s.telegramBotToken);
     setVal('settingTelegramChatId', s.telegramChatId);
     setChecked('settingTelegramEnabled', s.telegramEnabled !== false);
@@ -7564,15 +7587,15 @@ document.addEventListener('DOMContentLoaded', () => {
           metaPixelId: getVal('settingMetaPixelId', ''),
           contactEmail: getVal('settingEmail'),
           announcement: getVal('settingAnnouncement'),
-          telegramBotToken: getVal('settingTelegramBotToken'),
-          telegramChatId: getVal('settingTelegramChatId'),
+          telegramBotToken: '',
+          telegramChatId: '',
           telegramEnabled: document.getElementById('settingTelegramEnabled') ? document.getElementById('settingTelegramEnabled').checked : true,
           emailNotificationEnabled: document.getElementById('settingEmailNotificationEnabled') ? document.getElementById('settingEmailNotificationEnabled').checked : true,
           whatsappEnabled: document.getElementById('settingWhatsappEnabled') ? document.getElementById('settingWhatsappEnabled').checked : true,
           whatsappProvider: getVal('settingWhatsappProvider', 'direct'),
           whatsappGroupId: getVal('settingWhatsappGroupId'),
-          whatsappInstanceId: getVal('settingWhatsappInstanceId'),
-          whatsappToken: getVal('settingWhatsappToken'),
+          whatsappInstanceId: '',
+          whatsappToken: '',
           whatsappAutoBroadcast: document.getElementById('settingWhatsappAutoBroadcast') ? document.getElementById('settingWhatsappAutoBroadcast').checked : true,
           cargoSenderName: getVal('settingCargoSenderName', 'Teklimakan Online'),
           cargoSenderPhone: getVal('settingCargoSenderPhone', '05551609999'),
@@ -7593,13 +7616,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.appStore.updateSettings(updated);
 
-        const newUser = document.getElementById('settingAdminUsername') ? document.getElementById('settingAdminUsername').value.trim() : '';
-        if (newUser) {
-          localStorage.setItem('teklimakan_admin_username', newUser);
-        }
-        const newPw = document.getElementById('settingAdminPassword') ? document.getElementById('settingAdminPassword').value.trim() : '';
-        if (newPw) {
-          localStorage.setItem('teklimakan_admin_password', newPw);
+        const isLocal = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+        if (isLocal) {
+          const newUser = document.getElementById('settingAdminUsername') ? document.getElementById('settingAdminUsername').value.trim() : '';
+          if (newUser) localStorage.setItem('teklimakan_admin_username', newUser);
+          const newPw = document.getElementById('settingAdminPassword') ? document.getElementById('settingAdminPassword').value.trim() : '';
+          if (newPw && newPw.length >= 12) localStorage.setItem('teklimakan_admin_password', newPw);
         }
         if (updated.metaPixelId !== undefined) {
           localStorage.setItem('teklimakan_meta_pixel_id', updated.metaPixelId);
@@ -7844,8 +7866,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSendAuditTg = document.getElementById('btnSendDailyAuditToTelegram');
     if (btnSendAuditTg) {
       btnSendAuditTg.addEventListener('click', async () => {
-        const token = (document.getElementById('settingTelegramBotToken')?.value.trim()) || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
-        const chatId = (document.getElementById('settingTelegramChatId')?.value.trim()) || '7077223578';
+        const token = document.getElementById('settingTelegramBotToken')?.value.trim() || '';
+        const chatId = document.getElementById('settingTelegramChatId')?.value.trim() || '';
+        if (!token || !chatId) {
+          showAdminToast('Telegram مۇلازىمېتىر environment تەڭشىكى يوق.', 'error');
+          return;
+        }
         btnSendAuditTg.disabled = true;
         btnSendAuditTg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> دوكلات يوللىنىۋاتىدۇ...';
 

@@ -10,8 +10,8 @@
 (function(window) {
   'use strict';
 
-  const DEFAULT_BOT_TOKEN = '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
-  const DEFAULT_CHAT_ID = '7077223578';
+  const DEFAULT_BOT_TOKEN = '';
+  const DEFAULT_CHAT_ID = '';
   const BASE_SITE_URL = 'https://teklimakan.com';
 
   function getCredentials() {
@@ -71,7 +71,7 @@
 
   async function sendTelegramMessage(text) {
     const { botToken, chatId, enabled } = getCredentials();
-    if (!enabled) return false;
+    if (!enabled || !botToken || !chatId) return false;
 
     try {
       const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -94,7 +94,7 @@
 
   async function sendTelegramPhoto(photoUrlOrData, caption) {
     const { botToken, chatId, enabled } = getCredentials();
-    if (!enabled) return false;
+    if (!enabled || !botToken || !chatId) return false;
 
     const fullPhoto = resolveFullImageUrl(photoUrlOrData);
 

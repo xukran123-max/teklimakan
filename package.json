@@ -1,9 +1,10 @@
 {
-  "name": "teklimakan-tr",
+  "name": "teklimakan-ug",
   "version": "1.0.0",
   "private": true,
-  "description": "Teklimakan Online Turkish E-Commerce Platform",
+  "description": "Teklimakan Uyghur E-Commerce Platform",
   "dependencies": {
+    "nodemailer": "^10.2.1",
     "telegram": "^2.26.22"
   }
 }

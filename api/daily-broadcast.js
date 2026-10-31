@@ -10,9 +10,9 @@
 
 const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
-const DEFAULT_GROUP_LINK = 'https://chat.whatsapp.com/HSer7ggKO9iCvjUShuCmmW';
-const TELEGRAM_BOT_TOKEN = '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
-const TELEGRAM_CHAT_ID = '7077223578';
+const DEFAULT_GROUP_LINK = process.env.WHATSAPP_GROUP_LINK || '';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_TARGET_CHAT_ID || '';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function transliterateToSlug(text) {
@@ -47,7 +47,7 @@ function cleanDescription(desc) {
 function hasValidProductImage(prod) {
   if (!prod || !prod.image || typeof prod.image !== 'string') return false;
   const clean = prod.image.trim().toLowerCase();
-  if (!clean || clean === '' || clean.includes('default_product.jpg')) return false;
+  if (!clean || clean === '' || clean.includes('default_product.jpg') || clean.startsWith('data:image')) return false;
   return true;
 }
 
@@ -104,6 +104,7 @@ module.exports = async function handler(req, res) {
       const alertMsg = `⚠️ <b>تەكلىماكان سۇپىسى: WhatsApp كۈندىلىك ئېلان ئەسكەرتىشى</b>\n\nبارلىق سۈرەتلىك تاۋارلىرىڭىز يېقىنقى 30 كۈن ئىچىدە WhatsApp توپىغا ئېلان قىلىنىپ بولدى! تەكرارلىقنىڭ ئالدىنى ئېلىش ۋە سۈرەتسىز تاۋار چىقىپ قالماسلىق ئۈچۈن، بۈگۈنكى (${targetLang.toUpperCase()}) ئېلان قىلىش توختىتىلدى.\nيېڭى تاۋارغا سۈرەت قويۇپ ئېلان قىلسىڭىز ئاپتوماتىك داۋاملىشىدۇ!`;
 
       try {
+        if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) throw new Error('Telegram is not configured');
         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

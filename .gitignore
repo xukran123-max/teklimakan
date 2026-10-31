@@ -14,6 +14,9 @@ sms_logs.json
 iban.txt
 suba.txt
 .vercel
+.env
+.env.*
+!.env.example
 
 node_modules/
 

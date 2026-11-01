@@ -51,7 +51,7 @@ if (typeof window !== 'undefined') window.transliterateToSlug = transliterateToS
  */
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'teklimakan_ecom_products_v12',
+  PRODUCTS: 'teklimakan_ecom_products_v13',
   USER_EDITS: 'teklimakan_ecom_user_edits_v1',
   DELETED_PRODUCTS: 'teklimakan_ecom_deleted_products_v1',
   DELETED_AGENTS: 'teklimakan_ecom_deleted_agents_v1',
@@ -371,7 +371,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-114",
-    "brand": "تەكلىماكان كىلاسسىك",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "خۇشپۇراق تەبىئىي قەلەمپۇر (100g)",
     "category": "ئۆسۈملۈك دورىلار",
@@ -453,7 +453,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-120",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ سىقىلغان زەيتۇن مېيى (500ml)",
     "category": "تەبىئىي ياغلار",
@@ -494,7 +494,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-121",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ئۇيغۇر تېبابەت قامۇسى",
     "category": "كىتاب ۋە مەدەنىيەت",
@@ -535,7 +535,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-125",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "تەبىئىي شىپالىق چىلان (500g)",
     "category": "ئۆسۈملۈك دورىلار",
@@ -576,7 +576,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-128",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ئەنئەنىۋى كاۋاپ تېتىتقۇ يۈرۈشلۈكى (250g)",
     "category": "قۇرۇق يەل-يېمىشلەر",
@@ -617,7 +617,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-131",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ تەبىئىي پىلە غوزىسى (30 دانە)",
     "category": "ئۇيغۇر تىبابىتى",
@@ -658,7 +658,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-132",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ئۆسۈملۈك چاچ ئاسراش يۈرۈشلۈكى",
     "category": "گۈزەللىك ۋە ساغلاملىق",
@@ -699,7 +699,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-218",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "زاراڭزا چېچىكى",
     "category": "ئۆسۈملۈك دورىلار",
@@ -740,7 +740,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-225",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "تۇخۇم سېرىقى يېغى (25ml)",
     "category": "تەبىئىي ياغلار",
@@ -781,7 +781,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-226",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "كۆز ئاسراش مەجۈنى (250g)",
     "category": "پىششىق دورىلار",
@@ -904,7 +904,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-292",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ ھىندى يېغى (25ml)",
     "category": "ئۇيغۇر تېبابىتى مىراسى",
@@ -986,7 +986,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-341",
-    "brand": "تەكلىماكان كىلاسسىك",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ تاغ ئەتىرگۈل يېغى (25ml)",
     "category": "تەبىئىي ياغلار",
@@ -1068,7 +1068,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-451",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ماددەتۇلھايات مەجۈنى",
     "category": "ئۇيغۇر تېبابىتى مىراسى",
@@ -1109,7 +1109,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-458",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "نېپىز قېپلىق قەغەز ياڭاق (500g)",
     "category": "قۇرۇق يەل-يېمىشلەر",
@@ -1232,7 +1232,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-612",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ئەلا سۈپەتلىك قىزىل زەپە",
     "category": "ئۆسۈملۈك دورىلار",
@@ -1273,7 +1273,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-754",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "زەغىر ۋە زەپە مېيى (5L)",
     "category": "تەبىئىي ياغلار",
@@ -1314,7 +1314,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-755",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "قەغەز با��ام (500g)",
     "category": "قۇرۇق يەل-يېمىشلەر",
@@ -1355,7 +1355,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-759",
-    "brand": "تەكلىماكان كىلاسسىك",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ ئۈشمە يېغى (25ml)",
     "category": "تەبىئىي ياغلار",
@@ -1396,7 +1396,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-840",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "سېرىق ئوت",
     "category": "ئۆسۈملۈك دورىلار",
@@ -1437,7 +1437,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "PRD-910",
-    "brand": "تەكلىماكان تورى",
+    "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "تەبىئىي قارا كۈنجۈت (1kg)",
     "category": "قۇرۇق يەل-يېمىشلەر",

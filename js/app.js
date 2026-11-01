@@ -1531,10 +1531,15 @@ function initTeklimakanApp() {
         ${stripText ? `<div class="shelf-card-strip ${stripColorClass}"><span class="strip-text">${stripText}</span></div>` : ''}
         <div class="shelf-card-body">
           <div>
-            <div class="shelf-card-brand">
-              <span dir="auto">${(window.appI18n && window.appI18n.getBrandName(product.brand)) || product.brand || 'تەكلىماكان تورى'}</span>
-              ${verifiedHtml}
-            </div>
+            ${(() => {
+              const rawB = (product.brand || '').trim();
+              const bName = (window.appI18n && typeof window.appI18n.getBrandName === 'function') ? window.appI18n.getBrandName(rawB) : rawB;
+              // 🛡️ تەكلىماكان ئۆز ماركىسى بولغاندا كارتىدا قايتا-قايتا تەكرارلىماي پاكىز، كەسپىي تۇتۇش؛ «تۇرپان باغلىرى» غا ئوخشاش خاس يەرلىك ماركىلارنىلا ئېسىل كۆرسىتىش
+              if (!bName || /^(تەكلىماكان|تەكلىماكان تورى|تەكلىماكان كىلاسسىك|teklimakan|teklimakan online)$/i.test(bName.trim())) {
+                return '';
+              }
+              return `<div class="shelf-card-brand"><span dir="auto">${bName}</span>${verifiedHtml}</div>`;
+            })()}
             <h4 class="shelf-card-title" title="${product.name}">${product.name}</h4>
           </div>
 
@@ -2912,12 +2917,11 @@ function initTeklimakanApp() {
       `;
     } else {
       const stockPrefix = (window.appI18n && typeof window.appI18n.t === 'function') ? window.appI18n.t('inStock') : 'ئامباردا بار:';
+      const cleanStockUnit = (window.appI18n && typeof window.appI18n.getUnitName === 'function') ? window.appI18n.getUnitName(stockUnitLabel, lang) : stockUnitLabel;
       stockStatusHtml = `
-        <div style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.9rem; color: var(--success-color); display: flex; align-items: center; gap: 0.4rem;">
-          <i class="fas fa-check-circle"></i>
-          <span>${stockPrefix}</span>
-          <span class="number-latin">${product.stock}</span>
-          <bdi>${stockUnitLabel}</bdi>
+        <div class="product-stock-status in-stock" dir="${lang === 'ug' ? 'rtl' : 'ltr'}" style="margin-bottom: 0.85rem; font-weight: 700; font-size: 0.92rem; color: #059669; display: flex; align-items: center; gap: 0.45rem;">
+          <i class="fas fa-check-circle" style="color: #10b981;"></i>
+          <span>${stockPrefix} <strong class="number-latin" style="font-size: 1rem; color: #0f172a; margin: 0 4px;">${product.stock}</strong> ${cleanStockUnit}</span>
         </div>
       `;
     }

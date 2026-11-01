@@ -1018,6 +1018,16 @@ const I18N_TRANSLATIONS = {
 };
 
 const BRAND_LOCALIZATIONS = {
+  'تەكلىماكان': {
+    ug: 'تەكلىماكان',
+    tr: 'Teklimakan',
+    en: 'Teklimakan'
+  },
+  'Teklimakan': {
+    ug: 'تەكلىماكان',
+    tr: 'Teklimakan',
+    en: 'Teklimakan'
+  },
   'تەكلىماكان تورى': {
     ug: 'تەكلىماكان تورى',
     tr: 'Teklimakan Online',
@@ -1633,6 +1643,25 @@ const UYGHUR_WORD_GLOSSARY = [
 ];
 
 const UNIT_LOCALIZATIONS = {
+  'paket': { ug: 'بولاق', tr: 'Paket', en: 'Pack' },
+  'Paket': { ug: 'بولاق', tr: 'Paket', en: 'Pack' },
+  'adet': { ug: 'دانە', tr: 'Adet', en: 'Pcs' },
+  'Adet': { ug: 'دانە', tr: 'Adet', en: 'Pcs' },
+  'kutu': { ug: 'قۇتا', tr: 'Kutu', en: 'Box' },
+  'Kutu': { ug: 'قۇتا', tr: 'Kutu', en: 'Box' },
+  'şişe': { ug: 'بوتۇلكا', tr: 'Şişe', en: 'Bottle' },
+  'sise': { ug: 'بوتۇلكا', tr: 'Şişe', en: 'Bottle' },
+  'Şişe': { ug: 'بوتۇلكا', tr: 'Şişe', en: 'Bottle' },
+  'kavanoz': { ug: 'قاچا', tr: 'Kavanoz', en: 'Jar' },
+  'Kavanoz': { ug: 'قاچا', tr: 'Kavanoz', en: 'Jar' },
+  'kg': { ug: 'كىلو', tr: 'kg', en: 'kg' },
+  'Kg': { ug: 'كىلو', tr: 'kg', en: 'kg' },
+  'g': { ug: 'گرام', tr: 'g', en: 'g' },
+  'Gram': { ug: 'گرام', tr: 'g', en: 'g' },
+  'pack': { ug: 'بولاق', tr: 'Paket', en: 'Pack' },
+  'box': { ug: 'قۇتا', tr: 'Kutu', en: 'Box' },
+  'bottle': { ug: 'بوتۇلكا', tr: 'Şişe', en: 'Bottle' },
+  'jar': { ug: 'قاچا', tr: 'Kavanoz', en: 'Jar' },
   'دانە': { ug: 'دانە', tr: 'adet', en: 'pcs' },
   'كىلو': { ug: 'كىلو', tr: 'kg', en: 'kg' },
   '1 كىلو': { ug: '1 كىلو', tr: '1 kg', en: '1 kg' },
@@ -1736,6 +1765,9 @@ class I18nManager {
     const lang = targetLang || this.currentLang;
     if (brand === 'بارلىق ماركىلار') return this.t('allBrands', lang);
     const cleanBrand = String(brand).trim();
+    if (cleanBrand === 'تەكلىماكان' || cleanBrand === 'Teklimakan') {
+      return lang === 'tr' ? 'Teklimakan' : (lang === 'en' ? 'Teklimakan' : 'تەكلىماكان');
+    }
 
     // 1. بىۋاسىتە دەل كېلىش
     if (BRAND_LOCALIZATIONS[cleanBrand] && BRAND_LOCALIZATIONS[cleanBrand][lang]) {
@@ -1899,17 +1931,37 @@ class I18nManager {
   getUnitName(unit, targetLang = null) {
     if (!unit) return '';
     const lang = targetLang || this.currentLang;
-    if (lang === 'ug') return unit;
-    const clean = String(unit).trim().toLowerCase();
+    const clean = String(unit).trim();
+    const cleanLower = clean.toLowerCase();
+
+    if (lang === 'ug') {
+      if (/^paket$/i.test(cleanLower)) return 'بولاق';
+      if (/^adet$|^ad$/i.test(cleanLower)) return 'دانە';
+      if (/^kutu$/i.test(cleanLower)) return 'قۇتا';
+      if (/^şişe$|^sise$/i.test(cleanLower)) return 'بوتۇلكا';
+      if (/^kavanoz$/i.test(cleanLower)) return 'قاچا';
+      if (/^kg$/i.test(cleanLower)) return 'كىلو';
+      if (/^g$|^gram$/i.test(cleanLower)) return 'گرام';
+    }
+
     for (const [k, v] of Object.entries(UNIT_LOCALIZATIONS || {})) {
-      if (clean === k.toLowerCase() || clean === k) {
-        return v[lang] || unit;
+      if (cleanLower === k.toLowerCase()) {
+        return v[lang] || (lang === 'ug' ? (v.ug || unit) : unit);
       }
     }
     for (const [k, v] of Object.entries(UNIT_LOCALIZATIONS || {})) {
-      if (clean.includes(k.toLowerCase())) {
-        return v[lang] || unit;
+      if (cleanLower.includes(k.toLowerCase())) {
+        return v[lang] || (lang === 'ug' ? (v.ug || unit) : unit);
       }
+    }
+    if (lang === 'ug') {
+      let res = clean;
+      res = res.replace(/paket/gi, 'بولاق')
+               .replace(/adet/gi, 'دانە')
+               .replace(/kutu/gi, 'قۇتا')
+               .replace(/şişe|sise/gi, 'بوتۇلكا')
+               .replace(/kavanoz/gi, 'قاچا');
+      return res;
     }
     return this.autoTranslateUyghur(unit, lang);
   }

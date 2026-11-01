@@ -1528,7 +1528,7 @@ function initTeklimakanApp() {
           <img class="shelf-card-img" src="${product.image || 'images/default_product.jpg'}" alt="${product.name}" loading="lazy" onerror="this.onerror=null; this.src='images/default_product.jpg'">
           ${wishHtml}
         </div>
-        ${stripText ? `<div class="shelf-card-strip ${stripColorClass}"><bdi dir="ltr" style="unicode-bidi: isolate;">${stripText}</bdi></div>` : ''}
+        ${stripText ? `<div class="shelf-card-strip ${stripColorClass}"><span class="strip-text">${stripText}</span></div>` : ''}
         <div class="shelf-card-body">
           <div>
             <div class="shelf-card-brand">

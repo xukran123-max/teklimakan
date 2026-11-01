@@ -1093,6 +1093,21 @@ const BRAND_LOCALIZATIONS = {
     tr: 'Hoten Miras',
     en: 'Hotan Heritage'
   },
+  'تۇرپان باغلىرى': {
+    ug: 'تۇرپان باغلىرى',
+    tr: 'Turfan Bağları',
+    en: 'Turpan Vineyards'
+  },
+  'Turfan Bağları': {
+    ug: 'تۇرپان باغلىرى',
+    tr: 'Turfan Bağları',
+    en: 'Turpan Vineyards'
+  },
+  'Turfan Baglari': {
+    ug: 'تۇرپان باغلىرى',
+    tr: 'Turfan Bağları',
+    en: 'Turpan Vineyards'
+  },
   'تۇرپان يېشىل': {
     ug: 'تۇرپان يېشىل',
     tr: 'Turpan Doğal',

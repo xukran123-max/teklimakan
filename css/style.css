@@ -6259,22 +6259,29 @@ body.dark-mode .shelf-nav-btn:hover {
 
 /* 🎯 High-Converting Strip Badge */
 .shelf-card-strip {
-  direction: ltr !important;
-  unicode-bidi: isolate;
   width: 100%;
-  height: 25px;
-  line-height: 25px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 6px;
-  letter-spacing: 0.2px;
+  padding: 2px 8px;
+  box-sizing: border-box;
 }
 
+html[dir="rtl"] .shelf-card-strip {
+  direction: rtl !important;
+}
+
+html[dir="ltr"] .shelf-card-strip {
+  direction: ltr !important;
+}
 .shelf-card-strip.strip-green {
   background: #059669;
 }

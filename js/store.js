@@ -9349,30 +9349,52 @@ class StoreManager {
     return count;
   }
 
-  saveCoupon(coupon) {
-    const coupons = this.getCoupons();
-    const idx = coupons.findIndex(c => c.code.toUpperCase() === coupon.code.toUpperCase());
+  saveCoupon(coupon, oldCode = null) {
+    let coupons = this.getCoupons();
+    const cleanCode = (coupon.code || '').trim().toUpperCase();
+    if (!cleanCode) return { success: false, message: 'كۇپون كودى بوش بولسا بولمايدۇ!' };
+
+    // ئەگەر كود ئۆزگەرتىلگەن بولسا، ئەسلى كودنى ئۆچۈرۈپ يېڭىسىغا يۆتكەش
+    if (oldCode && oldCode.toUpperCase() !== cleanCode) {
+      coupons = coupons.filter(c => c.code.toUpperCase() !== oldCode.toUpperCase());
+    }
+
+    const idx = coupons.findIndex(c => c.code.toUpperCase() === cleanCode);
     if (idx !== -1) {
-      coupons[idx] = { ...coupons[idx], ...coupon, code: coupon.code.toUpperCase() };
+      coupons[idx] = {
+        ...coupons[idx],
+        ...coupon,
+        code: cleanCode,
+        value: Number(coupon.value) || 0,
+        minSpend: Number(coupon.minSpend) || 0,
+        usageLimit: Number(coupon.usageLimit) || 1000,
+        usedCount: Number(coupon.usedCount !== undefined ? coupon.usedCount : (coupons[idx].usedCount || 0)),
+        isActive: coupon.isActive !== undefined ? !!coupon.isActive : true
+      };
     } else {
       coupons.unshift({
         ...coupon,
-        code: coupon.code.toUpperCase(),
-        usedCount: coupon.usedCount || 0,
-        isActive: coupon.isActive !== undefined ? coupon.isActive : true
+        code: cleanCode,
+        value: Number(coupon.value) || 0,
+        minSpend: Number(coupon.minSpend) || 0,
+        usageLimit: Number(coupon.usageLimit) || 1000,
+        usedCount: Number(coupon.usedCount) || 0,
+        isActive: coupon.isActive !== undefined ? !!coupon.isActive : true
       });
     }
     localStorage.setItem(STORAGE_KEYS.COUPONS, JSON.stringify(coupons));
     this.notifyDataChange('coupons');
-    return true;
+    return { success: true, message: `«${cleanCode}» كۇپونى مۇۋەپپەقىيەتلىك ساقلاندى!` };
   }
 
   deleteCoupon(code) {
     let coupons = this.getCoupons();
+    const exists = coupons.some(c => c.code.toUpperCase() === code.toUpperCase());
+    if (!exists) return { success: false, message: 'كۇپون تېپىلمىدى!' };
     coupons = coupons.filter(c => c.code.toUpperCase() !== code.toUpperCase());
     localStorage.setItem(STORAGE_KEYS.COUPONS, JSON.stringify(coupons));
     this.notifyDataChange('coupons');
-    return true;
+    return { success: true, message: `«${code}» كۇپونى ئۆچۈرۈلدى!` };
   }
 
   toggleCouponStatus(code) {

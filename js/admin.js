@@ -9971,7 +9971,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${statusBadge}</td>
         <td>
           <div style="display: flex; gap: 0.4rem;">
-            <button type="button" class="btn-action-edit btn-toggle-coupon" data-code="${c.code}" title="${c.isActive ? 'توختىتىش' : 'ئاكتىپلاش'}" style="background: ${c.isActive ? '#f59e0b' : '#10b981'} !important; border-color: ${c.isActive ? '#f59e0b' : '#10b981'} !important; color: #ffffff !important;">
+            <button type="button" class="btn-action-edit btn-edit-coupon" data-code="${c.code}" title="تەھرىرلەش" style="background: #2563eb !important; border-color: #2563eb !important; color: #ffffff !important; border-radius: 6px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" class="btn-action-edit btn-toggle-coupon" data-code="${c.code}" title="${c.isActive ? 'توختىتىش' : 'ئاكتىپلاش'}" style="background: ${c.isActive ? '#f59e0b' : '#10b981'} !important; border-color: ${c.isActive ? '#f59e0b' : '#10b981'} !important; color: #ffffff !important; border-radius: 6px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
               <i class="fas ${c.isActive ? 'fa-pause' : 'fa-play'}"></i>
             </button>
             <button type="button" class="btn-action-delete btn-delete-coupon" data-code="${c.code}" title="ئۆچۈرۈش">
@@ -9982,6 +9985,13 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       tbody.appendChild(tr);
+    });
+
+    // ✏️ كۇپوننى تەھرىرلەش كۇنۇپكىسىغا باغلاش
+    tbody.querySelectorAll('.btn-edit-coupon').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openEditCouponModal(btn.dataset.code);
+      });
     });
 
     tbody.querySelectorAll('.btn-copy-coupon-code').forEach(btn => {
@@ -10012,6 +10022,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+  }
+
+  // 🎟️ كۇپوننى تەھرىرلەش كۆزنىكىنى ئېچىش ۋە قىممەتلەرنى تولدۇرۇش
+  function openEditCouponModal(code) {
+    if (!code) return;
+    const coupons = window.appStore.getCoupons();
+    const c = coupons.find(item => item.code.toUpperCase() === code.toUpperCase());
+    if (!c) {
+      showAdminToast('كۇپون تېپىلمىدى!', 'error');
+      return;
+    }
+
+    const modal = document.getElementById('editCouponModal');
+    if (!modal) return;
+
+    document.getElementById('editCouponOriginalCode').value = c.code;
+    document.getElementById('editCouponCode').value = c.code;
+    document.getElementById('editCouponType').value = c.type || 'percentage';
+    document.getElementById('editCouponValue').value = c.value !== undefined ? c.value : 10;
+    document.getElementById('editCouponMinSpend').value = c.minSpend || 0;
+    document.getElementById('editCouponExpireDate').value = c.expireDate || '2027-12-31';
+    document.getElementById('editCouponUsageLimit').value = c.usageLimit || 500;
+    document.getElementById('editCouponUsedCount').value = c.usedCount || 0;
+    document.getElementById('editCouponIsActive').value = (c.isActive !== false) ? 'true' : 'false';
+    document.getElementById('editCouponDescription').value = c.description || '';
+
+    // ۋاكالەتچى تاللىغۇچنى تولدۇرۇش
+    const agentSelect = document.getElementById('editCouponAgentId');
+    if (agentSelect) {
+      const agents = (window.appStore && typeof window.appStore.getAgents === 'function') ? window.appStore.getAgents('name') || [] : [];
+      agentSelect.innerHTML = '<option value="">-- ئورتاق سۇپا كۇپونى (ۋاكالەتچىسىز) --</option>' +
+        agents.map(a => `<option value="${a.id}" ${c.agentId === a.id ? 'selected' : ''}>${a.name} (${a.id})</option>`).join('');
+    }
+
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+  }
+
+  function setupEditCouponModal() {
+    const form = document.getElementById('formEditCoupon');
+    const modal = document.getElementById('editCouponModal');
+    const btnClose = document.getElementById('btnCloseEditCouponModal');
+    const btnCancel = document.getElementById('btnCancelEditCoupon');
+
+    const closeModal = () => {
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+    };
+
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const oldCode = document.getElementById('editCouponOriginalCode').value.trim();
+        const newCode = document.getElementById('editCouponCode').value.trim().toUpperCase();
+        const type = document.getElementById('editCouponType').value;
+        const value = parseFloat(document.getElementById('editCouponValue').value) || 0;
+        const minSpend = parseFloat(document.getElementById('editCouponMinSpend').value) || 0;
+        const expireDate = document.getElementById('editCouponExpireDate').value;
+        const usageLimit = parseInt(document.getElementById('editCouponUsageLimit').value, 10) || 500;
+        const usedCount = parseInt(document.getElementById('editCouponUsedCount').value, 10) || 0;
+        const isActive = document.getElementById('editCouponIsActive').value === 'true';
+        const agentId = document.getElementById('editCouponAgentId').value.trim() || null;
+        let agentName = null;
+        if (agentId && window.appStore) {
+          const ag = window.appStore.getAgentById(agentId);
+          if (ag) agentName = ag.name;
+        }
+        const description = document.getElementById('editCouponDescription').value.trim();
+
+        if (!newCode) {
+          showAdminToast('كۇپون كودى كىرگۈزۈڭ!', 'warning');
+          return;
+        }
+
+        const updated = {
+          code: newCode,
+          type,
+          value,
+          minSpend,
+          expireDate,
+          usageLimit,
+          usedCount,
+          isActive,
+          description,
+          agentId,
+          agentName
+        };
+
+        const res = window.appStore.saveCoupon(updated, oldCode);
+        if (res && res.success !== false) {
+          showAdminToast((res && res.message) || `«${newCode}» كۇپونى مۇۋەپپەقىيەتلىك يېڭىلاندى!`, 'success');
+          closeModal();
+          renderCouponsTable();
+        } else {
+          showAdminToast((res && res.message) || 'كۇپوننى ساقلاش مەغلۇپ بولدى!', 'error');
+        }
+      });
+    }
   }
 
   function setupCouponForm() {

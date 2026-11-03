@@ -3120,6 +3120,52 @@ function initTeklimakanApp() {
 
   // ==================== چىقىم ====================
   function openCheckoutModal() {
+    // 💳 ۋاكالەتچى سېتىۋېلىش چېكى تاللانمىسىنى يېڭىلاش
+    const limitWrap = document.getElementById('checkoutAgentPurchaseLimitWrap');
+    const limitChk = document.getElementById('chkUseAgentPurchaseLimit');
+    const limitDisplay = document.getElementById('checkoutAgentLimitValDisplay');
+    const limitDesc = document.getElementById('checkoutAgentLimitDesc');
+
+    let activeAgent = (typeof currentVerifiedAgent !== 'undefined' && currentVerifiedAgent) ? currentVerifiedAgent : null;
+    if (!activeAgent) {
+      try {
+        const savedSession = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
+        if (savedSession && savedSession.id && window.appStore) {
+          activeAgent = window.appStore.getAgentById(savedSession.id);
+        }
+      } catch(e) {}
+    }
+
+    if (limitWrap && activeAgent && window.appStore && typeof window.appStore.getAgentPurchaseLimitStatus === 'function') {
+      const quota = window.appStore.getAgentPurchaseLimitStatus(activeAgent.id);
+      if (quota.limit > 0) {
+        limitWrap.style.display = 'block';
+        if (limitDisplay) limitDisplay.textContent = `₺${quota.limit.toLocaleString('tr-TR')}`;
+
+        if (quota.usedThisMonth) {
+          if (limitChk) {
+            limitChk.checked = false;
+            limitChk.disabled = true;
+          }
+          if (limitDesc) {
+            limitDesc.innerHTML = `<span style="color: #b91c1c; font-weight: 700;"><i class="fas fa-exclamation-triangle"></i> سىز بۇ ئايلىق سېتىۋېلىش چېكىڭىزنى (${quota.lastDate || quota.currentMonth}) بىرلا قېتىملىق بەلگىلىمە بويىچە ئىشلىتىپ بولدىڭىز! كېيىنكى ئايدا قايتا ئېچىلىدۇ.</span>`;
+          }
+        } else {
+          if (limitChk) {
+            limitChk.checked = false;
+            limitChk.disabled = false;
+          }
+          if (limitDesc) {
+            limitDesc.textContent = '⚖️ تۈزۈم ئەسكەرتمىسى: كارتىدىكى بۇ سوممىنى شۇ ئاي ئىچىدە پەقەت مۇشۇ بىرلا زاكازدا تولۇق ئىشلىتەلەيسىز. بۆلۈپ ئىشلىتىشكە بولمايدۇ.';
+          }
+        }
+      } else {
+        limitWrap.style.display = 'none';
+      }
+    } else if (limitWrap) {
+      limitWrap.style.display = 'none';
+    }
+
     // 🎯 Meta (Facebook & Instagram) Pixel: InitiateCheckout
     try {
       if (typeof window.fbq === 'function') {
@@ -3732,7 +3778,13 @@ function initTeklimakanApp() {
         const cartDetailed = window.appStore ? window.appStore.getCartDetailed() : { totalCny: 0, subtotalCny: 0 };
         const check = window.appStore ? window.appStore.validateCoupon(code, cartDetailed.subtotalCny) : null;
         if (check && check.valid) {
-          appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
+          appliedCoupon = {
+            code: check.coupon.code,
+            discount: check.discountAmount,
+            agentId: check.coupon.agentId || null,
+            agentName: check.coupon.agentName || null,
+            isAgentCoupon: !!check.coupon.isAgentCoupon
+          };
           if (typeof playChime === 'function') playChime('success');
           showToast(`🎉 ${check.message}`, 'success');
           updateCartUI();
@@ -3753,7 +3805,13 @@ function initTeklimakanApp() {
       const cartDetailed = window.appStore ? window.appStore.getCartDetailed() : { totalCny: 0, subtotalCny: 0 };
       const check = window.appStore ? window.appStore.validateCoupon(code, cartDetailed.subtotalCny) : null;
       if (check && check.valid) {
-        appliedCoupon = { code: check.coupon.code, discount: check.discountAmount };
+        appliedCoupon = {
+            code: check.coupon.code,
+            discount: check.discountAmount,
+            agentId: check.coupon.agentId || null,
+            agentName: check.coupon.agentName || null,
+            isAgentCoupon: !!check.coupon.isAgentCoupon
+          };
         const coupInp = document.getElementById('couponCodeInput');
         if (coupInp) coupInp.value = code;
         updateCartUI();
@@ -4044,7 +4102,28 @@ function initTeklimakanApp() {
         const instagramGiftData = instaChecked ? { requested: true, username: instaUser } : null;
 
         const discountVal = appliedCoupon ? appliedCoupon.discount : 0;
-        const res = window.appStore.createOrder({ name, phone, city, district, address }, payment, notes, discountVal, lang, instagramGiftData);
+        
+        // 💳 ئايلىق سېتىۋېلىش چېكى تاللانغان بولسا، appliedCoupon غا ئۇچۇرىنى قوشۇش
+        const chkLimit = document.getElementById('chkUseAgentPurchaseLimit');
+        let couponPayload = appliedCoupon ? { ...appliedCoupon } : {};
+
+        let activeAgentForOrder = (typeof currentVerifiedAgent !== 'undefined' && currentVerifiedAgent) ? currentVerifiedAgent : null;
+        if (!activeAgentForOrder) {
+          try {
+            const savedSession = JSON.parse(localStorage.getItem('teklimakan_agent_session') || 'null');
+            if (savedSession && savedSession.id && window.appStore) {
+              activeAgentForOrder = window.appStore.getAgentById(savedSession.id);
+            }
+          } catch(e) {}
+        }
+
+        if (chkLimit && chkLimit.checked && activeAgentForOrder) {
+          couponPayload.usePurchaseLimit = true;
+          couponPayload.agentId = activeAgentForOrder.id;
+          couponPayload.agentName = activeAgentForOrder.name;
+        }
+
+        const res = window.appStore.createOrder({ name, phone, city, district, address }, payment, notes, discountVal, lang, instagramGiftData, couponPayload);
 
         if (res.success) {
           if (typeof playChime === 'function') playChime('success');
@@ -5844,6 +5923,59 @@ function initTeklimakanApp() {
         if (returnedEl) returnedEl.textContent = orderStats.returnedCount;
         if (profitEl) profitEl.textContent = `₺${orderStats.profitCommission.toLocaleString('tr-TR')}`;
         if (rateBadge) rateBadge.textContent = `پايدا: ${orderStats.commissionRate}%`;
+        // 🎁 شەخسىي كۇپون ۋە كىرىم ھەمبەھىرلەش كارتىسىنى يېڭىلاش
+        const couponCode = (agent.couponCode || agent.code || agent.id || '').toUpperCase();
+        const couponDiscount = agent.couponDiscount !== undefined ? agent.couponDiscount : 5;
+        const couponRate = agent.commissionRate !== undefined ? agent.commissionRate : 15;
+        const coupValEl = document.getElementById('dashAgentCouponCodeVal');
+        const coupDiscEl = document.getElementById('dashAgentCouponDiscount');
+        const coupRateEl = document.getElementById('dashAgentCouponRate');
+        const coupOrdersEl = document.getElementById('dashCouponOrderCount');
+        const coupSalesEl = document.getElementById('dashCouponSalesAmount');
+        const coupProfitEl = document.getElementById('dashCouponProfitAmount');
+        if (coupValEl) coupValEl.textContent = couponCode;
+        if (coupDiscEl) coupDiscEl.textContent = couponDiscount;
+        if (coupRateEl) coupRateEl.textContent = `${couponRate}%`;
+        if (coupOrdersEl) coupOrdersEl.textContent = orderStats.couponOrdersCount || 0;
+        if (coupSalesEl) coupSalesEl.textContent = `₺${(orderStats.couponSalesRevenue || 0).toLocaleString('tr-TR')}`;
+        if (coupProfitEl) coupProfitEl.textContent = `₺${(orderStats.couponProfitCommission || 0).toLocaleString('tr-TR')}`;
+        // 💳 ئايلىق سېتىۋېلىش چېكى تاختىسىنى يېڭىلاش
+        const limitAmtEl = document.getElementById('dashAgentPurchaseLimitAmount');
+        const limitBadgeEl = document.getElementById('dashAgentPurchaseLimitStatusBadge');
+        const limitNoticeEl = document.getElementById('dashAgentPurchaseLimitNotice');
+
+        if (window.appStore && typeof window.appStore.getAgentPurchaseLimitStatus === 'function') {
+          const quota = window.appStore.getAgentPurchaseLimitStatus(agent.id);
+          if (limitAmtEl) limitAmtEl.textContent = `₺${quota.limit.toLocaleString('tr-TR')}`;
+
+          if (limitBadgeEl) {
+            if (quota.limit <= 0) {
+              limitBadgeEl.innerHTML = '<i class="fas fa-info-circle"></i> چەك بېكىتىلمىگەن';
+              limitBadgeEl.style.background = 'rgba(255, 255, 255, 0.1)';
+              limitBadgeEl.style.color = '#cbd5e1';
+            } else if (quota.usedThisMonth) {
+              limitBadgeEl.innerHTML = '<i class="fas fa-lock"></i> بۇ ئايلىق ئىشلىتىپ بولۇندى';
+              limitBadgeEl.style.background = 'rgba(239, 68, 68, 0.25)';
+              limitBadgeEl.style.color = '#fca5a5';
+              limitBadgeEl.style.borderColor = 'rgba(248, 113, 113, 0.4)';
+            } else {
+              limitBadgeEl.innerHTML = '<i class="fas fa-check-circle"></i> بۇ ئايدا ئىشلىتىشكە تەييار';
+              limitBadgeEl.style.background = 'rgba(16, 185, 129, 0.25)';
+              limitBadgeEl.style.color = '#6ee7b7';
+              limitBadgeEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+            }
+          }
+
+          if (limitNoticeEl) {
+            if (quota.usedThisMonth) {
+              limitNoticeEl.textContent = `🔒 سىز بۇ ئايلىق چېكىڭىزنى (${quota.lastDate || quota.currentMonth}) ئىشلىتىپ بولدىڭىز. كېيىنكى ئايدا قايتا ئېچىلىدۇ.`;
+            } else if (quota.limit > 0) {
+              limitNoticeEl.textContent = '✨ شۇ ئاي ئىچىدە پەقەت بىرلا زاكازدا تولۇق كۈچكە ئىگە قىلالايسىز.';
+            } else {
+              limitNoticeEl.textContent = 'باشقۇرغۇچى سىزگە سېتىۋېلىش چېكى بېكىتكەندە ئاپتوماتىك قوزغىلىدۇ.';
+            }
+          }
+        }
       }
 
       // 🛍️ سېتىشلار سانىنى يېڭىلاش
@@ -6754,6 +6886,9 @@ function initTeklimakanApp() {
                 <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 2px;">
                   <span class="number-latin" style="font-size: 0.7rem; color: #64748b; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-weight: 700;">${item.orderId}</span>
                   <span class="number-latin" style="font-size: 0.72rem; color: #94a3b8;"><i class="far fa-calendar-alt"></i> ${item.date}</span>
+                  ${item.saleType === 'coupon' 
+                    ? '<span style="font-size: 0.68rem; color: #92400e; background: #fef3c7; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; font-weight: 800;"><i class="fas fa-gift"></i> شەخسىي كۇپونىڭىز بىلەن</span>' 
+                    : '<span style="font-size: 0.68rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 1px 6px; border-radius: 4px; font-weight: 800;"><i class="fas fa-store"></i> ئۆز تاۋىرىڭىز</span>'}
                 </div>
                 <h5 style="margin: 0; font-size: 0.86rem; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                   ${escapeModalHtml(item.productName)}
@@ -6989,6 +7124,50 @@ function initTeklimakanApp() {
           navigator.clipboard.writeText(codeVal);
           showToast(`«${codeVal}» كودىڭىز كۆچۈرۈلدى!`, 'success');
         }
+      });
+    }
+
+    // 🎁 شەخسىي ئېتىبار كۇپونىنى كۆچۈرۈش
+    const btnCopyCoup = document.getElementById('btnCopyAgentCoupon');
+    if (btnCopyCoup) {
+      btnCopyCoup.addEventListener('click', () => {
+        const coup = document.getElementById('dashAgentCouponCodeVal')?.textContent?.trim() || (currentVerifiedAgent ? (currentVerifiedAgent.couponCode || currentVerifiedAgent.id) : '');
+        if (coup) {
+          navigator.clipboard?.writeText(coup).then(() => {
+            showToast(`📋 شەخسىي كۇپونىڭىز (${coup}) كۆچۈرۈلدى!`, 'success');
+          }).catch(() => {
+            showToast(`كۇپون: ${coup}`, 'info');
+          });
+        }
+      });
+    }
+
+    // 🔗 شەخسىي تەشۋىقات ئۇلانمىسىنى كۆچۈرۈش
+    const btnCopyRef = document.getElementById('btnCopyAgentReferralLink');
+    if (btnCopyRef) {
+      btnCopyRef.addEventListener('click', () => {
+        const coup = document.getElementById('dashAgentCouponCodeVal')?.textContent?.trim() || (currentVerifiedAgent ? (currentVerifiedAgent.couponCode || currentVerifiedAgent.id) : '');
+        const refUrl = `https://teklimakan.com/?coupon=${encodeURIComponent(coup)}`;
+        navigator.clipboard?.writeText(refUrl).then(() => {
+          showToast('🔗 شەخسىي تەشۋىقات ئۇلانمىڭىز كۆچۈرۈلدى! خېرىدارلار كىرسە كۇپون ئۆزلۈكىدىن قوشۇلىدۇ.', 'success');
+        }).catch(() => {
+          showToast(refUrl, 'info');
+        });
+      });
+    }
+
+    // 📱 مەخسۇس ئۇيغۇرچە تەشۋىقات ئېلان تېكىستىنى كۆچۈرۈش
+    const btnCopyPromo = document.getElementById('btnCopyAgentPromoText');
+    if (btnCopyPromo) {
+      btnCopyPromo.addEventListener('click', () => {
+        const coup = document.getElementById('dashAgentCouponCodeVal')?.textContent?.trim() || (currentVerifiedAgent ? (currentVerifiedAgent.couponCode || currentVerifiedAgent.id) : '');
+        const disc = document.getElementById('dashAgentCouponDiscount')?.textContent?.trim() || '5';
+        const promoText = `🌟 تەكلىماكان تور سۇپىسىدا ئېتىبار پۇرسىتى!\n\nتەكلىماكان سۇپىسىدىن مېۋە-چېۋە، قۇرۇق مېۋە، چاي ۋە مىللىي تاۋارلارنى سېتىۋالغاندا مېنىڭ شەخسىي كۇپونۇمنى ئىشلىتىپ %${disc} ئېتىبارغا ئېرىشىڭ!\n\n🎁 كۇپون كودى: ${coup}\n🛒 بىۋاسىتە زاكاز قىلىش ئۇلانمىسى:\nhttps://teklimakan.com/?coupon=${encodeURIComponent(coup)}`;
+        navigator.clipboard?.writeText(promoText).then(() => {
+          showToast('📱 تەييار ئۇيغۇرچە ئېلان تېكىستى كۆچۈرۈلدى! WhatsApp، تېلېگرام ياكى دوستلار چەمبىرىكىگە چىقىرىپ سېتىڭ.', 'success');
+        }).catch(() => {
+          showToast('ئېلان تېكىستى كۆچۈرۈلدى.', 'info');
+        });
       });
     }
 
@@ -11733,3 +11912,22 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
     }
   }
 
+
+  // 🏷️ تور ئۇلانمىسىدىن ۋاكالەتچى كۇپونىنى ئۆزلۈكىدىن ئوقۇش ۋە سېۋەتكە ئىشلىتىش
+  function initUrlReferralCoupon() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const refCode = params.get('coupon') || params.get('kupon') || params.get('ref') || params.get('agent');
+      if (refCode && refCode.trim()) {
+        const clean = refCode.trim().toUpperCase();
+        sessionStorage.setItem('teklimakan_referred_coupon', clean);
+        setTimeout(() => {
+          if (typeof window.applyCustomerCouponToCart === 'function') {
+            window.applyCustomerCouponToCart(clean);
+          }
+        }, 1200);
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('DOMContentLoaded', initUrlReferralCoupon);
+  // teklimakan_auto_url_coupon

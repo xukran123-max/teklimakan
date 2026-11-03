@@ -2790,7 +2790,75 @@
                 </label>
                 <input type="number" id="authAgentEditCommission" class="form-control number-latin" min="1" max="100" placeholder="15" style="background: #ffffff; font-weight: 700;">
               </div>
-              <div class="form-group" style="margin: 0;">
+                          <!-- 🎁 شەخسىي كۇپون ۋە ئېتىبار تەڭشىكى -->
+            <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.85rem; margin-top: 0.85rem;">
+              <div style="font-weight: 800; font-size: 0.86rem; color: #92400e; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fas fa-gift" style="color: #d97706;"></i> ۋاكالەتچى شەخسىي ئېتىبار كۇپونى ۋە تەقسىماتى (Affiliate Coupon)
+              </div>
+              <div class="agent-edit-grid-3">
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #78350f;">
+                    شەخسىي كۇپون كودى:
+                  </label>
+                  <input type="text" id="authAgentEditCouponCode" class="form-control number-latin" placeholder="مەسىلەن: ALIJAN10" style="background: #ffffff; font-weight: 800; text-transform: uppercase;">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #78350f;">
+                    خېرىدار ئېتىبار نىسبىتى (%):
+                  </label>
+                  <input type="number" id="authAgentEditCouponDiscount" class="form-control number-latin" min="1" max="50" placeholder="5" style="background: #ffffff; font-weight: 800;">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #78350f;">
+                    كۇپون قوزغىتىش ھالىتى:
+                  </label>
+                  <select id="authAgentEditCouponActive" class="form-control" style="background: #ffffff; font-weight: 700;">
+                    <option value="true">قوزغىتىلدى (ئىناۋەتلىك)</option>
+                    <option value="false">توختىتىلدى (چەكلەندى)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+                        <!-- 💳 ئايلىق سېتىۋېلىش چېكى (بىر قېتىملىق تۈزۈم) تەڭشىكى -->
+            <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; padding: 0.85rem; margin-top: 0.85rem;">
+              <div style="font-weight: 800; font-size: 0.86rem; color: #0369a1; margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <i class="fas fa-credit-card" style="color: #0284c7;"></i> ۋاكالەتچى ئايلىق سېتىۋېلىش چېكى (شۇ ئايدا بىرلا قېتىمدا ئىشلىتىلىدىغان سومما)
+                </div>
+                <span id="authAgentPurchaseLimitStatusBadge" style="font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc;">
+                  ھالىتى: ئېنىقلانمىدى
+                </span>
+              </div>
+              <div class="agent-edit-grid-3">
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #075985;">
+                    ئايلىق سېتىۋېلىش چېكى (₺):
+                  </label>
+                  <input type="number" id="authAgentMonthlyPurchaseLimit" class="form-control number-latin" min="0" placeholder="مەسىلەن: 2000" style="background: #ffffff; font-weight: 800;">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #075985;">
+                    شۇ ئايدىكى ئىشلىتىلىش ھالىتى:
+                  </label>
+                  <select id="authAgentPurchaseLimitUsedSelect" class="form-control" style="background: #ffffff; font-weight: 700;">
+                    <option value="available">ئىشلىتىلمىدى (بۇ ئايدا ئىشلىتىشكە تەييار)</option>
+                    <option value="used">ئىشلىتىلدى (بۇ ئايلىق ھوقۇقى پۈتتى)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label class="form-label" style="font-weight: 700; font-size: 0.8rem; color: #075985;">
+                    ئەڭ ئاخىرقى ئىشلەتكەن ئاي:
+                  </label>
+                  <input type="text" id="authAgentPurchaseLimitLastMonth" class="form-control number-latin" placeholder="مەسىلەن: 2026-11" readonly style="background: #f8fafc; font-weight: 700; color: #64748b;">
+                </div>
+              </div>
+              <div style="font-size: 0.74rem; color: #0284c7; margin-top: 0.5rem; line-height: 1.4;">
+                <i class="fas fa-info-circle"></i> <b>تۈزۈم قائىدىسى:</b> ۋاكالەتچى كارتىسىدىكى بۇ سوممىنى شۇ ئاي ئىچىدە پەقەت <b>بىرلا قېتىمدا (بىرلا زاكازدا تولۇق)</b> ئىشلىتەلەيدۇ، قىسىملارغا بۆلۈپ ئىشلىتىشكە بولمايدۇ.
+              </div>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
                 <label class="form-label" style="font-weight: 700; font-size: 0.84rem;">
                   گۇۋاھنامە كودى (سېتىش رۇخسىتى):
                 </label>

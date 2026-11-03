@@ -3602,10 +3602,14 @@ class StoreManager {
       returnedCount: 0,
       totalSalesRevenue: 0,
       profitCommission: 0,
-      commissionRate: 15
+      commissionRate: 15,
+      couponOrdersCount: 0,
+      couponSalesRevenue: 0,
+      couponProfitCommission: 0
     };
 
     const agent = this.getAgentById(agentId);
+    const agentCoupon = (agent?.couponCode || agent?.code || agentId || '').trim().toUpperCase();
     const products = this.getProductsByAgent(agentId) || [];
     const prodIds = new Set(products.map(p => p.id));
     const orders = this.getOrders();
@@ -3617,12 +3621,23 @@ class StoreManager {
     let returnedCount = 0;
     let totalSalesRevenue = 0;
 
+    let couponOrdersCount = 0;
+    let couponSalesRevenue = 0;
+
     orders.forEach(order => {
-      const matchedItems = (order.items || []).filter(item => prodIds.has(item.id));
+      const isCouponOrder = (order.agentId && order.agentId === agentId) || 
+                            (order.couponCode && agentCoupon && order.couponCode.trim().toUpperCase() === agentCoupon);
+
+      const matchedItems = (order.items || []).filter(item => prodIds.has(item.id) || isCouponOrder);
       if (matchedItems.length > 0) {
         const orderStatus = (order.status || '').trim();
         const qty = matchedItems.reduce((sum, it) => sum + (Number(it.quantity) || 1), 0);
         const subRevenue = matchedItems.reduce((sum, it) => sum + ((Number(it.price) || 0) * (Number(it.quantity) || 1)), 0);
+
+        if (isCouponOrder) {
+          couponOrdersCount += 1;
+          couponSalesRevenue += subRevenue;
+        }
 
         if (orderStatus === 'يوللاندى' || orderStatus === 'يەتكۈزۈلۈۋاتىدۇ') {
           shippedCount += qty;
@@ -3647,6 +3662,7 @@ class StoreManager {
     const finalRevenue = Math.max(totalSalesRevenue, Number(agent?.monthlySales || 0));
     const rate = Number(agent?.commissionRate !== undefined ? agent.commissionRate : 15);
     const profitCommission = Math.round(finalRevenue * (rate / 100));
+    const couponProfitCommission = Math.round(couponSalesRevenue * (rate / 100));
 
     if (finalSoldCount > 0 && shippedCount === 0 && completedCount === 0) {
       completedCount = Math.max(1, Math.round(finalSoldCount * 0.75));
@@ -3663,14 +3679,18 @@ class StoreManager {
       returnedCount,
       totalSalesRevenue: finalRevenue,
       profitCommission,
-      commissionRate: rate
+      commissionRate: rate,
+      couponOrdersCount,
+      couponSalesRevenue,
+      couponProfitCommission
     };
   }
 
-  // 🛍️ ۋاكالەتچىنىڭ تاۋار سېتىش ۋە زاكاز تىزىملىكى (خېرىدار ئۇچۇرلىرى پۈتۈنلەي چىقىرىۋېتىلگەن، پەقەت نېمە ساتتى، قاچان ساتتى ۋە پايدا كۆرۈنىدۇ)
+  // 🛍️ ۋاكالەتچىنىڭ تاۋار سېتىش ۋە زاكاز تىزىملىكى (خېرىدار ئۇچۇرلىرى پۈتۈنلەي چىقىرىۋېتىلگەن، مەخپىيەتلىك 100% قوغدالغان)
   getAgentSalesOrderList(agentId) {
     if (!agentId) return [];
     const agent = this.getAgentById(agentId);
+    const agentCoupon = (agent?.couponCode || agent?.code || agentId || '').trim().toUpperCase();
     const products = this.getProductsByAgent(agentId) || [];
     const prodMap = new Map();
     products.forEach(p => prodMap.set(p.id, p));
@@ -3682,11 +3702,14 @@ class StoreManager {
     orders.forEach(order => {
       const orderDate = order.date || order.createdAt || new Date().toISOString().split('T')[0];
       const orderStatus = (order.status || 'ساقلاۋاتىدۇ').trim();
+      // 🛡️ مۇتلەق مەخپىيلەشتۈرۈلگەن زاكاز كودى: خېرىدارنىڭ ئىسمى، تېلېفونى، ئادرېسى كۆرۈنمەيدۇ!
       const orderMaskedId = order.id ? ('#TK-' + String(order.id).replace(/\D/g, '').slice(-4)) : '#TK-ORD';
+      const isCouponOrder = (order.agentId && order.agentId === agentId) || 
+                            (order.couponCode && agentCoupon && order.couponCode.trim().toUpperCase() === agentCoupon);
 
       (order.items || []).forEach(item => {
-        // تاۋار ۋاكالەتچىگە تەۋەمۇ تەكشۈرۈش
-        const isMatched = prodMap.has(item.id) || (order.agentId && order.agentId === agentId);
+        // تاۋار ۋاكالەتچىگە تەۋەمۇ ياكى كۇپون ئارقىلىق سېتىلغانمۇ تەكشۈرۈش
+        const isMatched = prodMap.has(item.id) || isCouponOrder;
         if (isMatched) {
           const qty = Number(item.quantity) || 1;
           const price = Number(item.price) || 0;
@@ -3707,13 +3730,14 @@ class StoreManager {
             agentProfit: profit,
             commissionRate: rate,
             date: orderDate,
-            status: orderStatus
+            status: orderStatus,
+            saleType: isCouponOrder ? 'coupon' : 'product',
+            couponCode: isCouponOrder ? (order.couponCode || agentCoupon) : null
           });
         }
       });
     });
 
-    // ئەگەر سىستېمىدا ۋاكالەتچىنىڭ سېتىش سانى بولۇپ تېخى زاكاز تەپسىلاتى تىزىلمىغان بولسا، تاۋارلىرى بويىچە يۈزەكى سېتىش خاتىرىسى ھاسىللاش
     const targetCount = Math.max(salesList.length, Number(agent?.monthlyOrders || 0));
     if (salesList.length === 0 && targetCount > 0 && products.length > 0) {
       const sampleProd = products[0];
@@ -3791,47 +3815,56 @@ class StoreManager {
       };
     }
 
-    if (agentData.id) {
-      const idx = agents.findIndex(a => a.id === agentData.id);
-      if (idx !== -1) {
-        const oldAgent = agents[idx];
-        agents[idx] = { 
-          ...oldAgent, 
-          ...agentData,
-          canPublishMultilingual: agentData.canPublishMultilingual !== undefined 
-            ? (agentData.canPublishMultilingual === true || agentData.canPublishMultilingual === 'true') 
-            : (oldAgent.canPublishMultilingual || false),
-          salesTotal: agentData.salesTotal !== undefined ? Number(agentData.salesTotal) : oldAgent.salesTotal,
-          monthlySales: agentData.monthlySales !== undefined ? Number(agentData.monthlySales) : oldAgent.monthlySales,
-          monthlyOrders: agentData.monthlyOrders !== undefined ? Number(agentData.monthlyOrders) : oldAgent.monthlyOrders,
-          commissionRate: agentData.commissionRate !== undefined ? Number(agentData.commissionRate) : oldAgent.commissionRate,
-          violationsCount: agentData.violationsCount !== undefined ? Number(agentData.violationsCount) : (oldAgent.violationsCount || 0),
-          suspendedUntil: agentData.suspendedUntil !== undefined ? agentData.suspendedUntil : (oldAgent.suspendedUntil || null),
-          suspensionReason: agentData.suspensionReason !== undefined ? agentData.suspensionReason : (oldAgent.suspensionReason || '')
-        };
+    const targetId = agentData.id || null;
+    const idx = targetId ? agents.findIndex(a => a.id === targetId) : -1;
 
-        // شۇ ۋاكالەتچىگە باغلانغان تاۋارلارنىڭ سالاھىيەت خېتى ۋە نامىنى ماسلاشتۇرۇش
-        let products = this.getProducts();
-        let prodChanged = false;
-        products.forEach(p => {
-          if (p.agentId === agentData.id || (p.agentName && p.agentName.includes(oldAgent.name))) {
-            if (agentData.name) {
-              const email = agentData.email || oldAgent.email || '';
-              p.agentName = email ? `${agentData.name} (${email})` : agentData.name;
-            }
-            if (agentData.reputation) {
-              p.merchantBadge = agentData.reputation;
-            }
-            prodChanged = true;
+    if (idx !== -1) {
+      const oldAgent = agents[idx];
+      agents[idx] = { 
+        ...oldAgent, 
+        ...agentData,
+        canPublishMultilingual: agentData.canPublishMultilingual !== undefined 
+          ? (agentData.canPublishMultilingual === true || agentData.canPublishMultilingual === 'true') 
+          : (oldAgent.canPublishMultilingual || false),
+        salesTotal: agentData.salesTotal !== undefined ? Number(agentData.salesTotal) : oldAgent.salesTotal,
+        monthlySales: agentData.monthlySales !== undefined ? Number(agentData.monthlySales) : oldAgent.monthlySales,
+        monthlyOrders: agentData.monthlyOrders !== undefined ? Number(agentData.monthlyOrders) : oldAgent.monthlyOrders,
+        commissionRate: agentData.commissionRate !== undefined ? Number(agentData.commissionRate) : (oldAgent.commissionRate || 15),
+        violationsCount: agentData.violationsCount !== undefined ? Number(agentData.violationsCount) : (oldAgent.violationsCount || 0),
+        suspendedUntil: agentData.suspendedUntil !== undefined ? agentData.suspendedUntil : (oldAgent.suspendedUntil || null),
+        suspensionReason: agentData.suspensionReason !== undefined ? agentData.suspensionReason : (oldAgent.suspensionReason || ''),
+        couponCode: agentData.couponCode !== undefined ? (agentData.couponCode || '').trim().toUpperCase() : (oldAgent.couponCode || oldAgent.id || ''),
+        couponDiscount: agentData.couponDiscount !== undefined ? Number(agentData.couponDiscount) : (oldAgent.couponDiscount !== undefined ? oldAgent.couponDiscount : 5),
+        couponActive: agentData.couponActive !== undefined ? (agentData.couponActive !== false) : (oldAgent.couponActive !== false),
+        couponType: agentData.couponType || oldAgent.couponType || 'percentage',
+        monthlyPurchaseLimit: agentData.monthlyPurchaseLimit !== undefined ? Number(agentData.monthlyPurchaseLimit) : (oldAgent.monthlyPurchaseLimit || 0),
+        purchaseLimitLastUsedMonth: agentData.purchaseLimitLastUsedMonth !== undefined ? agentData.purchaseLimitLastUsedMonth : (oldAgent.purchaseLimitLastUsedMonth || null),
+        purchaseLimitLastOrderId: agentData.purchaseLimitLastOrderId !== undefined ? agentData.purchaseLimitLastOrderId : (oldAgent.purchaseLimitLastOrderId || null),
+        purchaseLimitLastUsedDate: agentData.purchaseLimitLastUsedDate !== undefined ? agentData.purchaseLimitLastUsedDate : (oldAgent.purchaseLimitLastUsedDate || null),
+        purchaseLimitLastAmount: agentData.purchaseLimitLastAmount !== undefined ? Number(agentData.purchaseLimitLastAmount) : (oldAgent.purchaseLimitLastAmount || 0)
+      };
+
+      // شۇ ۋاكالەتچىگە باغلانغان تاۋارلارنىڭ سالاھىيەت خېتى ۋە نامىنى ماسلاشتۇرۇش
+      let products = this.getProducts();
+      let prodChanged = false;
+      products.forEach(p => {
+        if (p.agentId === agentData.id || (p.agentName && p.agentName.includes(oldAgent.name))) {
+          if (agentData.name) {
+            const email = agentData.email || oldAgent.email || '';
+            p.agentName = email ? `${agentData.name} (${email})` : agentData.name;
           }
-        });
-        if (prodChanged) {
-          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-          this.notifyDataChange('products');
+          if (agentData.reputation) {
+            p.merchantBadge = agentData.reputation;
+          }
+          prodChanged = true;
         }
+      });
+      if (prodChanged) {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+        this.notifyDataChange('products');
       }
     } else {
-      const newId = 'AGT-' + Math.floor(100 + Math.random() * 900);
+      const newId = targetId || ('AGT-' + Math.floor(100 + Math.random() * 900));
       const newAgent = {
         id: newId,
         name: agentData.name,
@@ -3852,7 +3885,16 @@ class StoreManager {
         commissionRate: Number(agentData.commissionRate || 15),
         violationsCount: Number(agentData.violationsCount || 0),
         suspendedUntil: agentData.suspendedUntil || null,
-        suspensionReason: agentData.suspensionReason || ''
+        suspensionReason: agentData.suspensionReason || '',
+        couponCode: (agentData.couponCode || agentData.code || newId).trim().toUpperCase(),
+        couponDiscount: Number(agentData.couponDiscount) || 5,
+        couponActive: agentData.couponActive !== false,
+        couponType: agentData.couponType || 'percentage',
+        monthlyPurchaseLimit: Number(agentData.monthlyPurchaseLimit || 0),
+        purchaseLimitLastUsedMonth: agentData.purchaseLimitLastUsedMonth || null,
+        purchaseLimitLastOrderId: agentData.purchaseLimitLastOrderId || null,
+        purchaseLimitLastUsedDate: agentData.purchaseLimitLastUsedDate || null,
+        purchaseLimitLastAmount: Number(agentData.purchaseLimitLastAmount || 0)
       };
       agents.unshift(newAgent);
     }
@@ -7495,8 +7537,41 @@ class StoreManager {
 
   validateCoupon(code, subtotal) {
     if (!code) return { valid: false, message: 'كۇپون كودىنى كىرگۈزۈڭ' };
+    const cleanCode = code.trim().toUpperCase();
     const coupons = this.getCoupons();
-    const c = coupons.find(item => item.code.toUpperCase() === code.trim().toUpperCase());
+    let c = coupons.find(item => item.code.toUpperCase() === cleanCode);
+
+    // ئەگەر ئادەتتىكى كۇپونلار ئىچىدە بولمىسا، ۋاكالەتچىلەرنىڭ شەخسىي ئېتىبار كۇپونىدىن ئىزدەش
+    if (!c) {
+      const agents = (typeof this.getAgents === 'function') ? this.getAgents() : [];
+      const matchedAgent = agents.find(a => {
+        if (!a) return false;
+        const aCoupon = (a.couponCode || a.code || a.id || '').trim().toUpperCase();
+        return aCoupon && aCoupon === cleanCode;
+      });
+
+      if (matchedAgent) {
+        if (matchedAgent.status === 'توختىتىلدى' || matchedAgent.couponActive === false) {
+          return { valid: false, message: 'بۇ ۋاكالەتچى ئېتىبار كۇپونىنىڭ كۈچى توختىتىلغان!' };
+        }
+        const discountVal = Number(matchedAgent.couponDiscount) || 5; // سۈكۈتتە خېرىدارغا %5 ئېتىبار
+        c = {
+          code: cleanCode,
+          type: matchedAgent.couponType || 'percentage',
+          value: discountVal,
+          minSpend: 0,
+          usageLimit: 999999,
+          usedCount: 0,
+          isActive: true,
+          isAgentCoupon: true,
+          agentId: matchedAgent.id,
+          agentName: matchedAgent.name,
+          commissionRate: Number(matchedAgent.commissionRate) || 15,
+          description: `ۋاكالەتچى ${matchedAgent.name} نىڭ شەخسىي ئېتىبار كۇپونى`
+        };
+      }
+    }
+
     if (!c) {
       return { valid: false, message: 'بۇ كۇپون كودى مەۋجۇت ئەمەس!' };
     }
@@ -7534,16 +7609,112 @@ class StoreManager {
     }
     discount = Math.round(discount);
 
+    const successMsg = c.isAgentCoupon 
+      ? `🎉 «${c.agentName || cleanCode}» ۋاكالەتچى ئېتىبار كۇپونى تەستىقلاندى! ${this.formatPrice(discount)} ئېتىبار قىلىندى.`
+      : `كۇپون تەستىقلاندى! ${this.formatPrice(discount)} ئېتىبار قىلىندى.`;
+
     return {
       valid: true,
       coupon: c,
       discountAmount: discount,
       discountFormatted: this.formatPrice(discount),
-      message: `كۇپون تەستىقلاندى! ${this.formatPrice(discount)} ئېتىبار قىلىندى.`
+      message: successMsg
     };
   }
 
-  // ==================== كارگو ئىز قوغلاش ۋە يېڭىلاش (Cargo Tracking) ====================
+  // 🎁 ۋاكالەتچى شەخسىي ئېتىبار كۇپونى ئۇچۇرلىرىنى ئېلىش
+  getAgentPersonalCoupon(agentId) {
+    if (!agentId) return null;
+    const agent = this.getAgentById(agentId);
+    if (!agent) return null;
+    const code = (agent.couponCode || agent.code || ('AGT-' + String(agent.id).replace(/\D/g, ''))).toUpperCase();
+    return {
+      code: code,
+      discount: Number(agent.couponDiscount) || 5,
+      type: agent.couponType || 'percentage',
+      commissionRate: Number(agent.commissionRate) || 15,
+      isActive: agent.status !== 'توختىتىلدى' && agent.couponActive !== false
+    };
+  }
+
+
+  // ==================== 💳 ۋاكالەتچى ئايلىق سېتىۋېلىش چېكى تۈزۈمى (بىر ئاي ئىچىدە بىرلا قېتىمدا ئىشلىتىش) ====================
+  getCurrentYearMonth() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  }
+
+  getAgentPurchaseLimitStatus(agentId) {
+    if (!agentId) return { limit: 0, isAvailable: false, usedThisMonth: false, reason: 'ۋاكالەتچى تېپىلمىدى' };
+    const agent = this.getAgentById(agentId);
+    if (!agent) return { limit: 0, isAvailable: false, usedThisMonth: false, reason: 'ۋاكالەتچى تېپىلمىدى' };
+
+    const limit = Number(agent.monthlyPurchaseLimit) || 0;
+    const currentMonth = this.getCurrentYearMonth();
+    const lastUsedMonth = agent.purchaseLimitLastUsedMonth || '';
+    const usedThisMonth = (lastUsedMonth === currentMonth);
+
+    if (limit <= 0) {
+      return {
+        limit: 0,
+        isAvailable: false,
+        usedThisMonth: false,
+        currentMonth,
+        lastUsedMonth,
+        reason: 'بۇ ۋاكالەتچىگە تېخى ئايلىق سېتىۋېلىش چېكى بېكىتىلمىگەن'
+      };
+    }
+
+    if (usedThisMonth) {
+      return {
+        limit,
+        isAvailable: false,
+        usedThisMonth: true,
+        currentMonth,
+        lastUsedMonth,
+        lastOrderId: agent.purchaseLimitLastOrderId || '',
+        lastDate: agent.purchaseLimitLastUsedDate || '',
+        reason: `بۇ ئايلىق (${currentMonth}) سېتىۋېلىش چېكىڭىز ئاللىقاچان بىر قېتىملىق بەلگىلىمە بويىچە ئىشلىتىپ بولۇندى. كېيىنكى ئايدا قايتا ئېچىلىدۇ.`
+      };
+    }
+
+    return {
+      limit,
+      isAvailable: true,
+      usedThisMonth: false,
+      currentMonth,
+      lastUsedMonth,
+      reason: `بۇ ئايلىق سېتىۋېلىش چېكىڭىز: ₺${limit.toLocaleString('tr-TR')} (دىققەت: شۇ ئاي ئىچىدە پەقەت بىرلا زاكازدا تولۇق ئىشلىتىلىدۇ).`
+    };
+  }
+
+  consumeAgentPurchaseLimit(agentId, orderId, usedAmount) {
+    if (!agentId) return false;
+    const agents = this.getAgents('none');
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx === -1) return false;
+
+    const currentMonth = this.getCurrentYearMonth();
+    const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 16);
+
+    agents[idx].purchaseLimitLastUsedMonth = currentMonth;
+    agents[idx].purchaseLimitLastOrderId = orderId || '';
+    agents[idx].purchaseLimitLastUsedDate = nowStr;
+    agents[idx].purchaseLimitLastAmount = Number(usedAmount) || 0;
+
+    localStorage.setItem(STORAGE_KEYS.AGENTS, JSON.stringify(agents));
+    this.notifyDataChange('agents');
+
+    // ☁️ Supabase sync
+    if (window.TeklimakanSupabase && typeof window.TeklimakanSupabase.upsertAgent === 'function') {
+      window.TeklimakanSupabase.upsertAgent(agents[idx]).catch(e => console.warn('Supabase agent quota update error:', e));
+    }
+    return true;
+  }
+
+    // ==================== كارگو ئىز قوغلاش ۋە يېڭىلاش (Cargo Tracking) ====================
   getCargoTrackingUrl(carrier, trackingNo) {
     if (!carrier || !trackingNo) return '';
     const c = carrier.toLowerCase();
@@ -8061,7 +8232,7 @@ class StoreManager {
     return orders;
   }
 
-  createOrder(customerData, paymentMethod, notes = '', couponDiscountCny = 0, lang = 'ug', instagramGift = null) {
+  createOrder(customerData, paymentMethod, notes = '', couponDiscountCny = 0, lang = 'ug', instagramGift = null, couponData = null) {
     const cartData = this.getCartDetailed(lang);
     if (cartData.items.length === 0) {
       return { success: false, message: 'سېۋەت بوش!' };
@@ -8110,14 +8281,49 @@ class StoreManager {
 
     const rawDisc = Number(couponDiscountCny);
     const validDiscount = (isNaN(rawDisc) || rawDisc < 0) ? 0 : Math.min(rawDisc, cartData.subtotalCny);
-    const finalTotalCny = Math.max(0, cartData.totalCny - validDiscount);
+    let finalTotalCny = Math.max(0, cartData.totalCny - validDiscount);
+
+        let couponCode = null;
+    let agentId = null;
+    let agentName = null;
+    let isAgentCoupon = false;
+
+    if (couponData && typeof couponData === 'object') {
+      couponCode = couponData.code ? couponData.code.trim().toUpperCase() : null;
+      agentId = couponData.agentId || null;
+      agentName = couponData.agentName || null;
+      isAgentCoupon = !!couponData.isAgentCoupon;
+    } else if (typeof couponData === 'string' && couponData.trim()) {
+      couponCode = couponData.trim().toUpperCase();
+    }
+
+    if (couponCode) {
+      const coupNote = isAgentCoupon && agentName 
+        ? `🏷️ ئېتىبار كۇپونى: ${couponCode} (ۋاكالەتچى: ${agentName})` 
+        : `🏷️ ئېتىبار كۇپونى: ${couponCode}`;
+      notes = notes ? `${notes} | ${coupNote}` : coupNote;
+    }
+
+    // 💳 ۋاكالەتچى ئايلىق سېتىۋېلىش چېكىنى بىرلا قېتىمدا ئىشلىتىش تەكشۈرۈشى
+    let purchaseLimitDeduction = 0;
+    if (couponData && couponData.usePurchaseLimit && couponData.agentId) {
+      const quotaStatus = this.getAgentPurchaseLimitStatus(couponData.agentId);
+      if (quotaStatus.isAvailable && quotaStatus.limit > 0) {
+        purchaseLimitDeduction = Math.min(quotaStatus.limit, finalTotalCny);
+        finalTotalCny = Math.max(0, finalTotalCny - purchaseLimitDeduction);
+        this.consumeAgentPurchaseLimit(couponData.agentId, orderId, purchaseLimitDeduction);
+        const limitNote = `💳 ۋاكالەتچى ئايلىق سېتىۋېلىش چېكىدىن ₺${purchaseLimitDeduction} ئىشلىتىلدى (شۇ ئايدا 1 قېتىم)`;
+        notes = notes ? `${notes} | ${limitNote}` : limitNote;
+      }
+    }
 
     const newOrder = {
       id: orderId,
       customer: customerData,
       items: orderItems,
       subtotalCny: cartData.subtotalCny,
-      discountCny: validDiscount,
+      discountCny: validDiscount + purchaseLimitDeduction,
+      purchaseLimitDeduction: purchaseLimitDeduction,
       deliveryFeeCny: cartData.deliveryFeeCny,
       totalCny: finalTotalCny,
       totalFormatted: this.formatPrice(finalTotalCny),
@@ -8128,7 +8334,11 @@ class StoreManager {
       language: lang,
       currency: this.currentCurrency,
       hasInstagramGift: hasInstaGift,
-      instagramUser: instaUsername
+      instagramUser: instaUsername,
+      couponCode: couponCode,
+      agentId: agentId,
+      agentName: agentName,
+      isAgentCoupon: isAgentCoupon
     };
 
     const lowStockAlerts = [];

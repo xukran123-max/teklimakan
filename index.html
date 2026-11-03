@@ -1335,6 +1335,95 @@
               </div>
             </div>
 
+                        
+            <!-- 💳 ۋاكالەتچى ئايلىق سېتىۋېلىش چېكى تاختىسى (Monthly Single-Use Purchase Credit Quota) -->
+            <div id="agentPurchaseLimitCard" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 132, 199, 0.25) 100%); border: 1.5px solid rgba(56, 189, 248, 0.45); border-radius: 12px; padding: 1rem; margin-bottom: 0.85rem; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">
+                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                  <span style="font-size: 0.95rem; font-weight: 900; color: #7dd3fc; display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fas fa-credit-card" style="color: #38bdf8;"></i> ئايلىق سېتىۋېلىش چېكى (شۇ ئايدا بىرلا قېتىم)
+                  </span>
+                </div>
+                <div id="dashAgentPurchaseLimitStatusBadge" style="font-size: 0.74rem; font-weight: 800; padding: 2px 9px; border-radius: 6px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4);">
+                  <i class="fas fa-check-circle"></i> ئىشلىتىشكە تەييار
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; background: rgba(0, 0, 0, 0.35); border-radius: 10px; padding: 0.75rem 1rem; border: 1px dashed rgba(56, 189, 248, 0.4);">
+                <div>
+                  <div style="font-size: 0.75rem; color: #94a3b8;">شۇ ئايلىق تەمىنات چېكى سوممىسى:</div>
+                  <div style="font-size: 1.4rem; font-weight: 900; color: #38bdf8; margin-top: 2px;">
+                    <span id="dashAgentPurchaseLimitAmount" class="number-latin">₺0</span>
+                  </div>
+                </div>
+                <div style="text-align: left; max-width: 320px;">
+                  <div style="font-size: 0.76rem; color: #e2e8f0; line-height: 1.45;">
+                    ⚖️ <b>بىر قېتىملىق تۈزۈم:</b> بۇ سوممىنى شۇ ئاي ئىچىدە پەقەت <strong>بىرلا زاكازدا تولۇق</strong> ئىشلىتىشكە بولىدۇ، بۆلۈپ ئىشلىتىشكە رۇخسەت قىلىنمايدۇ.
+                  </div>
+                  <div id="dashAgentPurchaseLimitNotice" style="font-size: 0.72rem; color: #fde68a; margin-top: 3px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🎁 ۋاكالەتچى شەخسىي ئېتىبار كۇپونى ۋە كىرىم ھەمبەھىرلەش مەركىزى (VIP Affiliate Coupon & Share Toolkit) -->
+            <div id="agentPersonalCouponCard" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 1.1rem; margin-bottom: 0.85rem; box-shadow: 0 4px 18px rgba(245, 158, 11, 0.2); position: relative; overflow: hidden;">
+              <!-- لەيلىمە زىننەت بەلگىسى -->
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                  <span style="font-size: 1rem; font-weight: 900; color: #fde68a; display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fas fa-gift" style="color: #fbbf24;"></i> شەخسىي ئېتىبار كۇپۇنۇم (Affiliate VIP)
+                  </span>
+                  <span id="dashAgentCouponDiscountBadge" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px;">
+                    خېرىدارغا %<span id="dashAgentCouponDiscount">5</span> ئېتىبار
+                  </span>
+                </div>
+                <div style="font-size: 0.76rem; color: #93c5fd; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(147, 197, 253, 0.35); padding: 2px 9px; border-radius: 6px; font-weight: 700;">
+                  <i class="fas fa-coins" style="color: #fde68a;"></i> سىزگە پايدا: <strong id="dashAgentCouponRate" style="color: #fef08a;">15%</strong>
+                </div>
+              </div>
+
+              <!-- كۇپون كودى كۆرسىتىش ۋە تېز مەشغۇلات بەلبېغى -->
+              <div style="background: rgba(0, 0, 0, 0.4); border: 1.5px dashed rgba(245, 158, 11, 0.6); border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <div style="font-size: 0.8rem; color: #cbd5e1; font-weight: 700;">كۇپون كودىڭىز:</div>
+                  <code id="dashAgentCouponCodeVal" class="number-latin" style="font-size: 1.35rem; font-weight: 900; letter-spacing: 2px; color: #fef08a; background: rgba(245, 158, 11, 0.15); padding: 4px 14px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.4); user-select: all;">AGT-000</code>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                  <button type="button" id="btnCopyAgentCoupon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; border: none; border-radius: 7px; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);">
+                    <i class="fas fa-copy"></i> <span>كۇپوننى كۆچۈرۈش</span>
+                  </button>
+                  <button type="button" id="btnCopyAgentReferralLink" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff; border-radius: 7px; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <i class="fas fa-link"></i> <span>ئۇلانمامنى كۆچۈرۈش</span>
+                  </button>
+                  <button type="button" id="btnCopyAgentPromoText" style="background: #25d366; color: #ffffff; border: none; border-radius: 7px; padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);">
+                    <i class="fab fa-whatsapp"></i> <span>ئېلان تېكىستى</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 📊 كۇپون نەتىجە كۆرسەتكۈچلىرى (3 كۆرسەتكۈچ) -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; text-align: center; margin-bottom: 0.65rem;">
+                <div style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                  <div style="font-size: 0.7rem; color: #bfdbfe;"><i class="fas fa-shopping-cart"></i> كۇپون بىلەن زاكاز</div>
+                  <div id="dashCouponOrderCount" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #60a5fa; margin-top: 2px;">0</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                  <div style="font-size: 0.7rem; color: #fed7aa;"><i class="fas fa-chart-line"></i> كۇپوندىن كەلگەن سودا</div>
+                  <div id="dashCouponSalesAmount" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #fb923c; margin-top: 2px;">₺0</div>
+                </div>
+                <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 0.45rem 0.2rem;">
+                  <div style="font-size: 0.7rem; color: #fde68a;"><i class="fas fa-hand-holding-usd"></i> كۇپوندىن تاپقان پايدىڭىز</div>
+                  <div id="dashCouponProfitAmount" class="number-latin" style="font-size: 1.15rem; font-weight: 900; color: #fde68a; margin-top: 2px;">₺0</div>
+                </div>
+              </div>
+
+              <!-- 🛡️ خېرىدار مەخپىيەتلىكى مۇتلەق كاپالىتى -->
+              <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.45rem 0.75rem; font-size: 0.75rem; color: #a7f3d0; display: flex; align-items: center; gap: 0.4rem; line-height: 1.4;">
+                <i class="fas fa-user-shield" style="font-size: 0.95rem; color: #34d399; flex-shrink: 0;"></i>
+                <span><strong>مەخپىيەتلىك كاپالىتى:</strong> سىستېما خېرىدار مەخپىيەتلىكىنى 100% قوغدايدۇ؛ خېرىدارنىڭ ئىسمى، تېلېفونى ياكى ئادرېسى كۆرۈنمەيدۇ. پەقەت سېتىلغان مەھسۇلات، ۋاقتى ۋە سىزنىڭ پايدىڭىز ئېنىق كۆرۈنىدۇ.</span>
+              </div>
+            </div>
+
             <!-- 📌 كۈندىلىك ئىمزا قويۇش، كۈن تىزىمى ۋە كۈندىلىك ئاكتىپلىق تاختىسى -->
             <div style="background: rgba(15, 23, 42, 0.45); border: 1.5px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 0.85rem; margin-bottom: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">

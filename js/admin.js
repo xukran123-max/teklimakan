@@ -2570,6 +2570,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span>📍 ${agent.city || 'ئىستانبۇل'}</span> | <span class="number-latin">${agent.phone || '-'}</span>
                 </div>
                 <div class="number-latin" style="font-size: 0.7rem; color: #2563eb; font-weight: 600;">${agent.email}</div>
+                <div style="margin-top: 3px; font-size: 0.72rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem;">
+                  <i class="fas fa-gift" style="color: #d97706;"></i>
+                  <span>كۇپون: <strong class="number-latin">${agent.couponCode || agent.id}</strong> (%<span class="number-latin">${agent.couponDiscount || 5}</span> ئېتىبار)</span>
+                </div>
                 <!-- 📜 ئارخىپلانغان كېلىشىمنامە كۇنۇپكىسى & سېتىش ئۇسۇلى -->
                 <div style="margin-top: 4px; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                   <button type="button" class="btn-agent-contract-archive" data-id="${agent.id}" title="ۋاكالەتچىلىك ئىمزالانغان كېلىشىمنامىسىنى كۆرۈش ۋە چۈشۈرۈش" style="background: #fffbeb; border: 1.5px solid #f59e0b; color: #b45309; padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
@@ -4006,6 +4010,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const editCommission = document.getElementById('authAgentEditCommission');
     if (editCommission) editCommission.value = agent.commissionRate !== undefined ? agent.commissionRate : 15;
+
+    const editCoupCode = document.getElementById("authAgentEditCouponCode"); if (editCoupCode) editCoupCode.value = agent.couponCode || agent.id || ""; const editCoupDisc = document.getElementById("authAgentEditCouponDiscount"); if (editCoupDisc) editCoupDisc.value = agent.couponDiscount !== undefined ? agent.couponDiscount : 5; const editCoupActive = document.getElementById("authAgentEditCouponActive"); if (editCoupActive) editCoupActive.value = agent.couponActive !== false ? "true" : "false";
+
+    // 💳 ئايلىق سېتىۋېلىش چېكى قىممەتلىرىنى قاچىلاش
+    const editLimitInp = document.getElementById('authAgentMonthlyPurchaseLimit');
+    if (editLimitInp) editLimitInp.value = agent.monthlyPurchaseLimit || 0;
+
+    const currentYearMonth = (window.appStore && typeof window.appStore.getCurrentYearMonth === 'function') 
+      ? window.appStore.getCurrentYearMonth() 
+      : new Date().toISOString().slice(0, 7);
+
+    const limitLastMonthInp = document.getElementById('authAgentPurchaseLimitLastMonth');
+    if (limitLastMonthInp) limitLastMonthInp.value = agent.purchaseLimitLastUsedMonth || 'ئىشلىتىلمىگەن';
+
+    const limitUsedSelect = document.getElementById('authAgentPurchaseLimitUsedSelect');
+    const isUsedThisMonth = (agent.purchaseLimitLastUsedMonth === currentYearMonth);
+    if (limitUsedSelect) {
+      limitUsedSelect.value = isUsedThisMonth ? 'used' : 'available';
+    }
+
+    const limitStatusBadge = document.getElementById('authAgentPurchaseLimitStatusBadge');
+    if (limitStatusBadge) {
+      if ((agent.monthlyPurchaseLimit || 0) <= 0) {
+        limitStatusBadge.textContent = 'چەك بېرىلمىگەن';
+        limitStatusBadge.style.background = '#f1f5f9';
+        limitStatusBadge.style.color = '#64748b';
+      } else if (isUsedThisMonth) {
+        limitStatusBadge.textContent = `🔒 بۇ ئايدا (${currentYearMonth}) ئىشلىتىلگەن`;
+        limitStatusBadge.style.background = '#fee2e2';
+        limitStatusBadge.style.color = '#b91c1c';
+      } else {
+        limitStatusBadge.textContent = `🟢 بۇ ئايدا (${currentYearMonth}) ئىشلىتىشكە تەييار`;
+        limitStatusBadge.style.background = '#ecfdf5';
+        limitStatusBadge.style.color = '#047857';
+      }
+    }
 
     const editCertCode = document.getElementById('authAgentEditCertCode');
     if (editCertCode) editCertCode.value = agent.certCode || ('TK-CERT-2026-' + (agent.id ? agent.id.replace(/\D/g, '') : '101'));
@@ -8731,6 +8771,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const editExpireDate = document.getElementById('authAgentEditExpireDate')?.value || agent.authExpireDate || '2027-08-15';
         const editNotes = document.getElementById('authAgentEditNotes')?.value?.trim() || '';
 
+        const editCouponCode = document.getElementById('authAgentEditCouponCode')?.value?.trim().toUpperCase() || agent.couponCode || agent.id;
+        const editCouponDiscount = Number(document.getElementById('authAgentEditCouponDiscount')?.value || agent.couponDiscount || 5);
+        const editCouponActive = document.getElementById('authAgentEditCouponActive')?.value !== 'false';
+
+        const editMonthlyPurchaseLimit = Number(document.getElementById('authAgentMonthlyPurchaseLimit')?.value || 0);
+        const limitUsedChoice = document.getElementById('authAgentPurchaseLimitUsedSelect')?.value || 'available';
+        const currentYM = (window.appStore && typeof window.appStore.getCurrentYearMonth === 'function') 
+          ? window.appStore.getCurrentYearMonth() 
+          : new Date().toISOString().slice(0, 7);
+        const newLastUsedMonth = (limitUsedChoice === 'used') ? currentYM : '';
+
         // سودىگەر ئىناۋەت دەرىجىسىنى ئېلىش
         let selectedReputation = authRepSelect ? authRepSelect.value : 'ئىشەنچىلىك سودىگەر';
         if (selectedReputation === 'custom') {
@@ -8771,7 +8822,12 @@ document.addEventListener('DOMContentLoaded', () => {
           canPublishMultilingual: canPublishMultilingual,
           violationsCount: editViolationsCount,
           authorizedBrands: selectedBrands,
-          notes: editNotes
+          notes: editNotes,
+          couponCode: editCouponCode,
+          couponDiscount: editCouponDiscount,
+          couponActive: editCouponActive,
+          monthlyPurchaseLimit: editMonthlyPurchaseLimit,
+          purchaseLimitLastUsedMonth: newLastUsedMonth
         });
 
         if (saveRes && saveRes.success === false) {

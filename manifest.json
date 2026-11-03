@@ -1,0 +1,65 @@
+{
+  "name": "تەكلىماكان سودا سۇپىسى",
+  "short_name": "تەكلىماكان",
+  "description": "تەكلىماكان كۆپ خىللاشقان خەلقئارالىق تور سودا سۇپىسى — ئەلا سۈپەتلىك تاۋارلار ۋە ئىشەنچلىك خېرىدارلار مۇلازىمىتى",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "dir": "rtl",
+  "lang": "ug",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "images/favicon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "images/logo_circle.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": [
+    "shopping",
+    "business",
+    "lifestyle"
+  ],
+  "shortcuts": [
+    {
+      "name": "ئالدى دۇكان",
+      "short_name": "دۇكان",
+      "description": "بارلىق مەھسۇلاتلار ۋە ئېتىبار پائالىيەتلىرى",
+      "url": "/?source=pwa_shortcut",
+      "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "ۋاكالەتچى سۇپىسى",
+      "short_name": "ۋاكالەتچى",
+      "description": "ۋاكالەتچى سودا تاختىسى ۋە تاۋار باشقۇرۇش",
+      "url": "/#agentPortalModal",
+      "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "باشقۇرۇش سۇپىسى",
+      "short_name": "سەئىدىيە",
+      "description": "تەكلىماكان سۇپا باشقۇرۇش سىستېمىسى",
+      "url": "/seidiye.html",
+      "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
+    }
+  ]
+}

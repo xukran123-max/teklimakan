@@ -1358,6 +1358,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!u || isBad(u)) return 'دانە';
         let s = String(u).trim();
         if (!s || s === '?????') return 'دانە';
+        // 🌿 100% ساپ ئۇيغۇرچە بىرلىك تازىلىغۇچ
+        s = s.replace(/paket/gi, 'بولاق')
+             .replace(/kavanoz/gi, 'شىشە')
+             .replace(/şişe/gi, 'شىشە')
+             .replace(/cam şişe/gi, 'شىشە')
+             .replace(/adet/gi, 'دانە')
+             .replace(/kutu/gi, 'قۇتا')
+             .replace(/box/gi, 'قۇتا')
+             .replace(/torba|poşet/gi, 'خالتا')
+             .replace(/pack/gi, 'بولاق')
+             .replace(/jar/gi, 'شىشە')
+             .replace(/bottle/gi, 'شىشە');
         const midGram = s.match(/^گ[ىي]?را\s*(\d+)\s*م$/i);
         if (midGram) return `${midGram[1]} گرام`;
         if (/^كىلو\s*1$/i.test(s) || /^1\s*كىلو$/i.test(s)) return 'كىلو';
@@ -1368,11 +1380,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return s;
       };
 
-      const rawUnit = (!product.unit || isBad(product.unit) || product.unit.trim().length === 0) ? 'دانە' : product.unit;
+      const rawUnit = (!product.unit || isBad(product.unit) || product.unit.trim().length === 0) ? (product.translations?.ug?.unit || 'دانە') : product.unit;
       const displayUnit = cleanUnit(rawUnit);
-      const displayName = isBad(product.name) ? (product.translations?.ug?.name && !isBad(product.translations.ug.name) ? product.translations.ug.name : (product.translations?.tr?.name || product.id)) : product.name;
-      const displayBrand = isBad(product.brand) ? 'تەكلىماكان كىلاسسىك' : (product.brand || 'تەكلىماكان');
-      const displayCategory = isBad(product.category) ? 'ئۇيغۇر تىبابىتى' : product.category;
+      const displayName = product.translations?.ug?.name || (isBad(product.name) ? (product.translations?.tr?.name || product.id) : product.name);
+      
+      let rawBrand = isBad(product.brand) ? 'تەكلىماكان كىلاسسىك' : (product.brand || 'تەكلىماكان');
+      let displayBrand = rawBrand;
+      if (/teklimakan\s*do[gğ]al/i.test(displayBrand)) displayBrand = 'تەكلىماكان تەبىئىي';
+      else if (/teklimakan\s*[sş]ifa/i.test(displayBrand)) displayBrand = 'تەكلىماكان تېبابىتى';
+      else if (/teklimakan\s*klasik/i.test(displayBrand)) displayBrand = 'تەكلىماكان كىلاسسىك';
+      else if (/teklimakan\s*online/i.test(displayBrand)) displayBrand = 'تەكلىماكان سۇپىسى';
+      else if (/^teklimakan$/i.test(displayBrand)) displayBrand = 'تەكلىماكان';
+
+      let rawCat = isBad(product.category) ? 'ئۇيغۇر تېبابىتى' : (product.translations?.ug?.category || product.category || 'ئۇيغۇر تېبابىتى');
+      const catMap = {
+        'Kuruyemişler': 'قۇرۇق يەل-يېمىشلەر',
+        'Geleneksel Şifa Ürünleri': 'ئۇيغۇر تېبابىتى',
+        'Geleneksel Uygur Tıbbı': 'ئۇيغۇر تېبابىتى',
+        'Uygur Tıbbı': 'ئۇيغۇر تېبابىتى',
+        'Uygur Tıbbى': 'ئۇيغۇر تېبابىتى',
+        'Uygur Tıbbı Mirası': 'ئۇيغۇر تېبابىتى مىراسى',
+        'Doğal Yağlar': 'تەبىئىي ياغلار',
+        'Bitkisel Yağlar': 'تەبىئىي ۋە شىپالىق مايلار',
+        'Şifalı Bitkiler & Çaylar': 'ئۆسۈملۈك دورىلار',
+        'Doğal Bakım & Güzellik': 'گۈزەللىك ۋە ساغلاملىق',
+        'Kitap & Kültür': 'كىتاب ۋە مەدەنىيەت',
+        'Gülkand & Reçeller': 'گۈلقەنت ۋە مۇراببالار'
+      };
+      const displayCategory = catMap[rawCat] || rawCat;
 
       let stockPill = '';
       const unitHasDigits = /\d/.test(displayUnit);
@@ -1489,9 +1524,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="min-width: 130px; text-align: right;">
           <span class="status-pill" style="background:#eff6ff; color:#1d4ed8; border: 1px solid #bfdbfe; font-weight: 700;">${displayCategory}</span>
         </td>
-        <td style="min-width: 120px; text-align: center;">
-          ${langBadge}
-        </td>
+
         <td style="min-width: 130px; text-align: right;">
           <div style="white-space: nowrap; font-weight: 800; font-size: 0.95rem; color: #0f172a; display: inline-flex; align-items: baseline; gap: 4px;">
             <span class="number-latin" style="color: #0284c7; font-weight: 900; font-size: 1.05rem;">${window.appStore.formatPrice(product.price)}</span>
@@ -4640,9 +4673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const multilingualBox = document.getElementById('multilingualFieldsBox');
 
     function updateLanguageFieldsVisibility(scope) {
-      if (scope === 'all') {
-        multilingualBox.style.display = 'block';
-      } else {
+      if (multilingualBox) {
         multilingualBox.style.display = 'none';
       }
     }

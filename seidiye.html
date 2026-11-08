@@ -525,7 +525,7 @@
                   <option value="تەستىق كۈتۈۋاتىدۇ">⏳ كۈتۈۋاتقانلار</option>
                   <option value="رەت قىلىندى">❌ رەت قىلىنغانلار</option>
                 </select>
-                <select id="adminProductLangFilter" class="form-control" style="width: auto; min-width: 125px; padding: 0.4rem 0.75rem; font-size: 0.84rem; border-radius: 8px;">
+                <select id="adminProductLangFilter" class="form-control" style="display: none !important;" style="width: auto; min-width: 125px; padding: 0.4rem 0.75rem; font-size: 0.84rem; border-radius: 8px;">
                   <option value="all">بارلىق تىللار</option>
                   <option value="all">🌍 ھەممە تىلدا</option>
                   <option value="ug">🌙 ئۇيغۇرچە</option>
@@ -558,7 +558,7 @@
                   <tr style="background: #f8fafc;">
                     <th style="min-width: 280px; text-align: right;">مەھسۇلات ئۇچۇرى</th>
                     <th style="min-width: 130px; text-align: right;">تۈرى</th>
-                    <th style="min-width: 120px; text-align: center;">ئېلان تىلى</th>
+                    
                     <th style="min-width: 130px; text-align: right;">باھاسى</th>
                     <th style="min-width: 120px; text-align: center;">ئامبار زاپىسى</th>
                     <th style="min-width: 135px; text-align: center;">تەستىق ھالىتى</th>
@@ -2418,26 +2418,8 @@
         <form id="productForm">
           <input type="hidden" id="formProductId">
 
-          <!-- 🌟 تىل تاللاش دائىرىسى (Language Scope) -->
-          <div style="background: var(--admin-bg); padding: 1rem; border-radius: var(--radius-md); border: 2px solid #3b82f6; margin-bottom: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.5rem;">
-              <label class="form-label" style="color: #1d4ed8; font-weight: 800; font-size: 0.95rem; margin: 0;">
-                <i class="fas fa-language"></i> تاۋارنى ئېلان قىلىش تىلىنى بەلگىلەڭ (Dil Kapsamı / Language Scope)
-              </label>
-              <span id="productModalAdminUnrestrictedBadge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 0.78rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                👑 ئالىي باشقۇرغۇچى: چەكلىمىسىز ھوقۇق
-              </span>
-            </div>
-            <select id="formLanguageScope" class="form-control" style="font-weight: 700;">
-              <option value="all">🌍 بارلىق تىللاردا ئېلان قىلىش (ھەممە تىلدا كۆرسىتىلىدۇ - ئۇيغۇرچە، تۈركچە، ئىنگلىزچە)</option>
-              <option value="ug">🌙 پەقەت ئۇيغۇرچە تىلدا ئېلان قىلىش (Only Uyghur)</option>
-              <option value="tr">🇹🇷 پەقەت تۈركچە تىلدا ئېلان قىلىش (Sadece Türkçe)</option>
-              <option value="en">🇬🇧 پەقەت ئىنگلىزچە تىلدا ئېلان قىلىش (English Only)</option>
-            </select>
-            <div id="productModalAgentLangNotice" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.45rem; line-height: 1.4;">
-              ئەسكەرتىش: «بارلىق تىللاردا ئېلان قىلىش» تاللانسا، خېرىدارلار تىل ئالماشتۇرغاندا ئاپتوماتىك شۇ تىلدىكى تەرجىمىسى كۆرۈنىدۇ.
-            </div>
-          </div>
+                    <!-- 🌐 تاۋار كۆرۈنۈش ھالىتى (ساپ ئۇيغۇرچە تەكلىماكان سۇپىسى) -->
+          <input type="hidden" id="formLanguageScope" value="all">
 
           <!-- ئۇيغۇرچە ئەسلى تېكىست -->
           <div class="form-group">
@@ -2478,7 +2460,7 @@
           </div>
 
           <!-- قوشۇمچە تىللار بۆلىكى (Türkçe & English) -->
-          <div id="multilingualFieldsBox" style="background: #f8fafc; border: 1.5px dashed #93c5fd; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+          <div id="multilingualFieldsBox" style="display: none !important; background: #f8fafc; border: 1.5px dashed #93c5fd; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
               <h5 style="font-size: 0.95rem; font-weight: 800; margin: 0; color: #1e3a8a; display: flex; align-items: center; gap: 0.4rem;">
                 <i class="fas fa-magic" style="color: #2563eb;"></i> تۈركچە ۋە ئىنگلىزچە تەرجىمىسى (ئاپتوماتىك يېزىلىدۇ ۋە ئەركىن تەھرىرلىنىدۇ)
@@ -2573,25 +2555,25 @@
               </label>
               <div style="display: flex; gap: 0.35rem; align-items: center;">
                 <select id="formProductUnitSelect" class="form-control" style="flex: 1.1; min-width: 95px; padding: 0.45rem 0.35rem; font-weight: 700; background-color: #f0fdf4; border-color: #86efac;" title="بىرلىك تاللاش">
-                  <option value="دانە">دانە (Adet)</option>
-                  <option value="كىلو">كىلو (kg)</option>
-                  <option value="1 كىلو">1 كىلو (1kg)</option>
-                  <option value="100 گرام">100 گرام (100g)</option>
-                  <option value="250 گرام">250 گرام (250g)</option>
-                  <option value="500 گرام">500 گرام (500g)</option>
-                  <option value="گىرام">گىرام (g)</option>
-                  <option value="قۇتا">قۇتا (Box)</option>
-                  <option value="بوتۇلكا">بوتۇلكا (Şişe)</option>
-                  <option value="بولاق">بولاق (Paket)</option>
-                  <option value="مىللىلېتىر">مىللىلېتىر (ml)</option>
+                  <option value="دانە">دانە</option>
+                  <option value="كىلو">كىلو</option>
+                  <option value="1 كىلو">1 كىلو</option>
+                  <option value="100 گرام">100 گرام</option>
+                  <option value="250 گرام">250 گرام</option>
+                  <option value="500 گرام">500 گرام</option>
+                  <option value="گىرام">گىرام</option>
+                  <option value="قۇتا">قۇتا</option>
+                  <option value="شىشە">شىشە</option>
+                  <option value="بولاق">بولاق</option>
+                  <option value="مىللىلېتىر">مىللىلېتىر</option>
                   <option value="100ml">100ml</option>
                   <option value="250ml">250ml</option>
                   <option value="500ml">500ml</option>
-                  <option value="لېتىر">لېتىر (L)</option>
+                  <option value="لېتىر">لېتىر</option>
                   <option value="تال">تال</option>
                   <option value="باغلام">باغلام / دەستە</option>
                   <option value="جۈپ">جۈپ</option>
-                  <option value="مېتىر">مېتىر (m)</option>
+                  <option value="مېتىر">مېتىر</option>
                   <option value="custom">باشقا (خاس يېزىش)...</option>
                 </select>
                 <input type="text" id="formProductUnit" class="form-control" value="دانە" placeholder="مەسىلەن: 500g، كىلو" style="flex: 1; min-width: 85px; font-weight: 700; text-align: center; border-color: #3b82f6;" title="بىرلىكنى ئەركىن تەھرىرلىيەلەيسىز">
@@ -2937,7 +2919,7 @@
           <!-- 5. تاۋار ئېلان قىلىش تىل ھوقۇقى (Language Scope Permission) -->
           <div class="form-group" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 1.1rem; margin-bottom: 1.25rem;">
             <label class="form-label" style="font-weight: 800; font-size: 0.92rem; color: #166534; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
-              <span><i class="fas fa-globe" style="color: #16a34a;"></i> 5. تاۋار ئېلان قىلىش تىل ھوقۇقى (Language Scope Permission):</span>
+              <span><i class="fas fa-globe" style="color: #16a34a;"></i> 5. تاۋار ئېلان قىلىش ھوقۇقى:</span>
               <span id="authAgentLangBadge" style="font-size: 0.78rem; font-weight: 800; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 12px;">سۈكۈت: پەقەت ئۇيغۇرچە</span>
             </label>
             <select id="authAgentCanPublishMultilingual" class="form-control" style="background: #ffffff; font-weight: 700; color: #0f172a;">

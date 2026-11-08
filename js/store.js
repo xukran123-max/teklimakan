@@ -1854,9 +1854,14 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(INITIAL_BRANDS));
     }
     // 🛡️ سىستېما تاۋار ساندانىنى تازىلاش ۋە كونا ئۆچۈرۈلگەن قالدۇق سۈرەتلەرنى بارلىق تېلېفون / ئۈسكۈنىلەردە پۈتۈنلەي پاكىزلاش
-    const STORE_PRODUCTS_RELEASE = 'v20260930_clean18';
+    const STORE_PRODUCTS_RELEASE = 'v20261108_pure_uyghur_v3';
     const currentRelease = localStorage.getItem('teklimakan_products_release');
     if (currentRelease !== STORE_PRODUCTS_RELEASE) {
+      localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+      localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
+      localStorage.removeItem('teklimakan_categories');
+      localStorage.removeItem('teklimakan_custom_categories');
+      localStorage.removeItem('teklimakan_active_categories');
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
       localStorage.setItem('teklimakan_products_release', STORE_PRODUCTS_RELEASE);
     }

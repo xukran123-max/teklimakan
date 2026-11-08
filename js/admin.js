@@ -10612,7 +10612,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const PRESET_HERO_IMAGES = [
     { label: 'تەبىئىي تاۋارلار ۋە قۇرۇق مېۋىلەر (ئۈزۈم، ياڭاق)', value: 'images/hero_dried_fruits.jpg' },
     { label: 'ئەنئەنىۋى يىپەك ئەتلەس ۋە گۈزەللىك بۇيۇملىرى', value: 'images/hero_atlas_silk.jpg' },
-    { label: 'ئۇيغۇر تىبابىتى ۋە شىپالىق ئۆسۈملۈكلەر (ھەسەل، قاشتېشى)', value: 'images/hero_uyghur_medicine.jpg' },
+    { label: 'ئۇيغۇر تېبابىتى ۋە شىپالىق ئۆسۈملۈكلەر (ھەسەل، قاشتېشى)', value: 'images/hero_uyghur_medicine.jpg' },
     { label: 'تۈركىيە رىزە قارا چېيى ۋە قەدىمىي مىس چەينەك', value: 'images/hero_turkish_tea.jpg' },
     { label: 'يىپەك يولى مەدەنىيىتى ۋە كىلاسسىك كىتابلار', value: 'images/hero_books_culture.jpg' }
   ];

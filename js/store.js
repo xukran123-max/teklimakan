@@ -620,7 +620,7 @@ const INITIAL_PRODUCTS = [
     "brand": "تەكلىماكان",
     "languageScope": "all",
     "name": "ساپ تەبىئىي پىلە غوزىسى (30 دانە)",
-    "category": "ئۇيغۇر تىبابىتى",
+    "category": "ئۇيغۇر تېبابىتى",
     "price": 190,
     "oldPrice": 238,
     "stock": 40,
@@ -635,7 +635,7 @@ const INITIAL_PRODUCTS = [
     "translations": {
       "ug": {
         "name": "ساپ تەبىئىي پىلە غوزىسى (30 دانە)",
-        "category": "ئۇيغۇر تىبابىتى",
+        "category": "ئۇيغۇر تېبابىتى",
         "description": "تەبىئىي يىپەك پىلە غوزىسى، تېرىنى چوڭقۇر تازىلاش، ئاقارتىش ۋە كوللاگېننى ئاشۇرۇش ئۈچۈن قەدىمىي تەبىئىي چارە.",
         "unit": "30 دانە قۇتا",
         "badge": "تەبىئىي گۈزەللىك"
@@ -825,7 +825,7 @@ const INITIAL_PRODUCTS = [
     "brand": "تەكلىماكان شىپا",
     "languageScope": "all",
     "name": "زېھىن مەجۇنى (100g)",
-    "category": "ئۇيغۇر تىبابىتى",
+    "category": "ئۇيغۇر تېبابىتى",
     "price": 190,
     "oldPrice": 238,
     "stock": 50,
@@ -840,7 +840,7 @@ const INITIAL_PRODUCTS = [
     "translations": {
       "ug": {
         "name": "زېھىن مەجۇنى (100g)",
-        "category": "ئۇيغۇر تىبابىتى",
+        "category": "ئۇيغۇر تېبابىتى",
         "description": "ئەنئەنىۋى يىپەك يولى تېبابەت رېتسىپى بويىچە مېڭە ھۈجەيرىلىرىنى قۇۋۋەتلەش، زېھىننى ئېچىش، ئەستە تۇتۇش قابىلىيىتىنى كۈچەيتىش ۋە تەپەككۇرنى جانلاندۇرۇش ئۈچۈن تەييارلانغان ساپ تەبىئىي مەجۇن (100g).",
         "unit": "100g قاچا",
         "badge": "ئالاھىدە رېتسىپ"
@@ -866,7 +866,7 @@ const INITIAL_PRODUCTS = [
     "brand": "تەكلىماكان شىپا",
     "languageScope": "all",
     "name": "قۇۋۋەت مەجۇنى (100g)",
-    "category": "ئۇيغۇر تىبابىتى",
+    "category": "ئۇيغۇر تېبابىتى",
     "price": 500,
     "oldPrice": 625,
     "stock": 45,
@@ -881,7 +881,7 @@ const INITIAL_PRODUCTS = [
     "translations": {
       "ug": {
         "name": "قۇۋۋەت مەجۇنى (100g)",
-        "category": "ئۇيغۇر تىبابىتى",
+        "category": "ئۇيغۇر تېبابىتى",
         "description": "ئەنئەنىۋى كىلاسسىك رېتسىپ بويىچە ساپ تاغ ھەسىلى ۋە ئالىي قۇۋۋەت ئۇرۇقلىرى بىلەن تەييارلانغان، بەل-بۆرەك قۇۋۋىتى ۋە جىسمانىي ھاياتى كۈچنى ئاشۇرغۇچى تەبىئىي قۇۋۋەت مەجۇنى (100g).",
         "unit": "100g قاچا",
         "badge": "ئالاھىدە رېتسىپ"
@@ -1480,7 +1480,7 @@ const INITIAL_PRODUCTS = [
 
 const INITIAL_CATEGORIES = [
   { id: 'all', name: 'بارلىق تۈرلەر', order: 0, icon: 'fas fa-th-large', translations: { ug: 'بارلىق تۈرلەر', tr: 'Tüm Kategoriler', en: 'All Categories' } },
-  { id: 'ئۇيغۇر تىبابىتى', name: 'ئۇيغۇر تىبابىتى', order: 1, icon: 'fas fa-mortar-pestle', translations: { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' } },
+  { id: 'ئۇيغۇر تېبابىتى', name: 'ئۇيغۇر تېبابىتى', order: 1, icon: 'fas fa-mortar-pestle', translations: { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' } },
   { id: 'پىششىق دورىلار', name: 'پىششىق دورىلار', order: 2, icon: 'fas fa-pills', translations: { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' } },
   { id: 'ئۆسۈملۈك دورىلار', name: 'ئۆسۈملۈك دورىلار', order: 3, icon: 'fas fa-leaf', translations: { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' } },
   { id: 'تەبىئىي ياغلار', name: 'تەبىئىي ياغلار', order: 4, icon: 'fas fa-tint', translations: { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' } },
@@ -1617,10 +1617,10 @@ const DEFAULT_HERO_SLIDES = [
   {
     id: 'hero_3',
     order: 3,
-    tag: 'ئۇيغۇر تىبابىتى',
+    tag: 'ئۇيغۇر تېبابىتى',
     tagColor: '#d97706',
     title: 'خوتەن قاشتېشى ۋە شىپالىق ئۆسۈملۈكلەر خەزىنىسى',
-    subtitle: 'ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تىبابەت مەلھەملىرى تولۇق كاپالەتلىك.',
+    subtitle: 'ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تېبابەت مەلھەملىرى تولۇق كاپالەتلىك.',
     btnText: 'شىپالىق ماللارنى كۆرۈش',
     btnLink: '#catalogSection',
     image: 'images/hero_uyghur_medicine.jpg',
@@ -1918,7 +1918,7 @@ class StoreManager {
         healed = true;
       }
       if (isCorrupted(p.category)) {
-        p.category = initMatch ? initMatch.category : 'ئۇيغۇر تىبابىتى';
+        p.category = initMatch ? initMatch.category : 'ئۇيغۇر تېبابىتى';
         healed = true;
       }
       if (!p.unit || isCorrupted(p.unit) || p.unit.trim().length === 0) {
@@ -2357,7 +2357,7 @@ class StoreManager {
             const safeBrand = isCorrupted(rp.brand) ? (localItem?.brand && !isCorrupted(localItem.brand) ? localItem.brand : initMatch?.brand || 'تەكلىماكان كىلاسسىك') : (rp.brand || 'تەكلىماكان كىلاسسىك');
             const safeCat = (ugTrans && ugTrans.category)
               ? ugTrans.category
-              : (initMatch?.category || (window.appI18n ? window.appI18n.getCategoryName(rp.category, 'ug') : 'ئۇيغۇر تىبابىتى'));
+              : (initMatch?.category || (window.appI18n ? window.appI18n.getCategoryName(rp.category, 'ug') : 'ئۇيغۇر تېبابىتى'));
             const rawUnit = (rp.translations?.unit && !isCorrupted(rp.translations.unit)) ? rp.translations.unit : (localItem?.unit || initMatch?.unit || 'دانە');
             const safeUnit = normalizeUnit(rawUnit);
             const safeDesc = (ugTrans && ugTrans.description)
@@ -6404,7 +6404,7 @@ class StoreManager {
         id: p.id,
         name: cleanName,
         brand: p.brand || 'تەكلىماكان كىلاسسىك',
-        category: p.category || 'ئۇيغۇر تىبابىتى',
+        category: p.category || 'ئۇيغۇر تېبابىتى',
         price: Number(p.price) || 100,
         oldPrice: p.oldPrice ? Number(p.oldPrice) : Math.round((Number(p.price) || 100) * 1.25),
         unit: p.unit || 'دانە',
@@ -6455,14 +6455,14 @@ class StoreManager {
       },
       {
         name: 'تەبىئىي شىپالىق پىننە گۈلقەنتى (ئاشقازان ۋە ھەزىمگە مەنپەئەتلىك)',
-        brand: 'تەكلىماكان تىبابىتى',
+        brand: 'تەكلىماكان تېبابىتى',
         category: 'گۈلقەنتلەر',
         price: 260,
         oldPrice: 320,
         unit: '1 كىلو',
         stock: 35,
         image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
-        description: 'ئەنئەنىۋى تىبابەت رېتسىپى بويىچە يېڭى پىننە ۋە تەبىئىي گۈل شىرنىسىدىن ياسالغان، ھەزىم ۋە سۈرۈشكە مەنپەئەتلىك گۈلقەنت.',
+        description: 'ئەنئەنىۋى تېبابەت رېتسىپى بويىچە يېڭى پىننە ۋە تەبىئىي گۈل شىرنىسىدىن ياسالغان، ھەزىم ۋە سۈرۈشكە مەنپەئەتلىك گۈلقەنت.',
         keywords: 'گۈلقەنت پىننە gulqent nane gül reçeli gülqent'
       },
       {

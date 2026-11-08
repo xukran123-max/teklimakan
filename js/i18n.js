@@ -74,9 +74,9 @@ const I18N_TRANSLATIONS = {
     heroDesc2: 'ساپ تەبىئىي يىپەك ۋە ھۆسن تۈزەش گۈزەللىك يۈرۈشلۈكلىرى زاكاز قىلىشىڭىزنى كۈتمەكتە.',
     heroBtn2: 'مەھسۇلاتلار تىزىملىكى',
 
-    heroTag3: 'ئۇيغۇر تىبابىتى',
+    heroTag3: 'ئۇيغۇر تېبابىتى',
     heroTitle3: 'خوتەن قاشتېشى ۋە شىپالىق ئۆسۈملۈكلەر خەزىنىسى',
-    heroDesc3: 'ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تىبابەت مەلھەملىرى تولۇق كاپالەتلىك.',
+    heroDesc3: 'ساپ تاش قاشتېشى بىلەزۈكلىرى، تەبىئىي شىپالىق تاغ ھەسىلى ۋە ئەنئەنىۋى تېبابەت مەلھەملىرى تولۇق كاپالەتلىك.',
     heroBtn3: 'شىپالىق ماللارنى كۆرۈش',
 
     heroTag4: 'ئالىي تەم ۋە ئىچىملىكلەر',
@@ -243,9 +243,9 @@ const I18N_TRANSLATIONS = {
     instaGiftHint: 'دەلىللەش ئۇچۇرى: پوسۇلكىڭىز چىقىرىلغاندا ھەدىيە ئاپتوماتىك قوشۇلىدۇ.',
     instaGiftItemName: '🎁 ئىنىستىگېرام ئەگەشكۈچى سوۋغىتى',
     instaGiftMarquee: '🎁 ئىنىستىگېرام سەھىپىمىزگە ئەگىشىپ زاكاز بەرسىڭىز ھەقسىز سوۋغات بېرىلىدۇ!',
-    btnUyghurMedicine: 'ئۇيغۇر تىبابىتى',
-    fLinkMerchants: 'ئۇيغۇر تىبابىتى',
-    fLinkFriendlyLinks: 'ئۇيغۇر تىبابىتى',
+    btnUyghurMedicine: 'ئۇيغۇر تېبابىتى',
+    fLinkMerchants: 'ئۇيغۇر تېبابىتى',
+    fLinkFriendlyLinks: 'ئۇيغۇر تېبابىتى',
     friendlyLinksModalTitle: 'دوستانە ئۇلىنىشلار',
     friendlyLinksModalSubtitle: 'تەكلىماكان تور سودا سۇپىسىنىڭ دوستلىرى ۋە ھەمكارلاشقان تور بېكەتلىرى',
     friendlyLinksNotice: 'بۇ سەھىپىگە ئۆزىڭىزنىڭ ياكى ھەمكارلاشقۇچىلارنىڭ تور بېكەت ئۇلىنىشلىرىنى ئاسانلا كىرگۈزۈپ ئىشلىتەلەيسىز.',
@@ -1173,8 +1173,8 @@ const BRAND_LOCALIZATIONS = {
     tr: 'Anargül Organik',
     en: 'Anargul Organic'
   },
-  'ئەلمۇئەللىم تىبابىتى': {
-    ug: 'ئەلمۇئەللىم تىبابىتى',
+  'ئەلمۇئەللىم تېبابىتى': {
+    ug: 'ئەلمۇئەللىم تېبابىتى',
     tr: 'El-Muallim Şifa',
     en: 'Al-Muallim Wellness'
   },
@@ -1304,14 +1304,14 @@ const PROMO_BADGE_LOCALIZATIONS = {
 
 // تۈرلەر ۋە تاۋار ناملىرى ئۈچۈن قوشۇمچە ئۆلچەملىك لۇغەت
 const CATEGORY_LOCALIZATIONS = {
-  'ئۇيغۇر تىبابىتى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'Uygur Tıbbı': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'Uygur Tıbbı Mirası': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'ئۇيغۇر تىبابىتى مىراسى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'ئۇيغۇر تېبابىتى مىراسى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'ئۇيغۇر تېبابىتى': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tıbbı': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tıbbı Mirası': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى مىراسى': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى مىراسى': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئۇيغۇر تېبابىتى': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
   'تەبىئىي ۋە شىپالىق مايلار': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
   'Doğal & Şifalı Yağlar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
   'Dogal & Sifali Yaglar': { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
@@ -1375,12 +1375,12 @@ const CATEGORY_LOCALIZATIONS = {
   'ئۆي بېزەكچىلىكى': { ug: 'ئۆي بېزەكچىلىكى', tr: 'Ev Dekorasyonu', en: 'Home Decor' },
   'كىتاب-مەدەنىيەت': { ug: 'كىتاب ۋە مەدەنىيەت', tr: 'Kitap & Kültür', en: 'Books & Culture' },
   'ئەنئەنىۋى بۇيۇملار': { ug: 'ئەنئەنىۋى بۇيۇملار', tr: 'Geleneksel Ürünler', en: 'Traditional Products' },
-  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Geleneksel Sifa Urunleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
-  'Şifa Ürünleri': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Şifa Ürünleri', en: 'Healing Products' },
-  'Uygur Tıbbı': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
-  'Uygur Tibbi': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'ئەنئەنىۋى شىپالىق مەھسۇلاتلار': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Şifa Ürünleri': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Geleneksel Sifa Urunleri': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Geleneksel Şifa Ürünleri', en: 'Traditional Healing Products' },
+  'Şifa Ürünleri': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Şifa Ürünleri', en: 'Healing Products' },
+  'Uygur Tıbbı': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  'Uygur Tibbi': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
   'Hazır & İşlenmiş İlaçlar': { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
   'Şifalı Bitkiler & Otlar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
   'Güzellik & Sağlık': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Güzellik & Sağlık', en: 'Beauty & Health' },
@@ -1390,8 +1390,8 @@ const CATEGORY_LOCALIZATIONS = {
   'Kuruyemişler': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuruyemişler', en: 'Dried Fruits & Nuts' },
   'Kuruyemisler': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuruyemişler', en: 'Dried Fruits & Nuts' },
   'Kuruyemiş': { ug: 'قۇرۇق يەل-يېمىشلەر', tr: 'Kuruyemiş', en: 'Dried Fruits & Nuts' },
-  'Uygur Tıbbı Mirası': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı Mirası', en: 'Uyghur Medicine Heritage' },
-  'Uygur Tibbi Mirasi': { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı Mirası', en: 'Uyghur Medicine Heritage' },
+  'Uygur Tıbbı Mirası': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı Mirası', en: 'Uyghur Medicine Heritage' },
+  'Uygur Tibbi Mirasi': { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı Mirası', en: 'Uyghur Medicine Heritage' },
   'Şifalı Bitkiler & Çaylar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Çaylar', en: 'Herbal Medicines & Teas' },
   'Sifali Bitkiler & Caylar': { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Çaylar', en: 'Herbal Medicines & Teas' },
   'Doğal Bakım & Güzellik': { ug: 'گۈزەللىك ۋە ساغلاملىق', tr: 'Doğal Bakım & Güzellik', en: 'Natural Care & Beauty' },
@@ -1412,7 +1412,7 @@ const CATEGORY_LOCALIZATIONS = {
 // ئۇيغۇرچە جۈملە ۋە سۆزلەرنى تۈركچە ۋە ئىنگلىزچىگە ئاپتوماتىك ئۆرىگۈچى لۇغەت ئامبىرى
 const UYGHUR_WORD_GLOSSARY = [
   // يېڭى داۋالاش ۋە دۇكان تۈرلىرى
-  { ug: 'ئۇيغۇر تىبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
+  { ug: 'ئۇيغۇر تېبابىتى', tr: 'Uygur Tıbbı', en: 'Uyghur Medicine' },
   { ug: 'پىششىق دورىلار', tr: 'Hazır & İşlenmiş İlaçlar', en: 'Prepared Medicines' },
   { ug: 'ئۆسۈملۈك دورىلار', tr: 'Şifalı Bitkiler & Otlar', en: 'Herbal Medicines' },
   { ug: 'تەبىئىي ياغلار', tr: 'Doğal & Şifalı Yağlar', en: 'Natural Oils' },
@@ -1462,8 +1462,8 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'پىلە غوزىسى', tr: 'Doğal Saf İpek Kozası (Cilt Bakımı)', en: 'Natural Pure Silk Cocoons' },
   { ug: 'پىلە', tr: 'İpek', en: 'Silk' },
   { ug: 'غوزىسى', tr: 'Kozası', en: 'Cocoon' },
-  { ug: 'ئۇيغۇر تىبابەت قامۇسى', tr: 'Uygur Geleneksel Tıbbı Ansiklopedisi', en: 'Uyghur Traditional Medicine Encyclopedia' },
-  { ug: 'تىبابەت قامۇسى', tr: 'Tıp Ansiklopedisi', en: 'Medical Encyclopedia' },
+  { ug: 'ئۇيغۇر تېبابەت قامۇسى', tr: 'Uygur Geleneksel Tıbbı Ansiklopedisi', en: 'Uyghur Traditional Medicine Encyclopedia' },
+  { ug: 'تېبابەت قامۇسى', tr: 'Tıp Ansiklopedisi', en: 'Medical Encyclopedia' },
   { ug: 'تىبابەت', tr: 'Tıbbı', en: 'Medicine' },
   { ug: 'كىچىك چىلان', tr: 'Doğal Küçük Boy Hünnap', en: 'Natural Small Jujube Dates' },
   { ug: 'كىچىك', tr: 'Küçük', en: 'Small' },
@@ -1604,7 +1604,7 @@ const UYGHUR_WORD_GLOSSARY = [
   { ug: 'يېڭى كەلگەن', tr: 'Yeni Gelen', en: 'New Arrival' },
   // 🏢 ماركىلار
   { ug: 'ئانارگۈل ئورگانىك', tr: 'Anargül Organik', en: 'Anargul Organic' },
-  { ug: 'ئەلمۇئەللىم تىبابىتى', tr: 'El-Muallim Şifa', en: 'Al-Muallim Wellness' },
+  { ug: 'ئەلمۇئەللىم تېبابىتى', tr: 'El-Muallim Şifa', en: 'Al-Muallim Wellness' },
   { ug: 'تەكلىماكان نەشرىياتى', tr: 'Teklimakan Yayınları', en: 'Teklimakan Publishing' },
   { ug: 'شىنجاڭ تەبىئىتى', tr: 'Doğal Yöresel', en: 'Natural Heritage' },
   { ug: 'قەشقەر كۆركى', tr: 'Kaşgar Zarafet', en: 'Kashgar Elegance' },
@@ -2428,7 +2428,7 @@ class I18nManager {
 
     // 🌐 15. ئاستى قىسىم (Footer)
     setText('footerBrandDesc', this.t('footerBrandDesc'));
-    setText('footerMedicineSpan', this.t('btnUyghurMedicine') || (lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تىبابىتى')));
+    setText('footerMedicineSpan', this.t('btnUyghurMedicine') || (lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تېبابىتى')));
     setText('fCol2TitleText', this.t('footerCol2') || (lang === 'tr' ? 'Platform Hakkında' : (lang === 'en' ? 'About Platform' : 'سۇپا ھەققىدە')));
     setText('fLinkAboutSpan', this.t('fLinkAbout') || (lang === 'tr' ? 'Hakkımızda' : (lang === 'en' ? 'About Us' : 'بىز ھەققىدە')));
     setText('fLinkAboutSub', this.t('fLinkAboutSub') || (lang === 'tr' ? 'Platform hakkında ve kurumsal bilgiler' : (lang === 'en' ? 'Platform introduction & info' : 'سۇپا تونۇشتۇرۇشى ۋە ئۇچۇرلىرى')));

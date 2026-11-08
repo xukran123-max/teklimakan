@@ -951,11 +951,11 @@ function initTeklimakanApp() {
 
     // ئۈستۈنكى ئايلانما ئېلان (Marquee) پۈتۈنلەي renderMarqueeTicker ئارقىلىق يېڭىلىنىدۇ
 
-    // 🌿 ئۇيغۇر تىبابىتى كۇنۇپكىسى تېكىستى ۋە نىشان تور ئادرېسى
+    // 🌿 ئۇيغۇر تېبابىتى كۇنۇپكىسى تېكىستى ۋە نىشان تور ئادرېسى
     const medLink = document.getElementById('btnUyghurMedicineFooter');
     const medSpan = document.getElementById('footerMedicineSpan') || document.getElementById('footerFriendlyLinksSpan') || document.getElementById('footerMerchantSpan');
     const medUrl = (lang === 'tr' || lang === 'en') ? 'https://www.uyghurmedicine.com/tr' : 'https://www.uyghurmedicine.com';
-    const medTitle = lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تىبابىتى');
+    const medTitle = lang === 'tr' ? 'Uygur Tıbbı' : (lang === 'en' ? 'Uyghur Medicine' : 'ئۇيغۇر تېبابىتى');
     if (medLink) {
       medLink.href = medUrl;
       medLink.title = medTitle;
@@ -5633,7 +5633,7 @@ function initTeklimakanApp() {
       });
     }
 
-    // 🌿 ئۇيغۇر تىبابىتى ئۇلىنىشى — نۆۋەتتىكى تىلغا ئاساسەن تور بەتكە كىرىش
+    // 🌿 ئۇيغۇر تېبابىتى ئۇلىنىشى — نۆۋەتتىكى تىلغا ئاساسەن تور بەتكە كىرىش
     const btnMedFooter = document.getElementById('btnUyghurMedicineFooter');
     if (btnMedFooter) {
       btnMedFooter.addEventListener('click', (e) => {
@@ -10400,7 +10400,7 @@ ${text}
           copy: 'كۆچۈرۈش',
           copied: 'كۆچۈرۈلدى!',
           saved: 'ساقلاندى!',
-          b1: 'كاپالەتلىك ئەسلى شىپالىق ئۇيغۇر تىبابەت مەھسۇلاتلىرى',
+          b1: 'كاپالەتلىك ئەسلى شىپالىق ئۇيغۇر تېبابەت مەھسۇلاتلىرى',
           b2: 'تېز سۈرئەتتە ئىشىك ئالدىغىچە بىخەتەر يەتكۈزۈش',
           b3: 'رازى بولمىسىڭىز مالنى قايتۇرۇپ ئالماشتۇرۇش كاپالىتى',
           stay: 'مال سېتىۋېلىشنى داۋاملاشتۇرۇش',

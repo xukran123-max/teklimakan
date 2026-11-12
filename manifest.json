@@ -1,7 +1,7 @@
 {
   "name": "تەكلىماكان سودا سۇپىسى",
   "short_name": "تەكلىماكان",
-  "description": "تەكلىماكان كۆپ خىللاشقان خەلقئارالىق تور سودا سۇپىسى — ئەلا سۈپەتلىك تاۋارلار ۋە ئىشەنچلىك خېرىدارلار مۇلازىمىتى",
+  "description": "تەكلىماكان — ئەلا سۈپەتلىك ئۇيغۇر تېبابىتى شىپالىق دەرمانلىرى، تەبىئىي تاۋارلار ۋە يەرلىك مەھسۇلاتلار تور دۇكىنى",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
@@ -36,29 +36,28 @@
   ],
   "categories": [
     "shopping",
-    "business",
     "lifestyle"
   ],
   "shortcuts": [
     {
       "name": "ئالدى دۇكان",
       "short_name": "دۇكان",
-      "description": "بارلىق مەھسۇلاتلار ۋە ئېتىبار پائالىيەتلىرى",
-      "url": "/?source=pwa_shortcut",
+      "description": "بارلىق شىپالىق مەھسۇلاتلار ۋە ئېتىبار پائالىيەتلىرى",
+      "url": "/?source=pwa_store",
       "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
     },
     {
-      "name": "ۋاكالەتچى سۇپىسى",
-      "short_name": "ۋاكالەتچى",
-      "description": "ۋاكالەتچى سودا تاختىسى ۋە تاۋار باشقۇرۇش",
-      "url": "/#agentPortalModal",
+      "name": "زاكاز ئىز قوغلاش",
+      "short_name": "ئىز قوغلاش",
+      "description": "زاكاز ۋە كىرگو يەتكۈزۈش ھالىتىنى تەكشۈرۈش",
+      "url": "/?source=pwa_track",
       "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
     },
     {
-      "name": "باشقۇرۇش سۇپىسى",
-      "short_name": "سەئىدىيە",
-      "description": "تەكلىماكان سۇپا باشقۇرۇش سىستېمىسى",
-      "url": "/seidiye.html",
+      "name": "خېرىدارلار مۇلازىمىتى",
+      "short_name": "ئالاقىلىشىش",
+      "description": "تەكلىماكان سۇپا خېرىدارلار مۇلازىمىتى ۋە ياردەم",
+      "url": "/?source=pwa_contact",
       "icons": [{ "src": "images/favicon-128x128.png", "sizes": "128x128" }]
     }
   ]

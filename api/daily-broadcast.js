@@ -10,7 +10,7 @@
 
 const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
-const DEFAULT_GROUP_LINK = process.env.WHATSAPP_GROUP_LINK || '';
+const DEFAULT_GROUP_LINK = process.env.WHATSAPP_GROUP_LINK || 'https://chat.whatsapp.com/HSer7ggKO9iCvjUShuCmmW';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_TARGET_CHAT_ID || '';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -78,12 +78,16 @@ module.exports = async function handler(req, res) {
       console.warn('[DailyBroadcast] Supabase query warning:', dbErr);
     }
 
-    // 2. كېيىنكى قېتىملىق تىلنى ئېنىقلاش (بىر كۈن ئۇيغۇرچە، ئەتىسى تۈركچە)
-    let targetLang = 'ug';
-    if (historyLogs && historyLogs.length > 0 && historyLogs[0].language) {
-      targetLang = historyLogs[0].language === 'ug' ? 'tr' : 'ug';
-    } else {
-      targetLang = (new Date().getDate() % 2 === 1) ? 'ug' : 'tr';
+    // 2. كېيىنكى قېتىملىق تىلنى ئېنىقلاش (بىر كۈن ئۇيغۇرچە، ئەتىسى تۈركچە، تەلەپ قىلىنسا بىۋاسىتە شۇ تىل)
+    const requestedLang = (req.query && req.query.lang) || (req.body && req.body.lang);
+    let targetLang = requestedLang === 'tr' ? 'tr' : (requestedLang === 'ug' ? 'ug' : null);
+
+    if (!targetLang) {
+      if (historyLogs && historyLogs.length > 0 && historyLogs[0].language) {
+        targetLang = historyLogs[0].language === 'ug' ? 'tr' : 'ug';
+      } else {
+        targetLang = (new Date().getDate() % 2 === 1) ? 'ug' : 'tr';
+      }
     }
 
     // 3. 30 كۈنلۈك تەكرارلىقنى سۈزۈش (30-Day Anti-Duplicate Engine)
@@ -139,11 +143,14 @@ module.exports = async function handler(req, res) {
     if (targetLang === 'tr') {
       // 🇹🇷 TÜRKÇE MESAJ & TEKLİMAKAN.ONLİNE LİNKİ
       const trData = (prod.translations && prod.translations.tr) || {};
-      const name = trData.name || prod.name || 'Doğal Ürün';
-      const brand = prod.brand || 'Teklimakan Online';
-      const category = trData.category || prod.category || 'Doğal Şifa Ürünleri';
-      const unit = trData.unit || prod.unit || '1 Adet';
-      const desc = cleanDescription(trData.description || prod.description);
+      const name = trData.name || 'Doğal Ürün';
+      let brand = trData.brand || prod.brand || 'Teklimakan Doğal';
+      if (/[\u0600-\u06FF]/.test(brand)) {
+        brand = 'Teklimakan Doğal';
+      }
+      const category = trData.category || 'Doğal Şifa Ürünleri';
+      const unit = trData.unit || '1 Adet';
+      const desc = cleanDescription(trData.description);
       const slug = transliterateToSlug(name);
       prodUrl = `https://www.teklimakan.online/p/${slug}-${String(prod.id).toLowerCase()}`;
 
@@ -182,7 +189,7 @@ module.exports = async function handler(req, res) {
       // 🌿 ئۇيغۇرچە مەسەج & TEKLİMAKAN.COM LİNKİ
       const ugData = (prod.translations && prod.translations.ug) || {};
       const name = ugData.name || prod.name || 'مەھسۇلات';
-      const brand = prod.brand || 'تەكلىماكان كىلاسسىك';
+      const brand = ugData.brand || prod.brand || 'تەكلىماكان تەبىئىي تاللانمىسى';
       const category = ugData.category || prod.category || 'ئۇيغۇر تىبابىتى';
       const unit = ugData.unit || prod.unit || '1 دانە';
       const desc = cleanDescription(ugData.description || prod.description);

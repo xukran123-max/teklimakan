@@ -289,8 +289,11 @@
     if (lang === 'tr') {
       // 🇹🇷 TÜRKÇE MESAJ METNİ
       const trData = (product.translations && product.translations.tr) || {};
-      const name = trData.name || product.name || 'Özel Doğal Ürün';
-      const brand = product.brand || 'Teklimakan Online';
+      const name = trData.name || 'Doğal Ürün';
+      let brand = trData.brand || product.brand || 'Teklimakan Doğal';
+      if (/[\u0600-\u06FF]/.test(brand)) {
+        brand = 'Teklimakan Doğal';
+      }
       const category = trData.category || product.category || 'Doğal Şifa Ürünleri';
       const unit = trData.unit || product.unit || '1 Adet';
       const desc = cleanDescription(trData.description || product.description);
@@ -328,7 +331,7 @@
       // 🌿 ئۇيغۇرچە ئۇچۇر تېكىستى
       const ugData = (product.translations && product.translations.ug) || {};
       const name = ugData.name || product.name || 'يېڭى مەھسۇلات';
-      const brand = product.brand || 'تەكلىماكان كىلاسسىك';
+      const brand = ugData.brand || product.brand || 'تەكلىماكان تەبىئىي تاللانمىسى';
       const category = ugData.category || product.category || 'ئۇيغۇر تىبابىتى';
       const unit = ugData.unit || product.unit || '1 دانە';
       const desc = cleanDescription(ugData.description || product.description);

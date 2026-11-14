@@ -7459,3 +7459,283 @@ html[dir="rtl"] .track-timeline-bar-fill {
   }
 }
 
+
+
+/* ==================== 📱 كۆچمە ئەپ چۈشۈرۈش مەركىزى (Mobile App Download Showcase) ==================== */
+.app-download-showcase {
+  background: linear-gradient(135deg, #0b1329 0%, #111e38 50%, #0a1124 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-radius: 20px;
+  padding: 1.85rem 2.2rem;
+  margin: 1.75rem 0 2rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.app-download-showcase::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.app-download-showcase::after {
+  content: "";
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.app-dl-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-dl-info {
+  flex: 1 1 360px;
+  text-align: right;
+}
+
+.app-dl-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  color: #fbbf24;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.app-dl-title {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 0.45rem 0;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.app-dl-desc {
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  line-height: 1.65;
+  margin: 0 0 1rem 0;
+}
+
+.app-dl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.app-dl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  color: #e2e8f0;
+}
+
+.app-dl-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.app-dl-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  min-width: 210px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+}
+
+.app-dl-btn-android {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+}
+
+.app-dl-btn-android:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
+
+.app-dl-btn-play {
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.app-dl-btn-play:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.app-dl-btn-ios {
+  background: rgba(15, 23, 42, 0.9);
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.app-dl-btn-ios:hover {
+  transform: translateY(-2px);
+  border-color: #a855f7;
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.app-dl-btn-icon {
+  font-size: 1.9rem;
+  flex-shrink: 0;
+}
+
+.app-dl-btn-texts {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  line-height: 1.25;
+}
+
+.app-dl-btn-sub {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.app-dl-btn-main {
+  font-size: 0.98rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.app-dl-btn-tag {
+  font-size: 0.65rem;
+  opacity: 0.8;
+  margin-top: 2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.app-dl-qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px dashed rgba(245, 158, 11, 0.45);
+  border-radius: 16px;
+  padding: 0.9rem 1.1rem;
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 145px;
+}
+
+.app-dl-qr-img {
+  width: 105px;
+  height: 105px;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  display: block;
+}
+
+.app-dl-qr-caption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.app-dl-qr-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+@media (max-width: 1024px) {
+  .app-dl-inner {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .app-dl-info {
+    flex: 1 1 100%;
+  }
+  .app-dl-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+  }
+  .app-dl-btn {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-download-showcase {
+    padding: 1.35rem 1.1rem;
+    margin: 1.25rem 0 1.5rem;
+    border-radius: 16px;
+  }
+  .app-dl-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+  .app-dl-title {
+    font-size: 1.2rem;
+  }
+  .app-dl-desc {
+    font-size: 0.85rem;
+  }
+  .app-dl-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .app-dl-btn {
+    width: 100%;
+    min-width: 0;
+  }
+  .app-dl-qr-box {
+    display: none !important;
+  }
+}

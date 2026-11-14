@@ -11931,3 +11931,46 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
   }
   window.addEventListener('DOMContentLoaded', initUrlReferralCoupon);
   // teklimakan_auto_url_coupon
+
+
+  // 📱 كۆچمە ئەپ قاچىلاش يېتەكچىسى ۋە ئۇچۇر كۆزنەكلىرى (iOS & Google Play)
+  window.showIosInstallModal = function() {
+    const modal = document.getElementById('iosInstallGuideModal');
+    if (modal) {
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    }
+  };
+  window.closeIosInstallModal = function() {
+    const modal = document.getElementById('iosInstallGuideModal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
+  };
+  window.showGooglePlayInfoModal = function() {
+    const modal = document.getElementById('googlePlayInfoModal');
+    if (modal) {
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    }
+  };
+  window.closeGooglePlayInfoModal = function() {
+    const modal = document.getElementById('googlePlayInfoModal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
+  };
+
+  // كۆزنەكنىڭ سىرتىنى چەككەندە ئاپتوماتىك تاقاش
+  document.addEventListener('click', function(e) {
+    const iosModal = document.getElementById('iosInstallGuideModal');
+    if (iosModal && e.target === iosModal) {
+      window.closeIosInstallModal();
+    }
+    const gpModal = document.getElementById('googlePlayInfoModal');
+    if (gpModal && e.target === gpModal) {
+      window.closeGooglePlayInfoModal();
+    }
+  });

@@ -173,7 +173,7 @@
   
   <!-- ئۇيغۇرچە ئۆلچەملىك خەت نۇسخىسى ۋە كۆرۈنۈش ئۇسلۇبى -->
   <link rel="stylesheet" href="css/fonts.css?v=20260924_v47">
-  <link rel="stylesheet" href="css/style.css?v=20261008_v188">
+  <link rel="stylesheet" href="css/style.css?v=20261114_v200">
 
   <!-- 🎯 Meta (Facebook & Instagram) Pixel Code -->
   <script>
@@ -2555,6 +2555,71 @@
         </div>
       </div>
 
+      <!-- 📱 كۆچمە ئەپ چۈشۈرۈش مەركىزى (Mobile App Download Showcase Banner) -->
+      <section class="app-download-showcase" id="footerAppDownloadShowcase">
+        <div class="app-dl-inner">
+          <!-- ئۇچۇر ۋە چۈشەندۈرۈش قىسمى -->
+          <div class="app-dl-info">
+            <div class="app-dl-badge-wrap">
+              <i class="fas fa-sparkles"></i>
+              <span>رەسمىي كۆچمە ئەپ &bull; v1.0.0</span>
+            </div>
+            <h3 class="app-dl-title">
+              <i class="fas fa-mobile-screen-button" style="color: #10b981;"></i>
+              <span>تەكلىماكان كۆچمە ئەپىنى چۈشۈرۈۋېلىڭ</span>
+            </h3>
+            <p class="app-dl-desc">
+              يانفۇنىڭىزدا تېخىمۇ تېز، قولايلىق ۋە بىخەتەر سودا قىلىڭ. كۈندىلىك مەخسۇس ئېتىبار كوپونلىرى، كارگو ئىز قوغلاش ۋە ئۇيغۇر تېبابىتى دەرمان مەسلىھەتلىرى ھەمىشە يېنىڭىزدا بولسۇن.
+            </p>
+            <div class="app-dl-chips">
+              <span class="app-dl-chip"><i class="fas fa-bolt" style="color: #fbbf24;"></i> دەرىجىدىن تاشقىرى تېز (3.5 MB)</span>
+              <span class="app-dl-chip"><i class="fas fa-shield-halved" style="color: #10b981;"></i> 100% بىخەتەر زاكاز</span>
+              <span class="app-dl-chip"><i class="fas fa-bell" style="color: #38bdf8;"></i> پوسۇلكا ۋە ئېتىبار ئۇقتۇرۇشى</span>
+            </div>
+          </div>
+
+          <!-- چۈشۈرۈش كۇنۇپكىلىرى -->
+          <div class="app-dl-actions">
+            <!-- 1. Android APK چۈشۈرۈش (بىۋاسىتە) -->
+            <a href="/downloads/taklimakan.apk" download="taklimakan.apk" class="app-dl-btn app-dl-btn-android" id="btnDownloadAndroidApk" title="تەكلىماكان Android ئەپىنى بىۋاسىتە چۈشۈرۈش (APK)">
+              <i class="fab fa-android app-dl-btn-icon"></i>
+              <div class="app-dl-btn-texts">
+                <span class="app-dl-btn-sub">بىۋاسىتە قاچىلاش</span>
+                <strong class="app-dl-btn-main">Android APK چۈشۈرۈش</strong>
+                <span class="app-dl-btn-tag">3.5 MB &bull; دەرھال قاچىلاش</span>
+              </div>
+            </a>
+
+            <!-- 2. Google Play دۇكىنى -->
+            <button type="button" class="app-dl-btn app-dl-btn-play" onclick="window.showGooglePlayInfoModal && window.showGooglePlayInfoModal()" title="Google Play دۇكىنى تەپسىلاتى">
+              <i class="fab fa-google-play app-dl-btn-icon" style="color: #38bdf8;"></i>
+              <div class="app-dl-btn-texts">
+                <span class="app-dl-btn-sub">رەسمىي دۇكان</span>
+                <strong class="app-dl-btn-main">Google Play</strong>
+                <span class="app-dl-btn-tag" style="color: #38bdf8;">تەكشۈرۈشتە (AAB تەييار)</span>
+              </div>
+            </button>
+
+            <!-- 3. Apple iOS (iPhone) يېتەكچىسى -->
+            <button type="button" class="app-dl-btn app-dl-btn-ios" onclick="window.showIosInstallModal && window.showIosInstallModal()" title="Apple iPhone / iPad ئۈچۈن قاچىلاش">
+              <i class="fab fa-apple app-dl-btn-icon" style="color: #f8fafc;"></i>
+              <div class="app-dl-btn-texts">
+                <span class="app-dl-btn-sub">iPhone / iPad</span>
+                <strong class="app-dl-btn-main">Apple iOS قاچىلاش</strong>
+                <span class="app-dl-btn-tag" style="color: #a855f7;">Safari ئارقىلىق 1 سېكۇنتتا</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- 4. تېلېفوندا سىكاننېرلاش QR كودى -->
+          <div class="app-dl-qr-box" title="يانفۇنىڭىزنىڭ كامېراسىنى توغرىلاپ ئەپنى دەرھال چۈشۈرۈڭ">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=6&data=https://teklimakan.com/downloads/taklimakan.apk" alt="تەكلىماكان كۆچمە ئەپ چۈشۈرۈش QR كودى" class="app-dl-qr-img" loading="lazy">
+            <span class="app-dl-qr-caption"><i class="fas fa-qrcode"></i> كامېرانى توغرىلاڭ</span>
+            <span class="app-dl-qr-sub">يانفۇنغا دەرھال چۈشىدۇ</span>
+          </div>
+        </div>
+      </section>
+
       <!-- 🤝 تەكلىماكان خەير-ساخاۋەت فوندى كەسپىي ئاستى ئۇچۇر تاختىسى (پەقەت ئۇيغۇرچىدا كۆرۈنىدۇ) -->
       <div id="footerCharityNoticeBar" class="footer-charity-notice-bar" style="display: none;">
         <div class="footer-charity-inner">
@@ -2654,7 +2719,7 @@
   <script src="js/store.js?v=20261008_v153"></script>
   <script src="js/telegram-notifier.js?v=20261020_v1"></script>
   <script src="js/turkey-locations.js?v=20261026_v1"></script>
-  <script src="js/app.js?v=20261008_v153"></script>
+  <script src="js/app.js?v=20261114_v200"></script>
   <script src="js/push-manager.js?v=20261004_v180"></script>
 
   <!-- 📲 PWA تېلېفونغا ئەپ قىلىپ قاچىلاش كارتىسى (PWA Install Banner) -->
@@ -2687,6 +2752,83 @@
       to { transform: translateY(0); opacity: 1; }
     }
   </style>
+
+
+  <!-- 🍏 Apple iOS (iPhone/iPad) قاچىلاش يېتەكچىسى كۆزنىكى -->
+  <div class="modal-backdrop" id="iosInstallGuideModal" style="z-index: 100060;">
+    <div class="modal-content" style="max-width: 520px; border-radius: 20px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 1.15rem 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+        <h4 class="modal-title" style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.15rem; font-weight: 800; color: #ffffff; margin: 0;">
+          <i class="fab fa-apple" style="color: #ffffff; font-size: 1.4rem;"></i>
+          <span>Apple iOS (iPhone) غا قاچىلاش يېتەكچىسى</span>
+        </h4>
+        <button type="button" class="btn-close-modal" onclick="window.closeIosInstallModal && window.closeIosInstallModal()" style="color: #ffffff; font-size: 1.35rem; background: transparent; border: none; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; text-align: right; color: #1e293b;">
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.88rem; color: #065f46; line-height: 1.6;">
+          <i class="fas fa-check-circle" style="color: #10b981;"></i> تەكلىماكان سۇپىسى Apple iOS ئۆلچەملىك كۆچمە تور سىستېمىسىنى تولۇق قوللايدۇ. App Store ھېساباتى تەلەپ قىلماستىن، 3 قەدەمدە ئورنىتىۋالالايسىز:
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">1</div>
+            <div>
+              <strong style="color: #0f172a; font-size: 0.95rem;">Safari توركۆرگۈچ بىلەن ئېچىڭ:</strong>
+              <p style="margin: 3px 0 0; font-size: 0.85rem; color: #64748b;">iPhone يانفۇنىڭىزدا Safari نى ئېچىپ <code>teklimakan.com</code> غا كىرىڭ.</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">2</div>
+            <div>
+              <strong style="color: #0f172a; font-size: 0.95rem;">«بەھرىلەش» (Share) كۇنۇپكىسىنى بېسىڭ:</strong>
+              <p style="margin: 3px 0 0; font-size: 0.85rem; color: #64748b;">ئېكراننىڭ تۆۋەن تەرىپىدىكى ھەمبەھىرلەش سىنبەلگىسىنى ( <i class="fas fa-arrow-up-from-bracket" style="color: #0284c7;"></i> ) بېسىڭ.</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">3</div>
+            <div>
+              <strong style="color: #0f172a; font-size: 0.95rem;">«باش ئېكرانغا قوشۇش»نى تاللاڭ:</strong>
+              <p style="margin: 3px 0 0; font-size: 0.85rem; color: #64748b;">تىزىملىكتىن <strong>«Add to Home Screen» (باش ئېكرانغا قوشۇش ⊞)</strong> نى تاللاپ «قوشۇش»نى باسسىڭىز، تەكلىماكان ئەپى يانفۇن ئېكرانىڭىزغا تولۇق ئەپ ھالىتىدە قاچىلىنىدۇ.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 0.9rem 1.4rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-primary" onclick="window.closeIosInstallModal && window.closeIosInstallModal()" style="padding: 0.55rem 1.4rem; border-radius: 10px; font-weight: 700; background: #0f172a; color: #fff; border: none; cursor: pointer;">چۈشەندىم</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 Google Play ئۇچۇر كۆزنىكى -->
+  <div class="modal-backdrop" id="googlePlayInfoModal" style="z-index: 100060;">
+    <div class="modal-content" style="max-width: 500px; border-radius: 20px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 1.15rem 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+        <h4 class="modal-title" style="display: flex; align-items: center; gap: 0.6rem; font-size: 1.15rem; font-weight: 800; color: #ffffff; margin: 0;">
+          <i class="fab fa-google-play" style="color: #38bdf8; font-size: 1.3rem;"></i>
+          <span>Google Play دۇكىنى ئۇچۇرى</span>
+        </h4>
+        <button type="button" class="btn-close-modal" onclick="window.closeGooglePlayInfoModal && window.closeGooglePlayInfoModal()" style="color: #ffffff; font-size: 1.35rem; background: transparent; border: none; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; text-align: right; color: #1e293b;">
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); color: #0284c7; display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 0.6rem;">
+            <i class="fab fa-google-play"></i>
+          </div>
+          <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Google Play ئورگان نۇسخىسى تەكشۈرۈش باسقۇچىدا</h4>
+          <p style="font-size: 0.86rem; color: #64748b; margin-top: 5px;">ئىمزالانغان رەسمىي تەكلىماكان AAB ھۆججىتى تەكشۈرۈشكە يوللاندى.</p>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.9rem 1.1rem; font-size: 0.88rem; color: #334155; line-height: 1.6; margin-bottom: 1.25rem;">
+          <i class="fas fa-circle-info" style="color: #0284c7;"></i> ھازىرچە ئەڭ يېڭى، بىخەتەر ۋە سۈرئەتلىك <strong>Android APK (3.5 MB)</strong> نۇسخىسىنى تۆۋەندىكى كۇنۇپكا ئارقىلىق دەرھال چۈشۈرۈپ ئىشلەتسىڭىز بولىدۇ:
+        </div>
+        <a href="/downloads/taklimakan.apk" download="taklimakan.apk" class="btn btn-success" style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; width: 100%; padding: 0.85rem; border-radius: 12px; font-weight: 800; font-size: 1rem; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); text-decoration: none; color: #fff;">
+          <i class="fab fa-android" style="font-size: 1.3rem;"></i>
+          <span>Android APK نى دەرھال چۈشۈرۈش (3.5 MB)</span>
+        </a>
+      </div>
+      <div class="modal-footer" style="padding: 0.9rem 1.4rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="window.closeGooglePlayInfoModal && window.closeGooglePlayInfoModal()" style="padding: 0.55rem 1.4rem; border-radius: 10px; font-weight: 700; background: #e2e8f0; color: #334155; border: none; cursor: pointer;">تاقاش</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

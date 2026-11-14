@@ -45,6 +45,24 @@ module.exports = async function handler(req, res) {
     const customer = order.customer || {};
     const items = order.items || [];
 
+    // Security Gate: Reject bot / fake test orders
+    const custName = String(customer.name || '').trim().toLowerCase();
+    const custPhone = String(customer.phone || '').trim().replace(/[\s\-\+\(\)]/g, '');
+    const custAddress = String(customer.address || '').trim();
+    const custCity = String(customer.city || '').trim();
+
+    // 1. Block known crawler/bot usernames
+    if (custName.includes('liwei') || custName.includes('test_bot') || custName.includes('dummy')) {
+      console.warn('[Security Gate] Blocked automated bot test order from name: ' + customer.name);
+      return res.status(200).json({ success: true, filtered: true, reason: 'Test/bot order suppressed' });
+    }
+
+    // 2. Reject empty addresses or dummy fallback phone
+    if (custPhone === '905551609999' || custPhone.length < 8 || (!custAddress && !custCity)) {
+      console.warn('[Security Gate] Suppressed fake/incomplete order: phone=' + custPhone);
+      return res.status(200).json({ success: true, filtered: true, reason: 'Incomplete dummy order' });
+    }
+
     // Format purchased items
     const itemsText = items.map((it, idx) => {
       const priceStr = it.price ? ` (${it.price} TL)` : '';
@@ -78,18 +96,7 @@ module.exports = async function handler(req, res) {
       const tgData = await tgRes.json();
       botMsgSuccess = tgData.ok;
 
-      // Pin message to trigger persistent notification sound on phone
-      if (tgData.ok && tgData.result && tgData.result.message_id) {
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TARGET_CHAT_ID,
-            message_id: tgData.result.message_id,
-            disable_notification: false
-          })
-        }).catch(() => {});
-      }
+      // Persistent pin disabled to prevent chat clutter
     } catch (err) {
       console.warn('Bot alert failed:', err.message);
     }

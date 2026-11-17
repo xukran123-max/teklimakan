@@ -11,8 +11,8 @@
 const SUPABASE_URL = 'https://hvvxnnnpukgpmwexcniq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PGV3YrYULBIiX1Xgo0tgag_FQWem2Hp';
 const DEFAULT_GROUP_LINK = process.env.WHATSAPP_GROUP_LINK || 'https://chat.whatsapp.com/HSer7ggKO9iCvjUShuCmmW';
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_TARGET_CHAT_ID || '';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8880936621:AAG7d5C4CPVyA8XiP0cPYUFYPfJmkF6DWZM';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_TARGET_CHAT_ID || '7077223578';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function transliterateToSlug(text) {
@@ -78,17 +78,9 @@ module.exports = async function handler(req, res) {
       console.warn('[DailyBroadcast] Supabase query warning:', dbErr);
     }
 
-    // 2. كېيىنكى قېتىملىق تىلنى ئېنىقلاش (بىر كۈن ئۇيغۇرچە، ئەتىسى تۈركچە، تەلەپ قىلىنسا بىۋاسىتە شۇ تىل)
+    // 2. كېيىنكى قېتىملىق تىلنى ئېنىقلاش (teklimakan.com ئۇيغۇرچە بېكىتى ئۈچۈن 100% ئۇيغۇرچە بولۇش كاپالىتى)
     const requestedLang = (req.query && req.query.lang) || (req.body && req.body.lang);
-    let targetLang = requestedLang === 'tr' ? 'tr' : (requestedLang === 'ug' ? 'ug' : null);
-
-    if (!targetLang) {
-      if (historyLogs && historyLogs.length > 0 && historyLogs[0].language) {
-        targetLang = historyLogs[0].language === 'ug' ? 'tr' : 'ug';
-      } else {
-        targetLang = (new Date().getDate() % 2 === 1) ? 'ug' : 'tr';
-      }
-    }
+    let targetLang = requestedLang === 'tr' ? 'tr' : 'ug';
 
     // 3. 30 كۈنلۈك تەكرارلىقنى سۈزۈش (30-Day Anti-Duplicate Engine)
     const now = Date.now();

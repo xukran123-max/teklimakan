@@ -8478,7 +8478,7 @@ class StoreManager {
           `📦 تاۋارلار:\n${itemsSummary}\n\n` +
           `ئامبىرىمىز ماللىرىڭىزنى ئەستايىدىل قاچىلاپ، كارگوغا تاپشۇرۇشقا تەييارلىماقتا.\n\n` +
           `تەكلىماكان سودا سۇپىسى\n` +
-          `🌐 www.teklimakan.com`;
+          `🌐 teklimakan.com`;
 
         this.sendWhatsAppCustomerMessage(customerData.phone, waMsg);
       } catch (waErr) {
@@ -8945,7 +8945,7 @@ class StoreManager {
           `📦 تاۋارلار:\n${itemsSummary}\n\n` +
           `ئامبىرىمىز مېلىڭىزنى رەتلەپ قاچىلاۋاتىدۇ. پوسۇلكا كارگوغا چىقىرىلغاندا سىزگە ئىز قوغلاش نومۇرى ئەۋەتىلىدۇ.\n\n` +
           `تەكلىماكاننى تاللىغىنىڭىزغا رەھمەت!\n` +
-          `🌐 www.teklimakan.com`;
+          `🌐 teklimakan.com`;
 
         this.sendWhatsAppCustomerMessage(newOrder.customer.phone, waMsg);
       } catch (waErr) {

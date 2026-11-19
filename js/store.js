@@ -259,29 +259,29 @@ const INITIAL_PRODUCTS = [
     "rating": 5,
     "ratingCount": 19,
     "featured": true,
-    "badge": "1-نۇسخا • 20 تەركىب",
+    "badge": "ئەلا سۈپەتلىك • مەخسۇس قۇۋۋەت كۈرى",
     "image": "images/products/PRD-475.webp",
-    "description": "قىشلىق بەدەن قۇۋۋىتىنى ئاشۇرۇش، ئاقسىل ۋە ۋىتامىن تولۇقلاش، ئىممۇنىتېتنى كۈچەيتىش ئۈچۈن 20 خىل تاللانغان تەبىئىي شىپالىق خام دورا ۋە مېغىزلار (بادام، ياڭاق، قىزىل ئۈزۈم، جىگدە، چىلغوزا، ساپ زەپە، تاغ ھەسىلى...) دىن ئەنئەنىۋى ئۇسۇلدا قاينىتىپ تەييارلانغان ئەلا سۈپەتلىك كۈچلۈك قۇۋۋەت سوقمىقى. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
+    "description": "ئۇيغۇر تېبابىتىنىڭ 2500 يىللىق ئەنئەنىۋى مىراسى ۋە مەخسۇس سىرلىق رېتسىپى بويىچە تەييارلانغان كۈچلۈك قۇۋۋەت سوقمىقى. قىش پەسلىدە بەدەننىڭ تەبىئىي قۇۋۋىتى ۋە ئىممۇنىتېت كۈچىنى كۈچەيتىشكە ياردەم بېرىدۇ. %100 ساپ ۋە تەبىئىي. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
     "unit": "500g قاچا",
     "translations": {
       "ug": {
         "name": "ئەنئەنىۋى قۇۋۋەت سوقمىقى (500g)",
         "category": "ئۇيغۇر تېبابىتى",
-        "description": "قىشلىق بەدەن قۇۋۋىتىنى ئاشۇرۇش، ئاقسىل ۋە ۋىتامىن تولۇقلاش، ئىممۇنىتېتنى كۈچەيتىش ئۈچۈن 20 خىل تاللانغان تەبىئىي شىپالىق خام دورا ۋە مېغىزلار (بادام، ياڭاق، قىزىل ئۈزۈم، جىگدە، چىلغوزا، ساپ زەپە، تاغ ھەسىلى...) دىن ئەنئەنىۋى ئۇسۇلدا قاينىتىپ تەييارلانغان ئەلا سۈپەتلىك كۈچلۈك قۇۋۋەت سوقمىقى. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
+        "description": "ئۇيغۇر تېبابىتىنىڭ 2500 يىللىق ئەنئەنىۋى مىراسى ۋە مەخسۇس سىرلىق رېتسىپى بويىچە تەييارلانغان كۈچلۈك قۇۋۋەت سوقمىقى. قىش پەسلىدە بەدەننىڭ تەبىئىي قۇۋۋىتى ۋە ئىممۇنىتېت كۈچىنى كۈچەيتىشكە ياردەم بېرىدۇ. %100 ساپ ۋە تەبىئىي. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
         "unit": "500g قاچا",
-        "badge": "1-نۇسخا • 20 تەركىب"
+        "badge": "ئەلا سۈپەتلىك • مەخسۇس قۇۋۋەت كۈرى"
       },
       "tr": {
         "name": "Geleneksel Kuvvet Macunu (500g)",
         "category": "Uygur Tıbbı",
-        "description": "Kış aylarında vücut direncini artırmaya, enerji ve vitamin desteği sağlamaya yardımcı 20 çeşit doğal şifalı içerik (badem, ceviz, kırmızı üzüm, iğde tozu, çam fıstığı, safran, yayla balı...) ile geleneksel usulde hazırlanan premium kuvvet macunu.",
+        "description": "2500 yıllık kadim Doğu ve Uygur hekimliği bilgeliğinden ilham alan, geleneksel usullere sadık kalınarak hazırlanan özel formüllü kuvvet macunu. Vücut direncini artırmaya, zindelik ve enerji kazandırmaya yardımcı olur. %100 doğal ve katkısızdır.",
         "unit": "500g Kavanoz",
-        "badge": "20 Doğal İçerik"
+        "badge": "Özel Doğal Formül"
       },
       "en": {
         "name": "Traditional Vitality Herbal Macun (500g)",
         "category": "Uyghur Medicine",
-        "description": "Premium traditional herbal vitality energy paste crafted from 20 natural ingredients (almonds, walnuts, saffron, dates, figs, pine nuts, honey) to boost winter stamina and immunity.",
+        "description": "Crafted following 2,500 years of traditional botanical heritage with a proprietary natural formula to boost winter stamina, vigor, and vitality. 100% pure and additive-free.",
         "unit": "500g Jar",
         "badge": "20 Natural Herbs"
       }

@@ -1895,7 +1895,7 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(INITIAL_BRANDS));
     }
     // 🛡️ سىستېما تاۋار ساندانىنى تازىلاش ۋە كونا ئۆچۈرۈلگەن قالدۇق سۈرەتلەرنى بارلىق تېلېفون / ئۈسكۈنىلەردە پۈتۈنلەي پاكىزلاش
-    const STORE_PRODUCTS_RELEASE = 'v20261119_kuvvet_macunu_v1';
+    const STORE_PRODUCTS_RELEASE = 'v20261119_kuvvet_macunu_white_v2';
     const currentRelease = localStorage.getItem('teklimakan_products_release');
     if (currentRelease !== STORE_PRODUCTS_RELEASE) {
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);

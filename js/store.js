@@ -247,6 +247,47 @@ const INITIAL_BRANDS = [
 // دەسلەپكى تاۋارلار تىزىملىكى (ئادەم، قول، تىرناق، بەدەن رەسىمى يوق ساپ مەھسۇلات سۈرەتلىرى)
 const INITIAL_PRODUCTS = [
   {
+    "id": "PRD-475",
+    "brand": "تەكلىماكان شىپا",
+    "languageScope": "all",
+    "name": "ئەنئەنىۋى قۇۋۋەت سوقمىقى (500g)",
+    "category": "ئۇيغۇر تېبابىتى",
+    "price": 800,
+    "oldPrice": 980,
+    "stock": 35,
+    "sales": 26,
+    "rating": 5,
+    "ratingCount": 19,
+    "featured": true,
+    "badge": "1-نۇسخا • 20 تەركىب",
+    "image": "images/products/PRD-475.webp",
+    "description": "قىشلىق بەدەن قۇۋۋىتىنى ئاشۇرۇش، ئاقسىل ۋە ۋىتامىن تولۇقلاش، ئىممۇنىتېتنى كۈچەيتىش ئۈچۈن 20 خىل تاللانغان تەبىئىي شىپالىق خام دورا ۋە مېغىزلار (بادام، ياڭاق، قىزىل ئۈزۈم، جىگدە، چىلغوزا، ساپ زەپە، تاغ ھەسىلى...) دىن ئەنئەنىۋى ئۇسۇلدا قاينىتىپ تەييارلانغان ئەلا سۈپەتلىك كۈچلۈك قۇۋۋەت سوقمىقى. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
+    "unit": "500g قاچا",
+    "translations": {
+      "ug": {
+        "name": "ئەنئەنىۋى قۇۋۋەت سوقمىقى (500g)",
+        "category": "ئۇيغۇر تېبابىتى",
+        "description": "قىشلىق بەدەن قۇۋۋىتىنى ئاشۇرۇش، ئاقسىل ۋە ۋىتامىن تولۇقلاش، ئىممۇنىتېتنى كۈچەيتىش ئۈچۈن 20 خىل تاللانغان تەبىئىي شىپالىق خام دورا ۋە مېغىزلار (بادام، ياڭاق، قىزىل ئۈزۈم، جىگدە، چىلغوزا، ساپ زەپە، تاغ ھەسىلى...) دىن ئەنئەنىۋى ئۇسۇلدا قاينىتىپ تەييارلانغان ئەلا سۈپەتلىك كۈچلۈك قۇۋۋەت سوقمىقى. كۈندە 1-2 قېتىم، ئەتىگەن ۋە كەچتە ئاچ قورساققا 1 تاتلىق تۈرۈم قوشۇقى مىقدارىدا ئىلمان سۇ ياكى سۈت بىلەن ئىستېمال قىلىنىدۇ.",
+        "unit": "500g قاچا",
+        "badge": "1-نۇسخا • 20 تەركىب"
+      },
+      "tr": {
+        "name": "Geleneksel Kuvvet Macunu (500g)",
+        "category": "Uygur Tıbbı",
+        "description": "Kış aylarında vücut direncini artırmaya, enerji ve vitamin desteği sağlamaya yardımcı 20 çeşit doğal şifalı içerik (badem, ceviz, kırmızı üzüm, iğde tozu, çam fıstığı, safran, yayla balı...) ile geleneksel usulde hazırlanan premium kuvvet macunu.",
+        "unit": "500g Kavanoz",
+        "badge": "20 Doğal İçerik"
+      },
+      "en": {
+        "name": "Traditional Vitality Herbal Macun (500g)",
+        "category": "Uyghur Medicine",
+        "description": "Premium traditional herbal vitality energy paste crafted from 20 natural ingredients (almonds, walnuts, saffron, dates, figs, pine nuts, honey) to boost winter stamina and immunity.",
+        "unit": "500g Jar",
+        "badge": "20 Natural Herbs"
+      }
+    }
+  },
+  {
     "id": "PRD-100",
     "brand": "تەكلىماكان شىپا",
     "languageScope": "all",
@@ -1854,7 +1895,7 @@ class StoreManager {
       localStorage.setItem(STORAGE_KEYS.BRANDS, JSON.stringify(INITIAL_BRANDS));
     }
     // 🛡️ سىستېما تاۋار ساندانىنى تازىلاش ۋە كونا ئۆچۈرۈلگەن قالدۇق سۈرەتلەرنى بارلىق تېلېفون / ئۈسكۈنىلەردە پۈتۈنلەي پاكىزلاش
-    const STORE_PRODUCTS_RELEASE = 'v20261108_pure_uyghur_v3';
+    const STORE_PRODUCTS_RELEASE = 'v20261119_kuvvet_macunu_v1';
     const currentRelease = localStorage.getItem('teklimakan_products_release');
     if (currentRelease !== STORE_PRODUCTS_RELEASE) {
       localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
